@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 test_name=$1
 # run test
 ut_log_name=/GenAIComps/.github/workflows/scripts/${test_name}_ut.log
