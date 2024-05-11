@@ -1,8 +1,9 @@
 <h1 align="center" id="title">Deploy DocSum in Kubernetes Cluster</h1>
 
-
 ## Prebuilt images
+
 You should have prebuilt images
+
 - TGI: ghcr.io/huggingface/text-generation-inference:1.4
 - TGI-Gaudi: ghcr.io/huggingface/tgi-gaudi:1.2.1
 - Doc_Summary: intel/gen-ai-examples:document-summarize
@@ -11,21 +12,23 @@ You should have prebuilt images
 > [NOTE]  
 > Please refer this OPEA repo https://github.com/opea-project/GenAIExamples/tree/main/DocSum to build UI
 
-
 ## Deploy Services by Yaml files(Option 1)
 
-> [NOTE] 
-> Be sure to set the ${http_proxy} and ${https_proxy} in each yaml file properly. 
+> [NOTE]
+> Be sure to set the ${http_proxy} and ${https_proxy} in each yaml file properly.
 > Be sure to modify the image name in web-ui.yaml by your own value
 > Be sure to modify the ${HUGGINGFACEHUB_API_TOKEN} in backend-service.yaml
 
-
 ### 1. Deploy Inference Service
+
 ```
 $ cd ${RepoPath}/manifests/DocSum/manifests
 ```
+
 #### 1.1 (Option 1) Deploy TGI on Xeon
+
 If you don't have Habana hardware, you could used TGI instead of TGI-Gaudi to serve as inference service.
+
 ```
 # deloy tgi
 $ kubectl apply -f inference-serving-tgi.yaml
@@ -43,7 +46,9 @@ data:{"index":3,"token":{"id":632,"text":" is","logprob":-0.56862223,"special":f
 data:{"index":4,"token":{"id":267,"text":" a","logprob":-0.7765873,"special":false},"generated_text":null,"details":null}
 
 ```
-#### 1.2 (Option 2) Deploy TGI-Gaudi on Gaudi 
+
+#### 1.2 (Option 2) Deploy TGI-Gaudi on Gaudi
+
 ```
 # deloy tgi-gaudi
 $ kubectl apply -f inference-serving-tgi-gaudi.yaml
@@ -84,6 +89,7 @@ data: {"ops":[{"op":"add","path":"/logs/HuggingFaceEndpoint/streamed_output_str/
 ```
 
 ### 3. Deploy UI Service
+
 ```
 # deloy ui service
 $ kubectl apply -f web-ui.yaml
@@ -94,12 +100,12 @@ $ curl ${ui_svc_ip}:5176 --noproxy "*"
 ```
 
 ### 4. Access the UI
+
 1. Be sure you could access the ui service by nodeport from your local pc
-http://${nodeip}:30176
+   http://${nodeip}:30176
 2. Be sure you could access the doc summary service by nodeport from your local pc
-http://${nodeip}:30123
-
-
+   http://${nodeip}:30123
 
 ## Deploy Services by helm chart(Option 2)
+
 Under Construction ...

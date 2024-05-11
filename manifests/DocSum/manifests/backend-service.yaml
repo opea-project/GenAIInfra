@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -16,27 +19,27 @@ spec:
         app: doc-sum
     spec:
       containers:
-      - env:
-        - name: http_proxy
-          value: ${http_proxy}
-        - name: https_proxy
-          value: ${https_proxy}
-        - name: HUGGINGFACEHUB_API_TOKEN
-          value: ${HUGGINGFACEHUB_API_TOKEN}
-        - name: TGI_ENDPOINT
-          value: http://tgi-deploy.default.svc.cluster.local:8180
-        image: intel/gen-ai-examples:document-summarize
-        name: doc-sum
-        command: ["nohup","python","app/server.py","&"] 
-        ports:
-        - containerPort: 8000
-        resources:
-          limits:
-            cpu: 8000m
-            memory: 26Gi
-          requests:
-            cpu: 8000m
-            memory: 26Gi    
+        - env:
+            - name: http_proxy
+              value: ${http_proxy}
+            - name: https_proxy
+              value: ${https_proxy}
+            - name: HUGGINGFACEHUB_API_TOKEN
+              value: ${HUGGINGFACEHUB_API_TOKEN}
+            - name: TGI_ENDPOINT
+              value: http://tgi-deploy.default.svc.cluster.local:8180
+          image: intel/gen-ai-examples:document-summarize
+          name: doc-sum
+          command: ["nohup", "python", "app/server.py", "&"]
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: 8000m
+              memory: 26Gi
+            requests:
+              cpu: 8000m
+              memory: 26Gi
       serviceAccountName: default
 
 ---
@@ -52,4 +55,4 @@ spec:
     - name: http-service
       port: 8080
       targetPort: 8000
-      nodePort: 30123  
+      nodePort: 30123

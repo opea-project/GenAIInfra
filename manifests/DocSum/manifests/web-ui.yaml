@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -17,23 +20,23 @@ spec:
         app: ui-deploy
     spec:
       containers:
-      - env:
-        - name: BASIC_URL
-          value: "http://{node_ip}:30123/v1"
-        - name: SVC_PORT
-          value: "5176"
-        image: ${docker_registry}/gen-ai-examples/ui:v1.0
-        name: ui-deploy-demo
-        command: ["npm","run","dev","--","--port","5176","--host"]
-        ports:
-        - containerPort: 5176
-        resources:
-          limits:
-            cpu: 2000m
-            memory: 1Gi
-          requests:
-            cpu: 1000m
-            memory: 1Gi
+        - env:
+            - name: BASIC_URL
+              value: "http://{node_ip}:30123/v1"
+            - name: SVC_PORT
+              value: "5176"
+          image: ${docker_registry}/gen-ai-examples/ui:v1.0
+          name: ui-deploy-demo
+          command: ["npm", "run", "dev", "--", "--port", "5176", "--host"]
+          ports:
+            - containerPort: 5176
+          resources:
+            limits:
+              cpu: 2000m
+              memory: 1Gi
+            requests:
+              cpu: 1000m
+              memory: 1Gi
       serviceAccountName: default
 ---
 kind: Service
