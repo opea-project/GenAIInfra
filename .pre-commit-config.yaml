@@ -10,6 +10,7 @@ repos:
         files: (.*\.(py|md|rst|yaml|yml|json|ts|js|html|svelte|sh))$
       - id: check-json
       - id: check-yaml
+        args: [--allow-multiple-documents]
       - id: debug-statements
       - id: requirements-txt-fixer
       - id: trailing-whitespace
