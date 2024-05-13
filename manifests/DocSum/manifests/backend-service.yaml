@@ -1,0 +1,58 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: doc-sum
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: doc-sum
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      labels:
+        app: doc-sum
+    spec:
+      containers:
+        - env:
+            - name: http_proxy
+              value: ${http_proxy}
+            - name: https_proxy
+              value: ${https_proxy}
+            - name: HUGGINGFACEHUB_API_TOKEN
+              value: ${HUGGINGFACEHUB_API_TOKEN}
+            - name: TGI_ENDPOINT
+              value: http://tgi-deploy.default.svc.cluster.local:8180
+          image: intel/gen-ai-examples:document-summarize
+          name: doc-sum
+          command: ["nohup", "python", "app/server.py", "&"]
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: 8000m
+              memory: 26Gi
+            requests:
+              cpu: 8000m
+              memory: 26Gi
+      serviceAccountName: default
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: doc-sum
+spec:
+  type: NodePort
+  selector:
+    app: doc-sum
+  ports:
+    - name: http-service
+      port: 8080
+      targetPort: 8000
+      nodePort: 30123

@@ -1,0 +1,77 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tgi-gaudi-deploy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tgi-gaudi-deploy
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      labels:
+        app: tgi-gaudi-deploy
+    spec:
+      hostIPC: true
+      containers:
+        - env:
+            - name: http_proxy
+              value: ${http_proxy}
+            - name: https_proxy
+              value: ${https_proxy}
+            - name: runtime
+              value: "habana"
+            - name: HABANA_VISIBLE_DEVICES
+              value: "0"
+            - name: OMPI_MCA_btl_vader_single_copy_mechanism
+              value: "none"
+            - name: model-id
+              value: "HuggingFaceH4/zephyr-7b-beta"
+          image: ghcr.io/huggingface/tgi-gaudi:1.2.1
+          name: tgi-gaudi-deploy
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+          ports:
+            - containerPort: 80
+          resources:
+            limits:
+              habana.ai/gaudi: 3
+              memory: 409Gi
+            # limits:
+            #   cpu: 8000m
+            #   memory: 26Gi
+            # requests:
+            #   cpu: 8000m
+            #   memory: 26Gi
+      serviceAccountName: default
+      volumes:
+        - name: model-volume
+          hostPath:
+            # directory location on host
+            path: /home/cloud/yulu/data
+            # this field is optional
+            type: Directory
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: tgi-gaudi-deploy
+  labels:
+    app: tgi-gaudi-deploy
+spec:
+  type: NodePort
+  selector:
+    app: tgi-gaudi-deploy
+  ports:
+    - name: metric-service
+      port: 8080
+      targetPort: 80
+      nodePort: 30031
