@@ -1,0 +1,12 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: codegen
+description: The Helm chart to deploy CodeGen
+type: application
+dependencies:
+  - name: tgi
+    version: "0.1.0"
+version: 0.1.0
+appVersion: "1.0.0"
