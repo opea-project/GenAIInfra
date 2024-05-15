@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: scorecard.operatorframework.io/v1alpha3
 kind: Configuration
 metadata:
