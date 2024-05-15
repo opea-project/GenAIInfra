@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CHARTS_DIR: "./helm-charts"
+  CHARTS_DIR: "helm-charts"
 
 jobs:
   charts-validate:
