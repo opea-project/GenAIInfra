@@ -1,0 +1,27 @@
+# permissions for end users to view megaservices.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: megaservice-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: mega-operator
+    app.kubernetes.io/part-of: mega-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: megaservice-viewer-role
+rules:
+- apiGroups:
+  - mega.opea.io
+  resources:
+  - megaservices
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - mega.opea.io
+  resources:
+  - megaservices/status
+  verbs:
+  - get

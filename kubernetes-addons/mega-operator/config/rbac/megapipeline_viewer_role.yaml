@@ -1,0 +1,27 @@
+# permissions for end users to view megapipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: megapipeline-viewer-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: mega-operator
+    app.kubernetes.io/part-of: mega-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: megapipeline-viewer-role
+rules:
+- apiGroups:
+  - mega.opea.io
+  resources:
+  - megapipelines
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - mega.opea.io
+  resources:
+  - megapipelines/status
+  verbs:
+  - get

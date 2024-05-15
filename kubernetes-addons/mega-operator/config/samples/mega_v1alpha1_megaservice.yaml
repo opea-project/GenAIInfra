@@ -1,0 +1,12 @@
+apiVersion: mega.opea.io/v1alpha1
+kind: MegaService
+metadata:
+  labels:
+    app.kubernetes.io/name: megaservice
+    app.kubernetes.io/instance: megaservice-sample
+    app.kubernetes.io/part-of: mega-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: mega-operator
+  name: megaservice-sample
+spec:
+  # TODO(user): Add fields here

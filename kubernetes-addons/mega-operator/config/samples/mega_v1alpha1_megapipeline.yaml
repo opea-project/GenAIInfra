@@ -1,0 +1,12 @@
+apiVersion: mega.opea.io/v1alpha1
+kind: MegaPipeline
+metadata:
+  labels:
+    app.kubernetes.io/name: megapipeline
+    app.kubernetes.io/instance: megapipeline-sample
+    app.kubernetes.io/part-of: mega-operator
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/created-by: mega-operator
+  name: megapipeline-sample
+spec:
+  # TODO(user): Add fields here

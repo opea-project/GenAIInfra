@@ -1,0 +1,31 @@
+# permissions for end users to edit megapipelines.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: clusterrole
+    app.kubernetes.io/instance: megapipeline-editor-role
+    app.kubernetes.io/component: rbac
+    app.kubernetes.io/created-by: mega-operator
+    app.kubernetes.io/part-of: mega-operator
+    app.kubernetes.io/managed-by: kustomize
+  name: megapipeline-editor-role
+rules:
+- apiGroups:
+  - mega.opea.io
+  resources:
+  - megapipelines
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - mega.opea.io
+  resources:
+  - megapipelines/status
+  verbs:
+  - get
