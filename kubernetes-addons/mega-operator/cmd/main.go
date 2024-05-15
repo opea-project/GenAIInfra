@@ -17,13 +17,19 @@ limitations under the License.
 package main
 
 import (
+	"context"
+	"encoding/json"
 	"flag"
+	"fmt"
+	"log"
+	"net/http"
 	"os"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
@@ -114,9 +120,50 @@ func main() {
 		os.Exit(1)
 	}
 
+	// Start the HTTP server in a new goroutine
+	go startHTTPServer(mgr)
+
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
 		setupLog.Error(err, "problem running manager")
 		os.Exit(1)
 	}
+}
+
+
+func startHTTPServer(mgr ctrl.Manager) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		// Parse the request to get the desired state of the MegaPipeline
+		// This will depend on the structure of your requests
+		var megaPipeline megav1alpha1.MegaPipeline
+
+		decoder := json.NewDecoder(r.Body)
+		err := decoder.Decode(&megaPipeline)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		// Create or update the MegaPipeline
+		ctx := context.Background()
+		err = mgr.GetClient().Create(ctx, &megaPipeline)
+		if err != nil {
+			if errors.IsAlreadyExists(err) {
+				// If the MegaPipeline already exists, update it
+				err = mgr.GetClient().Update(ctx, &megaPipeline)
+				if err != nil {
+					http.Error(w, err.Error(), http.StatusInternalServerError)
+					return
+				}
+			} else {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+		}
+
+		// Respond with a success message
+		fmt.Fprint(w, "MegaPipeline successfully created or updated")
+	})
+
+	log.Fatal(http.ListenAndServe(":8080", nil))
 }
