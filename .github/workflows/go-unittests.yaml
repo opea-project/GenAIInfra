@@ -1,0 +1,57 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Golang Lint and Unit Tests
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
+    paths:
+      - kubernetes-addons/mega-operator/**
+  workflow_dispatch:
+
+# If there is a new commit, the previous jobs will be canceled
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+env:
+  GOSRC_DIR: "kubernetes-addons/mega-operator"
+
+jobs:
+  go-unittests:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      actions: write
+      packages: write
+    steps:
+      - name: Set up Go 1.20
+        uses: actions/setup-go@v5
+        with:
+          go-version: "1.20"
+        id: go
+
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run golang lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          args: --timeout=10m
+          version: v1.55.2
+          working-directory: ${{ env.GOSRC_DIR }}
+
+      - name: Run golangunit test
+        run: |
+          cd $GOSRC_DIR
+          make test
+
+      - name: Run tests and generate coverage
+        run: |
+          cd $GOSRC_DIR
+          go test -coverprofile=coverage.out -coverpkg ./... ./...
+          ../../.github/workflows/scripts/go-coverage.sh
