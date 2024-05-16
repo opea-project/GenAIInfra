@@ -6,8 +6,8 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-tgi_endpoint: "http://automaticallydetected"
-hf_token: "yourowntokenfromhuggingface"
+hfToken: "insert-your-huggingface-token-here"
+# tgiEndpoint: "http://automaticallydetected"
 
 image:
   repository: intel/gen-ai-examples
@@ -21,11 +21,11 @@ service:
 
 # To override values in subchart tgi
 tgi:
-  HFTGI:
-    MODEL_ID: m-a-p/OpenCodeInterpreter-DS-6.7B
-    # MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-    Port: 80
-    Volume: /home/ubuntu/models
+  hftgi:
+    modelId: m-a-p/OpenCodeInterpreter-DS-6.7B
+    # modelId: /data/OpenCodeInterpreter-DS-6.7B
+    port: 80
+    Volume: /mnt
 
   image:
     repository: ghcr.io/huggingface/text-generation-inference

@@ -31,9 +31,9 @@ spec:
         - name: {{ .Chart.Name }}
           env:
             - name: MODEL_ID
-              value: {{ .Values.HFTGI.MODEL_ID }}
+              value: {{ .Values.hftgi.modelId }}
             - name: PORT
-              value: {{ .Values.HFTGI.Port | quote }}
+              value: {{ .Values.hftgi.port | quote }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -45,14 +45,24 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-                #          livenessProbe:
-                #            httpGet:
-                #              path: /
-                #              port: http
-                #          readinessProbe:
-                #            httpGet:
-                #              path: /
-                #              port: http
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: http
+          startupProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 30
+            failureThreshold: 20
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
             #          command:
@@ -60,7 +70,7 @@ spec:
       volumes:
         - name: model-volume
           hostPath:
-            path: {{ .Values.HFTGI.Volume }}
+            path: {{ .Values.hftgi.volume }}
             type: Directory
       {{- with .Values.nodeSelector }}
       nodeSelector:
