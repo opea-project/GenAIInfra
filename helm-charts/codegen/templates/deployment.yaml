@@ -33,7 +33,7 @@ spec:
             - name: TGI_ENDPOINT
               value: "http://{{ .Release.Name }}-tgi"
             - name: HUGGINGFACEHUB_API_TOKEN
-              value: {{ .Values.hf_token | quote}}
+              value: {{ .Values.hfToken | quote}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -44,6 +44,14 @@ spec:
             - name: codegen
               containerPort: 8000
               protocol: TCP
+          startupProbe:
+            exec:
+              command:
+              - curl
+              - http://{{ .Chart.Name }}-tgi
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
           livenessProbe:
             httpGet:
               path: /
