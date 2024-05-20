@@ -28,7 +28,7 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Release.Name }}
           env:
             - name: TGI_ENDPOINT
               value: "http://{{ .Release.Name }}-tgi"
@@ -48,7 +48,7 @@ spec:
             exec:
               command:
               - curl
-              - http://{{ .Chart.Name }}-tgi
+              - http://{{ .Release.Name }}-tgi
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
