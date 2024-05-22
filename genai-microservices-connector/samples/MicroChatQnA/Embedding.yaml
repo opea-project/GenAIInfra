@@ -1,0 +1,41 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: embedding-service
+spec:
+  ports:
+  - port: 6000
+    targetPort: 6000
+  selector:
+    app: embedding-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedding-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: embedding-service
+  template:
+    metadata:
+      labels:
+        app: embedding-service
+    spec:
+      serviceAccountName: gmc-service-sa
+      containers:
+      - name: embedding-server
+        image: zhlsunshine/gen-ai-comps:embedding-tei-server
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 6000
+        env:
+        - name: no_proxy
+          value: {{.NoProxy}}
+        - name: http_proxy
+          value: {{.HttpProxy}}
+        - name: https_proxy
+          value: {{.HttpsProxy}}
+        - name: TEI_EMBEDDING_ENDPOINT 
+          value: {{.TeiEndpoint}}

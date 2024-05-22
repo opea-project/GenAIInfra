@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- gmc_v1alpha3_gmconnector.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples
