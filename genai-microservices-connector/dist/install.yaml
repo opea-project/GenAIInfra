@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -149,7 +152,7 @@ spec:
                                       with RerankerService.
                                     type: string
                                 type: object
-                              retriving:
+                              retrieving:
                                 properties:
                                   serviceUrl:
                                     description: VectorDBService URL, mutually exclusive

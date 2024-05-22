@@ -1,7 +1,9 @@
 # genai-microservices-connector(GMC)
+
 This repo defines the GenAI Microservice Connector for OPEA projects.
 
 ## Description
+
 The GMC contains the CRD and its controller to bring up the needed services for a GenAI application.
 Istio Service Mesh can also be leveraged to facilicate communication between microservices in the GenAI application.
 
@@ -17,17 +19,17 @@ Istio Service Mesh can also be leveraged to facilicate communication between mic
 
 **CRD** defines are at config/crd/bases/  
 **API** is api/v1alpha3/  
-**Controller** is at internal/controller  
+**Controller** is at internal/controller
 
 `make manifests` to install the APIs  
-`make run` to lanch the controllers   
+`make run` to lanch the controllers
 
 ### Prerequisites
+
 - go version v1.21.0+
 - docker version 17.03+.
 - kubectl version v1.11.3+.
 - Access to a Kubernetes v1.11.3+ cluster.
-
 
 ### Introduction
 
@@ -51,10 +53,11 @@ make docker
 #### How to delete these components' binaries?
 
 ```sh
-make clean 
+make clean
 ```
 
 ### To Deploy on the cluster
+
 **Build and push your image to the location specified by `CTR_IMG`:**
 
 ```sh
@@ -78,7 +81,7 @@ make deploy CTR_IMG=<some-registry>/gmconnector:tag
 ```
 
 > **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
-privileges or be logged in as admin.
+> privileges or be logged in as admin.
 
 **Create instances of your solution**
 You can apply the samples (examples) from the config/sample:
@@ -87,9 +90,10 @@ You can apply the samples (examples) from the config/sample:
 kubectl apply -k config/samples/
 ```
 
->**NOTE**: Ensure that the samples has default values to test it out.
+> **NOTE**: Ensure that the samples has default values to test it out.
 
 ### To Uninstall
+
 **Delete the instances (CRs) from the cluster:**
 
 ```sh
@@ -130,5 +134,3 @@ Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project
 ```sh
 kubectl apply -f https://raw.githubusercontent.com/<org>/gmconnector/<tag or branch>/dist/install.yaml
 ```
-
-

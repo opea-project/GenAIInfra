@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: gmc.opea.io/v1alpha3
 kind: GMConnector
 metadata:
@@ -17,9 +20,9 @@ spec:
             embedderService:
               modelId: BAAI/bge-base-en-v1.5
               name: someEmbedder
-      - name: retriving
+      - name: retrieving
         target:
-          retriving:
+          retrieving:
             vectorDbService:
               type: REDIS
         data: $response
@@ -34,6 +37,3 @@ spec:
         target:
           lLM:
             runtimeService: tgiGaudi
-
-
-
