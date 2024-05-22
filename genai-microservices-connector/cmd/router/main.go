@@ -139,7 +139,7 @@ func callService(step *gmcv1alpha3.Step, serviceUrl string, input []byte, header
 }
 
 // Use step service name to create a K8s service if serviceURL is empty
-// TODO: add more features here, such as K8s service selector, lables, etc.
+// TODO: add more features here, such as K8s service selector, labels, etc.
 func getServiceURLByStepTarget(step *gmcv1alpha3.Step, svcNameSpace string) string {
 	if step.ServiceURL == "" {
 		serviceURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", step.StepName, svcNameSpace)
@@ -337,7 +337,7 @@ func main() {
 		Handler:      http.HandlerFunc(gmcGraphHandler), // specify your HTTP handler
 		ReadTimeout:  time.Minute,                       // set the maximum duration for reading the entire request, including the body
 		WriteTimeout: time.Minute,                       // set the maximum duration before timing out writes of the response
-		IdleTimeout:  3 * time.Minute,                   // set the maximum amount of time to wait for the next request when keep-alives are enabled
+		IdleTimeout:  3 * time.Minute,                   // set the maximum amount of time to wait for the next request when keep-alive are enabled
 	}
 	err = server.ListenAndServe()
 

@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -37,5 +40,5 @@ spec:
           value: {{.HttpProxy}}
         - name: https_proxy
           value: {{.HttpsProxy}}
-        - name: TEI_EMBEDDING_ENDPOINT 
+        - name: TEI_EMBEDDING_ENDPOINT
           value: {{.TeiEndpoint}}

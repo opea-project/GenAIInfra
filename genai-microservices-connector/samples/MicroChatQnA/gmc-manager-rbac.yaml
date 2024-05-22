@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v1
 kind: Namespace
 metadata:
@@ -25,7 +28,7 @@ rules:
   - ""
   resources:
   - services
-  - secrets 
+  - secrets
   verbs:
   - create
   - delete
@@ -35,9 +38,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - apps 
+  - apps
   resources:
-  - deployments 
+  - deployments
   verbs:
   - create
   - delete

@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 ## Append samples of your project ##
 resources:
 - gmc_v1alpha3_gmconnector.yaml

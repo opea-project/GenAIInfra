@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -43,7 +46,7 @@ spec:
           value: ${https_proxy}
         - name: no_proxy
           value: ${no_proxy}
-        - name: HUGGINGFACEHUB_API_TOKEN 
+        - name: HUGGINGFACEHUB_API_TOKEN
           valueFrom:
             secretKeyRef:
               name: ${GMC_TOKEN_SECRET}
@@ -94,7 +97,7 @@ spec:
           value: ${no_proxy}
         - name: TEI_RERANKING_ENDPOINT
           value: ${TEI_RERANKING_ENDPOINT}
-        - name: HUGGINGFACEHUB_API_TOKEN 
+        - name: HUGGINGFACEHUB_API_TOKEN
           valueFrom:
             secretKeyRef:
               name: ${GMC_TOKEN_SECRET}
