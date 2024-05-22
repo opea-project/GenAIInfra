@@ -25,7 +25,7 @@ tgi:
     modelId: m-a-p/OpenCodeInterpreter-DS-6.7B
     # modelId: /data/OpenCodeInterpreter-DS-6.7B
     port: 80
-    Volume: /mnt
+    volume: /mnt
 
   image:
     repository: ghcr.io/huggingface/text-generation-inference
