@@ -1,0 +1,26 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# permissions for end users to view gmconnectors.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: gmconnector
+    app.kubernetes.io/managed-by: kustomize
+  name: gmconnector-viewer-role
+rules:
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors/status
+  verbs:
+  - get

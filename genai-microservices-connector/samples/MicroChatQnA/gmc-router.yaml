@@ -1,0 +1,46 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: router-service
+spec:
+  selector:
+    app: router-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: router-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: router-service
+  template:
+    metadata:
+      labels:
+        app: router-service
+    spec:
+      serviceAccountName: gmc-service-sa
+      containers:
+      - name: router-server
+        image: zhlsunshine/gmcrouter:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        env:
+        - name: no_proxy
+          value: {{.NoProxy}}
+        - name: http_proxy
+          value: {{.HttpProxy}}
+        - name: https_proxy
+          value: {{.HttpsProxy}}
+        args:
+        - "--graph-json"
+        - {{.GRAPH_JSON}}

@@ -1,0 +1,62 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: tgi-service
+spec:
+  selector:
+    app: tgi-service
+  ports:
+    - protocol: TCP
+      port: 9009
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tgi-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tgi-service
+  template:
+    metadata:
+      labels:
+        app: tgi-service
+    spec:
+      serviceAccountName: gmc-service-sa
+      containers:
+      - name: tgi-server
+        image: ghcr.io/huggingface/text-generation-inference:1.4
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        env:
+        - name: no_proxy
+          value: {{.NoProxy}}
+        - name: http_proxy
+          value: {{.HttpProxy}}
+        - name: https_proxy
+          value: {{.HttpsProxy}}
+        - name: HUGGINGFACEHUB_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{.GmcTokenSecret}}
+              key: huggingfacehub_api_token
+        volumeMounts:
+        - name: tgi-data
+          mountPath: /data
+        args:
+        - "--model-id"
+        - {{.LlmModelId}}
+        - "--max-total-tokens"
+        - "4096"
+        - "--max-input-length"
+        - "4095"
+      volumes:
+      - name: tgi-data
+        hostPath:
+          path: {{.LlmModelDir}}
