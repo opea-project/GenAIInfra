@@ -1,0 +1,544 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+    control-plane: controller-manager
+  name: gmconnector-system
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.14.0
+  name: gmconnectors.gmc.opea.io
+spec:
+  group: gmc.opea.io
+  names:
+    kind: GMConnector
+    listKind: GMConnectorList
+    plural: gmconnectors
+    singular: gmconnector
+  scope: Namespaced
+  versions:
+  - name: v1alpha3
+    schema:
+      openAPIV3Schema:
+        description: GMConnector is the Schema for the gmconnectors API
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: GMConnectorSpec defines the desired state of GMConnector
+            properties:
+              nodes:
+                additionalProperties:
+                  properties:
+                    routerType:
+                      description: |-
+                        RouterType
+
+
+                        - `Sequence:` chain multiple steps with input/output from previous step
+
+
+                        - `Ensemble:` routes the request to multiple models and then merge the responses
+
+
+                        - `Switch:` routes the request to one of the steps based on condition
+                      enum:
+                      - Sequence
+                      - Ensemble
+                      - Switch
+                      type: string
+                    steps:
+                      description: Steps defines destinations for the current router
+                        node
+                      items:
+                        description: Step defines the target of the current
+                          step with condition, weights and data.
+                        properties:
+                          condition:
+                            description: routing based on the condition
+                            type: string
+                          data:
+                            description: |-
+                              request data sent to the next route with input/output from the previous step
+                              $request
+                              $response.predictions
+                            type: string
+                          dependency:
+                            description: to decide whether a step is a hard or a soft
+                              dependency in the Graph
+                            enum:
+                            - Soft
+                            - Hard
+                            type: string
+                          name:
+                            description: Unique name for the step within this node
+                            type: string
+                          nodeName:
+                            description: The node name for routing as the next step.
+                            type: string
+                          serviceUrl:
+                            description: Service URL, mutually exclusive with TargetContent.
+                            type: string
+                          target:
+                            description: TargetContent can be either PredefinedType
+                              or ServiceName.
+                            properties:
+                              embedding:
+                                description: PredefinedTypeContent holds the content
+                                  for one of the predefined types. Only one of the
+                                  fields should be set.
+                                properties:
+                                  embedderService:
+                                    properties:
+                                      modelId:
+                                        type: string
+                                      name:
+                                        type: string
+                                    required:
+                                    - modelId
+                                    - name
+                                    type: object
+                                  serviceUrl:
+                                    description: EmbeddingService URL, mutually exclusive
+                                      with EmbedderService.
+                                    type: string
+                                type: object
+                              lLM:
+                                properties:
+                                  runtimeService:
+                                    type: string
+                                  serviceUrl:
+                                    description: RuntimeService URL, mutually exclusive
+                                      with RuntimeService.
+                                    type: string
+                                type: object
+                              reranking:
+                                properties:
+                                  rerankerService:
+                                    properties:
+                                      modelId:
+                                        type: string
+                                      name:
+                                        type: string
+                                    required:
+                                    - modelId
+                                    - name
+                                    type: object
+                                  serviceUrl:
+                                    description: RerankerService URL, mutually exclusive
+                                      with RerankerService.
+                                    type: string
+                                type: object
+                              retriving:
+                                properties:
+                                  serviceUrl:
+                                    description: VectorDBService URL, mutually exclusive
+                                      with VectorDBService.
+                                    type: string
+                                  vectorDbService:
+                                    properties:
+                                      type:
+                                        type: string
+                                    required:
+                                    - type
+                                    type: object
+                                type: object
+                              serviceName:
+                                description: ServiceName holds serviceName. Only one
+                                  of the fields should be set.
+                                type: string
+                            type: object
+                        required:
+                        - target
+                        type: object
+                      type: array
+                  required:
+                  - routerType
+                  type: object
+                type: object
+            required:
+            - nodes
+            type: object
+          status:
+            description: GMConnectorStatus defines the observed state of GMConnector.
+            properties:
+              accessUrl:
+                description: AccessURL of the entrypoint for the GMConnector
+                type: string
+              annotations:
+                additionalProperties:
+                  type: string
+                description: |-
+                  Annotations is additional Status fields for the Resource to save some
+                  additional State as well as convey more information to the user. This is
+                  roughly akin to Annotations on any k8s resource, just the reconciler conveying
+                  richer information outwards.
+                type: object
+              condition:
+                description: conditions applied to the GMConnector. Known conditions
+                  are "Success", and "Failed".
+                properties:
+                  lastUpdateTime:
+                    description: lastUpdateTime is the time of the last update to
+                      this condition
+                    format: date-time
+                    type: string
+                  message:
+                    description: message contains a human readable message with details
+                      about the GMConnector state
+                    type: string
+                  reason:
+                    description: The reason for the condition's last transition.
+                    type: string
+                  type:
+                    description: |-
+                      type of the condition. Known conditions are "Success", and "Failed".
+
+
+                      A "Success" indicating the required services in the GMConnector was ready.
+
+
+                      A "Failed" indicating the GMConnector failed to get required service ready.
+                    type: string
+                type: object
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-controller-manager
+  namespace: gmconnector-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-leader-election-role
+  namespace: gmconnector-system
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - coordination.k8s.io
+  resources:
+  - leases
+  verbs:
+  - get
+  - list
+  - watch
+  - create
+  - update
+  - patch
+  - delete
+- apiGroups:
+  - ""
+  resources:
+  - events
+  verbs:
+  - create
+  - patch
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-gmconnector-editor-role
+rules:
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-gmconnector-viewer-role
+rules:
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors/status
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: gmconnector-manager-role
+rules:
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-metrics-reader
+rules:
+- nonResourceURLs:
+  - /metrics
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-proxy-role
+rules:
+- apiGroups:
+  - authentication.k8s.io
+  resources:
+  - tokenreviews
+  verbs:
+  - create
+- apiGroups:
+  - authorization.k8s.io
+  resources:
+  - subjectaccessreviews
+  verbs:
+  - create
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-leader-election-rolebinding
+  namespace: gmconnector-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: gmconnector-leader-election-role
+subjects:
+- kind: ServiceAccount
+  name: gmconnector-controller-manager
+  namespace: gmconnector-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gmconnector-manager-role
+subjects:
+- kind: ServiceAccount
+  name: gmconnector-controller-manager
+  namespace: gmconnector-system
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+  name: gmconnector-proxy-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: gmconnector-proxy-role
+subjects:
+- kind: ServiceAccount
+  name: gmconnector-controller-manager
+  namespace: gmconnector-system
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+    control-plane: controller-manager
+  name: gmconnector-controller-manager-metrics-service
+  namespace: gmconnector-system
+spec:
+  ports:
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: https
+  selector:
+    control-plane: controller-manager
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app.kubernetes.io/managed-by: kustomize
+    app.kubernetes.io/name: gmconnector
+    control-plane: controller-manager
+  name: gmconnector-controller-manager
+  namespace: gmconnector-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      control-plane: controller-manager
+  template:
+    metadata:
+      annotations:
+        kubectl.kubernetes.io/default-container: manager
+      labels:
+        control-plane: controller-manager
+    spec:
+      containers:
+      - args:
+        - --secure-listen-address=0.0.0.0:8443
+        - --upstream=http://127.0.0.1:8080/
+        - --logtostderr=true
+        - --v=0
+        image: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
+        name: kube-rbac-proxy
+        ports:
+        - containerPort: 8443
+          name: https
+          protocol: TCP
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 5m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      - args:
+        - --health-probe-bind-address=:8081
+        - --metrics-bind-address=127.0.0.1:8080
+        - --leader-elect
+        command:
+        - /manager
+        image: controller:latest
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8081
+          initialDelaySeconds: 15
+          periodSeconds: 20
+        name: manager
+        readinessProbe:
+          httpGet:
+            path: /readyz
+            port: 8081
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          limits:
+            cpu: 500m
+            memory: 128Mi
+          requests:
+            cpu: 10m
+            memory: 64Mi
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - ALL
+      securityContext:
+        runAsNonRoot: true
+      serviceAccountName: gmconnector-controller-manager
+      terminationGracePeriodSeconds: 10
