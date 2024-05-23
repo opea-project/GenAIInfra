@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 # Redis Vector DB Deployment
 apiVersion: apps/v1
 kind: Deployment
@@ -19,8 +22,8 @@ spec:
         ports:
         - containerPort: 6379
         - containerPort: 8001
-        
----        
+
+---
 # Redis Vector DB Service
 apiVersion: v1
 kind: Service
@@ -38,4 +41,3 @@ spec:
   - name: redis-insight
     port: 8001
     targetPort: 8001
-
