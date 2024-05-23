@@ -30,7 +30,7 @@ var _ = Describe("controller", Ordered, func() {
 		_, _ = utils.Run(cmd)
 	})
 
-	after all(func() {
+	AfterAll(func() {
 		By("uninstalling the Prometheus manager bundle")
 		utils.UninstallPrometheusOperator()
 
