@@ -1,0 +1,93 @@
+#!/bin/bash
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+LOG_PATH=.
+
+function init_codegen() {
+    # init var
+    CHART_MOUNT=/home/$USER_ID/charts-mnt/codegen
+    MODELREPO=m-a-p
+    MODELNAME=OpenCodeInterpreter-DS-6.7B
+    MODELID=$MODELREPO/$MODELNAME
+    MODELDOWNLOADID=models--$MODELREPO--$MODELNAME
+
+    ### PREPARE MODEL
+    # check if the model is already downloaded
+    if [ -d "$CHART_MOUNT/$MODELDOWNLOADID" ]; then
+        echo "Model $MODELID already downloaded!"
+        USE_MODELDOWNLOADID=True
+    else
+        echo "Downloading model $MODELID..."
+        MODELDIR=$CHART_MOUNT/$MODELNAME
+        if [ ! -d "$MODELDIR" ]; then
+            mkdir -p $MODELDIR
+        fi
+        huggingface-cli download $MODELID --local-dir $MODELDIR --local-dir-use-symlinks False
+        USE_MODELDOWNLOADID=False
+    fi
+
+    ### CONFIG VALUES.YAML
+    # set image name to the CI images, replace opea/gen-ai-comps with amr-registry.caas.intel.com/aiops/opea-ci
+    sed -i "s#opea/gen-ai-comps#amr-registry.caas.intel.com/aiops/opea-ci#g" values.yaml
+    # set huggingface token
+    sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" values.yaml
+    # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
+    sed -i "s#volume: .*#volume: $CHART_MOUNT#g" values.yaml
+    # replace the model ID with local dir name "data/$MODELNAME"
+    if [ "$USE_MODELDOWNLOADID" = "False" ]; then
+        sed -i "s#modelId: .*#modelId: /data/$MODELNAME#g" values.yaml
+    fi
+}
+
+function init_chatqna() {
+    echo "Init chatqna"
+    ### TODO PREPARE MODEL
+    ### TODO CONFIG VALUES.YAML
+}
+
+function validate_codegen() {
+    ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+    port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+    # Curl the Mega Service
+    curl http://${ip_address}:${port}/v1/codegen -H "Content-Type: application/json" -d '{
+        "model": "ise-uiuc/Magicoder-S-DS-6.7B",
+        "messages": "Implement a high-level API for a TODO list application. The API takes as input an operation request and updates the TODO list in place. If the request is invalid, raise an exception."}' > curl_megaservice.log
+
+    echo "Checking response results, make sure the output is reasonable. "
+    local status=true
+    if [[ -f curl_megaservice.log ]] && \
+    [[ $(grep -c "billion" curl_megaservice.log) != 0 ]]; then
+        status=true
+    fi
+
+    if [ $status == false ]; then
+        echo "Response check failed, please check the logs in artifacts!"
+    else
+        echo "Response check succeed!"
+    fi
+}
+
+function validate_chatqna() {
+    ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+    port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+    # Curl the Mega Service
+    curl http://${ip_address}:${port}/v1/chatqna -H "Content-Type: application/json" -d '{
+        "model": "Intel/neural-chat-7b-v3-3",
+        "messages": "What is the revenue of Nike in 2023?"}' > ${LOG_PATH}/curl_megaservice.log
+    exit_code=$?
+
+    echo "Checking response results, make sure the output is reasonable. "
+    local status=false
+    if [[ -f $LOG_PATH/curl_megaservice.log ]] && \
+    [[ $(grep -c "billion" $LOG_PATH/curl_megaservice.log) != 0 ]]; then
+        status=true
+    fi
+
+    if [ $status == false ]; then
+        echo "Response check failed, please check the logs in artifacts!"
+        exit 1
+    else
+        echo "Response check succeed!"
+    fi
+}
