@@ -1,0 +1,39 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: gmc.opea.io/v1alpha3
+kind: GMConnector
+metadata:
+  labels:
+    app.kubernetes.io/name: gmconnector
+    app.kubernetes.io/managed-by: kustomize
+  name: gmconnector-sample
+  namespace: gmcsample
+spec:
+  nodes:
+    root:
+      routerType: Sequence
+      steps:
+      - name: embedding
+        target:
+          embedding:
+            embedderService:
+              modelId: BAAI/bge-base-en-v1.5
+              name: someEmbedder
+      - name: retrieving
+        target:
+          retrieving:
+            vectorDbService:
+              type: REDIS
+        data: $response
+      - name: reranking
+        target:
+          reranking:
+            rerankerService:
+              name: someReranker
+              modelId: BAAI/bge-reranker-large
+        data: $response
+      - name: llm
+        target:
+          lLM:
+            runtimeService: tgiGaudi
