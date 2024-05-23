@@ -40,5 +40,5 @@ spec:
           value: {{.HttpProxy}}
         - name: https_proxy
           value: {{.HttpsProxy}}
-        - name: TEI_EMBEDDING_ENDPOINT 
+        - name: TEI_EMBEDDING_ENDPOINT
           value: {{.TeiEndpoint}}

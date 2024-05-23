@@ -30,7 +30,7 @@ spec:
       serviceAccountName: gmc-service-sa
       containers:
       - name: router-server
-        image: zhlsunshine/gmcrouter:latest 
+        image: zhlsunshine/gmcrouter:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

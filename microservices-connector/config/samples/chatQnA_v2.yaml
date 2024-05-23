@@ -45,7 +45,7 @@ spec:
             modelId: BAAI/bge-base-en-v1.5
             endpoint: /embed
           isDownstreamService: true
-      - name: Retriver
+      - name: Retriever
         data: $response
         internalService:
           nameSpace: gmcsample

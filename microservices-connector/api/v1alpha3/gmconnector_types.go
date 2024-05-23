@@ -53,8 +53,8 @@ const (
 	TeiEmbedding StepNameType = "TeiEmbedding"
 	// VectorDB
 	VectorDB StepNameType = "VectorDB"
-	// Retriver
-	Retriver StepNameType = "Retriver"
+	// Retriever
+	Retriever StepNameType = "Retriever"
 	// Reranking
 	Reranking StepNameType = "Reranking"
 	// Tei-Reranking
