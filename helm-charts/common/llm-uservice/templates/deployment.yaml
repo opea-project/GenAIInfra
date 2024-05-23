@@ -1,0 +1,74 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "llm-uservice.fullname" . }}
+  labels:
+    {{- include "llm-uservice.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "llm-uservice.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "llm-uservice.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: TGI_LLM_ENDPOINT
+              value: "http://{{ .Release.Name }}-tgi"
+            - name: HUGGINGFACEHUB_API_TOKEN
+              value: {{ .Values.hfToken | quote}}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: llm-uservice
+              containerPort: 9000
+              protocol: TCP
+          startupProbe:
+            exec:
+              command:
+              - curl
+              - http://{{ .Release.Name }}-tgi
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: 9000
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 9000
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
