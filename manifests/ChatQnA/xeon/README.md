@@ -22,13 +22,12 @@ You should have all the images
 > Be sure to modify the image name in all yaml files by your own value
 > Be sure to modify the all the value in qna_configmap.yaml
 
-
-
 ```
 $ cd ${RepoPath}/manifests/ChatQnA/manifests/xeon
 ```
 
 #### 1.1 Deploy QnA configmap
+
 ```
 kubectl apply -f qna_configmap.yaml
 
@@ -43,7 +42,7 @@ kubectl apply -f redis-vector-db.yaml
 # 2. deploy tei_embedding_service
 kubectl apply -f tei_embedding_service.yaml
 
-# 3. deploy embedding 
+# 3. deploy embedding
 kubectl apply -f embedding.yaml
 
 # 4. deploy retriever
@@ -70,10 +69,10 @@ kubectl apply -f chaqna-xeon-ui-server.yaml
 
 ```
 
-
 ## Verify Services
+
 ```
-$ chaqna_backend_svc_ip=`kubectl get svc|grep '^chaqna-xeon-backend-server-svc'|awk '{print $3}'` && echo ${chaqna_backend_svc_ip} 
+$ chaqna_backend_svc_ip=`kubectl get svc|grep '^chaqna-xeon-backend-server-svc'|awk '{print $3}'` && echo ${chaqna_backend_svc_ip}
 $ curl http://${chaqna_backend_svc_ip}:8888/v1/chatqna -H "Content-Type: application/json" -d '{
      "model": "Intel/neural-chat-7b-v3-3",
      "messages": "What is the revenue of Nike in 2023?"
