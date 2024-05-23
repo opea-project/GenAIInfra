@@ -3,9 +3,9 @@ CHARTS_DIR := ./helm-charts
 .PHONY: test
 
 test:
-	@for chart in $$(find $(CHARTS_DIR) -mindepth 1 -maxdepth 1 -type d); do \
-		echo "Testing chart: $$chart"; \
-		helm lint $$chart; \
+	@for chart in $$(find $(CHARTS_DIR) -mindepth 1 -maxdepth 2 -type f -name "Chart.yaml"); do \
+		  echo "Testing chart: $$(dirname $$chart)"; \
+		  helm lint $$(dirname $$chart); \
 	done
 
 pre-commit:
