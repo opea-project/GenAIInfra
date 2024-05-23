@@ -1,0 +1,110 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: tgi-service
+spec:
+  selector:
+    app: tgi-service
+  ports:
+    - protocol: TCP
+      port: 9009
+      targetPort: 80
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tgi-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tgi-service
+  template:
+    metadata:
+      labels:
+        app: tgi-service
+    spec:
+      serviceAccountName: gmc-service-sa
+      containers:
+      - name: tgi-server
+        image: ghcr.io/huggingface/text-generation-inference:1.4
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 80
+        env:
+        - name: http_proxy
+          value: ${http_proxy}
+        - name: https_proxy
+          value: ${https_proxy}
+        - name: no_proxy
+          value: ${no_proxy}
+        - name: HUGGINGFACEHUB_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ${GMC_TOKEN_SECRET}
+              key: huggingfacehub_api_token
+        volumeMounts:
+        - name: tgi-data
+          mountPath: /data
+        args:
+        - "--model-id"
+        - ${LLM_MODEL_ID}
+        - "--max-total-tokens"
+        - "4096"
+        - "--max-input-length"
+        - "4095"
+      volumes:
+      - name: tgi-data
+        hostPath:
+          path: ${LLM_MODEL_DIR}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: llm-service
+spec:
+  selector:
+    app: llm-service
+  ports:
+    - protocol: TCP
+      port: 9000
+      targetPort: 9000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llm-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llm-service
+  template:
+    metadata:
+      labels:
+        app: llm-service
+    spec:
+      serviceAccountName: gmc-service-sa
+      containers:
+      - name: llm-server
+        image: zhlsunshine/gen-ai-comps:llm-tgi-server
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 9000
+        env:
+        - name: http_proxy
+          value: ${http_proxy}
+        - name: https_proxy
+          value: ${https_proxy}
+        - name: no_proxy
+          value: ${no_proxy}
+        - name: TGI_LLM_ENDPOINT
+          value: ${TGI_LLM_ENDPOINT}
+        - name: HUGGINGFACEHUB_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: ${GMC_TOKEN_SECRET}
+              key: huggingfacehub_api_token

@@ -1,0 +1,82 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: gmc.opea.io/v1alpha3
+kind: GMConnector
+metadata:
+  labels:
+    app.kubernetes.io/name: gmconnector
+    app.kubernetes.io/managed-by: kustomize
+  name: gmconnector-sample
+spec:
+  nodes:
+    rag:
+      routerType: Sequence
+      steps:
+      - name: embd
+        nodeName: rtrv
+        target:
+          serviceName: embeddingSvc
+          embedding:
+            embedderService:
+              modelId: embd-model-id
+              name: someEmbder
+        data: $request
+      - name: rtrv
+        nodeName: rrnk
+        target:
+          serviceName: retrivingSvc
+          retrieving:
+            vectorDbService:
+              type: sometype
+      - name: rrnk
+        nodeName: llm
+        target:
+          serviceName: rerankingSvc
+          reranking:
+            rerankerService:
+              name: someReranker
+              modelId: reranker-model-id
+      - name: llm
+        target:
+          serviceName: llmSvc
+          lLM:
+            runtimeService: tgiGaudi
+    ingest:
+      routerType: Sequence
+      steps:
+      - name: embd
+        nodeName: rtrv
+        target:
+          serviceName: embeddingSvc
+          embedding:
+            embedderService:
+              modelId: embd-model-id
+              name: someEmbder
+        data: $request
+      - name: rtrv
+        nodeName: rrnk
+        target:
+          serviceName: retrivingSvc
+          retrieving:
+            vectorDbService:
+              type: sometype
+    bookinfo:
+      routerType: Sequence
+      steps:
+      - name: step1
+        nodeName: rtrv
+        target:
+          serviceName: ratings
+          embedding:
+            embedderService:
+              modelId: embd-model-id
+              name: someEmbder
+        data: $request
+      - name: rtrv
+        nodeName: rrnk
+        target:
+          serviceName: reviews
+          retrieving:
+            vectorDbService:
+              type: sometype
