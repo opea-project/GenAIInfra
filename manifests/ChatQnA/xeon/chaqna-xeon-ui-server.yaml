@@ -1,0 +1,43 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chaqna-xeon-ui-server-deploy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chaqna-xeon-ui-server-deploy
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
+      labels:
+        app: chaqna-xeon-ui-server-deploy
+    spec:
+      hostIPC: true
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: qna-config
+        image: opea/gen-ai-comps:chatqna-ui-server
+        name: chaqna-xeon-ui-server-deploy
+        args:
+        ports:
+        - containerPort: 5173
+      serviceAccountName: default
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: chaqna-xeon-ui-server-svc
+spec:
+  type: NodePort
+  selector:
+    app: chaqna-xeon-ui-server-deploy
+  ports:
+    - name: service
+      port: 5173
+      targetPort: 5173
+      nodePort: 30173
