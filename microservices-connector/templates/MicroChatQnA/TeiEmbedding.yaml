@@ -1,0 +1,57 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: tei-embedding-service
+spec:
+  ports:
+  - port: 6006
+    targetPort: 80
+  selector:
+    app: tei-embedding-service
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tei-embedding-server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tei-embedding-service
+  template:
+    metadata:
+      labels:
+        app: tei-embedding-service
+    spec:
+      serviceAccountName: gmc-service-sa
+      containers:
+      - name: tei-embedding-server
+        image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.2
+        imagePullPolicy: IfNotPresent
+        args:
+        - "--model-id"
+        - {{.EmbeddingModelId}}
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: tei-data
+          mountPath: /data
+        env:
+        - name: no_proxy
+          value: {{.NoProxy}}
+        - name: http_proxy
+          value: {{.HttpProxy}}
+        - name: https_proxy
+          value: {{.HttpsProxy}}
+        - name: HUGGINGFACEHUB_API_TOKEN
+          valueFrom:
+            secretKeyRef:
+              name: {{.GmcTokenSecret}}
+              key: huggingfacehub_api_token
+      volumes:
+      - name: tei-data
+        hostPath:
+          path: {{.EmbeddingModelDir}}
