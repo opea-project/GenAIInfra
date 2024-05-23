@@ -41,7 +41,7 @@ spec:
           value: ${https_proxy}
         - name: no_proxy
           value: ${no_proxy}
-        - name: HUGGINGFACEHUB_API_TOKEN 
+        - name: HUGGINGFACEHUB_API_TOKEN
           valueFrom:
             secretKeyRef:
               name: ${GMC_TOKEN_SECRET}
@@ -103,7 +103,7 @@ spec:
           value: ${no_proxy}
         - name: TGI_LLM_ENDPOINT
           value: ${TGI_LLM_ENDPOINT}
-        - name: HUGGINGFACEHUB_API_TOKEN 
+        - name: HUGGINGFACEHUB_API_TOKEN
           valueFrom:
             secretKeyRef:
               name: ${GMC_TOKEN_SECRET}

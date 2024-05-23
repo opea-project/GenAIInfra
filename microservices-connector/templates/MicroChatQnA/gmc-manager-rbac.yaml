@@ -28,7 +28,7 @@ rules:
   - ""
   resources:
   - services
-  - secrets 
+  - secrets
   verbs:
   - create
   - delete
@@ -38,9 +38,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - apps 
+  - apps
   resources:
-  - deployments 
+  - deployments
   verbs:
   - create
   - delete

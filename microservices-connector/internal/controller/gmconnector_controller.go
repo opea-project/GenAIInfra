@@ -69,15 +69,15 @@ func createService(step string, ns string, svc string, svcCfg *map[string]string
 
 	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
 
-	//TODO add validation to rule out unexpected case like both embedding and retriving
+	//TODO add validation to rule out unexpected case like both embedding and retrieving
 	if step == "Embedding" {
 		tmpltFile = yaml_dir + "/Embedding.yaml"
 	} else if step == "TeiEmbedding" {
 		tmpltFile = yaml_dir + "/TeiEmbedding.yaml"
 	} else if step == "VectorDB" {
 		tmpltFile = yaml_dir + "/VectorDB.yaml"
-	} else if step == "Retriver" {
-		tmpltFile = yaml_dir + "/Retriver.yaml"
+	} else if step == "Retriever" {
+		tmpltFile = yaml_dir + "/Retriever.yaml"
 	} else if step == "Reranking" {
 		tmpltFile = yaml_dir + "/Reranking.yaml"
 	} else if step == "TeiReranking" {
@@ -89,7 +89,7 @@ func createService(step string, ns string, svc string, svcCfg *map[string]string
 	} else if step == "router" {
 		tmpltFile = yaml_dir + "/gmc-router.yaml"
 	} else {
-		return errors.New("unexpectd target")
+		return errors.New("unexpected target")
 	}
 
 	config, err := getKubeConfig()
@@ -193,7 +193,7 @@ func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (s
 		}
 	} else if step == "VectorDB" {
 		userDefinedCfg = nil
-	} else if step == "Retriver" {
+	} else if step == "Retriever" {
 		userDefinedCfg = RetriverCfg{
 			NoProxy:     (*svcCfg)["no_proxy"],
 			HttpProxy:   (*svcCfg)["http_proxy"],
