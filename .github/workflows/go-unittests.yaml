@@ -8,7 +8,7 @@ on:
     branches: [main]
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
-      - kubernetes-addons/mega-operator/**
+      - microservices-connector/**
   workflow_dispatch:
 
 # If there is a new commit, the previous jobs will be canceled
@@ -17,7 +17,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GOSRC_DIR: "kubernetes-addons/mega-operator"
+  GOSRC_DIR: "microservices-connector"
 
 jobs:
   go-unittests:
@@ -27,10 +27,10 @@ jobs:
       actions: write
       packages: write
     steps:
-      - name: Set up Go 1.20
+      - name: Set up Go 1.21
         uses: actions/setup-go@v5
         with:
-          go-version: "1.20"
+          go-version: "1.21"
         id: go
 
       - name: Checkout out Repo
