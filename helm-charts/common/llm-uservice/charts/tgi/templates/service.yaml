@@ -11,7 +11,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.hftgi.port }}
+      targetPort: {{ .Values.port }}
       protocol: TCP
       name: tgi
   selector:
