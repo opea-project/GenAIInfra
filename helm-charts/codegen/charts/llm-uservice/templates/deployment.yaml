@@ -4,14 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "tgi.fullname" . }}
+  name: {{ include "llm-uservice.fullname" . }}
   labels:
-    {{- include "tgi.labels" . | nindent 4 }}
+    {{- include "llm-uservice.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "tgi.selectorLabels" . | nindent 6 }}
+      {{- include "llm-uservice.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "tgi.selectorLabels" . | nindent 8 }}
+        {{- include "llm-uservice.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -28,50 +28,38 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Chart.Name }}
+        - name: {{ .Release.Name }}
           env:
-            - name: MODEL_ID
-              value: {{ .Values.hftgi.modelId }}
-            - name: PORT
-              value: {{ .Values.hftgi.port | quote }}
+            - name: TGI_LLM_ENDPOINT
+              value: "http://{{ .Release.Name }}-tgi:{{ .Values.tgi.service.port }}"
+            - name: HUGGINGFACEHUB_API_TOKEN
+              value: {{ .Values.HUGGINGFACEHUB_API_TOKEN | quote}}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          volumeMounts:
-            - mountPath: /data
-              name: model-volume
           ports:
-            - name: http
-              containerPort: 80
+            - name: llm-uservice
+              containerPort: 9000
               protocol: TCP
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: http
           startupProbe:
-            httpGet:
-              path: /
-              port: http
+            exec:
+              command:
+              - curl
+              - http://{{ .Release.Name }}-tgi:{{ .Values.tgi.service.port }}
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
-          readinessProbe:
-            httpGet:
-              path: /
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 30
-            failureThreshold: 20
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: 9000
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 9000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-            #          command:
-            #            - "/usr/bin/bash"
-      volumes:
-        - name: model-volume
-          hostPath:
-            path: {{ .Values.hftgi.volume }}
-            type: Directory
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

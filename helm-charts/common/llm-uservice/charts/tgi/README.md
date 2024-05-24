@@ -9,7 +9,7 @@ To install the chart, run the following:
 ```console
 $ export MODELDIR=/mnt
 $ export MODELNAME="bigscience/bloom-560m"
-$ helm install tgi tgi --set hftgi.volume=${MODELDIR} --set hftgi.modelId=${MODELNAME}
+$ helm install tgi tgi --set volume=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME}
 ```
 
 By default, the tgi service will downloading the "bigscience/bloom-560m" which is about 1.1GB.
@@ -22,11 +22,11 @@ MODELNAME="/data/models--bigscience--bloom-560m"
 
 ## Values
 
-| Key           | Type   | Default                                           | Description                                                                                                                              |
-| ------------- | ------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| hftgi.modelId | string | `"bigscience/bloom-560m"`                         | Models id from https://huggingface.co/, or predownloaded model directory                                                                 |
-| hftgi.port    | string | `"80"`                                            | Hugging Face Text Generation Inference service port                                                                                      |
-| hftgi.volume  | string | `"/mnt"`                                          | Cached models directory, tgi will not download if the model is cached here. The "volume" will be mounted to container as /data directory |
-| hftgi.image   | string | `"ghcr.io/huggingface/text-generation-inference"` |                                                                                                                                          |
-| hftgi.tag     | string | `"1.4"`                                           |                                                                                                                                          |
-| service.port  | string | `"80"`                                            | The service port                                                                                                                         |
+| Key          | Type   | Default                                           | Description                                                                                                                              |
+| ------------ | ------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| LLM_MODEL_ID | string | `"bigscience/bloom-560m"`                         | Models id from https://huggingface.co/, or predownloaded model directory                                                                 |
+| port         | string | `"80"`                                            | Hugging Face Text Generation Inference service port                                                                                      |
+| volume       | string | `"/mnt"`                                          | Cached models directory, tgi will not download if the model is cached here. The "volume" will be mounted to container as /data directory |
+| image        | string | `"ghcr.io/huggingface/text-generation-inference"` |                                                                                                                                          |
+| tag          | string | `"1.4"`                                           |                                                                                                                                          |
+| service.port | string | `"80"`                                            | The service port                                                                                                                         |
