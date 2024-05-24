@@ -23,11 +23,11 @@ MODELNAME="/data/BAAI/bge-base-en-v1.5"
 
 ## Values
 
-| Key           | Type   | Default                                           | Description                                                                                                                              |
-| ------------- | ------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Key                                 | Type   | Default                                           | Description                                                                                                                              |
+| ----------------------------------- | ------ | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | global.qnaConfig.EMBEDDING_MODEL_ID | string | `"BAAI/bge-base-en-v1.5"`                         | Models id from https://huggingface.co/, or predownloaded model directory                                                                 |
-| hftei.port    | string | `"80"`                                            | Hugging Face Text Generation Inference service port                                                                                      |
-| hftei.volume  | string | `"/mnt/model"`                                          | Cached models directory, tei will not download if the model is cached here. The "volume" will be mounted to container as /data directory |
-| hftei.image   | string | `"ghcr.io/huggingface/text-embeddings-inference"` |                                                                                                                                          |
-| hftei.tag     | string | `"cpu-1.2"`                                           |                                                                                                                                          |
-| service.port  | string | `"80"`                                            | The service port                                                                                                                         |
+| hftei.port                          | string | `"80"`                                            | Hugging Face Text Generation Inference service port                                                                                      |
+| hftei.volume                        | string | `"/mnt/model"`                                    | Cached models directory, tei will not download if the model is cached here. The "volume" will be mounted to container as /data directory |
+| hftei.image                         | string | `"ghcr.io/huggingface/text-embeddings-inference"` |                                                                                                                                          |
+| hftei.tag                           | string | `"cpu-1.2"`                                       |                                                                                                                                          |
+| service.port                        | string | `"80"`                                            | The service port                                                                                                                         |
