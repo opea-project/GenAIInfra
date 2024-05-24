@@ -1,0 +1,4 @@
+1. Get the application IP or URL by running these commands:
+  export redis_svc_ip=$(kubectl get svc --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "redis-vector-db.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].spec.clusterIP}") && echo ${redis_svc_ip}
+2. Use this command to verify redis-vector-db :
+  telnet ${redis_svc_ip} 6379
