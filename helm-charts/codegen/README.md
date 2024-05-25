@@ -9,17 +9,19 @@ CodeGen depends on LLM microservice, refer to llm-uservice for more config detai
 To install the chart, run the following:
 
 ```console
-$ export HFTOKEN="insert-your-huggingface-token-here"
-$ export MODELDIR="/mnt"
-$ export MODELNAME="m-a-p/OpenCodeInterpreter-DS-6.7B"
-$ helm install codegen codegen --set llm-uservice.HUGGINGFACE_API_TOKEN=${HFTOKEN} --set llm-uservice.tgi.volume=${MODELDIR} --set llm-uservice.tgi.LLM_MODEL_ID=${MODELNAME}
+export HFTOKEN="insert-your-huggingface-token-here"
+export MODELDIR="/mnt"
+export MODELNAME="m-a-p/OpenCodeInterpreter-DS-6.7B"
+helm install codegen codegen --set llm-uservice.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set llm-uservice.tgi.volume=${MODELDIR} --set llm-uservice.tgi.LLM_MODEL_ID=${MODELNAME}
+# To use Gaudi device
+# helm install codegen codegen --set llm-uservice.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values codegen/gaudi-values.yaml
 ```
 
 ## Values
 
 | Key                                   | Type   | Default                                          | Description                                                                                                                              |
 | ------------------------------------- | ------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| image.repository                      | string | `"opea/gen-ai-comps:codegen-megaservice-server"` |                                                                                                                                          |
+| image.repository                      | string | `"opea/codegen:latest"` |                                                                                                                                          |
 | service.port                          | string | `"6666"`                                         |                                                                                                                                          |
 | llm-uservice.HUGGINGFACEHUB_API_TOKEN | string | `""`                                             | Your own Hugging Face API token                                                                                                          |
 | llm-uservice.tgi.LLM_MODEL_ID         | string | `"ise-uiuc/Magicoder-S-DS-6.7B"`                 | Models id from https://huggingface.co/, or predownloaded model directory                                                                 |
