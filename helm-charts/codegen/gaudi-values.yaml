@@ -28,9 +28,8 @@ llm-uservice:
 # To override values in subchart tgi
   tgi:
     # LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
-    # LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
-    LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-    volume: /mnt/data0/weights
+    LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
+    volume: /mnt
     image:
       repository: ghcr.io/huggingface/tgi-gaudi
       tag: "1.2.1"
@@ -38,6 +37,6 @@ llm-uservice:
       limits:
         habana.ai/gaudi: 1
 global:
-  http_proxy: http://192.168.1.253:3128
-  https_proxy: http://192.168.1.253:3128
-  no_proxy: intel.com,.intel.com,10.0.0.0/8,192.168.0.0/16,localhost,127.0.0.0/8,134.134.0.0/16,10.238.154.145,192.168.1.3
+  http_proxy:
+  https_proxy:
+  no_proxy:

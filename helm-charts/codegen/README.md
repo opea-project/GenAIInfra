@@ -19,10 +19,10 @@ helm install codegen codegen --set llm-uservice.HUGGINGFACEHUB_API_TOKEN=${HFTOK
 
 ## Values
 
-| Key                                   | Type   | Default                                          | Description                                                                                                                              |
-| ------------------------------------- | ------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| image.repository                      | string | `"opea/codegen:latest"` |                                                                                                                                          |
-| service.port                          | string | `"6666"`                                         |                                                                                                                                          |
-| llm-uservice.HUGGINGFACEHUB_API_TOKEN | string | `""`                                             | Your own Hugging Face API token                                                                                                          |
-| llm-uservice.tgi.LLM_MODEL_ID         | string | `"ise-uiuc/Magicoder-S-DS-6.7B"`                 | Models id from https://huggingface.co/, or predownloaded model directory                                                                 |
-| llm-uservice.tgi.volume               | string | `"/mnt"`                                         | Cached models directory, tgi will not download if the model is cached here. The "volume" will be mounted to container as /data directory |
+| Key                                   | Type   | Default                          | Description                                                                                                                              |
+| ------------------------------------- | ------ | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| image.repository                      | string | `"opea/codegen:latest"`          |                                                                                                                                          |
+| service.port                          | string | `"6666"`                         |                                                                                                                                          |
+| llm-uservice.HUGGINGFACEHUB_API_TOKEN | string | `""`                             | Your own Hugging Face API token                                                                                                          |
+| llm-uservice.tgi.LLM_MODEL_ID         | string | `"ise-uiuc/Magicoder-S-DS-6.7B"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                 |
+| llm-uservice.tgi.volume               | string | `"/mnt"`                         | Cached models directory, tgi will not download if the model is cached here. The "volume" will be mounted to container as /data directory |
