@@ -28,22 +28,13 @@ echo "Testing chart $CHART_NAME, init environment done!"
 echo "Testing chart $CHART_NAME, installing chart with helm..."
 if helm install --create-namespace --namespace $NAMESPACE --wait --timeout "$ROLLOUT_TIMEOUT_SECONDS" $RELEASE_NAME .; then
     echo "Testing chart $CHART_NAME, installing chart with helm done!"
+    return_code=0
 else
     echo "Failed to install chart $CHART_NAME!"
-    exit 1
+    return_code=1
 fi
 
-# step 3 Wait for pod ready
-# echo "Testing chart $CHART_NAME, waiting for pod ready..."
-# if kubectl rollout status deployment --namespace "$NAMESPACE" --timeout "$ROLLOUT_TIMEOUT_SECONDS"; then
-#     echo "Testing chart $CHART_NAME, waiting for pod ready done!"
-#     return_code=0
-# else
-#     echo "Timeout waiting for pods in namespace $NAMESPACE to be ready!"
-#     return_code=1
-# fi
-
-# step 4 Validate
+# step 3 Validate
 # if return_code is 0, then validate, call validate_${CHART_NAME}
 if [ $return_code -eq 0 ]; then
     echo "Testing chart $CHART_NAME, validating..."
@@ -58,7 +49,7 @@ if [ $return_code -eq 0 ]; then
     fi
 fi
 
-# step 5 Clean up
+# step 4 Clean up
 echo "Testing chart $CHART_NAME, cleaning up..."
 helm uninstall $RELEASE_NAME --namespace $NAMESPACE
 if ! kubectl delete ns $NAMESPACE --timeout=$KUBECTL_TIMEOUT_SECONDS; then

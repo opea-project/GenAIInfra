@@ -11,6 +11,8 @@ function init_codegen() {
     MODELNAME=OpenCodeInterpreter-DS-6.7B
     MODELID=$MODELREPO/$MODELNAME
     MODELDOWNLOADID=models--$MODELREPO--$MODELNAME
+    # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
+    IMAGE_REPO=${OPEA_IMAGE_REPO:-amr-registry.caas.intel.com/aiops}
 
     ### PREPARE MODEL
     # check if the model is already downloaded
@@ -28,15 +30,17 @@ function init_codegen() {
     fi
 
     ### CONFIG VALUES.YAML
-    # set image name to the CI images, replace opea/gen-ai-comps with amr-registry.caas.intel.com/aiops/opea-ci
-    sed -i "s#opea/gen-ai-comps#amr-registry.caas.intel.com/aiops/opea-ci#g" values.yaml
+    # insert a prefix before opea/.*, the prefix is IMAGE_REPO
+    sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" values.yaml
     # set huggingface token
     sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" values.yaml
     # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
     sed -i "s#volume: .*#volume: $CHART_MOUNT#g" values.yaml
     # replace the model ID with local dir name "data/$MODELNAME"
     if [ "$USE_MODELDOWNLOADID" = "False" ]; then
-        sed -i "s#modelId: .*#modelId: /data/$MODELNAME#g" values.yaml
+        sed -i "s#LLM_MODEL_ID: .*#LLM_MODEL_ID: /data/$MODELNAME#g" values.yaml
+    else
+        sed -i "s#LLM_MODEL_ID: .*#LLM_MODEL_ID: $MODELID#g" values.yaml
     fi
 }
 
