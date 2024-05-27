@@ -1,16 +1,5 @@
 <h1 align="center" id="title">Deploy CodeGen in Kubernetes Cluster on Xeon</h1>
 
-## Prebuilt images
-
-You should have all the images
-
-- tgi: ghcr.io/huggingface/text-generation-inference:1.4
-- llm-uservice: opea/gen-ai-comps:llm-tgi-server
-- codegen: opea/gen-ai-comps:codegen-megaservice-server
-
-> [NOTE]  
-> Please refer this OPEA repo https://github.com/opea-project/GenAIExamples/blob/main/CodeGen/docker-composer/xeon/README.md to build some opea images
-
 ## Deploy Services
 
 > [NOTE]
