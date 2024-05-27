@@ -120,10 +120,6 @@ spec:
             - name: http
               containerPort: 80
               protocol: TCP
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: http
           startupProbe:
             httpGet:
               path: /
@@ -140,8 +136,6 @@ spec:
             failureThreshold: 120
           resources:
             {}
-            #          command:
-            #            - "/usr/bin/bash"
       volumes:
         - name: model-volume
           hostPath:
@@ -199,14 +193,6 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: 9000
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: 9000
           resources:
             {}
 ---
@@ -251,21 +237,5 @@ spec:
             - name: codegen
               containerPort: 6666
               protocol: TCP
-                #          startupProbe:
-                #            httpGet:
-                #              host: codegen-llm-uservice
-                #              port: 9000
-                #              path: /
-                #            initialDelaySeconds: 5
-                #            periodSeconds: 5
-                #            failureThreshold: 120
-                #          livenessProbe:
-                #            httpGet:
-                #              path: /
-                #              port: 6666
-                #          readinessProbe:
-                #            httpGet:
-                #              path: /
-                #              port: 6666
           resources:
             null
