@@ -1,7 +1,7 @@
 /*
 * Copyright (C) 2024 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
-*/
+ */
 
 package controller
 
@@ -414,7 +414,9 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 	graph.Status.AccessURL = getServiceURL(routerService)
 	graph.Status.Status = "Success"
-	r.Status().Update(context.TODO(), graph)
+	if err = r.Status().Update(context.TODO(), graph); err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
+	}
 	return ctrl.Result{}, nil
 }
 

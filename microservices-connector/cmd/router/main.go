@@ -1,7 +1,7 @@
 /*
 * Copyright (C) 2024 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
-*/
+ */
 
 package main
 
@@ -35,6 +35,11 @@ var (
 	log             = logf.Log.WithName("GMCGraphRouter")
 	gmcGraph        *gmcv1alpha3.GMConnector
 	defaultNodeName = "root"
+)
+
+const (
+	ServiceURL  = "serviceUrl"
+	ServiceNode = "node"
 )
 
 type EnsembleStepOutput struct {
@@ -91,8 +96,15 @@ func callService(step *gmcv1alpha3.Step, serviceUrl string, input []byte, header
 	defer timeTrack(time.Now(), "step", serviceUrl)
 	log.Info("Entering callService", "url", serviceUrl)
 
+	// log the http header from the original request
+	log.Info("Print the http request headers", "HTTP_Header", headers)
+
 	if step.InternalService.Config != nil {
-		os.Setenv("no_proxy", step.InternalService.Config["no_proxy"])
+		err := os.Setenv("no_proxy", step.InternalService.Config["no_proxy"])
+		if err != nil {
+			log.Error(err, "Error setting environment variable", "no_proxy", step.InternalService.Config["no_proxy"])
+			return nil, 400, err
+		}
 	}
 	req, err := http.NewRequest("POST", serviceUrl, bytes.NewBuffer(input))
 	if err != nil {
@@ -137,7 +149,12 @@ func getServiceURLByStepTarget(step *gmcv1alpha3.Step, svcNameSpace string) stri
 	return step.ServiceURL
 }
 
-func executeStep(step *gmcv1alpha3.Step, graph gmcv1alpha3.GMConnector, input []byte, headers http.Header) ([]byte, int, error) {
+func executeStep(
+	step *gmcv1alpha3.Step,
+	graph gmcv1alpha3.GMConnector,
+	input []byte,
+	headers http.Header,
+) ([]byte, int, error) {
 	if step.NodeName != "" {
 		// when nodeName is specified make a recursive call for routing to next step
 		return routeStep(step.NodeName, graph, input, headers)
@@ -146,13 +163,18 @@ func executeStep(step *gmcv1alpha3.Step, graph gmcv1alpha3.GMConnector, input []
 	return callService(step, serviceURL, input, headers)
 }
 
-func handleSwitchNode(route *gmcv1alpha3.Step, graph gmcv1alpha3.GMConnector, input []byte, headers http.Header) ([]byte, int, error) {
+func handleSwitchNode(
+	route *gmcv1alpha3.Step,
+	graph gmcv1alpha3.GMConnector,
+	input []byte,
+	headers http.Header,
+) ([]byte, int, error) {
 	var statusCode int
 	var responseBytes []byte
 	var err error
-	stepType := "serviceUrl"
+	stepType := ServiceURL
 	if route.NodeName != "" {
-		stepType = "node"
+		stepType = ServiceNode
 	}
 	log.Info("Starting execution of step", "type", stepType, "stepName", route.StepName)
 	if responseBytes, statusCode, err = executeStep(route, graph, input, headers); err != nil {
@@ -160,7 +182,13 @@ func handleSwitchNode(route *gmcv1alpha3.Step, graph gmcv1alpha3.GMConnector, in
 	}
 
 	if route.Dependency == gmcv1alpha3.Hard && !isSuccessFul(statusCode) {
-		log.Info("This step is a hard dependency and it is unsuccessful", "stepName", route.StepName, "statusCode", statusCode)
+		log.Info(
+			"This step is a hard dependency and it is unsuccessful",
+			"stepName",
+			route.StepName,
+			"statusCode",
+			statusCode,
+		)
 	}
 	return responseBytes, statusCode, nil
 }
@@ -186,9 +214,9 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 		errChan := make(chan error)
 		for i := range currentNode.Steps {
 			step := &currentNode.Steps[i]
-			stepType := "serviceUrl"
+			stepType := ServiceURL
 			if step.NodeName != "" {
-				stepType = "node"
+				stepType = ServiceNode
 			}
 			log.Info("Starting execution of step", "type", stepType, "stepName", step.StepName)
 			resultChan := make(chan EnsembleStepOutput)
@@ -220,9 +248,15 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 			select {
 			case ensembleStepOutput = <-resultChan:
 				if !isSuccessFul(ensembleStepOutput.StepStatusCode) && currentNode.Steps[i].Dependency == gmcv1alpha3.Hard {
-					log.Info("This step is a hard dependency and it is unsuccessful", "stepName", currentNode.Steps[i].StepName, "statusCode", ensembleStepOutput.StepStatusCode)
-					stepResponse, _ := json.Marshal(ensembleStepOutput.StepResponse) // TODO check if you need err handling for Marshalling
-					return stepResponse, ensembleStepOutput.StepStatusCode, nil      // First failed hard dependency will decide the response and response code for ensemble node
+					log.Info(
+						"This step is a hard dependency and it is unsuccessful",
+						"stepName",
+						currentNode.Steps[i].StepName,
+						"statusCode",
+						ensembleStepOutput.StepStatusCode,
+					)
+					stepResponse, _ := json.Marshal(ensembleStepOutput.StepResponse)
+					return stepResponse, ensembleStepOutput.StepStatusCode, nil
 				} else {
 					response[key] = ensembleStepOutput.StepResponse
 				}
@@ -241,12 +275,18 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 		var err error
 		for i := range currentNode.Steps {
 			step := &currentNode.Steps[i]
-			stepType := "serviceUrl"
+			stepType := ServiceURL
 			if step.NodeName != "" {
-				stepType = "node"
+				stepType = ServiceNode
 			}
 			if step.InternalService.IsDownstreamService {
-				log.Info("InternalService DownstreamService is true, skip the execution of step", "type", stepType, "stepName", step.StepName)
+				log.Info(
+					"InternalService DownstreamService is true, skip the execution of step",
+					"type",
+					stepType,
+					"stepName",
+					step.StepName,
+				)
 				continue
 			}
 			log.Info("Starting execution of step", "type", stepType, "stepName", step.StepName)
@@ -275,7 +315,13 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 			*/
 			if step.Dependency == gmcv1alpha3.Hard {
 				if !isSuccessFul(statusCode) {
-					log.Info("This step is a hard dependency and it is unsuccessful", "stepName", step.StepName, "statusCode", statusCode)
+					log.Info(
+						"This step is a hard dependency and it is unsuccessful",
+						"stepName",
+						step.StepName,
+						"statusCode",
+						statusCode,
+					)
 					// Stop the execution of sequence right away if step is a hard dependency and is unsuccessful
 					return responseBytes, statusCode, nil
 				}
@@ -322,11 +368,16 @@ func main() {
 	http.HandleFunc("/", gmcGraphHandler)
 
 	server := &http.Server{
-		Addr:         ":8080",                           // specify the address and port
-		Handler:      http.HandlerFunc(gmcGraphHandler), // specify your HTTP handler
-		ReadTimeout:  time.Minute,                       // set the maximum duration for reading the entire request, including the body
-		WriteTimeout: time.Minute,                       // set the maximum duration before timing out writes of the response
-		IdleTimeout:  3 * time.Minute,                   // set the maximum amount of time to wait for the next request when keep-alive are enabled
+		// specify the address and port
+		Addr: ":8080",
+		// specify your HTTP handler
+		Handler: http.HandlerFunc(gmcGraphHandler),
+		// set the maximum duration for reading the entire request, including the body
+		ReadTimeout: time.Minute,
+		// set the maximum duration before timing out writes of the response
+		WriteTimeout: time.Minute,
+		// set the maximum amount of time to wait for the next request when keep-alive are enabled
+		IdleTimeout: 3 * time.Minute,
 	}
 	err = server.ListenAndServe()
 

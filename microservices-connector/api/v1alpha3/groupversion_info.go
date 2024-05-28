@@ -1,7 +1,7 @@
 /*
 * Copyright (C) 2024 Intel Corporation
 * SPDX-License-Identifier: Apache-2.0
-*/
+ */
 
 // Package v1alpha3 contains API Schema definitions for the gmc v1alpha3 API group
 // +kubebuilder:object:generate=true
