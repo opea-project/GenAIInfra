@@ -65,9 +65,12 @@ var _ = Describe("GMConnector Controller", func() {
 				Scheme: k8sClient.Scheme(),
 			}
 
-			controllerReconciler.Reconcile(ctx, reconcile.Request{
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
+			if err != nil {
+				return
+			}
 			//Expect(err).NotTo(HaveOccurred())
 			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
 			// Example: If you expect a certain status condition after reconciliation, verify it here.
