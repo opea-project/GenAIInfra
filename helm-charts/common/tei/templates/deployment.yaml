@@ -31,7 +31,7 @@ spec:
         - name: {{ .Chart.Name }}
           env:
             - name: MODEL_ID
-              value: {{ .Values.global.qnaConfig.EMBEDDING_MODEL_ID | quote }}
+              value: {{ .Values.EMBEDDING_MODEL_ID | quote }}
             - name: PORT
               value: {{ .Values.service.targetPort | quote }}
           securityContext:
@@ -47,28 +47,8 @@ spec:
             - name: http
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: http
-          startupProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.service.targetPort }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            failureThreshold: 120
-          readinessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.service.targetPort }}
-            initialDelaySeconds: 5
-            periodSeconds: 30
-            failureThreshold: 20
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-            #          command:
-            #            - "/usr/bin/bash"
       volumes:
         - name: model-volume
           hostPath:

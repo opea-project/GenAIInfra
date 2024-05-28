@@ -49,8 +49,6 @@ spec:
             failureThreshold: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-            #          command:
-            #            - "/usr/bin/bash"
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
