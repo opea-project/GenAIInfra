@@ -111,7 +111,7 @@ spec:
               value: "80"
           securityContext:
             {}
-          image: "ghcr.io/huggingface/text-generation-inference:1.4"
+          image: "ghcr.io/huggingface/tgi-gaudi:1.2.1"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /data
@@ -121,7 +121,8 @@ spec:
               containerPort: 80
               protocol: TCP
           resources:
-            {}
+            limits:
+              habana.ai/gaudi: 1
       volumes:
         - name: model-volume
           hostPath:

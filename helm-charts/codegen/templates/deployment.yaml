@@ -30,7 +30,7 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           env:
-            - name: MEGA_SERVICE_HOST_IP
+            - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-uservice
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
