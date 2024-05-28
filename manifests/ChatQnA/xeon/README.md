@@ -21,6 +21,7 @@ You should have all the images
 > [NOTE]
 > Be sure to modify the image name in all yaml files by your own value
 > Be sure to modify the all the value in qna_configmap.yaml
+> Be sure to replace "insert-your-huggingface-token-here" in qna_configmap.yaml with a real huggingface token
 
 ```
 $ cd ${RepoPath}/manifests/ChatQnA/manifests/xeon
