@@ -15,7 +15,7 @@ data:
   INDEX_NAME: "rag-redis"
   RERANK_MODEL_ID: "BAAI/bge-reranker-large"
   TEI_RERANKING_ENDPOINT: "http://tei-reranking-svc.default.svc.cluster.local:8808"
-  HUGGINGFACEHUB_API_TOKEN: {your_huggingfacehub_api_token}
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   # ${HUGGINGFACEHUB_API_TOKEN}
   LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
   TGI_LLM_ENDPOINT: "http://tgi-svc.default.svc.cluster.local:9009"
