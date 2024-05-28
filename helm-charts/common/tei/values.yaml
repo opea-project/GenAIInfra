@@ -1,19 +1,21 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for llm-uservice.
+# Default values for tei.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-# TGI_LLM_ENDPOINT: "http://automaticallydetected"
+
+hftei:
+  volume: /mnt/model
+  shmSize: 1Gi
 
 image:
-  repository: opea/llm-tgi:latest
+  repository: ghcr.io/huggingface/text-embeddings-inference
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: "cpu-1.2"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -34,8 +36,8 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  # The default port for llm service is 9000
-  port: 9000
+  port: 6006
+  targetPort: 80
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -55,15 +57,4 @@ tolerations: []
 
 affinity: {}
 
-# To override values in subchart tgi
-tgi:
-  LLM_MODEL_ID: m-a-p/OpenCodeInterpreter-DS-6.7B
-  # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-  port: 80
-  volume: /mnt
-
-  image:
-    repository: ghcr.io/huggingface/text-generation-inference
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.4"
+EMBEDDING_MODEL_ID: "BAAI/bge-base-en-v1.5"

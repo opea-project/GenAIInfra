@@ -1,0 +1,10 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: tei
+description: The Helm chart for HuggingFace Text Embedding Inference Server
+type: application
+version: 0.1.0
+# The HF TEI version
+appVersion: "1.2"

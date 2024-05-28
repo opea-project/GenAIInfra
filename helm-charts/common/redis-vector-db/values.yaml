@@ -1,19 +1,15 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for llm-uservice.
+# Default values for tei.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
-HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-# TGI_LLM_ENDPOINT: "http://automaticallydetected"
-
 image:
-  repository: opea/llm-tgi:latest
+  repository: redis/redis-stack
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: "7.2.0-v9"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -25,18 +21,17 @@ podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
 
 service:
-  type: ClusterIP
-  # The default port for llm service is 9000
-  port: 9000
-
+  ports:
+  - name: redis-service
+    type: ClusterIP
+    port: 6379
+    targetPort: 6379
+  - name: redis-insight
+    type: ClusterIP
+    port: 8001
+    targetPort: 8001
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -54,16 +49,3 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
-
-# To override values in subchart tgi
-tgi:
-  LLM_MODEL_ID: m-a-p/OpenCodeInterpreter-DS-6.7B
-  # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-  port: 80
-  volume: /mnt
-
-  image:
-    repository: ghcr.io/huggingface/text-generation-inference
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.4"

@@ -27,6 +27,16 @@ llm-uservice:
     port: 9000
 # To override values in subchart tgi
   tgi:
-    LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
-    # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
+    # LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
+    LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
     volume: /mnt
+    image:
+      repository: ghcr.io/huggingface/tgi-gaudi
+      tag: "1.2.1"
+    resources:
+      limits:
+        habana.ai/gaudi: 1
+global:
+  http_proxy:
+  https_proxy:
+  no_proxy:

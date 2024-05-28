@@ -49,20 +49,20 @@ spec:
 #            httpGet:
 #              path: /
 #              port: http
-          startupProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            failureThreshold: 120
-          readinessProbe:
-            httpGet:
-              path: /
-              port: {{ .Values.port }}
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            failureThreshold: 120
+#          startupProbe:
+#            httpGet:
+#              path: /
+#              port: {{ .Values.port }}
+#            initialDelaySeconds: 5
+#            periodSeconds: 5
+#            failureThreshold: 120
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: {{ .Values.port }}
+#            initialDelaySeconds: 5
+#            periodSeconds: 5
+#            failureThreshold: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
             #          command:

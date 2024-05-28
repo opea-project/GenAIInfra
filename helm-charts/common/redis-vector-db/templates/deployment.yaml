@@ -4,14 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "tgi.fullname" . }}
+  name: {{ include "redis-vector-db.fullname" . }}
   labels:
-    {{- include "tgi.labels" . | nindent 4 }}
+    {{- include "redis-vector-db.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "tgi.selectorLabels" . | nindent 6 }}
+      {{- include "redis-vector-db.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "tgi.selectorLabels" . | nindent 8 }}
+        {{- include "redis-vector-db.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -30,48 +30,25 @@ spec:
       containers:
         - name: {{ .Chart.Name }}
           env:
-            - name: MODEL_ID
-              value: {{ .Values.LLM_MODEL_ID }}
-            - name: PORT
-              value: {{ .Values.port | quote }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          volumeMounts:
-            - mountPath: /data
-              name: model-volume
           ports:
-            - name: http
-              containerPort: {{ .Values.port }}
+          {{- $redisServicePort := index .Values.service.ports 0 }}
+            {{- range .Values.service.ports }}
+            - name: {{ .name }}
+              containerPort: {{ .targetPort }}
               protocol: TCP
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: http
-#          startupProbe:
-#            httpGet:
-#              path: /
-#              port: {{ .Values.port }}
-#            initialDelaySeconds: 5
-#            periodSeconds: 5
-#            failureThreshold: 120
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: {{ .Values.port }}
-#            initialDelaySeconds: 5
-#            periodSeconds: 5
-#            failureThreshold: 120
+            {{- end }}
+          startupProbe:
+            tcpSocket:
+              port: {{ $redisServicePort.targetPort }} # Probe the Redis port
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-            #          command:
-            #            - "/usr/bin/bash"
-      volumes:
-        - name: model-volume
-          hostPath:
-            path: {{ .Values.volume }}
-            type: Directory
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

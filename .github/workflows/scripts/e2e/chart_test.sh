@@ -5,8 +5,10 @@
 LOG_PATH=.
 
 function init_codegen() {
+    # executed under path helm-charts/codegen
     # init var
-    CHART_MOUNT=/home/$USER_ID/charts-mnt/codegen
+    USER_ID=$(whoami)
+    CHART_MOUNT=/home/$USER_ID/charts-mnt
     MODELREPO=m-a-p
     MODELNAME=OpenCodeInterpreter-DS-6.7B
     MODELID=$MODELREPO/$MODELNAME
@@ -95,3 +97,34 @@ function validate_chatqna() {
         echo "Response check succeed!"
     fi
 }
+
+if [ $# -eq 0 ]; then
+    echo "Usage: $0 <function_name>"
+    exit 1
+fi
+
+case "$1" in
+    init_codegen)
+        pushd helm-charts/codegen
+        init_codegen
+        popd
+        ;;
+    validate_codegen)
+        RELEASE_NAME=$2
+        NAMESPACE=$3
+        validate_codegen
+        ;;
+    init_chatqna)
+        pushd helm-charts/chatqna
+        init_chatqna
+        popd
+        ;;
+    validate_chatqna)
+        RELEASE_NAME=$2
+        NAMESPACE=$3
+        validate_chatqna
+        ;;
+    *)
+        echo "Unknown function: $1"
+        ;;
+esac

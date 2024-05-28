@@ -34,6 +34,13 @@ spec:
               value: "http://{{ .Release.Name }}-tgi:{{ .Values.tgi.service.port }}"
             - name: HUGGINGFACEHUB_API_TOKEN
               value: {{ .Values.HUGGINGFACEHUB_API_TOKEN | quote}}
+            - name: http_proxy
+              value: {{ .Values.global.http_proxy }}
+            - name: https_proxy
+              value: {{ .Values.global.https_proxy }}
+            - name: no_proxy
+              value: {{ .Values.global.no_proxy }}
+
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
