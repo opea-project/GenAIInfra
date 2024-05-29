@@ -52,7 +52,7 @@ jobs:
     if: always() && ${{ needs.job1.outputs.run_matrix.chart.length }} > 0
     strategy:
       matrix: ${{ fromJSON(needs.job1.outputs.run_matrix) }}
-    runs-on: inspur-icx-1
+    runs-on: irisoffice
     continue-on-error: true
     outputs:
       should_cleanup: ${{ steps.set_boolean.outputs.should_cleanup }}
