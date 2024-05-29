@@ -34,7 +34,7 @@ For Gaudi:
 ```
 # Deploy Services with Xeon
 
-$ cd ${RepoPath}/ChatQnA/kubernetes/manifests/
+$ cd ${RepoPath}/manifests/ChatQnA
 $ ./install_all_xeon.sh
 ```
 
@@ -55,7 +55,7 @@ $ ./remove_all_xeon.sh
 ### Deploy
 
 ```
-$ cd ${RepoPath}/ChatQnA/kubernetes/manifests/
+$ cd ${RepoPath}/manifests/ChatQnA
 $ ./install_all_gaudi.sh
 ```
 
