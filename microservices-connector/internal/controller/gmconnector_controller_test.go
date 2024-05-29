@@ -16,7 +16,7 @@ import (
 
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
-	gmcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
+	mcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
 )
 
 var _ = Describe("GMConnector Controller", func() {
@@ -29,19 +29,19 @@ var _ = Describe("GMConnector Controller", func() {
 			Name:      resourceName,
 			Namespace: "default", // TODO(user):Modify as needed
 		}
-		gmconnector := &gmcv1alpha3.GMConnector{}
+		gmconnector := &mcv1alpha3.GMConnector{}
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind GMConnector")
 			err := k8sClient.Get(ctx, typeNamespacedName, gmconnector)
 			if err != nil && errors.IsNotFound(err) {
-				resource := &gmcv1alpha3.GMConnector{
+				resource := &mcv1alpha3.GMConnector{
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
 					},
-					Spec: gmcv1alpha3.GMConnectorSpec{
-						Nodes: map[string]gmcv1alpha3.Router{},
+					Spec: mcv1alpha3.GMConnectorSpec{
+						Nodes: map[string]mcv1alpha3.Router{},
 					},
 					// TODO(user): Specify other spec details if needed.
 				}
@@ -51,7 +51,7 @@ var _ = Describe("GMConnector Controller", func() {
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &gmcv1alpha3.GMConnector{}
+			resource := &mcv1alpha3.GMConnector{}
 			err := k8sClient.Get(ctx, typeNamespacedName, resource)
 			Expect(err).NotTo(HaveOccurred())
 

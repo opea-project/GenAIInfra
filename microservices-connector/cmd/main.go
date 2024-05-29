@@ -23,7 +23,7 @@ import (
 	metricsserver "sigs.k8s.io/controller-runtime/pkg/metrics/server"
 	"sigs.k8s.io/controller-runtime/pkg/webhook"
 
-	gmcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
+	mcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
 	"github.com/opea-project/GenAIInfra/genai-microservices-connector/internal/controller"
 	//+kubebuilder:scaffold:imports
 )
@@ -36,7 +36,7 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(gmcv1alpha3.AddToScheme(scheme))
+	utilruntime.Must(mcv1alpha3.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

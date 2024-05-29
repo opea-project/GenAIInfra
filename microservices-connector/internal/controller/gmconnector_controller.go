@@ -16,7 +16,7 @@ import (
 	"text/template"
 	"time"
 
-	gmcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
+	mcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
 	"github.com/pkg/errors"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
@@ -354,7 +354,7 @@ type RouterCfg struct {
 func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
 
-	graph := &gmcv1alpha3.GMConnector{}
+	graph := &mcv1alpha3.GMConnector{}
 	if err := r.Get(ctx, req.NamespacedName, graph); err != nil {
 		if apierr.IsNotFound(err) {
 			// Object not found, return.  Created objects are automatically garbage collected.
@@ -424,6 +424,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 // SetupWithManager sets up the controller with the Manager.
 func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&gmcv1alpha3.GMConnector{}).
+		For(&mcv1alpha3.GMConnector{}).
 		Complete(r)
 }
