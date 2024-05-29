@@ -30,14 +30,13 @@ kind: Service
 metadata:
   name: redis-vector-db
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: redis-vector-db
   ports:
   - name: redis-service
     port: 6379
     targetPort: 6379
-    nodePort: 31379
   - name: redis-insight
     port: 8001
     targetPort: 8001

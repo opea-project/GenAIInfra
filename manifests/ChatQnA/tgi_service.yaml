@@ -5,29 +5,35 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tei-reranking-service-deploy
+  name: tgi-service-deploy
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tei-reranking-service-deploy
+      app: tgi-service-deploy
   template:
     metadata:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
-        app: tei-reranking-service-deploy
+        app: tgi-service-deploy
     spec:
+      hostIPC: true
       containers:
       - envFrom:
         - configMapRef:
             name: qna-config
-        image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.2
-        name: tei-reranking-service-deploy
+        image: ghcr.io/huggingface/text-generation-inference:1.4
+        name: tgi-service-deploy-demo
         args:
         - --model-id
-        - $(RERANK_MODEL_ID)
+        - $(LLM_MODEL_ID)
+        #- "/data/Llama-2-7b-hf"
+        # - "/data/Mistral-7B-Instruct-v0.2"
+        # - --quantize
+        # - "bitsandbytes-fp4"
+#        - --disable-custom-kernels
         volumeMounts:
         - mountPath: /data
           name: model-volume
@@ -35,19 +41,20 @@ spec:
           name: shm
         ports:
         - containerPort: 80
-        # resources:
-        #   limits:
-        #     cpu: 56000m
-        #     memory: 26Gi
-        #   requests:
-        #     cpu: 56000m
-        #     memory: 26Gi
+        resources:
+          # limits:
+          #   cpu: 56000m
+          #   memory: 26Gi
+          # requests:
+          #   cpu: 56000m
+          #   memory: 26Gi
       serviceAccountName: default
+      nodeSelector:
       volumes:
       - name: model-volume
         hostPath:
           # directory location on host
-          path: /mnt/model
+          path: /mnt/models
           # this field is optional
           type: Directory
       - name: shm
@@ -58,13 +65,12 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: tei-reranking-svc
+  name: tgi-svc
 spec:
   type: NodePort
   selector:
-    app: tei-reranking-service-deploy
+    app: tgi-service-deploy
   ports:
     - name: service
-      port: 8808
+      port: 9009
       targetPort: 80
-      nodePort: 30808

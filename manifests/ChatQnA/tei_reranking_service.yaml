@@ -5,29 +5,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tei-embedding-service-deploy
+  name: tei-reranking-service-deploy
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tei-embedding-service-deploy
+      app: tei-reranking-service-deploy
   template:
     metadata:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
-        app: tei-embedding-service-deploy
+        app: tei-reranking-service-deploy
     spec:
       containers:
       - envFrom:
         - configMapRef:
             name: qna-config
         image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.2
-        name: tei-embedding-service-deploy
+        name: tei-reranking-service-deploy
         args:
         - --model-id
-        - $(EMBEDDING_MODEL_ID)
+        - $(RERANK_MODEL_ID)
         volumeMounts:
         - mountPath: /data
           name: model-volume
@@ -47,7 +47,7 @@ spec:
       - name: model-volume
         hostPath:
           # directory location on host
-          path: /mnt/model
+          path: /mnt/models
           # this field is optional
           type: Directory
       - name: shm
@@ -58,13 +58,12 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: tei-embedding-svc
+  name: tei-reranking-svc
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
-    app: tei-embedding-service-deploy
+    app: tei-reranking-service-deploy
   ports:
     - name: service
-      port: 6006
+      port: 8808
       targetPort: 80
-      nodePort: 30606
