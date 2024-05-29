@@ -82,7 +82,7 @@ jobs:
 
       - name: Initialize chart testing
         run: |
-          .github/workflows/scripts/e2e/chart_test.sh init_codegen
+          .github/workflows/scripts/e2e/chart_test.sh init_${{ matrix.chart }}
 
       - name: Helm install
         id: install
@@ -100,7 +100,7 @@ jobs:
           if $skip_validate; then
             echo "Skip validate"
           else
-            .github/workflows/scripts/e2e/chart_test.sh validate_codegen $RELEASE_NAME $NAMESPACE
+            .github/workflows/scripts/e2e/chart_test.sh validate_${{ matrix.chart }} $RELEASE_NAME $NAMESPACE
           fi
 
       - name: Helm uninstall
