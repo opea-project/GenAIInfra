@@ -5,42 +5,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: chaqna-xeon-backend-server-deploy
-  namespace: default
+  name: retriever-deploy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: chaqna-xeon-backend-server-deploy
+      app: retriever-deploy
   template:
     metadata:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
-        app: chaqna-xeon-backend-server-deploy
+        app: retriever-deploy
     spec:
       hostIPC: true
       containers:
       - envFrom:
         - configMapRef:
             name: qna-config
-        image: opea/gen-ai-comps:chatqna-megaservice-server
-        name: chaqna-xeon-backend-server-deploy
+        image: opea/retriever-redis:latest
+        imagePullPolicy: IfNotPresent
+        name: retriever-deploy
         args:
         ports:
-        - containerPort: 8888
+        - containerPort: 7000
       serviceAccountName: default
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: chaqna-xeon-backend-server-svc
+  name: retriever-svc
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
-    app: chaqna-xeon-backend-server-deploy
+    app: retriever-deploy
   ports:
     - name: service
-      port: 8888
-      targetPort: 8888
-      nodePort: 30888
+      port: 7000
+      targetPort: 7000
