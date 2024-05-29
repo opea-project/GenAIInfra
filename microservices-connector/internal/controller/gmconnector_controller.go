@@ -136,7 +136,7 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 
 			// createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Create(context.TODO(), obj, metav1.CreateOptions{})
 			createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, patchBytes, metav1.PatchOptions{
-				FieldManager: "your-field-manager",
+				FieldManager: "gmc-controller",
 				Force:        ptr.To(true),
 			})
 			if err != nil {
