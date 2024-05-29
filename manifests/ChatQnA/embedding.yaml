@@ -5,42 +5,42 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: chaqna-xeon-ui-server-deploy
+  name: embedding-deploy
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: chaqna-xeon-ui-server-deploy
+      app: embedding-deploy
   template:
     metadata:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
-        app: chaqna-xeon-ui-server-deploy
+        app: embedding-deploy
     spec:
       hostIPC: true
       containers:
       - envFrom:
         - configMapRef:
             name: qna-config
-        image: opea/gen-ai-comps:chatqna-ui-server
-        name: chaqna-xeon-ui-server-deploy
+        image: opea/embedding-tei:latest
+        imagePullPolicy: IfNotPresent
+        name: embedding-deploy
         args:
         ports:
-        - containerPort: 5173
+        - containerPort: 6000
       serviceAccountName: default
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: chaqna-xeon-ui-server-svc
+  name: embedding-svc
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
-    app: chaqna-xeon-ui-server-deploy
+    app: embedding-deploy
   ports:
     - name: service
-      port: 5173
-      targetPort: 5173
-      nodePort: 30173
+      port: 6000
+      targetPort: 6000
