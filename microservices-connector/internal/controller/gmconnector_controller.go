@@ -374,12 +374,12 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if step.Executor.ExternalService == "" {
 				ns := step.Executor.InternalService.NameSpace
 				svcName := step.Executor.InternalService.ServiceName
-				fmt.Println("trying to internal service [", svcName, "] in namespace ", ns)
+				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
 
 				service := &corev1.Service{}
 				err := reconcileResource(step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
 				if err != nil {
-					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to create service for %s", svcName)
+					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
 				}
 
 				graph.Spec.Nodes[node].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
