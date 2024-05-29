@@ -134,13 +134,12 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 				return fmt.Errorf("failed to marshal config to json: %v", err)
 			}
 
-			// createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Create(context.TODO(), obj, metav1.CreateOptions{})
 			createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, patchBytes, metav1.PatchOptions{
 				FieldManager: "gmc-controller",
 				Force:        ptr.To(true),
 			})
 			if err != nil {
-				fmt.Printf("Failed to create resource: %v\n", err)
+				fmt.Printf("Failed to reconcile resource: %v\n", err)
 			} else {
 				fmt.Printf("Resource %s/%s created\n", gvk.Kind, createdObj.GetName())
 				if retSvc != nil && createdObj.GetKind() == "Service" {
@@ -411,7 +410,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
 		err = reconcileResource(graph.Spec.RouterConfig.Name, graph.Spec.RouterConfig.NameSpace, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
 		if err != nil {
-			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to create router service")
+			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 		}
 	}
 	graph.Status.AccessURL = getServiceURL(routerService)
