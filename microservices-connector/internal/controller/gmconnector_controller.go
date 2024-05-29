@@ -30,6 +30,7 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
+	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -63,7 +64,7 @@ func getKubeConfig() (*rest.Config, error) {
 	return config, nil
 }
 
-func createService(step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
+func reconcileResource(step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
 
 	var tmpltFile string
 
@@ -128,11 +129,17 @@ func createService(step string, ns string, svc string, svcCfg *map[string]string
 
 		gvr, _ := meta.UnsafeGuessKindToResource(*gvk)
 		for {
-			// _, err = dynamicClient.Resource(gvr).Namespace(ns).List(context.TODO(), metav1.ListOptions{})
-
-			createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Create(context.TODO(), obj, metav1.CreateOptions{})
+			patchBytes, err := json.Marshal(obj)
 			if err != nil {
-				fmt.Printf("Failed to create resource: %v\n", err)
+				return fmt.Errorf("failed to marshal config to json: %v", err)
+			}
+
+			createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, patchBytes, metav1.PatchOptions{
+				FieldManager: "gmc-controller",
+				Force:        ptr.To(true),
+			})
+			if err != nil {
+				fmt.Printf("Failed to reconcile resource: %v\n", err)
 			} else {
 				fmt.Printf("Resource %s/%s created\n", gvk.Kind, createdObj.GetName())
 				if retSvc != nil && createdObj.GetKind() == "Service" {
@@ -362,23 +369,17 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	for node, router := range graph.Spec.Nodes {
 		for i, step := range router.Steps {
-			fmt.Println("reconcil service for node:", step.StepName)
+			fmt.Println("reconcile resource for node:", step.StepName)
 
 			if step.Executor.ExternalService == "" {
 				ns := step.Executor.InternalService.NameSpace
 				svcName := step.Executor.InternalService.ServiceName
-				fmt.Println("trying to find internal service [", svcName, "] in namespace ", ns)
+				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
 
 				service := &corev1.Service{}
-				err := r.Client.Get(ctx, types.NamespacedName{Namespace: ns, Name: svcName}, service)
-				if err == nil {
-					fmt.Println("success to get service ", svcName)
-				} else {
-					fmt.Println("service [", svcName, "] is needed, start to deploy ...")
-					err := createService(step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
-					if err != nil {
-						return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to create service for %s", svcName)
-					}
+				err := reconcileResource(step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
+				if err != nil {
+					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
 				}
 
 				graph.Spec.Nodes[node].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
@@ -407,9 +408,9 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			graph.Spec.RouterConfig.Config = make(map[string]string)
 		}
 		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-		err = createService(graph.Spec.RouterConfig.Name, graph.Spec.RouterConfig.NameSpace, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
+		err = reconcileResource(graph.Spec.RouterConfig.Name, graph.Spec.RouterConfig.NameSpace, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
 		if err != nil {
-			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to create router service")
+			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 		}
 	}
 	graph.Status.AccessURL = getServiceURL(routerService)
