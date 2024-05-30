@@ -58,7 +58,7 @@ spec:
             memory: 64Mi
       volumes:
       - name: yaml-file
-        hostPath:
-          path: ${YAML_DIR}
+        configMap:
+          name: gmcyaml
       serviceAccountName: gmc-controller
       terminationGracePeriodSeconds: 10
