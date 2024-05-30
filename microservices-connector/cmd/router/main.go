@@ -26,14 +26,14 @@ import (
 	// "crypto/rand"
 	// "math/big"
 
-	gmcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
+	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
 	flag "github.com/spf13/pflag"
 )
 
 var (
 	jsonGraph       = flag.String("graph-json", "", "serialized json graph def")
 	log             = logf.Log.WithName("GMCGraphRouter")
-	gmcGraph        *gmcv1alpha3.GMConnector
+	mcGraph         *mcv1alpha3.GMConnector
 	defaultNodeName = "root"
 )
 
@@ -68,7 +68,7 @@ func isSuccessFul(statusCode int) bool {
 	return false
 }
 
-func pickupRouteByCondition(input []byte, routes []gmcv1alpha3.Step) *gmcv1alpha3.Step {
+func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.Step {
 	if !gjson.ValidBytes(input) {
 		return nil
 	}
@@ -92,7 +92,7 @@ func prepareErrorResponse(err error, errorMessage string) []byte {
 	return errorResponseBytes
 }
 
-func callService(step *gmcv1alpha3.Step, serviceUrl string, input []byte, headers http.Header) ([]byte, int, error) {
+func callService(step *mcv1alpha3.Step, serviceUrl string, input []byte, headers http.Header) ([]byte, int, error) {
 	defer timeTrack(time.Now(), "step", serviceUrl)
 	log.Info("Entering callService", "url", serviceUrl)
 
@@ -141,7 +141,7 @@ func callService(step *gmcv1alpha3.Step, serviceUrl string, input []byte, header
 
 // Use step service name to create a K8s service if serviceURL is empty
 // TODO: add more features here, such as K8s service selector, labels, etc.
-func getServiceURLByStepTarget(step *gmcv1alpha3.Step, svcNameSpace string) string {
+func getServiceURLByStepTarget(step *mcv1alpha3.Step, svcNameSpace string) string {
 	if step.ServiceURL == "" {
 		serviceURL := fmt.Sprintf("http://%s.%s.svc.cluster.local", step.StepName, svcNameSpace)
 		return serviceURL
@@ -150,8 +150,8 @@ func getServiceURLByStepTarget(step *gmcv1alpha3.Step, svcNameSpace string) stri
 }
 
 func executeStep(
-	step *gmcv1alpha3.Step,
-	graph gmcv1alpha3.GMConnector,
+	step *mcv1alpha3.Step,
+	graph mcv1alpha3.GMConnector,
 	input []byte,
 	headers http.Header,
 ) ([]byte, int, error) {
@@ -164,8 +164,8 @@ func executeStep(
 }
 
 func handleSwitchNode(
-	route *gmcv1alpha3.Step,
-	graph gmcv1alpha3.GMConnector,
+	route *mcv1alpha3.Step,
+	graph mcv1alpha3.GMConnector,
 	input []byte,
 	headers http.Header,
 ) ([]byte, int, error) {
@@ -181,7 +181,7 @@ func handleSwitchNode(
 		return nil, 500, err
 	}
 
-	if route.Dependency == gmcv1alpha3.Hard && !isSuccessFul(statusCode) {
+	if route.Dependency == mcv1alpha3.Hard && !isSuccessFul(statusCode) {
 		log.Info(
 			"This step is a hard dependency and it is unsuccessful",
 			"stepName",
@@ -193,11 +193,11 @@ func handleSwitchNode(
 	return responseBytes, statusCode, nil
 }
 
-func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, headers http.Header) ([]byte, int, error) {
+func routeStep(nodeName string, graph mcv1alpha3.GMConnector, input []byte, headers http.Header) ([]byte, int, error) {
 	defer timeTrack(time.Now(), "node", nodeName)
 	currentNode := graph.Spec.Nodes[nodeName]
 
-	if currentNode.RouterType == gmcv1alpha3.Switch {
+	if currentNode.RouterType == mcv1alpha3.Switch {
 		var err error
 		route := pickupRouteByCondition(input, currentNode.Steps)
 		if route == nil {
@@ -209,7 +209,7 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 		return handleSwitchNode(route, graph, input, headers)
 	}
 
-	if currentNode.RouterType == gmcv1alpha3.Ensemble {
+	if currentNode.RouterType == mcv1alpha3.Ensemble {
 		ensembleRes := make([]chan EnsembleStepOutput, len(currentNode.Steps))
 		errChan := make(chan error)
 		for i := range currentNode.Steps {
@@ -247,7 +247,7 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 			}
 			select {
 			case ensembleStepOutput = <-resultChan:
-				if !isSuccessFul(ensembleStepOutput.StepStatusCode) && currentNode.Steps[i].Dependency == gmcv1alpha3.Hard {
+				if !isSuccessFul(ensembleStepOutput.StepStatusCode) && currentNode.Steps[i].Dependency == mcv1alpha3.Hard {
 					log.Info(
 						"This step is a hard dependency and it is unsuccessful",
 						"stepName",
@@ -269,7 +269,7 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 		return combinedResponse, 200, nil
 	}
 
-	if currentNode.RouterType == gmcv1alpha3.Sequence {
+	if currentNode.RouterType == mcv1alpha3.Sequence {
 		var statusCode int
 		var responseBytes []byte
 		var err error
@@ -313,7 +313,7 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 			/*
 			   Only if a step is a hard dependency, we will check for its success.
 			*/
-			if step.Dependency == gmcv1alpha3.Hard {
+			if step.Dependency == mcv1alpha3.Hard {
 				if !isSuccessFul(statusCode) {
 					log.Info(
 						"This step is a hard dependency and it is unsuccessful",
@@ -334,14 +334,14 @@ func routeStep(nodeName string, graph gmcv1alpha3.GMConnector, input []byte, hea
 	return nil, 500, fmt.Errorf("invalid route type: %v", currentNode.RouterType)
 }
 
-func gmcGraphHandler(w http.ResponseWriter, req *http.Request) {
+func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
 	inputBytes, _ := io.ReadAll(req.Body)
-	if response, statusCode, err := routeStep(defaultNodeName, *gmcGraph, inputBytes, req.Header); err != nil {
+	if response, statusCode, err := routeStep(defaultNodeName, *mcGraph, inputBytes, req.Header); err != nil {
 		log.Error(err, "failed to process request")
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(statusCode)
 		if _, err := w.Write(prepareErrorResponse(err, "Failed to process request")); err != nil {
-			log.Error(err, "failed to write gmcGraphHandler response")
+			log.Error(err, "failed to write mcGraphHandler response")
 		}
 	} else {
 		if json.Valid(response) {
@@ -349,7 +349,7 @@ func gmcGraphHandler(w http.ResponseWriter, req *http.Request) {
 		}
 		w.WriteHeader(statusCode)
 		if _, err := w.Write(response); err != nil {
-			log.Error(err, "failed to write gmcGraphHandler response")
+			log.Error(err, "failed to write mcGraphHandler response")
 		}
 	}
 }
@@ -358,20 +358,20 @@ func main() {
 	flag.Parse()
 	logf.SetLogger(zap.New())
 
-	gmcGraph = &gmcv1alpha3.GMConnector{}
-	err := json.Unmarshal([]byte(*jsonGraph), gmcGraph)
+	mcGraph = &mcv1alpha3.GMConnector{}
+	err := json.Unmarshal([]byte(*jsonGraph), mcGraph)
 	if err != nil {
 		log.Error(err, "failed to unmarshall gmc graph json")
 		os.Exit(1)
 	}
 
-	http.HandleFunc("/", gmcGraphHandler)
+	http.HandleFunc("/", mcGraphHandler)
 
 	server := &http.Server{
 		// specify the address and port
 		Addr: ":8080",
 		// specify your HTTP handler
-		Handler: http.HandlerFunc(gmcGraphHandler),
+		Handler: http.HandlerFunc(mcGraphHandler),
 		// set the maximum duration for reading the entire request, including the body
 		ReadTimeout: time.Minute,
 		// set the maximum duration before timing out writes of the response
