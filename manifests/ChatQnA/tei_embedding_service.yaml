@@ -6,7 +6,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: tei-embedding-service-deploy
-  namespace: default
 spec:
   replicas: 1
   selector:
@@ -47,7 +46,7 @@ spec:
       - name: model-volume
         hostPath:
           # directory location on host
-          path: /mnt/model
+          path: /mnt/models
           # this field is optional
           type: Directory
       - name: shm
@@ -60,11 +59,10 @@ apiVersion: v1
 metadata:
   name: tei-embedding-svc
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: tei-embedding-service-deploy
   ports:
     - name: service
       port: 6006
       targetPort: 80
-      nodePort: 30606

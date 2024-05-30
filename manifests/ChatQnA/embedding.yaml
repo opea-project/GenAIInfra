@@ -5,27 +5,27 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: retriever-deploy
-  namespace: default
+  name: embedding-deploy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: retriever-deploy
+      app: embedding-deploy
   template:
     metadata:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
-        app: retriever-deploy
+        app: embedding-deploy
     spec:
       hostIPC: true
       containers:
       - envFrom:
         - configMapRef:
             name: qna-config
-        image: opea/gen-ai-comps:retriever-redis-server
-        name: retriever-deploy
+        image: opea/embedding-tei:latest
+        imagePullPolicy: IfNotPresent
+        name: embedding-deploy
         args:
         ports:
         - containerPort: 6000
@@ -34,13 +34,12 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: retriever-svc
+  name: embedding-svc
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
-    app: retriever-deploy
+    app: embedding-deploy
   ports:
     - name: service
-      port: 7000
-      targetPort: 7000
-      nodePort: 30700
+      port: 6000
+      targetPort: 6000

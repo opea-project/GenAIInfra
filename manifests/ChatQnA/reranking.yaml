@@ -5,42 +5,41 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: chaqna-xeon-ui-server-deploy
-  namespace: default
+  name: reranking-deploy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: chaqna-xeon-ui-server-deploy
+      app: reranking-deploy
   template:
     metadata:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
-        app: chaqna-xeon-ui-server-deploy
+        app: reranking-deploy
     spec:
       hostIPC: true
       containers:
       - envFrom:
         - configMapRef:
             name: qna-config
-        image: opea/gen-ai-comps:chatqna-ui-server
-        name: chaqna-xeon-ui-server-deploy
+        image: opea/reranking-tei:latest
+        imagePullPolicy: IfNotPresent
+        name: reranking-deploy
         args:
         ports:
-        - containerPort: 5173
+        - containerPort: 8000
       serviceAccountName: default
 ---
 kind: Service
 apiVersion: v1
 metadata:
-  name: chaqna-xeon-ui-server-svc
+  name: reranking-svc
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
-    app: chaqna-xeon-ui-server-deploy
+    app: reranking-deploy
   ports:
     - name: service
-      port: 5173
-      targetPort: 5173
-      nodePort: 30173
+      port: 8000
+      targetPort: 8000

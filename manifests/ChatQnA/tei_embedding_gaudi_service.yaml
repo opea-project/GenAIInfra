@@ -5,29 +5,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: tei-reranking-service-deploy
-  namespace: default
+  name: tei-embedding-gaudi-service-deploy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: tei-reranking-service-deploy
+      app: tei-embedding-gaudi-service-deploy
   template:
     metadata:
       annotations:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
-        app: tei-reranking-service-deploy
+        app: tei-embedding-gaudi-service-deploy
     spec:
       containers:
       - envFrom:
         - configMapRef:
             name: qna-config
-        image: ghcr.io/huggingface/text-embeddings-inference:cpu-1.2
-        name: tei-reranking-service-deploy
+        image: opea/tei-gaudi:latest
+        imagePullPolicy: IfNotPresent
+        name: tei-embedding-gaudi-service-deploy
+          #command: ["/usr/bin/bash"]
         args:
         - --model-id
-        - $(RERANK_MODEL_ID)
+        - $(EMBEDDING_MODEL_ID)
+          #- $(RERANK_MODEL_ID)
         volumeMounts:
         - mountPath: /data
           name: model-volume
@@ -35,9 +37,9 @@ spec:
           name: shm
         ports:
         - containerPort: 80
-        # resources:
-        #   limits:
-        #     cpu: 56000m
+        resources:
+          limits:
+            habana.ai/gaudi: 1
         #     memory: 26Gi
         #   requests:
         #     cpu: 56000m
@@ -47,7 +49,7 @@ spec:
       - name: model-volume
         hostPath:
           # directory location on host
-          path: /mnt/model
+          path: /mnt/models
           # this field is optional
           type: Directory
       - name: shm
@@ -58,13 +60,12 @@ spec:
 kind: Service
 apiVersion: v1
 metadata:
-  name: tei-reranking-svc
+  name: tei-embedding-gaudi-svc
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
-    app: tei-reranking-service-deploy
+    app: tei-embedding-gaudi-service-deploy
   ports:
     - name: service
-      port: 8808
+      port: 6006
       targetPort: 80
-      nodePort: 30808

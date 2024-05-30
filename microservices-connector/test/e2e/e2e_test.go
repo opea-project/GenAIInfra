@@ -12,7 +12,7 @@ import (
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
-	"github.com/opea-project/GenAIInfra/genai-microservices-connector/test/utils"
+	"github.com/opea-project/GenAIInfra/microservices-connector/test/utils"
 )
 
 const namespace = "gmconnector-system"
