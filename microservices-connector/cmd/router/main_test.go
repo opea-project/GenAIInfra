@@ -13,7 +13,7 @@ import (
 	"net/http/httptest"
 	"testing"
 
-	mcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
+	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
 	"github.com/stretchr/testify/assert"
 	"knative.dev/pkg/apis"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"

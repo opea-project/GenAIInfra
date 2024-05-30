@@ -1,4 +1,4 @@
-module github.com/opea-project/GenAIInfra/genai-microservices-connector
+module github.com/opea-project/GenAIInfra/microservices-connector
 
 go 1.21
 

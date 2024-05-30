@@ -26,7 +26,7 @@ import (
 	// "crypto/rand"
 	// "math/big"
 
-	mcv1alpha3 "github.com/opea-project/GenAIInfra/genai-microservices-connector/api/v1alpha3"
+	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
 	flag "github.com/spf13/pflag"
 )
 
