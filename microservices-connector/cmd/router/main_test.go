@@ -26,7 +26,7 @@ func init() {
 
 func TestSimpleModelChainer(t *testing.T) {
 	// Start a local HTTP server
-	model1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	service1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -38,12 +38,12 @@ func TestSimpleModelChainer(t *testing.T) {
 			return
 		}
 	}))
-	model1Url, err := apis.ParseURL(model1.URL)
+	service1Url, err := apis.ParseURL(service1.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model1.Close()
-	model2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	defer service1.Close()
+	service2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -55,11 +55,11 @@ func TestSimpleModelChainer(t *testing.T) {
 			return
 		}
 	}))
-	model2Url, err := apis.ParseURL(model2.URL)
+	service2Url, err := apis.ParseURL(service2.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model2.Close()
+	defer service2.Close()
 
 	gmcGraph := mcv1alpha3.GMConnector{
 		Spec: mcv1alpha3.GMConnectorSpec{
@@ -68,8 +68,8 @@ func TestSimpleModelChainer(t *testing.T) {
 					RouterType: mcv1alpha3.Sequence,
 					Steps: []mcv1alpha3.Step{
 						{
-							StepName:   "model1",
-							ServiceURL: model1Url.String(),
+							StepName:   "service1",
+							ServiceURL: service1Url.String(),
 							Executor: mcv1alpha3.Executor{
 								InternalService: mcv1alpha3.GMCTarget{
 									NameSpace:   "default",
@@ -78,8 +78,8 @@ func TestSimpleModelChainer(t *testing.T) {
 							},
 						},
 						{
-							StepName:   "model2",
-							ServiceURL: model2Url.String(),
+							StepName:   "service2",
+							ServiceURL: service2Url.String(),
 							Executor: mcv1alpha3.Executor{
 								InternalService: mcv1alpha3.GMCTarget{
 									NameSpace:   "default",
@@ -120,9 +120,9 @@ func TestSimpleModelChainer(t *testing.T) {
 	assert.Equal(t, expectedResponse, response)
 }
 
-func TestSimpleModelEnsemble(t *testing.T) {
+func TestSimpleServiceEnsemble(t *testing.T) {
 	// Start a local HTTP server
-	model1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	service1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -137,12 +137,12 @@ func TestSimpleModelEnsemble(t *testing.T) {
 			return
 		}
 	}))
-	model1Url, err := apis.ParseURL(model1.URL)
+	service1Url, err := apis.ParseURL(service1.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model1.Close()
-	model2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	defer service1.Close()
+	service2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -157,11 +157,11 @@ func TestSimpleModelEnsemble(t *testing.T) {
 			return
 		}
 	}))
-	model2Url, err := apis.ParseURL(model2.URL)
+	service2Url, err := apis.ParseURL(service2.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model2.Close()
+	defer service2.Close()
 
 	gmcGraph := mcv1alpha3.GMConnector{
 		Spec: mcv1alpha3.GMConnectorSpec{
@@ -170,8 +170,8 @@ func TestSimpleModelEnsemble(t *testing.T) {
 					RouterType: mcv1alpha3.Ensemble,
 					Steps: []mcv1alpha3.Step{
 						{
-							StepName:   "model1",
-							ServiceURL: model1Url.String(),
+							StepName:   "service1",
+							ServiceURL: service1Url.String(),
 							Executor: mcv1alpha3.Executor{
 								InternalService: mcv1alpha3.GMCTarget{
 									NameSpace:   "default",
@@ -180,8 +180,8 @@ func TestSimpleModelEnsemble(t *testing.T) {
 							},
 						},
 						{
-							StepName:   "model2",
-							ServiceURL: model2Url.String(),
+							StepName:   "service2",
+							ServiceURL: service2Url.String(),
 							Executor: mcv1alpha3.Executor{
 								InternalService: mcv1alpha3.GMCTarget{
 									NameSpace:   "default",
@@ -215,10 +215,10 @@ func TestSimpleModelEnsemble(t *testing.T) {
 		return
 	}
 	expectedResponse := map[string]interface{}{
-		"model1": map[string]interface{}{
+		"service1": map[string]interface{}{
 			"predictions": "1",
 		},
-		"model2": map[string]interface{}{
+		"service2": map[string]interface{}{
 			"predictions": "2",
 		},
 	}
@@ -226,9 +226,9 @@ func TestSimpleModelEnsemble(t *testing.T) {
 	assert.Equal(t, expectedResponse, response)
 }
 
-func TestInferenceGraphWithCondition(t *testing.T) {
+func TestMCWithCondition(t *testing.T) {
 	// Start a local HTTP server
-	model1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	service1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -252,12 +252,12 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 			return
 		}
 	}))
-	model1Url, err := apis.ParseURL(model1.URL)
+	service1Url, err := apis.ParseURL(service1.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model1.Close()
-	model2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	defer service1.Close()
+	service2 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -281,14 +281,14 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 			return
 		}
 	}))
-	model2Url, err := apis.ParseURL(model2.URL)
+	service2Url, err := apis.ParseURL(service2.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model2.Close()
+	defer service2.Close()
 
 	// Start a local HTTP server
-	model3 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	service3 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -312,12 +312,12 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 			return
 		}
 	}))
-	model3Url, err := apis.ParseURL(model3.URL)
+	service3Url, err := apis.ParseURL(service3.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model3.Close()
-	model4 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	defer service3.Close()
+	service4 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -341,11 +341,11 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 			return
 		}
 	}))
-	model4Url, err := apis.ParseURL(model4.URL)
+	service4Url, err := apis.ParseURL(service4.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model4.Close()
+	defer service4.Close()
 
 	gmcGraph := mcv1alpha3.GMConnector{
 		Spec: mcv1alpha3.GMConnectorSpec{
@@ -380,8 +380,8 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 					RouterType: mcv1alpha3.Switch,
 					Steps: []mcv1alpha3.Step{
 						{
-							StepName:   "model1",
-							ServiceURL: model1Url.String(),
+							StepName:   "service1",
+							ServiceURL: service1Url.String(),
 							Executor: mcv1alpha3.Executor{
 								InternalService: mcv1alpha3.GMCTarget{
 									NameSpace:   "default",
@@ -391,8 +391,8 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 							Condition: "instances.#(modelId==\"1\")",
 						},
 						{
-							StepName:   "model2",
-							ServiceURL: model2Url.String(),
+							StepName:   "service2",
+							ServiceURL: service2Url.String(),
 							Executor: mcv1alpha3.Executor{
 								InternalService: mcv1alpha3.GMCTarget{
 									NameSpace:   "default",
@@ -407,8 +407,8 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 					RouterType: mcv1alpha3.Ensemble,
 					Steps: []mcv1alpha3.Step{
 						{
-							StepName:   "model3",
-							ServiceURL: model3Url.String(),
+							StepName:   "service3",
+							ServiceURL: service3Url.String(),
 							Executor: mcv1alpha3.Executor{
 								InternalService: mcv1alpha3.GMCTarget{
 									NameSpace:   "default",
@@ -417,8 +417,8 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 							},
 						},
 						{
-							StepName:   "model4",
-							ServiceURL: model4Url.String(),
+							StepName:   "service4",
+							ServiceURL: service4Url.String(),
 							Executor: mcv1alpha3.Executor{
 								InternalService: mcv1alpha3.GMCTarget{
 									NameSpace:   "default",
@@ -449,7 +449,7 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 	if err != nil {
 		return
 	}
-	expectedModel3Response := map[string]interface{}{
+	expectedservice3Response := map[string]interface{}{
 		"predictions": []interface{}{
 			map[string]interface{}{
 				"label": "beagle",
@@ -460,7 +460,7 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 		},
 	}
 
-	expectedModel4Response := map[string]interface{}{
+	expectedservice4Response := map[string]interface{}{
 		"predictions": []interface{}{
 			map[string]interface{}{
 				"label": "poodle",
@@ -471,13 +471,13 @@ func TestInferenceGraphWithCondition(t *testing.T) {
 		},
 	}
 	fmt.Printf("final response:%v\n", response)
-	assert.Equal(t, expectedModel3Response, response["model3"])
-	assert.Equal(t, expectedModel4Response, response["model4"])
+	assert.Equal(t, expectedservice3Response, response["service3"])
+	assert.Equal(t, expectedservice4Response, response["service4"])
 }
 
 func TestCallServiceWhenNoneHeadersToPropagateIsEmpty(t *testing.T) {
 	// Start a local HTTP server
-	model1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+	service1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 		_, err := io.ReadAll(req.Body)
 		if err != nil {
 			return
@@ -494,11 +494,11 @@ func TestCallServiceWhenNoneHeadersToPropagateIsEmpty(t *testing.T) {
 			return
 		}
 	}))
-	model1Url, err := apis.ParseURL(model1.URL)
+	service1Url, err := apis.ParseURL(service1.URL)
 	if err != nil {
 		t.Fatalf("Failed to parse model url")
 	}
-	defer model1.Close()
+	defer service1.Close()
 
 	input := map[string]interface{}{
 		"instances": []string{
@@ -513,8 +513,8 @@ func TestCallServiceWhenNoneHeadersToPropagateIsEmpty(t *testing.T) {
 	}
 
 	step := &mcv1alpha3.Step{
-		StepName:   "model1",
-		ServiceURL: model1Url.String(),
+		StepName:   "service1",
+		ServiceURL: service1Url.String(),
 		Executor: mcv1alpha3.Executor{
 			InternalService: mcv1alpha3.GMCTarget{
 				NameSpace:   "default",
@@ -524,7 +524,7 @@ func TestCallServiceWhenNoneHeadersToPropagateIsEmpty(t *testing.T) {
 		Condition: "instances.#(modelId==\"1\")",
 	}
 
-	res, _, err := callService(step, model1Url.String(), jsonBytes, headers)
+	res, _, err := callService(step, service1Url.String(), jsonBytes, headers)
 	if err != nil {
 		return
 	}
@@ -543,7 +543,7 @@ func TestCallServiceWhenNoneHeadersToPropagateIsEmpty(t *testing.T) {
 func TestMalformedURL(t *testing.T) {
 	malformedURL := "http://single-1.default.{$your-domain}/switch"
 	step := &mcv1alpha3.Step{
-		StepName:   "model1",
+		StepName:   "service1",
 		ServiceURL: malformedURL,
 		Executor: mcv1alpha3.Executor{
 			InternalService: mcv1alpha3.GMCTarget{
