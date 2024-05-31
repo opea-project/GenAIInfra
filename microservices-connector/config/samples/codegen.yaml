@@ -1,0 +1,49 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: gmc.opea.io/v1alpha3
+kind: GMConnector
+metadata:
+  labels:
+    app.kubernetes.io/name: gmconnector
+    app.kubernetes.io/managed-by: kustomize
+  name: codegen
+  namespace: codegen
+spec:
+  routerConfig:
+    name: router
+    nameSpace: codegen
+    serviceName: router-service
+    config:
+      no_proxy: ".codegen.svc.cluster.local"
+      http_proxy: http://child-jf.intel.com:912
+      https_proxy: http://child-jf.intel.com:912
+  nodes:
+    root:
+      routerType: Sequence
+      steps:
+      - name: Llm
+        data: $response
+        internalService:
+          nameSpace: codegen
+          serviceName: llm-service
+          config:
+            no_proxy: ".codegen.svc.cluster.local"
+            http_proxy: http://child-jf.intel.com:912
+            https_proxy: http://child-jf.intel.com:912
+            tgi_endpoint: http://tgi-service.codegen.svc.cluster.local:9009
+            gmcTokenSecret: gmc-tokens
+            endpoint: /v1/chat/completions
+      - name: Tgi
+        internalService:
+          nameSpace: codegen
+          serviceName: tgi-service
+          config:
+            no_proxy: ".codegen.svc.cluster.local"
+            http_proxy: http://child-jf.intel.com:912
+            https_proxy: http://child-jf.intel.com:912
+            gmcTokenSecret: gmc-tokens
+            hostPath: /root/GMC/data/tgi
+            modelId: ise-uiuc/Magicoder-S-DS-6.7B
+            endpoint: /generate
+          isDownstreamService: true
