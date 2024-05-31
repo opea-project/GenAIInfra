@@ -1,0 +1,90 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "retriever-usvc.fullname" . }}
+  labels:
+    {{- include "retriever-usvc.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "retriever-usvc.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "retriever-usvc.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: TGI_EMBEDDING_ENDPOINT
+              value: "http://{{ .Release.Name }}-tei"
+            - name: REDIS_URL
+              value: "redis://{{ .Release.Name }}-redis-vector-db:6379"
+            - name: INDEX_NAME
+              value: "rag-redis"
+                #            - name: HUGGINGFACEHUB_API_TOKEN
+                #              value: {{ .Values.HUGGINGFACEHUB_API_TOKEN | quote}}
+            - name: http_proxy
+              value: {{ .Values.global.http_proxy }}
+            - name: https_proxy
+              value: {{ .Values.global.https_proxy }}
+            - name: no_proxy
+              value: {{ .Values.global.no_proxy }}
+            - name: LANGCHAIN_TRACING_V2
+              value: {{ .Values.global.LANGCHAIN_TRACING_V2 | quote }}
+            - name: LANGCHAIN_API_KEY
+              value: {{ .Values.global.LANGCHAIN_API_KEY }}
+            - name: LANGCHAIN_PROJECT
+              value: "opea-retriever-service"
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: retriever-usvc
+              containerPort: 7000
+              protocol: TCP
+          startupProbe:
+            exec:
+              command:
+              - curl
+              - http://{{ .Release.Name }}-tei
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: 7000
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 7000
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
