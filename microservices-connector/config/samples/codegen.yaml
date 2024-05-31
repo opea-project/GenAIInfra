@@ -16,8 +16,8 @@ spec:
     serviceName: router-service
     config:
       no_proxy: ".codegen.svc.cluster.local"
-      http_proxy: http://child-jf.intel.com:912
-      https_proxy: http://child-jf.intel.com:912
+      http_proxy: "insert-your-http-proxy-here"
+      https_proxy: "insert-your-https-proxy-here"
   nodes:
     root:
       routerType: Sequence
@@ -29,8 +29,8 @@ spec:
           serviceName: llm-service
           config:
             no_proxy: ".codegen.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             tgi_endpoint: http://tgi-service.codegen.svc.cluster.local:9009
             gmcTokenSecret: gmc-tokens
             endpoint: /v1/chat/completions
@@ -40,8 +40,8 @@ spec:
           serviceName: tgi-service
           config:
             no_proxy: ".codegen.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             gmcTokenSecret: gmc-tokens
             hostPath: /root/GMC/data/tgi
             modelId: ise-uiuc/Magicoder-S-DS-6.7B
