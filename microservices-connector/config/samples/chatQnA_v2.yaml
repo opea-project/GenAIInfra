@@ -16,8 +16,8 @@ spec:
     serviceName: router-service
     config:
       no_proxy: ".chatqa.svc.cluster.local"
-      http_proxy: http://child-jf.intel.com:912
-      https_proxy: http://child-jf.intel.com:912
+      http_proxy: "insert-your-http-proxy-here"
+      https_proxy: "insert-your-https-proxy-here"
   nodes:
     root:
       routerType: Sequence
@@ -28,8 +28,8 @@ spec:
           serviceName: embedding-service
           config:
             no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             tei_endpoint: "http://tei-embedding-service.chatqa.svc.cluster.local:6006"
             endpoint: /v1/embeddings
       - name: TeiEmbedding
@@ -38,8 +38,8 @@ spec:
           serviceName: tei-embedding-service
           config:
             no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             gmcTokenSecret: gmc-tokens
             hostPath: /root/GMC/data/tei
             modelId: BAAI/bge-base-en-v1.5
@@ -52,8 +52,8 @@ spec:
           serviceName: retriever-redis-server
           config:
             no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             RedisUrl: redis://redis-vector-db.chatqa.svc.cluster.local:6379
             IndexName: rag-redis
             tei_endpoint: "http://tei-embedding-service.chatqa.svc.cluster.local:6006"
@@ -70,8 +70,8 @@ spec:
           serviceName: reranking-service
           config:
             no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             tei_reranking_endpoint: http://tei-reranking-service.chatqa.svc.cluster.local:8808
             gmcTokenSecret: gmc-tokens
             endpoint: /v1/reranking
@@ -81,8 +81,8 @@ spec:
           serviceName: tei-reranking-service
           config:
             no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             gmcTokenSecret: gmc-tokens
             hostPath: /root/GMC/data/rerank
             modelId: BAAI/bge-reranker-large
@@ -95,8 +95,8 @@ spec:
           serviceName: llm-service
           config:
             no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             tgi_endpoint: http://tgi-service.chatqa.svc.cluster.local:9009
             gmcTokenSecret: gmc-tokens
             endpoint: /v1/chat/completions
@@ -106,8 +106,8 @@ spec:
           serviceName: tgi-service
           config:
             no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: http://child-jf.intel.com:912
-            https_proxy: http://child-jf.intel.com:912
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
             gmcTokenSecret: gmc-tokens
             hostPath: /root/GMC/data/tgi
             modelId: Intel/neural-chat-7b-v3-3
