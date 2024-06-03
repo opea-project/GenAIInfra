@@ -71,22 +71,24 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
 
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
-	if step == "Embedding" {
-		tmpltFile = yaml_dir + "/Embedding.yaml"
+	if step == "Configmap" {
+		tmpltFile = yaml_dir + "/qna_configmap_xeon.yaml"
+	} else if step == "Embedding" {
+		tmpltFile = yaml_dir + "/embedding.yaml"
 	} else if step == "TeiEmbedding" {
-		tmpltFile = yaml_dir + "/TeiEmbedding.yaml"
+		tmpltFile = yaml_dir + "/tei_embedding_service.yaml"
 	} else if step == "VectorDB" {
-		tmpltFile = yaml_dir + "/VectorDB.yaml"
+		tmpltFile = yaml_dir + "/redis-vector-db.yaml"
 	} else if step == "Retriever" {
-		tmpltFile = yaml_dir + "/Retriever.yaml"
+		tmpltFile = yaml_dir + "/retriever.yaml"
 	} else if step == "Reranking" {
-		tmpltFile = yaml_dir + "/Reranking.yaml"
+		tmpltFile = yaml_dir + "/reranking.yaml"
 	} else if step == "TeiReranking" {
-		tmpltFile = yaml_dir + "/TeiReranking.yaml"
+		tmpltFile = yaml_dir + "/tei_reranking_service.yaml"
 	} else if step == "Tgi" {
-		tmpltFile = yaml_dir + "/Tgi.yaml"
+		tmpltFile = yaml_dir + "/tgi_service.yaml"
 	} else if step == "Llm" {
-		tmpltFile = yaml_dir + "/Llm.yaml"
+		tmpltFile = yaml_dir + "/llm.yaml"
 	} else if step == "router" {
 		tmpltFile = yaml_dir + "/gmc-router.yaml"
 	} else {
@@ -113,6 +115,10 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 		return fmt.Errorf("failed to apply user config: %v", err)
 	}
 	resources = strings.Split(appliedCfg, "---")
+	fmt.Printf("The raw yaml file has been splitted into %v yaml files", len(resources))
+	if len(resources) >= 2 {
+		resources = resources[1:]
+	}
 
 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
@@ -182,66 +188,53 @@ func getServiceURL(service *corev1.Service) string {
 
 func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
 	var userDefinedCfg interface{}
-	if step == "Embedding" {
+	if step == "Configmap" {
+		return string(yamlFile), nil
+	} else if step == "Embedding" {
 		userDefinedCfg = EmbeddingCfg{
-			NoProxy:     (*svcCfg)["no_proxy"],
-			HttpProxy:   (*svcCfg)["http_proxy"],
-			HttpsProxy:  (*svcCfg)["https_proxy"],
-			TeiEndpoint: (*svcCfg)["tei_endpoint"],
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
 		}
 	} else if step == "TeiEmbedding" {
 		userDefinedCfg = TeiEmbeddingCfg{
-			EmbeddingModelId:  (*svcCfg)["modelId"],
-			NoProxy:           (*svcCfg)["no_proxy"],
-			HttpProxy:         (*svcCfg)["http_proxy"],
-			HttpsProxy:        (*svcCfg)["https_proxy"],
-			GmcTokenSecret:    (*svcCfg)["gmcTokenSecret"],
-			EmbeddingModelDir: (*svcCfg)["hostPath"],
+			EmbeddingModelId: (*svcCfg)["modelId"],
+			NoProxy:          (*svcCfg)["no_proxy"],
+			HttpProxy:        (*svcCfg)["http_proxy"],
+			HttpsProxy:       (*svcCfg)["https_proxy"],
 		}
 	} else if step == "VectorDB" {
 		userDefinedCfg = nil
 	} else if step == "Retriever" {
 		userDefinedCfg = RetriverCfg{
-			NoProxy:     (*svcCfg)["no_proxy"],
-			HttpProxy:   (*svcCfg)["http_proxy"],
-			HttpsProxy:  (*svcCfg)["https_proxy"],
-			RedisUrl:    (*svcCfg)["RedisUrl"],
-			IndexName:   (*svcCfg)["IndexName"],
-			TeiEndpoint: (*svcCfg)["tei_endpoint"],
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
 		}
 	} else if step == "Reranking" {
 		userDefinedCfg = RerankingCfg{
-			NoProxy:              (*svcCfg)["no_proxy"],
-			HttpProxy:            (*svcCfg)["http_proxy"],
-			HttpsProxy:           (*svcCfg)["https_proxy"],
-			TeiRerankingEndpoint: (*svcCfg)["tei_reranking_endpoint"],
-			GmcTokenSecret:       (*svcCfg)["gmcTokenSecret"],
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
 		}
 	} else if step == "TeiReranking" {
 		userDefinedCfg = TeiRerankingCfg{
-			RerankingModelId:  (*svcCfg)["modelId"],
-			NoProxy:           (*svcCfg)["no_proxy"],
-			HttpProxy:         (*svcCfg)["http_proxy"],
-			HttpsProxy:        (*svcCfg)["https_proxy"],
-			GmcTokenSecret:    (*svcCfg)["gmcTokenSecret"],
-			RerankingModelDir: (*svcCfg)["hostPath"],
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
 		}
 	} else if step == "Tgi" {
 		userDefinedCfg = TgiCfg{
-			NoProxy:        (*svcCfg)["no_proxy"],
-			HttpProxy:      (*svcCfg)["http_proxy"],
-			HttpsProxy:     (*svcCfg)["https_proxy"],
-			GmcTokenSecret: (*svcCfg)["gmcTokenSecret"],
-			LlmModelId:     (*svcCfg)["modelId"],
-			LlmModelDir:    (*svcCfg)["hostPath"],
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
 		}
 	} else if step == "Llm" {
 		userDefinedCfg = LlmCfg{
-			NoProxy:        (*svcCfg)["no_proxy"],
-			HttpProxy:      (*svcCfg)["http_proxy"],
-			HttpsProxy:     (*svcCfg)["https_proxy"],
-			TgiEndpoint:    (*svcCfg)["tgi_endpoint"],
-			GmcTokenSecret: (*svcCfg)["gmcTokenSecret"]}
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
+		}
 	} else if step == "router" {
 		userDefinedCfg = RouterCfg{
 			NoProxy:    (*svcCfg)["no_proxy"],
@@ -275,61 +268,46 @@ func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (s
 }
 
 type EmbeddingCfg struct {
-	NoProxy     string
-	HttpProxy   string
-	HttpsProxy  string
-	TeiEndpoint string
+	NoProxy    string
+	HttpProxy  string
+	HttpsProxy string
 }
 type TeiEmbeddingCfg struct {
-	EmbeddingModelId  string
-	NoProxy           string
-	HttpProxy         string
-	HttpsProxy        string
-	GmcTokenSecret    string
-	EmbeddingModelDir string
+	EmbeddingModelId string
+	NoProxy          string
+	HttpProxy        string
+	HttpsProxy       string
 }
 
 type RetriverCfg struct {
-	NoProxy     string
-	HttpProxy   string
-	HttpsProxy  string
-	RedisUrl    string
-	IndexName   string
-	TeiEndpoint string
+	NoProxy    string
+	HttpProxy  string
+	HttpsProxy string
 }
 
 type RerankingCfg struct {
-	NoProxy              string
-	HttpProxy            string
-	HttpsProxy           string
-	TeiRerankingEndpoint string
-	GmcTokenSecret       string
+	NoProxy    string
+	HttpProxy  string
+	HttpsProxy string
 }
 
 type TeiRerankingCfg struct {
-	RerankingModelId  string
-	NoProxy           string
-	HttpProxy         string
-	HttpsProxy        string
-	GmcTokenSecret    string
-	RerankingModelDir string
+	RerankingModelId string
+	NoProxy          string
+	HttpProxy        string
+	HttpsProxy       string
 }
 
 type TgiCfg struct {
-	NoProxy        string
-	HttpProxy      string
-	HttpsProxy     string
-	GmcTokenSecret string
-	LlmModelId     string
-	LlmModelDir    string
+	NoProxy    string
+	HttpProxy  string
+	HttpsProxy string
 }
 
 type LlmCfg struct {
-	NoProxy        string
-	HttpProxy      string
-	HttpsProxy     string
-	TgiEndpoint    string
-	GmcTokenSecret string
+	NoProxy    string
+	HttpProxy  string
+	HttpsProxy string
 }
 
 type RouterCfg struct {
@@ -366,7 +344,10 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// get the router config
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
-
+	err := reconcileResource("Configmap", req.NamespacedName.Namespace, "", nil, nil)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile the Configmap file")
+	}
 	for node, router := range graph.Spec.Nodes {
 		for i, step := range router.Steps {
 			fmt.Println("reconcile resource for node:", step.StepName)
@@ -394,7 +375,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	//to start a router controller
 	routerService := &corev1.Service{}
-	err := r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Spec.RouterConfig.NameSpace, Name: graph.Spec.RouterConfig.ServiceName}, routerService)
+	err = r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Spec.RouterConfig.NameSpace, Name: graph.Spec.RouterConfig.ServiceName}, routerService)
 	if err == nil {
 		fmt.Println("success to get router service ", graph.Spec.RouterConfig.ServiceName)
 	} else {
