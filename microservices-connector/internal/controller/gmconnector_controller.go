@@ -64,6 +64,19 @@ func getKubeConfig() (*rest.Config, error) {
 	return config, nil
 }
 
+// This is for linting purpose, they are supposed to be removed after reading manifests from oneclick
+const (
+	Embedding    = "Embedding"
+	TeiEmbedding = "TeiEmbedding"
+	VectorDB     = "VectorDB"
+	Retriever    = "Retriever"
+	Reranking    = "Reranking"
+	TeiReranking = "TeiReranking"
+	Tgi          = "Tgi"
+	Llm          = "Llm"
+	Router       = "router"
+)
+
 func reconcileResource(step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
 
 	var tmpltFile string
@@ -71,23 +84,23 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
 
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
-	if step == "Embedding" {
+	if step == Embedding {
 		tmpltFile = yaml_dir + "/Embedding.yaml"
-	} else if step == "TeiEmbedding" {
+	} else if step == TeiEmbedding {
 		tmpltFile = yaml_dir + "/TeiEmbedding.yaml"
-	} else if step == "VectorDB" {
+	} else if step == VectorDB {
 		tmpltFile = yaml_dir + "/VectorDB.yaml"
-	} else if step == "Retriever" {
+	} else if step == Retriever {
 		tmpltFile = yaml_dir + "/Retriever.yaml"
-	} else if step == "Reranking" {
+	} else if step == Reranking {
 		tmpltFile = yaml_dir + "/Reranking.yaml"
-	} else if step == "TeiReranking" {
+	} else if step == TeiReranking {
 		tmpltFile = yaml_dir + "/TeiReranking.yaml"
-	} else if step == "Tgi" {
+	} else if step == Tgi {
 		tmpltFile = yaml_dir + "/Tgi.yaml"
-	} else if step == "Llm" {
+	} else if step == Llm {
 		tmpltFile = yaml_dir + "/Llm.yaml"
-	} else if step == "router" {
+	} else if step == Router {
 		tmpltFile = yaml_dir + "/gmc-router.yaml"
 	} else {
 		return errors.New("unexpected target")
