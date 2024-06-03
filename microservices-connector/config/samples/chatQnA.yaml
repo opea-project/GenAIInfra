@@ -7,33 +7,100 @@ metadata:
   labels:
     app.kubernetes.io/name: gmconnector
     app.kubernetes.io/managed-by: kustomize
-  name: gmconnector-sample
-  namespace: gmcsample
+  name: chatqa
+  namespace: chatqa
 spec:
+  routerConfig:
+    name: router
+    serviceName: router-service
+    config:
+      no_proxy: ".chatqa.svc.cluster.local"
+      http_proxy: "insert-your-http-proxy-here"
+      https_proxy: "insert-your-https-proxy-here"
   nodes:
     root:
       routerType: Sequence
       steps:
-      - name: embedding
-        target:
-          embedding:
-            embedderService:
-              modelId: BAAI/bge-base-en-v1.5
-              name: someEmbedder
-      - name: retrieving
-        target:
-          retrieving:
-            vectorDbService:
-              type: REDIS
+      - name: Embedding
+        internalService:
+          serviceName: embedding-service
+          config:
+            no_proxy: ".chatqa.svc.cluster.local"
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
+            tei_endpoint: "http://tei-embedding-service.chatqa.svc.cluster.local:6006"
+            endpoint: /v1/embeddings
+      - name: TeiEmbedding
+        internalService:
+          serviceName: tei-embedding-service
+          config:
+            no_proxy: ".chatqa.svc.cluster.local"
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
+            gmcTokenSecret: gmc-tokens
+            hostPath: /root/GMC/data/tei
+            modelId: BAAI/bge-base-en-v1.5
+            endpoint: /embed
+          isDownstreamService: true
+      - name: Retriever
         data: $response
-      - name: reranking
-        target:
-          reranking:
-            rerankerService:
-              name: someReranker
-              modelId: BAAI/bge-reranker-large
+        internalService:
+          serviceName: retriever-redis-server
+          config:
+            no_proxy: ".chatqa.svc.cluster.local"
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
+            RedisUrl: redis://redis-vector-db.chatqa.svc.cluster.local:6379
+            IndexName: rag-redis
+            tei_endpoint: "http://tei-embedding-service.chatqa.svc.cluster.local:6006"
+            endpoint: /v1/retrieval
+      - name: VectorDB
+        internalService:
+          serviceName: redis-vector-db
+          isDownstreamService: true
+      - name: Reranking
         data: $response
-      - name: llm
-        target:
-          lLM:
-            runtimeService: tgiGaudi
+        internalService:
+          serviceName: reranking-service
+          config:
+            no_proxy: ".chatqa.svc.cluster.local"
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
+            tei_reranking_endpoint: http://tei-reranking-service.chatqa.svc.cluster.local:8808
+            gmcTokenSecret: gmc-tokens
+            endpoint: /v1/reranking
+      - name: TeiReranking
+        internalService:
+          serviceName: tei-reranking-service
+          config:
+            no_proxy: ".chatqa.svc.cluster.local"
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
+            gmcTokenSecret: gmc-tokens
+            hostPath: /root/GMC/data/rerank
+            modelId: BAAI/bge-reranker-large
+            endpoint: /rerank
+          isDownstreamService: true
+      - name: Llm
+        data: $response
+        internalService:
+          serviceName: llm-service
+          config:
+            no_proxy: ".chatqa.svc.cluster.local"
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
+            tgi_endpoint: http://tgi-service.chatqa.svc.cluster.local:9009
+            gmcTokenSecret: gmc-tokens
+            endpoint: /v1/chat/completions
+      - name: Tgi
+        internalService:
+          serviceName: tgi-service
+          config:
+            no_proxy: ".chatqa.svc.cluster.local"
+            http_proxy: "insert-your-http-proxy-here"
+            https_proxy: "insert-your-https-proxy-here"
+            gmcTokenSecret: gmc-tokens
+            hostPath: /root/GMC/data/tgi
+            modelId: Intel/neural-chat-7b-v3-3
+            endpoint: /generate
+          isDownstreamService: true

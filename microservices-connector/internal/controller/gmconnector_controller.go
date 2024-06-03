@@ -372,7 +372,12 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			fmt.Println("reconcile resource for node:", step.StepName)
 
 			if step.Executor.ExternalService == "" {
-				ns := step.Executor.InternalService.NameSpace
+				var ns string
+				if step.Executor.InternalService.NameSpace == "" {
+					ns = req.Namespace
+				} else {
+					ns = step.Executor.InternalService.NameSpace
+				}
 				svcName := step.Executor.InternalService.ServiceName
 				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
 
@@ -394,7 +399,13 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	//to start a router controller
 	routerService := &corev1.Service{}
-	err := r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Spec.RouterConfig.NameSpace, Name: graph.Spec.RouterConfig.ServiceName}, routerService)
+	var router_ns string
+	if graph.Spec.RouterConfig.NameSpace == "" {
+		router_ns = req.Namespace
+	} else {
+		router_ns = graph.Spec.RouterConfig.NameSpace
+	}
+	err := r.Client.Get(ctx, types.NamespacedName{Namespace: router_ns, Name: graph.Spec.RouterConfig.ServiceName}, routerService)
 	if err == nil {
 		fmt.Println("success to get router service ", graph.Spec.RouterConfig.ServiceName)
 	} else {
@@ -408,7 +419,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			graph.Spec.RouterConfig.Config = make(map[string]string)
 		}
 		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-		err = reconcileResource(graph.Spec.RouterConfig.Name, graph.Spec.RouterConfig.NameSpace, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
+		err = reconcileResource(graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
 		if err != nil {
 			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 		}

@@ -15,6 +15,7 @@ import (
 type GMCTarget struct {
 	NameSpace string `json:"nameSpace,omitempty"`
 
+	// +optional
 	ServiceName string `json:"serviceName,omitempty"`
 
 	// +optional
@@ -141,8 +142,9 @@ type Router struct {
 
 type RouterConfig struct {
 	Name        string `json:"name"`
-	NameSpace   string `json:"nameSpace"`
 	ServiceName string `json:"serviceName"`
+	// +optional
+	NameSpace string `json:"nameSpace"`
 	// +optional
 	Config map[string]string `json:"config"`
 }
