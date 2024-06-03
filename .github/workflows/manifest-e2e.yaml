@@ -51,7 +51,7 @@ jobs:
                       continue # skip gaudi for K8s test temporarily
                   else
                       lower_example=$(echo "${example}" | tr '[:upper:]' '[:lower:]')
-                      run_matrix="${run_matrix}{\"example\":\"${lower_example}\",\"hardware\":\"inspur-icx-1\"},"
+                      run_matrix="${run_matrix}{\"example\":\"${lower_example}\",\"hardware\":\"k8s\"},"
                   fi
               done
           done

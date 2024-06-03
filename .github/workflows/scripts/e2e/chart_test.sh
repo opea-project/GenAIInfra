@@ -3,47 +3,18 @@
 # SPDX-License-Identifier: Apache-2.0
 
 LOG_PATH=.
-
 USER_ID=$(whoami)
 CHART_MOUNT=/home/$USER_ID/charts-mnt
-IMAGE_REPO=${OPEA_IMAGE_REPO:-amr-registry.caas.intel.com/aiops}
+# IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
+IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
+
 function init_codegen() {
-    # executed under path helm-charts/codegen
-    # init var
-    MODELREPO=m-a-p
-    MODELNAME=OpenCodeInterpreter-DS-6.7B
-    MODELID=$MODELREPO/$MODELNAME
-    MODELDOWNLOADID=models--$MODELREPO--$MODELNAME
-    # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
-
-    ### PREPARE MODEL
-    # check if the model is already downloaded
-    if [ -d "$CHART_MOUNT/$MODELDOWNLOADID" ]; then
-        echo "Model $MODELID already downloaded!"
-        USE_MODELDOWNLOADID=True
-    else
-        echo "Downloading model $MODELID..."
-        MODELDIR=$CHART_MOUNT/$MODELNAME
-        if [ ! -d "$MODELDIR" ]; then
-            mkdir -p $MODELDIR
-        fi
-        huggingface-cli download $MODELID --local-dir $MODELDIR --local-dir-use-symlinks False
-        USE_MODELDOWNLOADID=False
-    fi
-
-    ### CONFIG VALUES.YAML
     # insert a prefix before opea/.*, the prefix is IMAGE_REPO
     sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" values.yaml
     # set huggingface token
     sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" values.yaml
     # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
     sed -i "s#volume: .*#volume: $CHART_MOUNT#g" values.yaml
-    # replace the model ID with local dir name "data/$MODELNAME"
-    if [ "$USE_MODELDOWNLOADID" = "False" ]; then
-        sed -i "s#LLM_MODEL_ID: .*#LLM_MODEL_ID: /data/$MODELNAME#g" values.yaml
-    else
-        sed -i "s#LLM_MODEL_ID: .*#LLM_MODEL_ID: $MODELID#g" values.yaml
-    fi
 }
 
 function init_chatqna() {
