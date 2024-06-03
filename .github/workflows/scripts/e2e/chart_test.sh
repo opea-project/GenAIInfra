@@ -47,12 +47,16 @@ function init_codegen() {
 }
 
 function init_chatqna() {
-    echo "Init chatqna"
-    ### TODO PREPARE MODEL
-    ### TODO CONFIG VALUES.YAML
+    # replace volume: /mnt with volume: $CHART_MOUNT
+    find . -name '*.yaml' -type f -exec sed -i "s#volume: /mnt#volume: $CHART_MOUNT#g" {} \;
+    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" {} \;
+    # set huggingface token
+    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
 
 function validate_codegen() {
+    # validate mega service
     ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
     port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     # Curl the Mega Service
@@ -75,6 +79,13 @@ function validate_codegen() {
 }
 
 function validate_chatqna() {
+    sleep 60
+    # make sure microservice retriever svcname=$RELEASE_NAME-retriever-usvc is ready
+    ip_address=$(kubectl get svc $RELEASE_NAME-retriever-usvc -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+    port=$(kubectl get svc $RELEASE_NAME-retriever-usvc -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+    until curl http://${ip_address}:${port}/v1/retrieval -X POST \
+    -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${your_embedding}"'"}' \
+    -H 'Content-Type: application/json'; do sleep 10; done
     ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
     port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     # Curl the Mega Service
