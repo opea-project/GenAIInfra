@@ -4,17 +4,17 @@
 
 LOG_PATH=.
 
+USER_ID=$(whoami)
+CHART_MOUNT=/home/$USER_ID/charts-mnt
+IMAGE_REPO=${OPEA_IMAGE_REPO:-amr-registry.caas.intel.com/aiops}
 function init_codegen() {
     # executed under path helm-charts/codegen
     # init var
-    USER_ID=$(whoami)
-    CHART_MOUNT=/home/$USER_ID/charts-mnt
     MODELREPO=m-a-p
     MODELNAME=OpenCodeInterpreter-DS-6.7B
     MODELID=$MODELREPO/$MODELNAME
     MODELDOWNLOADID=models--$MODELREPO--$MODELNAME
     # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
-    IMAGE_REPO=${OPEA_IMAGE_REPO:-amr-registry.caas.intel.com/aiops}
 
     ### PREPARE MODEL
     # check if the model is already downloaded

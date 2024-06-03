@@ -30,14 +30,12 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           env:
-            - name: TGI_EMBEDDING_ENDPOINT
+            - name: TEI_EMBEDDING_ENDPOINT
               value: "http://{{ .Release.Name }}-tei"
             - name: REDIS_URL
               value: "redis://{{ .Release.Name }}-redis-vector-db:6379"
             - name: INDEX_NAME
               value: "rag-redis"
-                #            - name: HUGGINGFACEHUB_API_TOKEN
-                #              value: {{ .Values.HUGGINGFACEHUB_API_TOKEN | quote}}
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy

@@ -21,10 +21,6 @@ service:
 # To override values in subchart llm-uservice
 llm-uservice:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-  image:
-    repository: opea/llm-tgi:latest
-  service:
-    port: 9000
 # To override values in subchart tgi
   tgi:
     LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
