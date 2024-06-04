@@ -73,10 +73,14 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
 	if step == "Configmap" {
 		tmpltFile = yaml_dir + "/qna_configmap_xeon.yaml"
+	} else if step == "ConfigmapGaudi" {
+		tmpltFile = yaml_dir + "/qna_configmap_gaudi.yaml"
 	} else if step == "Embedding" {
 		tmpltFile = yaml_dir + "/embedding.yaml"
 	} else if step == "TeiEmbedding" {
 		tmpltFile = yaml_dir + "/tei_embedding_service.yaml"
+	} else if step == "TeiEmbeddingGaudi" {
+		tmpltFile = yaml_dir + "/tei_embedding_gaudi_service.yaml"
 	} else if step == "VectorDB" {
 		tmpltFile = yaml_dir + "/redis-vector-db.yaml"
 	} else if step == "Retriever" {
@@ -87,6 +91,8 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 		tmpltFile = yaml_dir + "/tei_reranking_service.yaml"
 	} else if step == "Tgi" {
 		tmpltFile = yaml_dir + "/tgi_service.yaml"
+	} else if step == "TgiGaudi" {
+		tmpltFile = yaml_dir + "/tgi_gaudi_service.yaml"
 	} else if step == "Llm" {
 		tmpltFile = yaml_dir + "/llm.yaml"
 	} else if step == "router" {
@@ -188,7 +194,7 @@ func getServiceURL(service *corev1.Service) string {
 
 func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
 	var userDefinedCfg interface{}
-	if step == "Configmap" {
+	if step == "Configmap" || step == "ConfigmapGaudi" {
 		return string(yamlFile), nil
 	} else if step == "Embedding" {
 		userDefinedCfg = EmbeddingCfg{
@@ -198,10 +204,9 @@ func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (s
 		}
 	} else if step == "TeiEmbedding" {
 		userDefinedCfg = TeiEmbeddingCfg{
-			EmbeddingModelId: (*svcCfg)["modelId"],
-			NoProxy:          (*svcCfg)["no_proxy"],
-			HttpProxy:        (*svcCfg)["http_proxy"],
-			HttpsProxy:       (*svcCfg)["https_proxy"],
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
 		}
 	} else if step == "VectorDB" {
 		userDefinedCfg = nil
