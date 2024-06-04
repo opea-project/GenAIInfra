@@ -1,0 +1,10 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: redis-vector-db
+description: The Helm chart for Redis Vector DB
+type: application
+version: 0.1.0
+# The HF TEI version
+appVersion: "1.0"

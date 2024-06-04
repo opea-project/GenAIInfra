@@ -1,0 +1,7 @@
+1. Get the application IP or URL by running these commands:
+  export embedding_uservice_svc_ip=$(kubectl get svc --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "embedding-usvc.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].spec.clusterIP}") && echo ${embedding_uservice_svc_ip}
+2.   Use this command to verify tei service:
+  curl ${embedding_uservice_svc_ip}:6000/v1/embeddings\
+  -X POST \
+  -d '{"text":"hello"}' \
+  -H 'Content-Type: application/json'
