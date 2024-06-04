@@ -44,9 +44,39 @@ var _ = Describe("GMConnector Controller", func() {
 						Namespace: "default",
 					},
 					Spec: mcv1alpha3.GMConnectorSpec{
-						Nodes: map[string]mcv1alpha3.Router{},
+						RouterConfig: mcv1alpha3.RouterConfig{
+							Name:        "router",
+							ServiceName: "router-service",
+							Config: map[string]string{
+								"no_proxy":    ".codegen.svc.cluster.local",
+								"http_proxy":  "insert-your-http-proxy-here",
+								"https_proxy": "insert-your-https-proxy-here",
+							},
+						},
+						Nodes: map[string]mcv1alpha3.Router{
+							"root": {
+								RouterType: "Sequence",
+								Steps: []mcv1alpha3.Step{
+									{
+										StepName: "Embedding",
+										Data:     "$response",
+										Executor: mcv1alpha3.Executor{
+											InternalService: mcv1alpha3.GMCTarget{
+												NameSpace:   "default",
+												ServiceName: "embedding-service",
+												Config: map[string]string{
+													"no_proxy":    ".codegen.svc.cluster.local",
+													"http_proxy":  "insert-your-http-proxy-here",
+													"https_proxy": "insert-your-https-proxy-here",
+													"endpoint":    "/v1/embeddings",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
 					},
-					// TODO(user): Specify other spec details if needed.
 				}
 				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
 			}
@@ -81,44 +111,16 @@ var _ = Describe("GMConnector Controller", func() {
 	})
 })
 
-func TestGetKubeConfig(t *testing.T) {
-	config, err := getKubeConfig()
-	if err != nil {
-		t.Errorf("getKubeConfig() error = %v", err)
-		return
-	}
-	if config == nil {
-		t.Error("Expected kube config to be not nil")
-	}
-	// Add more assertions based on what getKubeConfig() is supposed to do
-}
-
-// func TestReconcileResource(t *testing.T) {
-// 	// Create a fake context
-// 	// ctx := context.TODO()
-
-// 	// Create a fake namespace and service name
-// 	ns := "test-namespace"
-// 	svc := "test-service"
-
-// 	// Create a fake service config
-// 	svcCfg := map[string]string{
-// 		"no_proxy":     "localhost",
-// 		"http_proxy":   "http://proxy.example.com",
-// 		"https_proxy":  "https://proxy.example.com",
-// 		"tei_endpoint": "http://tei.example.com",
-// 	}
-
-// 	// Create a fake service
-// 	retSvc := &corev1.Service{}
-
-// 	// Call the reconcileResource function
-// 	err := reconcileResource("Embedding", ns, svc, &svcCfg, retSvc)
+// func TestGetKubeConfig(t *testing.T) {
+// 	config, err := getKubeConfig()
 // 	if err != nil {
-// 		t.Errorf("reconcileResource returned an error: %v", err)
+// 		t.Errorf("getKubeConfig() error = %v", err)
+// 		return
 // 	}
-
-// 	// Add assertions here based on the expected behavior of reconcileResource
+// 	if config == nil {
+// 		t.Error("Expected kube config to be not nil")
+// 	}
+// 	// Add more assertions based on what getKubeConfig() is supposed to do
 // }
 
 func TestGetServiceURL(t *testing.T) {
@@ -145,7 +147,7 @@ func TestGetServiceURL(t *testing.T) {
 	}
 }
 
-func TestGetCustomConfig(t *testing.T) {
+func TestGetCustomConfig_ExpectedCases(t *testing.T) {
 	step := "Embedding"
 	svcCfg := &map[string]string{
 		"no_proxy":     "localhost",
@@ -180,93 +182,112 @@ data:
 	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
 		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
 	}
+
+	step = TeiEmbedding
+	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+
+	step = VectorDB
+	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+
+	step = Retriever
+	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+
+	step = Reranking
+	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+
+	step = TeiReranking
+	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+
+	step = Tgi
+	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+
+	step = Llm
+	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+
+	step = Router
+	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+
 }
 
-// func TestReconcile(t *testing.T) {
-// 	// Create a fake context
-// 	const resourceName = "test-resource"
-
-// 	ctx := context.Background()
-
-// 	typeNamespacedName := types.NamespacedName{
-// 		Name:      resourceName,
-// 		Namespace: "default", // TODO(user):Modify as needed
-// 	}
-
-// 	// Create a fake GMConnector object
-// 	gmconnector := &gmcv1alpha3.GMConnector{
-// 		ObjectMeta: metav1.ObjectMeta{
-// 			Name:      "test-gmconnector",
-// 			Namespace: "default",
-// 		},
-// 		Spec: gmcv1alpha3.GMConnectorSpec{
-// 			Nodes: map[string]gmcv1alpha3.Router{
-// 				"node1": {
-// 					Steps: []gmcv1alpha3.Step{
-// 						{
-// 							StepName: "Embedding",
-// 							Executor: gmcv1alpha3.Executor{
-// 								InternalService: gmcv1alpha3.GMCTarget{
-// 									NameSpace:   "default",
-// 									ServiceName: "test-service",
-// 									Config: map[string]string{
-// 										"no_proxy":     "localhost",
-// 										"http_proxy":   "http://proxy.example.com",
-// 										"https_proxy":  "https://proxy.example.com",
-// 										"tei_endpoint": "http://tei.example.com",
-// 									},
-// 								},
-// 							},
-// 						},
-// 					},
-// 				},
-// 			},
-// 			RouterConfig: gmcv1alpha3.RouterConfig{
-// 				NameSpace:   "default",
-// 				ServiceName: "test-router",
-// 				Config: map[string]string{
-// 					"nodes": "{'apiVersion': 'v1', 'kind': 'Service', 'metadata': {'name': 'test-service', 'namespace': 'default'}, 'spec': {'type': 'ClusterIP', 'ports': [{'port': 8080}]}}",
-// 				},
-// 			},
-// 		},
-// 	}
-// 	err := k8sClient.Get(ctx, typeNamespacedName, gmconnector)
-// 	if err != nil && errors.IsNotFound(err) {
-// 		resource := &gmcv1alpha3.GMConnector{
-// 			ObjectMeta: metav1.ObjectMeta{
-// 				Name:      resourceName,
-// 				Namespace: "test-namespace",
-// 			},
-// 			Spec: gmcv1alpha3.GMConnectorSpec{
-// 				Nodes: map[string]gmcv1alpha3.Router{},
-// 			},
-// 			// TODO(user): Specify other spec details if needed.
-// 		}
-// 		Expect(k8sClient.Create(ctx, resource)).To(Succeed())
-// 	}
-
-// 	// Create a fake GMConnectorReconciler
-// 	controllerReconciler := &GMConnectorReconciler{
-// 		Client: k8sClient,
-// 		Scheme: k8sClient.Scheme(),
-// 	}
-
-// 	// Call the Reconcile function
-// 	result, err := controllerReconciler.Reconcile(ctx, ctrl.Request{
-// 		NamespacedName: types.NamespacedName{
-// 			Name:      "test-gmconnector",
-// 			Namespace: "default",
-// 		},
-// 	})
-
-// 	// Check the result and error
-// 	if err != nil {
-// 		t.Errorf("Reconcile returned an error: %v", err)
-// 	}
-
-// 	if result.Requeue {
-// 		t.Error("Expected Requeue to be false")
-// 	}
-
-// 	// Add assertions here based on the expected behavior of the Reconcile function
-// }
+func TestGetCustomConfig_EmptyStep(t *testing.T) {
+	step := ""
+	svcCfg := &map[string]string{
+		"no_proxy":     "localhost",
+		"http_proxy":   "http://proxy.example.com",
+		"https_proxy":  "https://proxy.example.com",
+		"tei_endpoint": "http://tei.example.com",
+	}
+	yamlFile := []byte(`
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+data:
+  key1: value1
+  key2: value2
+`)
+	expectedCfg := string(yamlFile)
+	actualCfg, err := getCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("getCustomConfig() returned an error: %v", err)
+	}
+	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
+		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
+	}
+}
