@@ -1,0 +1,87 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "llm-uservice.fullname" . }}
+  labels:
+    {{- include "llm-uservice.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "llm-uservice.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "llm-uservice.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: TGI_LLM_ENDPOINT
+              value: "http://{{ .Release.Name }}-tgi:{{ .Values.tgi.service.port }}"
+            - name: HUGGINGFACEHUB_API_TOKEN
+              value: {{ .Values.HUGGINGFACEHUB_API_TOKEN | quote}}
+            - name: http_proxy
+              value: {{ .Values.global.http_proxy }}
+            - name: https_proxy
+              value: {{ .Values.global.https_proxy }}
+            - name: no_proxy
+              value: {{ .Values.global.no_proxy }}
+            - name: LANGCHAIN_TRACING_V2
+              value: {{ .Values.global.LANGCHAIN_TRACING_V2 | quote }}
+            - name: LANGCHAIN_API_KEY
+              value: {{ .Values.global.LANGCHAIN_API_KEY }}
+            - name: LANGCHAIN_PROJECT
+              value: "opea-llm-service"
+
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: llm-uservice
+              containerPort: 9000
+              protocol: TCP
+          startupProbe:
+            exec:
+              command:
+              - curl
+              - http://{{ .Release.Name }}-tgi:{{ .Values.tgi.service.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: 9000
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 9000
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

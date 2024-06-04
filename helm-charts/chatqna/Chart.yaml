@@ -1,0 +1,18 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: chatqna
+description: The Helm chart to deploy ChatQnA
+type: application
+dependencies:
+  - name: llm-uservice
+    version: "0.1.0"
+  - name: embedding-usvc
+    version: "0.1.0"
+  - name: reranking-usvc
+    version: "0.1.0"
+  - name: retriever-usvc
+    version: "0.1.0"
+version: 0.1.0
+appVersion: "1.0.0"
