@@ -126,7 +126,7 @@ router-image:
 	@echo "Building router Docker image..."
 	$(CONTAINER_TOOL) build -t $(DOCKER_REGISTRY)/${ROUTER_IMG}:$(VERSION) -f Dockerfile.router .
 
-# Publish manger and router docker images
+# Publish manager and router docker images
 .PHONY: docker.push
 docker.push:
 	@echo "Push manager Docker image..."
