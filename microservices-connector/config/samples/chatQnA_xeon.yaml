@@ -39,7 +39,7 @@ spec:
       - name: VectorDB
         internalService:
           nameSpace: chatqa
-          serviceName: redis-service
+          serviceName: redis-vector-db
           isDownstreamService: true
       - name: Reranking
         data: $response
