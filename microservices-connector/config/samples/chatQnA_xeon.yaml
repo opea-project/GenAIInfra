@@ -12,7 +12,6 @@ metadata:
 spec:
   routerConfig:
     name: router
-    nameSpace: chatqa
     serviceName: router-service
   nodes:
     root:
@@ -20,37 +19,31 @@ spec:
       steps:
       - name: Embedding
         internalService:
-          nameSpace: chatqa
           serviceName: embedding-svc
           config:
             endpoint: /v1/embeddings
       - name: TeiEmbedding
         internalService:
-          nameSpace: chatqa
           serviceName: tei-embedding-svc
           isDownstreamService: true
       - name: Retriever
         data: $response
         internalService:
-          nameSpace: chatqa
           serviceName: retriever-svc
           config:
             endpoint: /v1/retrieval
       - name: VectorDB
         internalService:
-          nameSpace: chatqa
           serviceName: redis-vector-db
           isDownstreamService: true
       - name: Reranking
         data: $response
         internalService:
-          nameSpace: chatqa
           serviceName: reranking-svc
           config:
             endpoint: /v1/reranking
       - name: TeiReranking
         internalService:
-          nameSpace: chatqa
           serviceName: tei-reranking-svc
           config:
             endpoint: /rerank
@@ -58,13 +51,11 @@ spec:
       - name: Llm
         data: $response
         internalService:
-          nameSpace: chatqa
           serviceName: llm-svc
           config:
             endpoint: /v1/chat/completions
       - name: Tgi
         internalService:
-          nameSpace: chatqa
           serviceName: tgi-svc
           config:
             endpoint: /generate

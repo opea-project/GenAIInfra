@@ -12,7 +12,6 @@ metadata:
 spec:
   routerConfig:
     name: router
-    nameSpace: codegen
     serviceName: router-service
     config:
       no_proxy: ".codegen.svc.cluster.local"
@@ -25,7 +24,6 @@ spec:
       - name: Llm
         data: $response
         internalService:
-          nameSpace: codegen
           serviceName: llm-service
           config:
             no_proxy: ".codegen.svc.cluster.local"
@@ -36,7 +34,6 @@ spec:
             endpoint: /v1/chat/completions
       - name: Tgi
         internalService:
-          nameSpace: codegen
           serviceName: tgi-service
           config:
             no_proxy: ".codegen.svc.cluster.local"

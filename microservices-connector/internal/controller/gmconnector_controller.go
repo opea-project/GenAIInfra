@@ -64,6 +64,23 @@ func getKubeConfig() (*rest.Config, error) {
 	return config, nil
 }
 
+// This is for linting purpose, they are supposed to be removed after reading manifests from oneclick
+const (
+	Configmap         = "Configmap"
+	ConfigmapGaudi    = "ConfigmapGaudi"
+	Embedding         = "Embedding"
+	TeiEmbedding      = "TeiEmbedding"
+	TeiEmbeddingGaudi = "TeiEmbeddingGaudi"
+	VectorDB          = "VectorDB"
+	Retriever         = "Retriever"
+	Reranking         = "Reranking"
+	TeiReranking      = "TeiReranking"
+	Tgi               = "Tgi"
+	TgiGaudi          = "TgiGaudi"
+	Llm               = "Llm"
+	Router            = "router"
+)
+
 func reconcileResource(step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
 
 	var tmpltFile string
@@ -71,31 +88,31 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
 
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
-	if step == "Configmap" {
+	if step == Configmap {
 		tmpltFile = yaml_dir + "/qna_configmap_xeon.yaml"
-	} else if step == "ConfigmapGaudi" {
+	} else if step == ConfigmapGaudi {
 		tmpltFile = yaml_dir + "/qna_configmap_gaudi.yaml"
-	} else if step == "Embedding" {
+	} else if step == Embedding {
 		tmpltFile = yaml_dir + "/embedding.yaml"
-	} else if step == "TeiEmbedding" {
+	} else if step == TeiEmbedding {
 		tmpltFile = yaml_dir + "/tei_embedding_service.yaml"
-	} else if step == "TeiEmbeddingGaudi" {
+	} else if step == TeiEmbeddingGaudi {
 		tmpltFile = yaml_dir + "/tei_embedding_gaudi_service.yaml"
-	} else if step == "VectorDB" {
+	} else if step == VectorDB {
 		tmpltFile = yaml_dir + "/redis-vector-db.yaml"
-	} else if step == "Retriever" {
+	} else if step == Retriever {
 		tmpltFile = yaml_dir + "/retriever.yaml"
-	} else if step == "Reranking" {
+	} else if step == Reranking {
 		tmpltFile = yaml_dir + "/reranking.yaml"
-	} else if step == "TeiReranking" {
+	} else if step == TeiReranking {
 		tmpltFile = yaml_dir + "/tei_reranking_service.yaml"
-	} else if step == "Tgi" {
+	} else if step == Tgi {
 		tmpltFile = yaml_dir + "/tgi_service.yaml"
-	} else if step == "TgiGaudi" {
+	} else if step == TgiGaudi {
 		tmpltFile = yaml_dir + "/tgi_gaudi_service.yaml"
-	} else if step == "Llm" {
+	} else if step == Llm {
 		tmpltFile = yaml_dir + "/llm.yaml"
-	} else if step == "router" {
+	} else if step == Router {
 		tmpltFile = yaml_dir + "/gmc-router.yaml"
 	} else {
 		return errors.New("unexpected target")
@@ -354,7 +371,12 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			fmt.Println("reconcile resource for node:", step.StepName)
 
 			if step.Executor.ExternalService == "" {
-				ns := step.Executor.InternalService.NameSpace
+				var ns string
+				if step.Executor.InternalService.NameSpace == "" {
+					ns = req.Namespace
+				} else {
+					ns = step.Executor.InternalService.NameSpace
+				}
 				svcName := step.Executor.InternalService.ServiceName
 				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
 
@@ -376,7 +398,13 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	//to start a router controller
 	routerService := &corev1.Service{}
-	err = r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Spec.RouterConfig.NameSpace, Name: graph.Spec.RouterConfig.ServiceName}, routerService)
+	var router_ns string
+	if graph.Spec.RouterConfig.NameSpace == "" {
+		router_ns = req.Namespace
+	} else {
+		router_ns = graph.Spec.RouterConfig.NameSpace
+	}
+	err = r.Client.Get(ctx, types.NamespacedName{Namespace: router_ns, Name: graph.Spec.RouterConfig.ServiceName}, routerService)
 	if err == nil {
 		fmt.Println("success to get router service ", graph.Spec.RouterConfig.ServiceName)
 	} else {
@@ -390,7 +418,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			graph.Spec.RouterConfig.Config = make(map[string]string)
 		}
 		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-		err = reconcileResource(graph.Spec.RouterConfig.Name, graph.Spec.RouterConfig.NameSpace, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
+		err = reconcileResource(graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
 		if err != nil {
 			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 		}

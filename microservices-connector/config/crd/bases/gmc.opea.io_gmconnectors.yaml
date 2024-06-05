@@ -150,7 +150,6 @@ spec:
                     type: string
                 required:
                 - name
-                - nameSpace
                 - serviceName
                 type: object
             required:

@@ -7,7 +7,7 @@ USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
 MOUNT_DIR=/home/$USER_ID/charts-mnt
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
-IMAGE_REPO=${OPEA_IMAGE_REPO:-amr-registry.caas.intel.com/aiops}
+IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
 
 function init_codegen() {
     # executed under path manifest/codegen/xeon
@@ -36,7 +36,7 @@ function init_chatqna() {
 
 function install_chatqna {
     # replace namespace "default" with real namespace
-    find . -name '*.yaml' -type f -exec sed -i "s#svc.default#svc.$NAMESPACE#g" {} \;
+    find . -name '*.yaml' -type f -exec sed -i "s#default.svc#$NAMESPACE.svc#g" {} \;
     # for very yaml file in yaml_files, apply it to the k8s cluster
     yaml_files=("qna_configmap_xeon" "redis-vector-db"  "tei_embedding_service" "tei_reranking_service" "tgi_service" "retriever" "embedding" "reranking" "llm")
     for yaml_file in ${yaml_files[@]}; do
@@ -88,22 +88,20 @@ function validate_chatqna() {
         echo "Megaservice failed, please check the logs in ${LOG_PATH}!"
         exit 1
     fi
-    echo "Response check succeed!"
 
-    # Temporarily disable response check
-    # echo "Checking response results, make sure the output is reasonable. "
-    # local status=false
-    # if [[ -f $LOG_PATH/curl_megaservice.log ]] && \
-    # [[ $(grep -c "billion" $LOG_PATH/curl_megaservice.log) != 0 ]]; then
-    #     status=true
-    # fi
+    echo "Checking response results, make sure the output is reasonable. "
+    local status=false
+    if [[ -f $LOG_PATH/curl_megaservice.log ]] && \
+    [[ $(grep -c "billion" $LOG_PATH/curl_megaservice.log) != 0 ]]; then
+        status=true
+    fi
 
-    # if [ $status == false ]; then
-    #     echo "Response check failed, please check the logs in artifacts!"
-    #     exit 1
-    # else
-    #     echo "Response check succeed!"
-    # fi
+    if [ $status == false ]; then
+        echo "Response check failed, please check the logs in artifacts!"
+        exit 1
+    else
+        echo "Response check succeed!"
+    fi
 }
 
 if [ $# -eq 0 ]; then
