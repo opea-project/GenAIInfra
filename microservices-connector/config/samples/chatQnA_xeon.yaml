@@ -14,10 +14,6 @@ spec:
     name: router
     nameSpace: chatqa
     serviceName: router-service
-    config:
-      no_proxy: ".chatqa.svc.cluster.local"
-      http_proxy: "insert-your-http-proxy-here"
-      https_proxy: "insert-your-https-proxy-here"
   nodes:
     root:
       routerType: Sequence
@@ -27,18 +23,11 @@ spec:
           nameSpace: chatqa
           serviceName: embedding-svc
           config:
-            no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
             endpoint: /v1/embeddings
       - name: TeiEmbedding
         internalService:
           nameSpace: chatqa
           serviceName: tei-embedding-svc
-          config:
-            no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
           isDownstreamService: true
       - name: Retriever
         data: $response
@@ -46,9 +35,6 @@ spec:
           nameSpace: chatqa
           serviceName: retriever-svc
           config:
-            no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
             endpoint: /v1/retrieval
       - name: VectorDB
         internalService:
@@ -61,18 +47,12 @@ spec:
           nameSpace: chatqa
           serviceName: reranking-svc
           config:
-            no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
             endpoint: /v1/reranking
       - name: TeiReranking
         internalService:
           nameSpace: chatqa
           serviceName: tei-reranking-svc
           config:
-            no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
             endpoint: /rerank
           isDownstreamService: true
       - name: Llm
@@ -81,17 +61,11 @@ spec:
           nameSpace: chatqa
           serviceName: llm-svc
           config:
-            no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
             endpoint: /v1/chat/completions
       - name: Tgi
         internalService:
           nameSpace: chatqa
           serviceName: tgi-svc
           config:
-            no_proxy: ".chatqa.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
             endpoint: /generate
           isDownstreamService: true
