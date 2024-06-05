@@ -32,6 +32,8 @@ spec:
           env:
             - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-uservice
+            #- name: MEGA_SERVICE_PORT
+            #  value: {{ .Values.port }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
