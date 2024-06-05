@@ -13,9 +13,10 @@ import (
 
 // GMCTarget represents the structure to hold either a PredefinedType or a ServiceReference.
 type GMCTarget struct {
-	NameSpace string `json:"nameSpace,omitempty"`
-
 	ServiceName string `json:"serviceName,omitempty"`
+
+	// +optional
+	NameSpace string `json:"nameSpace,omitempty"`
 
 	// +optional
 	Config map[string]string `json:"config,omitempty"`
@@ -141,8 +142,9 @@ type Router struct {
 
 type RouterConfig struct {
 	Name        string `json:"name"`
-	NameSpace   string `json:"nameSpace"`
 	ServiceName string `json:"serviceName"`
+	// +optional
+	NameSpace string `json:"nameSpace"`
 	// +optional
 	Config map[string]string `json:"config"`
 }
