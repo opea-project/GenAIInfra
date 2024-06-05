@@ -132,7 +132,7 @@ docker.push:
 	@echo "Push manager Docker image..."
 	$(CONTAINER_TOOL) push $(DOCKER_REGISTRY)/${CTR_IMG}:$(VERSION)
 	@echo "Push router Docker image..."
-        $(CONTAINER_TOOL) push $(DOCKER_REGISTRY)/${ROUTER_IMG}:$(VERSION)
+	$(CONTAINER_TOOL) push $(DOCKER_REGISTRY)/${ROUTER_IMG}:$(VERSION)
 
 
 ## Clean up build binaries
