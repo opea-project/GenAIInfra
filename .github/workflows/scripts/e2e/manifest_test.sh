@@ -51,14 +51,18 @@ function validate_codegen() {
     port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     echo "try to curl http://${ip_address}:${port}/v1/codegen..."
     # Curl the Mega Service
-    curl http://${ip_address}:${port}/v1/codegen -H "Content-Type: application/json" -d '{
-        "model": "ise-uiuc/Magicoder-S-DS-6.7B",
-        "messages": "Implement a high-level API for a TODO list application. The API takes as input an operation request and updates the TODO list in place. If the request is invalid, raise an exception."}' > curl_megaservice.log
+    curl http://${ip_address}:${port}/v1/codegen -H "Content-Type: application/json" \
+    -d '{"messages": "def print_hello_world():"}' > $LOG_PATH/curl_codegen.log
+    exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo "Megaservice codegen failed, please check the logs in ${LOG_PATH}!"
+        exit 1
+    fi
 
     echo "Checking response results, make sure the output is reasonable. "
-    local status=true
-    if [[ -f curl_megaservice.log ]] && \
-    [[ $(grep -c "billion" curl_megaservice.log) != 0 ]]; then
+    local status=false
+    if [[ -f $LOG_PATH/curl_codegen.log ]] && \
+    [[ $(grep -c "print" $LOG_PATH/curl_codegen.log) != 0 ]]; then
         status=true
     fi
 
@@ -82,17 +86,17 @@ function validate_chatqna() {
 
     # Curl the Mega Service
     curl http://chaqna-xeon-backend-server-svc.$NAMESPACE:8888/v1/chatqna -H "Content-Type: application/json" \
-    -d '{ "messages": "What is the revenue of Nike in 2023?" }' > $LOG_PATH/curl_megaservice.log
+    -d '{ "messages": "What is the revenue of Nike in 2023?" }' > $LOG_PATH/curl_chatqna.log
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
-        echo "Megaservice failed, please check the logs in ${LOG_PATH}!"
+        echo "Megaservice chatqna failed, please check the logs in ${LOG_PATH}!"
         exit 1
     fi
 
     echo "Checking response results, make sure the output is reasonable. "
     local status=false
-    if [[ -f $LOG_PATH/curl_megaservice.log ]] && \
-    [[ $(grep -c "billion" $LOG_PATH/curl_megaservice.log) != 0 ]]; then
+    if [[ -f $LOG_PATH/curl_chatqna.log ]] && \
+    [[ $(grep -c "billion" $LOG_PATH/curl_chatqna.log) != 0 ]]; then
         status=true
     fi
 
