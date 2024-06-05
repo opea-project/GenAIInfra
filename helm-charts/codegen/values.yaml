@@ -13,10 +13,10 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   # tag: "1.0"
 
-port: 6666
+port: 7778
 service:
   type: ClusterIP
-  port: 6666
+  port: 7778
 
 # To override values in subchart llm-uservice
 llm-uservice:
