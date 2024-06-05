@@ -122,14 +122,10 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 	}
 	resources = strings.Split(appliedCfg, "---")
 	fmt.Printf("The raw yaml file has been splitted into %v yaml files", len(resources))
-	if len(resources) >= 2 {
-		resources = resources[1:]
-	}
-
 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 	for _, res := range resources {
-		if res == "" {
+		if res == "" || !strings.Contains(res, "kind:") {
 			continue
 		}
 
