@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Image URL to use all building/pushing image targets
-CTR_IMG ?= gmcmanager:latest
-ROUTER_IMG ?= gmcrouter:latest
+CTR_IMG ?= gmcmanager
+ROUTER_IMG ?= gmcrouter
+VERSION ?= latest
+DOCKER_REGISTRY ?= docker.io/opea
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.29.0
 
@@ -111,18 +113,26 @@ run-router: manifests generate fmt vet
 
 
 ## Build manager and router Docker images
-.PHONY: docker
-docker: manager-image router-image
+.PHONY: docker.build
+docker.build: manager-image router-image
 
 # Build manager Docker image
 manager-image:
 	@echo "Building manager Docker image..."
-	$(CONTAINER_TOOL) build -t ${CTR_IMG} --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f Dockerfile.manager .
+	$(CONTAINER_TOOL) build -t $(DOCKER_REGISTRY)/${CTR_IMG}:$(VERSION) -f Dockerfile.manager .
 
 # Build router Docker image
 router-image:
 	@echo "Building router Docker image..."
-	$(CONTAINER_TOOL) build -t ${ROUTER_IMG} --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f Dockerfile.router .
+	$(CONTAINER_TOOL) build -t $(DOCKER_REGISTRY)/${ROUTER_IMG}:$(VERSION) -f Dockerfile.router .
+
+# Publish manger and router docker images
+.PHONY: docker.push
+docker.push:
+	@echo "Push manager Docker image..."
+	$(CONTAINER_TOOL) push $(DOCKER_REGISTRY)/${CTR_IMG}:$(VERSION)
+	@echo "Push router Docker image..."
+        $(CONTAINER_TOOL) push $(DOCKER_REGISTRY)/${ROUTER_IMG}:$(VERSION)
 
 
 ## Clean up build binaries
