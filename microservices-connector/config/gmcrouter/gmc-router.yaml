@@ -32,7 +32,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: router-server
-        image: zhlsunshine/gmcrouter:latest
+        image: opea/gmcrouter:latest
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
