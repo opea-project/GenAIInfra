@@ -67,21 +67,32 @@ func getKubeConfig() (*rest.Config, error) {
 
 // make go lint happy
 const (
-	Configmap         = "Configmap"
-	ConfigmapGaudi    = "ConfigmapGaudi"
-	Embedding         = "Embedding"
-	TeiEmbedding      = "TeiEmbedding"
-	TeiEmbeddingGaudi = "TeiEmbeddingGaudi"
-	VectorDB          = "VectorDB"
-	Retriever         = "Retriever"
-	Reranking         = "Reranking"
-	TeiReranking      = "TeiReranking"
-	Tgi               = "Tgi"
-	TgiGaudi          = "TgiGaudi"
-	Llm               = "Llm"
-	Router            = "router"
-	xeon              = "xeon"
-	gaudi             = "gaudi"
+	Configmap                        = "Configmap"
+	ConfigmapGaudi                   = "ConfigmapGaudi"
+	Embedding                        = "Embedding"
+	TeiEmbedding                     = "TeiEmbedding"
+	TeiEmbeddingGaudi                = "TeiEmbeddingGaudi"
+	VectorDB                         = "VectorDB"
+	Retriever                        = "Retriever"
+	Reranking                        = "Reranking"
+	TeiReranking                     = "TeiReranking"
+	Tgi                              = "Tgi"
+	TgiGaudi                         = "TgiGaudi"
+	Llm                              = "Llm"
+	Router                           = "router"
+	xeon                             = "xeon"
+	gaudi                            = "gaudi"
+	tei_reranking_service_yaml       = "/tei_reranking_service.yaml"
+	embedding_yaml                   = "/embedding.yaml"
+	tei_embedding_service_yaml       = "/tei_embedding_service.yaml"
+	tei_embedding_gaudi_service_yaml = "/tei_embedding_gaudi_service.yaml"
+	tgi_service_yaml                 = "/tgi_service.yaml"
+	tgi_gaudi_service_yaml           = "/tgi_gaudi_service.yaml"
+	llm_yaml                         = "/llm.yaml"
+	gmc_router_yaml                  = "/gmc-router.yaml"
+	redis_vector_db_yaml             = "/redis-vector-db.yaml"
+	retriever_yaml                   = "/retriever.yaml"
+	reranking_yaml                   = "/reranking.yaml"
 )
 
 func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
@@ -96,27 +107,27 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 	} else if step == ConfigmapGaudi {
 		tmpltFile = yaml_dir + "/qna_configmap_gaudi_adj.yaml"
 	} else if step == Embedding {
-		tmpltFile = yaml_dir + "/embedding.yaml"
+		tmpltFile = yaml_dir + embedding_yaml
 	} else if step == TeiEmbedding {
-		tmpltFile = yaml_dir + "/tei_embedding_service.yaml"
+		tmpltFile = yaml_dir + tei_embedding_service_yaml
 	} else if step == TeiEmbeddingGaudi {
-		tmpltFile = yaml_dir + "/tei_embedding_gaudi_service.yaml"
+		tmpltFile = yaml_dir + tei_embedding_gaudi_service_yaml
 	} else if step == VectorDB {
-		tmpltFile = yaml_dir + "/redis-vector-db.yaml"
+		tmpltFile = yaml_dir + redis_vector_db_yaml
 	} else if step == Retriever {
-		tmpltFile = yaml_dir + "/retriever.yaml"
+		tmpltFile = yaml_dir + retriever_yaml
 	} else if step == Reranking {
-		tmpltFile = yaml_dir + "/reranking.yaml"
+		tmpltFile = yaml_dir + reranking_yaml
 	} else if step == TeiReranking {
-		tmpltFile = yaml_dir + "/tei_reranking_service.yaml"
+		tmpltFile = yaml_dir + tei_reranking_service_yaml
 	} else if step == Tgi {
-		tmpltFile = yaml_dir + "/tgi_service.yaml"
+		tmpltFile = yaml_dir + tgi_service_yaml
 	} else if step == TgiGaudi {
-		tmpltFile = yaml_dir + "/tgi_gaudi_service.yaml"
+		tmpltFile = yaml_dir + tgi_gaudi_service_yaml
 	} else if step == Llm {
-		tmpltFile = yaml_dir + "/llm.yaml"
+		tmpltFile = yaml_dir + llm_yaml
 	} else if step == Router {
-		tmpltFile = yaml_dir + "/gmc-router.yaml"
+		tmpltFile = yaml_dir + gmc_router_yaml
 	} else {
 		return errors.New("unexpected target")
 	}
@@ -456,15 +467,15 @@ func preprocessUserConfigmap(ns string, hwType string) error {
 	var adjustFile string
 	if hwType == xeon {
 		cfgFile = yaml_dir + "/qna_configmap_xeon.yaml"
-		embdManifest = yaml_dir + "/tei_embedding_service.yaml"
-		rerankManifest = yaml_dir + "/tei_reranking_service.yaml"
-		tgiManifest = yaml_dir + "/tgi_service.yaml"
+		embdManifest = yaml_dir + tei_embedding_service_yaml
+		rerankManifest = yaml_dir + tei_reranking_service_yaml
+		tgiManifest = yaml_dir + tgi_service_yaml
 		adjustFile = yaml_dir + "/qna_configmap_xeon_adj.yaml"
 	} else if hwType == gaudi {
 		cfgFile = yaml_dir + "/qna_configmap_gaudi.yaml"
-		embdManifest = yaml_dir + "/tei_embedding_gaudi_service.yaml"
-		rerankManifest = yaml_dir + "/tei_reranking_service.yaml"
-		tgiManifest = yaml_dir + "/tgi_gaudi_service.yaml"
+		embdManifest = yaml_dir + tei_embedding_gaudi_service_yaml
+		rerankManifest = yaml_dir + tei_reranking_service_yaml
+		tgiManifest = yaml_dir + tgi_gaudi_service_yaml
 		adjustFile = yaml_dir + "/qna_configmap_gaudi_adj.yaml"
 	} else {
 		return fmt.Errorf("unexpected hardware type %s", hwType)
