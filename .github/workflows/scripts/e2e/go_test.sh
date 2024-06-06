@@ -19,7 +19,7 @@ function install_gmc() {
     kubectl apply -f $(pwd)/config/rbac/gmc-manager-rbac.yaml
     kubectl create configmap gmcyaml -n $SYSTEM_NAMESPACE --from-file $(pwd)/config/manifests
     kubectl apply -f $(pwd)/config/manager/gmc-manager.yaml
- 
+
     # Wait until the gmc conroller pod is ready
     wait_until_pod_ready "gmc-controller" $SYSTEM_NAMESPACE "gmc-controller"
 }
@@ -47,7 +47,7 @@ function validate_chatqna() {
    kubectl create ns $APP_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $APP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
- 
+
 
 
    output=$(kubectl get pods)
@@ -57,15 +57,20 @@ function validate_chatqna() {
    echo "Waiting for the chatqa router service to be ready..."
    wait_until_pod_ready "chatqna router" $APP_NAMESPACE "router-service"
 
+  # Wait until the tgi pod is ready
+  TGI_POD_NAME=$(kubectl get pods --namespace=$APP_NAMESPACE | grep ^tgi-service | awk '{print $1}')
+  kubectl describe pod $TGI_POD_NAME -n $APP_NAMESPACE
+  kubectl wait --for=condition=ready pod/$TGI_POD_NAME --namespace=$APP_NAMESPACE --timeout=300s
+
 
    # deploy client pod for testing
-   kubectl create deployment client-test -n $APP_NAMESPACE --image=python:3.8.13 -- sleep infinity 
+   kubectl create deployment client-test -n $APP_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
    # wait for client pod ready
    wait_until_pod_ready "client-test" $APP_NAMESPACE "client-test"
    # giving time to populating data
-   sleep 180
-   kubectl get pods -n $APP_NAMESPACE 
+   sleep 120
+   kubectl get pods -n $APP_NAMESPACE
    # send request to chatqnA
    export CLIENT_POD=$(kubectl get pod -n $APP_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
@@ -181,3 +186,4 @@ case "$1" in
         echo "Unknown function: $1"
         ;;
 esac
+
