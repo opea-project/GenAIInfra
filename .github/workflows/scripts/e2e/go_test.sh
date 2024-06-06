@@ -42,7 +42,7 @@ function cleanup_gmc() {
 
 function validate_chatqna() {
 
-
+   kubectl get pods -n $SYSTEM_NAMESPACE
    # todo select gaudi or xeon
    kubectl create ns $APP_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $APP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
@@ -64,8 +64,8 @@ function validate_chatqna() {
    # wait for client pod ready
    wait_until_pod_ready "client-test" $APP_NAMESPACE "client-test"
    # giving time to populating data
-   sleep 120
-
+   sleep 180
+   kubectl get pods -n $APP_NAMESPACE 
    # send request to chatqnA
    export CLIENT_POD=$(kubectl get pod -n $APP_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
