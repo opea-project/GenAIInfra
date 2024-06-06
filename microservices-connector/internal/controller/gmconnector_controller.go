@@ -18,6 +18,7 @@ import (
 
 	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
 	"github.com/pkg/errors"
+	yaml2 "gopkg.in/yaml.v2"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -64,7 +65,7 @@ func getKubeConfig() (*rest.Config, error) {
 	return config, nil
 }
 
-// This is for linting purpose, they are supposed to be removed after reading manifests from oneclick
+// make go lint happy
 const (
 	Configmap         = "Configmap"
 	ConfigmapGaudi    = "ConfigmapGaudi"
@@ -79,9 +80,11 @@ const (
 	TgiGaudi          = "TgiGaudi"
 	Llm               = "Llm"
 	Router            = "router"
+	xeon              = "xeon"
+	gaudi             = "gaudi"
 )
 
-func reconcileResource(step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
+func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
 
 	var tmpltFile string
 
@@ -89,9 +92,9 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
 	if step == Configmap {
-		tmpltFile = yaml_dir + "/qna_configmap_xeon.yaml"
+		tmpltFile = yaml_dir + "/qna_configmap_xeon_adj.yaml"
 	} else if step == ConfigmapGaudi {
-		tmpltFile = yaml_dir + "/qna_configmap_gaudi.yaml"
+		tmpltFile = yaml_dir + "/qna_configmap_gaudi_adj.yaml"
 	} else if step == Embedding {
 		tmpltFile = yaml_dir + "/embedding.yaml"
 	} else if step == TeiEmbedding {
@@ -118,15 +121,6 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 		return errors.New("unexpected target")
 	}
 
-	config, err := getKubeConfig()
-	if err != nil {
-		return err
-	}
-	dynamicClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		return fmt.Errorf("failed to create dynamic client: %v", err)
-	}
-
 	yamlFile, err := os.ReadFile(tmpltFile)
 	if err != nil {
 		return fmt.Errorf("failed to read YAML file: %v", err)
@@ -138,7 +132,7 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 		return fmt.Errorf("failed to apply user config: %v", err)
 	}
 	resources = strings.Split(appliedCfg, "---")
-	fmt.Printf("The raw yaml file has been splitted into %v yaml files", len(resources))
+	fmt.Printf("The raw yaml file has been split into %v yaml files", len(resources))
 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 	for _, res := range resources {
@@ -159,7 +153,7 @@ func reconcileResource(step string, ns string, svc string, svcCfg *map[string]st
 				return fmt.Errorf("failed to marshal config to json: %v", err)
 			}
 
-			createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(), obj.GetName(), types.ApplyPatchType, patchBytes, metav1.PatchOptions{
+			createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Patch(ctx, obj.GetName(), types.ApplyPatchType, patchBytes, metav1.PatchOptions{
 				FieldManager: "gmc-controller",
 				Force:        ptr.To(true),
 			})
@@ -207,7 +201,7 @@ func getServiceURL(service *corev1.Service) string {
 
 func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
 	var userDefinedCfg interface{}
-	if step == "Configmap" || step == "ConfigmapGaudi" {
+	if step == "Configmap" || step == "ConfigmapGaudi" || nil == svcCfg {
 		return string(yamlFile), nil
 	} else if step == "Embedding" {
 		userDefinedCfg = EmbeddingCfg{
@@ -224,7 +218,7 @@ func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (s
 	} else if step == "VectorDB" {
 		userDefinedCfg = nil
 	} else if step == "Retriever" {
-		userDefinedCfg = RetriverCfg{
+		userDefinedCfg = RetrieverCfg{
 			NoProxy:    (*svcCfg)["no_proxy"],
 			HttpProxy:  (*svcCfg)["http_proxy"],
 			HttpsProxy: (*svcCfg)["https_proxy"],
@@ -297,7 +291,7 @@ type TeiEmbeddingCfg struct {
 	HttpsProxy       string
 }
 
-type RetriverCfg struct {
+type RetrieverCfg struct {
 	NoProxy    string
 	HttpProxy  string
 	HttpsProxy string
@@ -362,9 +356,31 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// get the router config
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
-	err := reconcileResource("Configmap", req.NamespacedName.Namespace, "", nil, nil)
+
+	config, err := getKubeConfig()
 	if err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile the Configmap file")
+		return reconcile.Result{}, err
+	}
+	dynamicClient, err := dynamic.NewForConfig(config)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	err = preprocessUserConfigmap(req.NamespacedName.Namespace, xeon)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
+	}
+	err = preprocessUserConfigmap(req.NamespacedName.Namespace, gaudi)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for gaudi")
+	}
+	err = reconcileResource(ctx, dynamicClient, "Configmap", req.Namespace, "qna-configmap-xeon", nil, nil)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to apply the adjusted the Configmap qna-configmap-xeon")
+	}
+	err = reconcileResource(ctx, dynamicClient, "ConfigmapGaudi", req.Namespace, "qna-configmap-gaudi", nil, nil)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to apply the adjusted the Configmap qna-configmap-gaudi")
 	}
 	for node, router := range graph.Spec.Nodes {
 		for i, step := range router.Steps {
@@ -381,7 +397,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
 
 				service := &corev1.Service{}
-				err := reconcileResource(step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
+				err := reconcileResource(ctx, dynamicClient, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
 				}
@@ -418,7 +434,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			graph.Spec.RouterConfig.Config = make(map[string]string)
 		}
 		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-		err = reconcileResource(graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
+		err = reconcileResource(ctx, dynamicClient, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
 		if err != nil {
 			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 		}
@@ -429,6 +445,135 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
 	}
 	return ctrl.Result{}, nil
+}
+
+// get the svc NamespaceName from the svcCfg and replace the ones in the original config map
+func preprocessUserConfigmap(ns string, hwType string) error {
+	var cfgFile string
+	var embdManifest string
+	var rerankManifest string
+	var tgiManifest string
+	var adjustFile string
+	if hwType == xeon {
+		cfgFile = yaml_dir + "/qna_configmap_xeon.yaml"
+		embdManifest = yaml_dir + "/tei_embedding_service.yaml"
+		rerankManifest = yaml_dir + "/tei_reranking_service.yaml"
+		tgiManifest = yaml_dir + "/tgi_service.yaml"
+		adjustFile = yaml_dir + "/qna_configmap_xeon_adj.yaml"
+	} else if hwType == gaudi {
+		cfgFile = yaml_dir + "/qna_configmap_gaudi.yaml"
+		embdManifest = yaml_dir + "/tei_embedding_gaudi_service.yaml"
+		rerankManifest = yaml_dir + "/tei_reranking_service.yaml"
+		tgiManifest = yaml_dir + "/tgi_gaudi_service.yaml"
+		adjustFile = yaml_dir + "/qna_configmap_gaudi_adj.yaml"
+	} else {
+		return fmt.Errorf("unexpected hardware type %s", hwType)
+	}
+	yamlData, err := os.ReadFile(cfgFile)
+	if err != nil {
+		fmt.Printf("failed to read %s : %v\n", cfgFile, err)
+	} else {
+		fmt.Printf("adjust config: %s\n", cfgFile)
+		// Unmarshal the YAML data into a map
+		var yamlMap map[string]interface{}
+		err = yaml2.Unmarshal(yamlData, &yamlMap)
+		if err != nil {
+			return fmt.Errorf("failed to unmarshal YAML data: %v", err)
+		}
+		cfgmapName := yamlMap["metadata"].(map[interface{}]interface{})["name"].(string) + "-" + hwType
+		yamlMap["metadata"].(map[interface{}]interface{})["name"] = cfgmapName
+		if data, ok := yamlMap["data"].(map[interface{}]interface{}); ok {
+			// Update the value of "TEI_EMBEDDING_ENDPOINT" field
+			if _, ok := data["TEI_EMBEDDING_ENDPOINT"].(string); ok {
+				svcName, port, err := getServiceDetails(embdManifest)
+				if err == nil {
+					data["TEI_EMBEDDING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				} else {
+					fmt.Printf("failed to get service details for %s: %v\n", embdManifest, err)
+				}
+			} else {
+				fmt.Printf("failed to get data for TEI_EMBEDDING_ENDPOINT\n")
+			}
+			// Update the value of "TEI_RERANKING_ENDPOINT" field
+			if _, ok = data["TEI_RERANKING_ENDPOINT"].(string); ok {
+				svcName, port, err := getServiceDetails(rerankManifest)
+				if err == nil {
+					data["TEI_RERANKING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				} else {
+					fmt.Printf("failed to get service details for %s: %v\n", rerankManifest, err)
+				}
+			} else {
+				fmt.Printf("failed to get data for TEI_RERANKING_ENDPOINT\n")
+			}
+			// Update the value of "TGI_LLM_ENDPOINT" field
+			if _, ok = data["TGI_LLM_ENDPOINT"].(string); ok {
+				svcName, port, err := getServiceDetails(tgiManifest)
+				if err == nil {
+					data["TGI_LLM_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				} else {
+					fmt.Printf("failed to get service details for %s: %v\n", tgiManifest, err)
+				}
+			} else {
+				fmt.Printf("failed to get data for TGI_LLM_ENDPOINT\n")
+			}
+		} else {
+			fmt.Printf("failed to interpret data %v\n", data)
+		}
+
+		// write yamlMap back to yaml
+		yamlData, err := yaml2.Marshal(yamlMap)
+		if err != nil {
+			return err
+		}
+		err = os.WriteFile(adjustFile, yamlData, 0644)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+type YAMLContent struct {
+	Service struct {
+		Kind     string `yaml:"kind"`
+		Metadata struct {
+			Name string `yaml:"name"`
+		} `yaml:"metadata"`
+		Spec struct {
+			Ports []struct {
+				Name string `yaml:"name"`
+				Port int    `yaml:"port"`
+			} `yaml:"ports"`
+		} `yaml:"spec"`
+	} `yaml:"services"`
+}
+
+func getServiceDetails(filePath string) (string, int, error) {
+	data, err := os.ReadFile(filePath)
+	if err != nil {
+		return "", 0, err
+	}
+	resources := strings.Split(string(data), "---")
+
+	for _, res := range resources {
+		if res == "" || !strings.Contains(res, "kind: Service") {
+			continue
+		}
+		var content YAMLContent
+		err = yaml2.Unmarshal([]byte(res), &content.Service)
+		if err != nil {
+			return "", 0, err
+		}
+		if content.Service.Kind == "Service" {
+			if len(content.Service.Spec.Ports) > 0 {
+				return content.Service.Metadata.Name, content.Service.Spec.Ports[0].Port, nil
+			}
+		}
+
+	}
+
+	return "", 0, fmt.Errorf("service name or port not found")
 }
 
 // SetupWithManager sets up the controller with the Manager.
