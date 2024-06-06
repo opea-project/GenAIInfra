@@ -30,3 +30,8 @@ llm-uservice:
     LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
     # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
     volume: /mnt
+
+global:
+  http_proxy:
+  https_proxy:
+  no_proxy:
