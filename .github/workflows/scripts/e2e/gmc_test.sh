@@ -21,7 +21,8 @@ function install_gmc() {
     kubectl apply -f $(pwd)/config/manager/gmc-manager.yaml
 
     # Wait until the gmc controller pod is ready
-    wait_until_pod_ready "gmc-controller" $SYSTEM_NAMESPACE "gmc-controller"
+    GMC_CONTROLLER_POD=$(kubectl get pods --namespace=$SYSTEM_NAMESPACE | awk '{print $1}')
+    wait_until_pod_ready "gmc-controller" $GMC_CONTROLLER_POD $SYSTEM_NAMESPACE
 }
 
 function validate_gmc() {
@@ -55,12 +56,13 @@ function validate_chatqna() {
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
-   wait_until_pod_ready "chatqna router" $APP_NAMESPACE "router-service"
+   ROUTER_POD=$(kubectl get pods --namespace=$APP_NAMESPACE -l app=router-service | awk '{print $1}')
+   wait_until_pod_ready "chatqna router" $ROUTER_POD $APP_NAMESPACE
 
   # Wait until the tgi pod is ready
   TGI_POD_NAME=$(kubectl get pods --namespace=$APP_NAMESPACE | grep ^tgi-service | awk '{print $1}')
   kubectl describe pod $TGI_POD_NAME -n $APP_NAMESPACE
-  kubectl wait --for=condition=ready pod/$TGI_POD_NAME --namespace=$APP_NAMESPACE --timeout=300s
+  wait_until_pod_ready "tgi service" $TGI_POD_NAME $APP_NAMESPACE
 
 
    # deploy client pod for testing
@@ -123,44 +125,10 @@ function init_gmc() {
     find . -name '*.yaml' -type f -exec sed -i "s#default.svc#$APP_NAMESPACE.svc#g" {} \;
 }
 
-
 function wait_until_pod_ready() {
     echo "Waiting for the $1 to be ready..."
-    max_retries=3000
-    retry_count=0
-    while ! is_pod_ready $2 $3; do
-        if [ $retry_count -ge $max_retries ]; then
-            echo "$1 is not ready after waiting for a significant amount of time"
-            exit 1
-        fi
-        echo "$1 is not ready yet. Retrying in 10 seconds..."
-        sleep 10
-        output=$(kubectl get pods -n $2)
-        # Check if the command was successful
-        if [ $? -eq 0 ]; then
-          echo "Successfully retrieved $1 information:"
-          echo "$output"
-        else
-          echo "Failed to retrieve $1 information"
-          exit 1
-        fi
-        retry_count=$((retry_count + 1))
-    done
+    kubectl wait --for=condition=ready pod/$2 --namespace=$3 --timeout=300s
 }
-
-function is_pod_ready() {
-    if [ "$2" == "gmc-controller" ]; then
-      pod_status=$(kubectl get pods -n $1 -o jsonpath='{.items[].status.conditions[?(@.type=="Ready")].status}')
-    else
-      pod_status=$(kubectl get pods -n $1 -l app=$2 -o jsonpath='{.items[].status.conditions[?(@.type=="Ready")].status}')
-    fi
-    if [ "$pod_status" == "True" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
 
 
 if [ $# -eq 0 ]; then
@@ -186,3 +154,4 @@ case "$1" in
         echo "Unknown function: $1"
         ;;
 esac
+
