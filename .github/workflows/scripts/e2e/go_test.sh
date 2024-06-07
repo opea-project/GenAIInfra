@@ -20,7 +20,7 @@ function install_gmc() {
     kubectl create configmap gmcyaml -n $SYSTEM_NAMESPACE --from-file $(pwd)/config/manifests
     kubectl apply -f $(pwd)/config/manager/gmc-manager.yaml
 
-    # Wait until the gmc conroller pod is ready
+    # Wait until the gmc controller pod is ready
     wait_until_pod_ready "gmc-controller" $SYSTEM_NAMESPACE "gmc-controller"
 }
 
@@ -186,4 +186,3 @@ case "$1" in
         echo "Unknown function: $1"
         ;;
 esac
-
