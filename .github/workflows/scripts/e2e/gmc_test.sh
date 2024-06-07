@@ -21,7 +21,7 @@ function install_gmc() {
     kubectl apply -f $(pwd)/config/manager/gmc-manager.yaml
 
     # Wait until the gmc controller pod is ready
-    GMC_CONTROLLER_POD=$(kubectl get pods --namespace=$SYSTEM_NAMESPACE | awk '{print $1}')
+    GMC_CONTROLLER_POD=$(kubectl get pods --namespace=$SYSTEM_NAMESPACE | awk 'NR>1 {print $1; exit}')
     wait_until_pod_ready "gmc-controller" $GMC_CONTROLLER_POD $SYSTEM_NAMESPACE
 }
 
@@ -56,7 +56,7 @@ function validate_chatqna() {
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
-   ROUTER_POD=$(kubectl get pods --namespace=$APP_NAMESPACE -l app=router-service | awk '{print $1}')
+   ROUTER_POD=$(kubectl get pods --namespace=$APP_NAMESPACE -l app=router-service | awk 'NR>1 {print $1; exit}')
    wait_until_pod_ready "chatqna router" $ROUTER_POD $APP_NAMESPACE
 
   # Wait until the tgi pod is ready
@@ -69,7 +69,8 @@ function validate_chatqna() {
    kubectl create deployment client-test -n $APP_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
    # wait for client pod ready
-   wait_until_pod_ready "client-test" $APP_NAMESPACE "client-test"
+   CLIENT_POD=$(kubectl get pods --namespace=$APP_NAMESPACE -l app=client-test | awk 'NR>1 {print $1; exit}')
+   wait_until_pod_ready "client-test" $CLIENT_POD $APP_NAMESPACE
    # giving time to populating data
    sleep 120
    kubectl get pods -n $APP_NAMESPACE
