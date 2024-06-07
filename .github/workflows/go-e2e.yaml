@@ -44,7 +44,7 @@ jobs:
           make docker.build
           make docker.push
 
-      - name: Install GMC 
+      - name: Install GMC
         run: |
           echo "should_cleanup=true" >> $GITHUB_ENV
           .github/workflows/scripts/e2e/gmc_test.sh install_gmc
