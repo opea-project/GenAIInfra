@@ -377,11 +377,11 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{}, err
 	}
 
-	err = preprocessUserConfigmap(req.NamespacedName.Namespace, xeon)
+	err = preProcessUserConfigmap(req.NamespacedName.Namespace, xeon, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
 	}
-	err = preprocessUserConfigmap(req.NamespacedName.Namespace, gaudi)
+	err = preProcessUserConfigmap(req.NamespacedName.Namespace, gaudi, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for gaudi")
 	}
@@ -458,24 +458,17 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return ctrl.Result{}, nil
 }
 
-// get the svc NamespaceName from the svcCfg and replace the ones in the original config map
-func preprocessUserConfigmap(ns string, hwType string) error {
+// read the configmap file from the manifests
+// update the values of the fields in the configmap
+// add service details to the fields
+func preProcessUserConfigmap(ns string, hwType string, gmcGraph *mcv1alpha3.GMConnector) error {
 	var cfgFile string
-	var embdManifest string
-	var rerankManifest string
-	var tgiManifest string
 	var adjustFile string
 	if hwType == xeon {
 		cfgFile = yaml_dir + "/qna_configmap_xeon.yaml"
-		embdManifest = yaml_dir + tei_embedding_service_yaml
-		rerankManifest = yaml_dir + tei_reranking_service_yaml
-		tgiManifest = yaml_dir + tgi_service_yaml
 		adjustFile = yaml_dir + "/qna_configmap_xeon_adj.yaml"
 	} else if hwType == gaudi {
 		cfgFile = yaml_dir + "/qna_configmap_gaudi.yaml"
-		embdManifest = yaml_dir + tei_embedding_gaudi_service_yaml
-		rerankManifest = yaml_dir + tei_reranking_service_yaml
-		tgiManifest = yaml_dir + tgi_gaudi_service_yaml
 		adjustFile = yaml_dir + "/qna_configmap_gaudi_adj.yaml"
 	} else {
 		return fmt.Errorf("unexpected hardware type %s", hwType)
@@ -491,45 +484,14 @@ func preprocessUserConfigmap(ns string, hwType string) error {
 		if err != nil {
 			return fmt.Errorf("failed to unmarshal YAML data: %v", err)
 		}
+		// make a new configmap to save the adjusted values
 		cfgmapName := yamlMap["metadata"].(map[interface{}]interface{})["name"].(string) + "-" + hwType
 		yamlMap["metadata"].(map[interface{}]interface{})["name"] = cfgmapName
-		if data, ok := yamlMap["data"].(map[interface{}]interface{}); ok {
-			// Update the value of "TEI_EMBEDDING_ENDPOINT" field
-			if _, ok := data["TEI_EMBEDDING_ENDPOINT"].(string); ok {
-				svcName, port, err := getServiceDetails(embdManifest)
-				if err == nil {
-					data["TEI_EMBEDDING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
-				} else {
-					fmt.Printf("failed to get service details for %s: %v\n", embdManifest, err)
-				}
-			} else {
-				fmt.Printf("failed to get data for TEI_EMBEDDING_ENDPOINT\n")
-			}
-			// Update the value of "TEI_RERANKING_ENDPOINT" field
-			if _, ok = data["TEI_RERANKING_ENDPOINT"].(string); ok {
-				svcName, port, err := getServiceDetails(rerankManifest)
-				if err == nil {
-					data["TEI_RERANKING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
-				} else {
-					fmt.Printf("failed to get service details for %s: %v\n", rerankManifest, err)
-				}
-			} else {
-				fmt.Printf("failed to get data for TEI_RERANKING_ENDPOINT\n")
-			}
-			// Update the value of "TGI_LLM_ENDPOINT" field
-			if _, ok = data["TGI_LLM_ENDPOINT"].(string); ok {
-				svcName, port, err := getServiceDetails(tgiManifest)
-				if err == nil {
-					data["TGI_LLM_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
-				} else {
-					fmt.Printf("failed to get service details for %s: %v\n", tgiManifest, err)
-				}
-			} else {
-				fmt.Printf("failed to get data for TGI_LLM_ENDPOINT\n")
-			}
-		} else {
-			fmt.Printf("failed to interpret data %v\n", data)
-		}
+
+		//adjust the values of the fields defined in manifest configmap file
+		adjustConfigmap(ns, hwType, &yamlMap, gmcGraph)
+
+		//TODO: add GMC configs into new configmap
 
 		// write yamlMap back to yaml
 		yamlData, err := yaml2.Marshal(yamlMap)
@@ -543,6 +505,116 @@ func preprocessUserConfigmap(ns string, hwType string) error {
 	}
 
 	return nil
+}
+
+func getNsFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
+	for _, router := range gmcGraph.Spec.Nodes {
+		for _, step := range router.Steps {
+			if step.StepName == stepName {
+				// Check if InternalService is not nil
+				if step.Executor.ExternalService == "" {
+					// Check if NameSpace is not an empty string
+					if step.Executor.InternalService.NameSpace != "" {
+						return step.Executor.InternalService.NameSpace
+					}
+				}
+			}
+		}
+	}
+	return ""
+}
+
+func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, gmcGraph *mcv1alpha3.GMConnector) {
+	var embdManifest string
+	var rerankManifest string
+	var tgiManifest string
+	var redisManifest string
+	if hwType == xeon {
+		embdManifest = yaml_dir + tei_embedding_service_yaml
+		rerankManifest = yaml_dir + tei_reranking_service_yaml
+		tgiManifest = yaml_dir + tgi_service_yaml
+		redisManifest = yaml_dir + redis_vector_db_yaml
+	} else if hwType == gaudi {
+		embdManifest = yaml_dir + tei_embedding_gaudi_service_yaml
+		rerankManifest = yaml_dir + tei_reranking_service_yaml
+		tgiManifest = yaml_dir + tgi_gaudi_service_yaml
+		redisManifest = yaml_dir + redis_vector_db_yaml
+	} else {
+		fmt.Printf("unexpected hardware type %s", hwType)
+		return
+	}
+	if data, ok := (*yamlMap)["data"].(map[interface{}]interface{}); ok {
+		// Update the value of "TEI_EMBEDDING_ENDPOINT" field
+		if _, ok := data["TEI_EMBEDDING_ENDPOINT"].(string); ok {
+			svcName, port, err := getServiceDetailsFromManifests(embdManifest)
+			if err == nil {
+				//check GMC config if there is specific namespace for embedding
+				altNs := getNsFromGraph(gmcGraph, TeiEmbedding)
+				if altNs != "" {
+					data["TEI_EMBEDDING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
+				} else {
+					data["TEI_EMBEDDING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				}
+			} else {
+				fmt.Printf("failed to get service details for %s: %v\n", embdManifest, err)
+			}
+		} else {
+			fmt.Printf("failed to get data for TEI_EMBEDDING_ENDPOINT\n")
+		}
+		// Update the value of "TEI_RERANKING_ENDPOINT" field
+		if _, ok = data["TEI_RERANKING_ENDPOINT"].(string); ok {
+			svcName, port, err := getServiceDetailsFromManifests(rerankManifest)
+			if err == nil {
+				//check GMC config if there is specific namespace for reranking
+				altNs := getNsFromGraph(gmcGraph, TeiReranking)
+				if altNs != "" {
+					data["TEI_RERANKING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
+				} else {
+					data["TEI_RERANKING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				}
+			} else {
+				fmt.Printf("failed to get service details for %s: %v\n", rerankManifest, err)
+			}
+		} else {
+			fmt.Printf("failed to get data for TEI_RERANKING_ENDPOINT\n")
+		}
+		// Update the value of "TGI_LLM_ENDPOINT" field
+		if _, ok = data["TGI_LLM_ENDPOINT"].(string); ok {
+			svcName, port, err := getServiceDetailsFromManifests(tgiManifest)
+			if err == nil {
+				//check GMC config if there is specific namespace for tgillm
+				altNs := getNsFromGraph(gmcGraph, Tgi)
+				if altNs != "" {
+					data["TGI_LLM_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
+				} else {
+					data["TGI_LLM_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				}
+			} else {
+				fmt.Printf("failed to get service details for %s: %v\n", tgiManifest, err)
+			}
+		} else {
+			fmt.Printf("failed to get data for TGI_LLM_ENDPOINT\n")
+		}
+		// Update the value of "REDIS_URL" field
+		if _, ok = data["REDIS_URL"].(string); ok {
+			svcName, port, err := getServiceDetailsFromManifests(redisManifest)
+			if err == nil {
+				//check GMC config if there is specific namespace for tgillm
+				altNs := getNsFromGraph(gmcGraph, Tgi)
+				if altNs != "" {
+					data["REDIS_URL"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
+				} else {
+					data["REDIS_URL"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				}
+			} else {
+				fmt.Printf("failed to get service details for %s: %v\n", redisManifest, err)
+			}
+		} else {
+			fmt.Printf("failed to get data for REDIS_URL\n")
+		}
+	} else {
+		fmt.Printf("failed to interpret data %v\n", data)
+	}
 }
 
 type YAMLContent struct {
@@ -560,7 +632,7 @@ type YAMLContent struct {
 	} `yaml:"services"`
 }
 
-func getServiceDetails(filePath string) (string, int, error) {
+func getServiceDetailsFromManifests(filePath string) (string, int, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
 		return "", 0, err
