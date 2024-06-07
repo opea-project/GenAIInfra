@@ -27,7 +27,7 @@ spec:
       containers:
       - command:
         - /manager
-        image: zhlsunshine/gmcmanager:latest
+        image: opea/gmcmanager:latest
         name: manager
         volumeMounts:
         - name: yaml-file
