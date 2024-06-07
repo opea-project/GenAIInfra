@@ -57,7 +57,7 @@ function validate_chatqna() {
   # Wait until the tgi pod is ready
   TGI_POD_NAME=$(kubectl get pods --namespace=$APP_NAMESPACE | grep ^tgi-service | awk '{print $1}')
   kubectl describe pod $TGI_POD_NAME -n $APP_NAMESPACE
-  kubectl wait --for=condition=ready pod/TGI_POD_NAME --namespace=$APP_NAMESPACE --timeout=300s
+  kubectl wait --for=condition=ready pod/$TGI_POD_NAME --namespace=$APP_NAMESPACE --timeout=300s
 
 
    # deploy client pod for testing
