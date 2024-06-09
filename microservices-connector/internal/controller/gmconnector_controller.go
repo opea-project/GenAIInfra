@@ -102,11 +102,7 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
 
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
-	if step == Configmap {
-		tmpltFile = yaml_dir + "/qna_configmap_xeon_adj.yaml"
-	} else if step == ConfigmapGaudi {
-		tmpltFile = yaml_dir + "/qna_configmap_gaudi_adj.yaml"
-	} else if step == Embedding {
+	if step == Embedding {
 		tmpltFile = yaml_dir + embedding_yaml
 	} else if step == TeiEmbedding {
 		tmpltFile = yaml_dir + tei_embedding_service_yaml
@@ -143,44 +139,33 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 		return fmt.Errorf("failed to apply user config: %v", err)
 	}
 	resources = strings.Split(appliedCfg, "---")
-	fmt.Printf("The raw yaml file has been split into %v yaml files", len(resources))
-	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+	fmt.Printf("The raw yaml file has been split into %v yaml files\n", len(resources))
 
 	for _, res := range resources {
 		if res == "" || !strings.Contains(res, "kind:") {
 			continue
 		}
 
-		obj := &unstructured.Unstructured{}
-		_, gvk, err := decUnstructured.Decode([]byte(res), nil, obj)
-		if err != nil {
-			return fmt.Errorf("failed to decode YAML: %v", err)
-		}
-
-		gvr, _ := meta.UnsafeGuessKindToResource(*gvk)
+		// if create failed, wait 2s and retry, this will be removed when the monitor task is implemented
 		for {
-			patchBytes, err := json.Marshal(obj)
-			if err != nil {
-				return fmt.Errorf("failed to marshal config to json: %v", err)
-			}
+			createdObj, err := applyResourceToK8s(ctx, dynamicClient, ns, []byte(res))
 
-			createdObj, err := dynamicClient.Resource(gvr).Namespace(ns).Patch(ctx, obj.GetName(), types.ApplyPatchType, patchBytes, metav1.PatchOptions{
-				FieldManager: "gmc-controller",
-				Force:        ptr.To(true),
-			})
 			if err != nil {
 				fmt.Printf("Failed to reconcile resource: %v\n", err)
 			} else {
-				fmt.Printf("Resource %s/%s created\n", gvk.Kind, createdObj.GetName())
+				fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
+
+				// return the service obj to get the serivce URL from it
 				if retSvc != nil && createdObj.GetKind() == "Service" {
 					err = scheme.Scheme.Convert(createdObj, retSvc, nil)
 					if err != nil {
 						fmt.Printf("Failed to save service: %v\n", err)
 					}
 				}
+
 				break
 			}
-			time.Sleep(time.Second * 2)
+			time.Sleep(2 * time.Second)
 		}
 	}
 	return nil
@@ -212,9 +197,7 @@ func getServiceURL(service *corev1.Service) string {
 
 func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
 	var userDefinedCfg interface{}
-	if step == "Configmap" || step == "ConfigmapGaudi" || nil == svcCfg {
-		return string(yamlFile), nil
-	} else if step == "Embedding" {
+	if step == "Embedding" {
 		userDefinedCfg = EmbeddingCfg{
 			NoProxy:    (*svcCfg)["no_proxy"],
 			HttpProxy:  (*svcCfg)["http_proxy"],
@@ -280,8 +263,7 @@ func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (s
 		if err != nil {
 			return string(yamlFile), fmt.Errorf("error executing template: %v", err)
 		} else {
-			fmt.Printf("applied config %s\n", appliedCfg.String())
-
+			// fmt.Printf("applied config %s\n", appliedCfg.String())
 			return appliedCfg.String(), nil
 		}
 	} else {
@@ -377,25 +359,22 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{}, err
 	}
 
-	err = preProcessUserConfigmap(req.NamespacedName.Namespace, xeon, graph)
+	err = preProcessUserConfigmap(ctx, dynamicClient, req.NamespacedName.Namespace, xeon, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
 	}
-	err = preProcessUserConfigmap(req.NamespacedName.Namespace, gaudi, graph)
-	if err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for gaudi")
-	}
-	err = reconcileResource(ctx, dynamicClient, "Configmap", req.Namespace, "qna-configmap-xeon", nil, nil)
-	if err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to apply the adjusted the Configmap qna-configmap-xeon")
-	}
-	err = reconcileResource(ctx, dynamicClient, "ConfigmapGaudi", req.Namespace, "qna-configmap-gaudi", nil, nil)
-	if err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to apply the adjusted the Configmap qna-configmap-gaudi")
-	}
+
+	// TODO
+	// we need add a config if the hardware is gaudi
+	// no matter guadi or xeon, the manifest read configmap by name "qna-config"
+	// err = preProcessUserConfigmap(ctx, dynamicClient, req.NamespacedName.Namespace, gaudi, graph)
+	// if err != nil {
+	// 	return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for gaudi")
+	// }
+
 	for node, router := range graph.Spec.Nodes {
 		for i, step := range router.Steps {
-			fmt.Println("reconcile resource for node:", step.StepName)
+			fmt.Println("\nreconcile resource for node:", step.StepName)
 
 			if step.Executor.ExternalService == "" {
 				var ns string
@@ -461,50 +440,69 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 // read the configmap file from the manifests
 // update the values of the fields in the configmap
 // add service details to the fields
-func preProcessUserConfigmap(ns string, hwType string, gmcGraph *mcv1alpha3.GMConnector) error {
+func preProcessUserConfigmap(ctx context.Context, dynamicClient *dynamic.DynamicClient, ns string, hwType string, gmcGraph *mcv1alpha3.GMConnector) error {
 	var cfgFile string
-	var adjustFile string
+	// var adjustFile string
 	if hwType == xeon {
 		cfgFile = yaml_dir + "/qna_configmap_xeon.yaml"
-		adjustFile = yaml_dir + "/qna_configmap_xeon_adj.yaml"
 	} else if hwType == gaudi {
 		cfgFile = yaml_dir + "/qna_configmap_gaudi.yaml"
-		adjustFile = yaml_dir + "/qna_configmap_gaudi_adj.yaml"
 	} else {
 		return fmt.Errorf("unexpected hardware type %s", hwType)
 	}
 	yamlData, err := os.ReadFile(cfgFile)
 	if err != nil {
-		fmt.Printf("failed to read %s : %v\n", cfgFile, err)
+		return fmt.Errorf("failed to read %s : %v", cfgFile, err)
+	}
+
+	fmt.Printf("adjust config: %s\n", cfgFile)
+
+	// Unmarshal the YAML data into a map
+	var yamlMap map[string]interface{}
+	err = yaml2.Unmarshal(yamlData, &yamlMap)
+	if err != nil {
+		return fmt.Errorf("failed to unmarshal YAML data: %v", err)
+	}
+
+	//adjust the values of the fields defined in manifest configmap file
+	adjustConfigmap(ns, hwType, &yamlMap, gmcGraph)
+
+	//TODO: add GMC configs into new configmap
+
+	//NOTE: the filesystem could be read-only, DONOT write it
+
+	adjustedCmBytes, err := yaml2.Marshal(yamlMap)
+	if err != nil {
+		return fmt.Errorf("failed to marshal YAML data: %v", err)
+	}
+	_, err = applyResourceToK8s(ctx, dynamicClient, ns, adjustedCmBytes)
+	if err != nil {
+		return fmt.Errorf("failed to apply the adjusted configmap: %v", err)
 	} else {
-		fmt.Printf("adjust config: %s\n", cfgFile)
-		// Unmarshal the YAML data into a map
-		var yamlMap map[string]interface{}
-		err = yaml2.Unmarshal(yamlData, &yamlMap)
-		if err != nil {
-			return fmt.Errorf("failed to unmarshal YAML data: %v", err)
-		}
-		// make a new configmap to save the adjusted values
-		cfgmapName := yamlMap["metadata"].(map[interface{}]interface{})["name"].(string) + "-" + hwType
-		yamlMap["metadata"].(map[interface{}]interface{})["name"] = cfgmapName
-
-		//adjust the values of the fields defined in manifest configmap file
-		adjustConfigmap(ns, hwType, &yamlMap, gmcGraph)
-
-		//TODO: add GMC configs into new configmap
-
-		// write yamlMap back to yaml
-		yamlData, err := yaml2.Marshal(yamlMap)
-		if err != nil {
-			return err
-		}
-		err = os.WriteFile(adjustFile, yamlData, 0644)
-		if err != nil {
-			return err
-		}
+		fmt.Printf("Success to apply the adjusted configmap\n")
 	}
 
 	return nil
+}
+
+func applyResourceToK8s(ctx context.Context, dynamicClient *dynamic.DynamicClient, ns string, resource []byte) (*unstructured.Unstructured, error) {
+	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+
+	obj := &unstructured.Unstructured{}
+	_, gvk, err := decUnstructured.Decode([]byte(resource), nil, obj)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode YAML: %v", err)
+	}
+	gvr, _ := meta.UnsafeGuessKindToResource(*gvk)
+	patchBytes, err := json.Marshal(obj)
+	if err != nil {
+		return nil, fmt.Errorf("failed to marshal config to json: %v", err)
+	}
+
+	return dynamicClient.Resource(gvr).Namespace(ns).Patch(ctx, obj.GetName(), types.ApplyPatchType, patchBytes, metav1.PatchOptions{
+		FieldManager: "gmc-controller",
+		Force:        ptr.To(true),
+	})
 }
 
 func getNsFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
