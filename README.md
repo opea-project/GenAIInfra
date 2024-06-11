@@ -76,6 +76,7 @@ kubectl apply -f ./DocSum/manifests/
 ```
 
 ## Additional Content
+
 - [Code of Conduct](https://github.com/opea-project/docs/tree/main/community/CODE_OF_CONDUCT.md)
 - [Contribution](https://github.com/opea-project/docs/tree/main/community/CONTRIBUTING.md)
 - [Security Policy](https://github.com/opea-project/docs/tree/main/community/SECURITY.md)
