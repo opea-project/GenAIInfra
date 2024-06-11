@@ -22,6 +22,7 @@ function install_gmc() {
 
     # Wait until the gmc controller pod is ready
     wait_until_pod_ready "gmc-controller" $SYSTEM_NAMESPACE "gmc-controller"
+    kubectl get pods -n $SYSTEM_NAMESPACE
 }
 
 function validate_gmc() {
@@ -42,20 +43,16 @@ function cleanup_gmc() {
 
 function validate_chatqna() {
 
-   kubectl get pods -n $SYSTEM_NAMESPACE
    # todo select gaudi or xeon
    kubectl create ns $APP_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $APP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
 
-
-
-   output=$(kubectl get pods)
-   echo $output
-
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
    wait_until_pod_ready "chatqna router" $APP_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $APP_NAMESPACE)
+   echo $output
 
   # Wait until the tgi pod is ready
   TGI_POD_NAME=$(kubectl get pods --namespace=$APP_NAMESPACE | grep ^tgi-service | awk '{print $1}')
@@ -70,6 +67,7 @@ function validate_chatqna() {
    wait_until_pod_ready "client-test" $APP_NAMESPACE "client-test"
    # giving time to populating data
    sleep 120
+
    kubectl get pods -n $APP_NAMESPACE
    # send request to chatqnA
    export CLIENT_POD=$(kubectl get pod -n $APP_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
@@ -123,10 +121,9 @@ function init_gmc() {
     find . -name '*.yaml' -type f -exec sed -i "s#default.svc#$APP_NAMESPACE.svc#g" {} \;
 }
 
-
 function wait_until_pod_ready() {
     echo "Waiting for the $1 to be ready..."
-    max_retries=3000
+    max_retries=30
     retry_count=0
     while ! is_pod_ready $2 $3; do
         if [ $retry_count -ge $max_retries ]; then
@@ -136,14 +133,7 @@ function wait_until_pod_ready() {
         echo "$1 is not ready yet. Retrying in 10 seconds..."
         sleep 10
         output=$(kubectl get pods -n $2)
-        # Check if the command was successful
-        if [ $? -eq 0 ]; then
-          echo "Successfully retrieved $1 information:"
-          echo "$output"
-        else
-          echo "Failed to retrieve $1 information"
-          exit 1
-        fi
+        echo $output
         retry_count=$((retry_count + 1))
     done
 }
@@ -160,8 +150,6 @@ function is_pod_ready() {
         return 1
     fi
 }
-
-
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <function_name>"
