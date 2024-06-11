@@ -489,7 +489,7 @@ func applyResourceToK8s(ctx context.Context, dynamicClient *dynamic.DynamicClien
 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 	obj := &unstructured.Unstructured{}
-	_, gvk, err := decUnstructured.Decode([]byte(resource), nil, obj)
+	_, gvk, err := decUnstructured.Decode(resource, nil, obj)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode YAML: %v", err)
 	}
