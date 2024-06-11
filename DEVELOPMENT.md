@@ -1,7 +1,7 @@
 # Development
 
-This doc explains how to set up a development environment so you can get started
-[contributing](./CONTRIBUTING.md) to `GenAIInfra` and how to test your changes before
+This doc explains how to set up a development environment, so you can get started
+[contributing](https://github.com/opea-project/docs/tree/main/community/CONTRIBUTING.md) to `GenAIInfra` and how to test your changes before
 submitting a pull request.
 
 ## Prerequisites

@@ -74,3 +74,9 @@ Select the example workflow you want to deploy, deploy the example (e.g. DocSum)
 ```shell
 kubectl apply -f ./DocSum/manifests/
 ```
+
+## Additional Content
+- [Code of Conduct](https://github.com/opea-project/docs/tree/main/community/CODE_OF_CONDUCT.md)
+- [Contribution](https://github.com/opea-project/docs/tree/main/community/CONTRIBUTING.md)
+- [Security Policy](https://github.com/opea-project/docs/tree/main/community/SECURITY.md)
+- [Legal Information](/LEGAL_INFORMATION.md)
