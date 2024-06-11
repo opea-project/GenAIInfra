@@ -2,7 +2,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-cat > $cov-ignore << EndOfMessage
+cat > coverge-test-ignore << EndOfMessage
 zz_generated.deepcopy.go
 openapi_generated.go
 testing
@@ -10,12 +10,12 @@ tests
 test
 EndOfMessage
 
-PASSPERCENT=10
+PASSPERCENT=40
 
 while read p || [ -n "$p" ]
 do
     sed -i "/${p}/d" ./coverage.out
-done < $cov-ignore
+done < coverge-test-ignore
 
 # get the total coverage percentage number
 COVPERCENT=$(go tool cover -func ./coverage.out | grep total | awk '{print $3}')
