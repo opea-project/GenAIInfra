@@ -600,9 +600,9 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 				//check GMC config if there is specific namespace for tgillm
 				altNs := getNsFromGraph(gmcGraph, Tgi)
 				if altNs != "" {
-					data["REDIS_URL"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
+					data["REDIS_URL"] = fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
 				} else {
-					data["REDIS_URL"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+					data["REDIS_URL"] = fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", svcName, ns, port)
 				}
 			} else {
 				fmt.Printf("failed to get service details for %s: %v\n", redisManifest, err)
