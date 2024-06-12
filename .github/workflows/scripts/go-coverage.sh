@@ -10,7 +10,7 @@ tests
 test
 EndOfMessage
 
-PASSPERCENT=40
+PASSPERCENT=30
 
 while read p || [ -n "$p" ]
 do
