@@ -6,7 +6,10 @@
 package controller
 
 import (
+	"encoding/base64"
 	"fmt"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -15,7 +18,6 @@ import (
 	. "github.com/onsi/gomega"
 
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/envtest"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -28,7 +30,6 @@ import (
 // These tests use Ginkgo (BDD-style Go testing framework). Refer to
 // http://onsi.github.io/ginkgo/ to learn more about Ginkgo.
 
-var cfg *rest.Config
 var k8sClient client.Client
 var testEnv *envtest.Environment
 
@@ -40,6 +41,32 @@ func TestControllers(t *testing.T) {
 
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
+	err := os.MkdirAll(yaml_dir, os.ModePerm)
+	Expect(err).NotTo(HaveOccurred())
+
+	templateDir := "../../../manifests/ChatQnA"
+
+	files := []string{
+		templateDir + tei_reranking_service_yaml,
+		templateDir + embedding_yaml,
+		templateDir + tei_embedding_service_yaml,
+		templateDir + tei_embedding_gaudi_service_yaml,
+		templateDir + tgi_service_yaml,
+		templateDir + tei_reranking_service_yaml,
+		templateDir + tgi_gaudi_service_yaml,
+		templateDir + llm_yaml,
+		templateDir + redis_vector_db_yaml,
+		templateDir + retriever_yaml,
+		templateDir + reranking_yaml,
+		templateDir + "/qna_configmap_xeon.yaml",
+		templateDir + "/qna_configmap_gaudi.yaml",
+		"../../config/gmcrouter/gmc-router.yaml",
+	}
+	for _, file := range files {
+		cmd := exec.Command("cp", file, yaml_dir)
+		err = cmd.Run()
+		Expect(err).NotTo(HaveOccurred())
+	}
 
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
@@ -55,11 +82,43 @@ var _ = BeforeSuite(func() {
 			fmt.Sprintf("1.29.0-%s-%s", runtime.GOOS, runtime.GOARCH)),
 	}
 
-	var err error
 	// cfg is defined in this file globally.
-	cfg, err = testEnv.Start()
+	cfg, err := testEnv.Start()
+
 	Expect(err).NotTo(HaveOccurred())
 	Expect(cfg).NotTo(BeNil())
+
+	kubeconfigContent := fmt.Sprintf(`
+apiVersion: v1
+kind: Config
+clusters:
+- cluster:
+    server: %s
+    certificate-authority-data: %s
+  name: envtest
+contexts:
+- context:
+    cluster: envtest
+    user: envtest
+  name: envtest
+current-context: envtest
+users:
+- name: envtest
+  user:
+    client-certificate-data: %s
+    client-key-data: %s`, cfg.Host, base64.StdEncoding.EncodeToString(cfg.TLSClientConfig.CAData), base64.StdEncoding.EncodeToString(cfg.TLSClientConfig.CertData), base64.StdEncoding.EncodeToString(cfg.TLSClientConfig.KeyData))
+
+	tmpFile, err := os.CreateTemp("/tmp", "fake-kubeconfig-*.yaml")
+	Expect(err).NotTo(HaveOccurred())
+
+	_, err = tmpFile.Write([]byte(kubeconfigContent))
+	Expect(err).NotTo(HaveOccurred())
+
+	err = os.Setenv("KUBECONFIG", tmpFile.Name())
+	Expect(err).NotTo(HaveOccurred())
+
+	err = tmpFile.Close()
+	Expect(err).NotTo(HaveOccurred())
 
 	err = mcv1alpha3.AddToScheme(scheme.Scheme)
 	Expect(err).NotTo(HaveOccurred())

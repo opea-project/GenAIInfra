@@ -49,7 +49,6 @@ type GMConnectorReconciler struct {
 func getKubeConfig() (*rest.Config, error) {
 	var config *rest.Config
 	var err error
-
 	if _, err = os.Stat("/var/run/secrets/kubernetes.io/serviceaccount/token"); err == nil {
 		config, err = rest.InClusterConfig()
 		if err != nil {
@@ -57,6 +56,11 @@ func getKubeConfig() (*rest.Config, error) {
 		}
 	} else {
 		kubeconfigPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
+		if _, err := os.Stat(kubeconfigPath); os.IsNotExist(err) {
+			kubeconfigPath = os.Getenv("KUBECONFIG")
+		}
+		fmt.Println(kubeconfigPath)
+
 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
 		if err != nil {
 			return nil, fmt.Errorf("failed to build kubeconfig: %w", err)
@@ -481,7 +485,6 @@ func preProcessUserConfigmap(ctx context.Context, dynamicClient *dynamic.Dynamic
 	} else {
 		fmt.Printf("Success to apply the adjusted configmap\n")
 	}
-
 	return nil
 }
 

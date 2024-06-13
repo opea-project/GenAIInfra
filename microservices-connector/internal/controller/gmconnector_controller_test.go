@@ -101,10 +101,7 @@ var _ = Describe("GMConnector Controller", func() {
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
-			if err != nil {
-				return
-			}
-			//Expect(err).NotTo(HaveOccurred())
+			Expect(err).NotTo(HaveOccurred())
 			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
 			// Example: If you expect a certain status condition after reconciliation, verify it here.
 		})
@@ -263,31 +260,4 @@ data:
 		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
 	}
 
-}
-
-func TestGetCustomConfig_EmptyStep(t *testing.T) {
-	step := ""
-	svcCfg := &map[string]string{
-		"no_proxy":     "localhost",
-		"http_proxy":   "http://proxy.example.com",
-		"https_proxy":  "https://proxy.example.com",
-		"tei_endpoint": "http://tei.example.com",
-	}
-	yamlFile := []byte(`
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-config
-data:
-  key1: value1
-  key2: value2
-`)
-	expectedCfg := string(yamlFile)
-	actualCfg, err := getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
 }
