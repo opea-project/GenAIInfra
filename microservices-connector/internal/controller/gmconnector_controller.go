@@ -217,7 +217,7 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 							types.ApplyPatchType,
 							modifiedBytes,
 							metav1.PatchOptions{
-								FieldManager: "my-controller",
+								FieldManager: "gmc-controller",
 								Force:        ptr.To(true),
 							})
 						if merr != nil {
