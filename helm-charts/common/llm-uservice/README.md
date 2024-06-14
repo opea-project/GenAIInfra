@@ -9,10 +9,14 @@ llm-uservice depends on TGI, refer to tgi for more config details.
 To install the chart, run the following:
 
 ```console
-$ export HFTOKEN="insert-your-huggingface-token-here"
-$ export MODELDIR="/mnt"
-$ export MODELNAME="m-a-p/OpenCodeInterpreter-DS-6.7B"
-$ helm install llm llm-uservice --set HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set tgi.volume=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
+cd GenAIInfra/helm-charts/common
+helm dependency update llm-uservice
+export HFTOKEN="insert-your-huggingface-token-here"
+export MODELDIR="/mnt"
+export MODELNAME="m-a-p/OpenCodeInterpreter-DS-6.7B"
+helm install llm llm-uservice --set HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set tgi.volume=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} --wait
+# To deploy on Gaudi enabled k8s cluster
+helm install llm llm-uservice --set HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set tgi.volume=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} --values llm-uservice/gaudi-values.yaml --wait
 ```
 
 ## Values
