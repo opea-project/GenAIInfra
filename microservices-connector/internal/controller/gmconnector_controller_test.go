@@ -48,9 +48,7 @@ var _ = Describe("GMConnector Controller", func() {
 							Name:        "router",
 							ServiceName: "router-service",
 							Config: map[string]string{
-								"no_proxy":    ".codegen.svc.cluster.local",
-								"http_proxy":  "insert-your-http-proxy-here",
-								"https_proxy": "insert-your-https-proxy-here",
+								"endpoint": "/",
 							},
 						},
 						Nodes: map[string]mcv1alpha3.Router{
@@ -65,10 +63,7 @@ var _ = Describe("GMConnector Controller", func() {
 												NameSpace:   "default",
 												ServiceName: "embedding-service",
 												Config: map[string]string{
-													"no_proxy":    ".codegen.svc.cluster.local",
-													"http_proxy":  "insert-your-http-proxy-here",
-													"https_proxy": "insert-your-https-proxy-here",
-													"endpoint":    "/v1/embeddings",
+													"endpoint": "/v1/embeddings",
 												},
 											},
 										},
@@ -144,12 +139,8 @@ func TestGetServiceURL(t *testing.T) {
 	}
 }
 
-func TestGetCustomConfig_ExpectedCases(t *testing.T) {
-	step := "Embedding"
+func TestApplyCustomConfig_ExpectedCases(t *testing.T) {
 	svcCfg := &map[string]string{
-		"no_proxy":     "localhost",
-		"http_proxy":   "http://proxy.example.com",
-		"https_proxy":  "https://proxy.example.com",
 		"tei_endpoint": "http://tei.example.com",
 	}
 	yamlFile := []byte(`
@@ -171,93 +162,38 @@ data:
   key2: value2
 `
 
-	actualCfg, err := getCustomConfig(step, svcCfg, yamlFile)
+	step := Router
+	actualCfg, err := applyCustomConfig(step, svcCfg, yamlFile)
 	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
+		t.Errorf("applyCustomConfig() returned an error: %v", err)
 	}
 
 	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
 		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
 	}
 
-	step = TeiEmbedding
-	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
+}
 
+func TestApplyCustomConfig_EmptyStep(t *testing.T) {
+	step := ""
+	svcCfg := &map[string]string{
+		"tei_endpoint": "http://tei.example.com",
+	}
+	yamlFile := []byte(`
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: my-config
+data:
+  key1: value1
+  key2: value2
+`)
+	expectedCfg := string(yamlFile)
+	actualCfg, err := applyCustomConfig(step, svcCfg, yamlFile)
+	if err != nil {
+		t.Errorf("applyCustomConfig() returned an error: %v", err)
+	}
 	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
 		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
 	}
-
-	step = VectorDB
-	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
-	step = Retriever
-	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
-	step = Reranking
-	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
-	step = TeiReranking
-	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
-	step = Tgi
-	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
-	step = Llm
-	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
-	step = Router
-	actualCfg, err = getCustomConfig(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("getCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
 }

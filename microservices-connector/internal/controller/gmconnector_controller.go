@@ -19,6 +19,7 @@ import (
 	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
 	"github.com/pkg/errors"
 	yaml2 "gopkg.in/yaml.v2"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/meta"
@@ -37,8 +38,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
-
-const yaml_dir = "/tmp/microservices/yamls"
 
 // GMConnectorReconciler reconciles a GMConnector object
 type GMConnectorReconciler struct {
@@ -97,14 +96,18 @@ const (
 	redis_vector_db_yaml             = "/redis-vector-db.yaml"
 	retriever_yaml                   = "/retriever.yaml"
 	reranking_yaml                   = "/reranking.yaml"
+	yaml_dir                         = "/tmp/microservices/yamls"
 )
 
-func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
+type RouterCfg struct {
+	NoProxy    string
+	HttpProxy  string
+	HttpsProxy string
+	GRAPH_JSON string
+}
 
+func getStepYamlTemplate(step string) string {
 	var tmpltFile string
-
-	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
-
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
 	if step == Embedding {
 		tmpltFile = yaml_dir + embedding_yaml
@@ -129,16 +132,24 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 	} else if step == Router {
 		tmpltFile = yaml_dir + gmc_router_yaml
 	} else {
+		return ""
+	}
+	return tmpltFile
+}
+
+func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
+	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
+	tmpltFile := getStepYamlTemplate(step)
+	if tmpltFile == "" {
 		return errors.New("unexpected target")
 	}
-
 	yamlFile, err := os.ReadFile(tmpltFile)
 	if err != nil {
 		return fmt.Errorf("failed to read YAML file: %v", err)
 	}
 
 	var resources []string
-	appliedCfg, err := getCustomConfig(step, svcCfg, yamlFile)
+	appliedCfg, err := applyCustomConfig(step, svcCfg, yamlFile)
 	if err != nil {
 		return fmt.Errorf("failed to apply user config: %v", err)
 	}
@@ -149,11 +160,9 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 		if res == "" || !strings.Contains(res, "kind:") {
 			continue
 		}
-
 		// if create failed, wait 2s and retry, this will be removed when the monitor task is implemented
 		for {
 			createdObj, err := applyResourceToK8s(ctx, dynamicClient, ns, []byte(res))
-
 			if err != nil {
 				fmt.Printf("Failed to reconcile resource: %v\n", err)
 			} else {
@@ -167,6 +176,60 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 					}
 				}
 
+				if createdObj.GetKind() == "Deployment" {
+					var newEnvVars []corev1.EnvVar
+					if svcCfg != nil {
+						for name, value := range *svcCfg {
+							if name == "endpoint" {
+								continue
+							}
+							itemEnvVar := corev1.EnvVar{
+								Name:  name,
+								Value: value,
+							}
+							newEnvVars = append(newEnvVars, itemEnvVar)
+						}
+					}
+					if len(newEnvVars) > 0 {
+						deployment := &appsv1.Deployment{}
+						err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
+						if err != nil {
+							fmt.Printf("Failed to save deployment: %v\n", err)
+						}
+						for i := range deployment.Spec.Template.Spec.Containers {
+							deployment.Spec.Template.Spec.Containers[i].Env = append(
+								deployment.Spec.Template.Spec.Containers[i].Env,
+								newEnvVars...)
+						}
+						modifiedObj, derr := runtime.DefaultUnstructuredConverter.ToUnstructured(deployment)
+						if derr != nil {
+							fmt.Printf("Failed to marshal updated deployment: %v", derr)
+						}
+
+						// Remove managedFields from the unstructured object
+						if _, ok := modifiedObj["metadata"].(map[string]interface{}); ok {
+							delete(modifiedObj["metadata"].(map[string]interface{}), "managedFields")
+						}
+
+						modifiedUnstructured := &unstructured.Unstructured{Object: modifiedObj}
+						modifiedBytes, merr := json.Marshal(modifiedUnstructured)
+						if merr != nil {
+							fmt.Printf("Failed to marshal updated deployment: %v", merr)
+						}
+						gvr := appsv1.SchemeGroupVersion.WithResource("deployments")
+						_, merr = dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(),
+							createdObj.GetName(),
+							types.ApplyPatchType,
+							modifiedBytes,
+							metav1.PatchOptions{
+								FieldManager: "gmc-controller",
+								Force:        ptr.To(true),
+							})
+						if merr != nil {
+							fmt.Printf("Failed to patch deployment: %v", merr)
+						}
+					}
+				}
 				break
 			}
 			time.Sleep(2 * time.Second)
@@ -199,60 +262,16 @@ func getServiceURL(service *corev1.Service) string {
 	return ""
 }
 
-func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
-	var userDefinedCfg interface{}
-	if step == "Embedding" {
-		userDefinedCfg = EmbeddingCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-		}
-	} else if step == "TeiEmbedding" {
-		userDefinedCfg = TeiEmbeddingCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-		}
-	} else if step == "VectorDB" {
-		userDefinedCfg = nil
-	} else if step == "Retriever" {
-		userDefinedCfg = RetrieverCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-		}
-	} else if step == "Reranking" {
-		userDefinedCfg = RerankingCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-		}
-	} else if step == "TeiReranking" {
-		userDefinedCfg = TeiRerankingCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-		}
-	} else if step == "Tgi" {
-		userDefinedCfg = TgiCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-		}
-	} else if step == "Llm" {
-		userDefinedCfg = LlmCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-		}
-	} else if step == "router" {
+func applyCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
+	var userDefinedCfg RouterCfg
+	if step == "router" {
 		userDefinedCfg = RouterCfg{
 			NoProxy:    (*svcCfg)["no_proxy"],
 			HttpProxy:  (*svcCfg)["http_proxy"],
 			HttpsProxy: (*svcCfg)["https_proxy"],
 			GRAPH_JSON: (*svcCfg)["nodes"]}
 	} else {
-		userDefinedCfg = nil
+		return string(yamlFile), nil
 	}
 
 	fmt.Printf("user config %v\n", userDefinedCfg)
@@ -261,69 +280,15 @@ func getCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (s
 	if err != nil {
 		return string(yamlFile), fmt.Errorf("error parsing template: %v", err)
 	}
-	if userDefinedCfg != nil {
-		var appliedCfg bytes.Buffer
-		err = tmpl.Execute(&appliedCfg, userDefinedCfg)
-		if err != nil {
-			return string(yamlFile), fmt.Errorf("error executing template: %v", err)
-		} else {
-			// fmt.Printf("applied config %s\n", appliedCfg.String())
-			return appliedCfg.String(), nil
-		}
+
+	var appliedCfg bytes.Buffer
+	err = tmpl.Execute(&appliedCfg, userDefinedCfg)
+	if err != nil {
+		return string(yamlFile), fmt.Errorf("error executing template: %v", err)
 	} else {
-		return string(yamlFile), nil
+		// fmt.Printf("applied config %s\n", appliedCfg.String())
+		return appliedCfg.String(), nil
 	}
-
-}
-
-type EmbeddingCfg struct {
-	NoProxy    string
-	HttpProxy  string
-	HttpsProxy string
-}
-type TeiEmbeddingCfg struct {
-	EmbeddingModelId string
-	NoProxy          string
-	HttpProxy        string
-	HttpsProxy       string
-}
-
-type RetrieverCfg struct {
-	NoProxy    string
-	HttpProxy  string
-	HttpsProxy string
-}
-
-type RerankingCfg struct {
-	NoProxy    string
-	HttpProxy  string
-	HttpsProxy string
-}
-
-type TeiRerankingCfg struct {
-	RerankingModelId string
-	NoProxy          string
-	HttpProxy        string
-	HttpsProxy       string
-}
-
-type TgiCfg struct {
-	NoProxy    string
-	HttpProxy  string
-	HttpsProxy string
-}
-
-type LlmCfg struct {
-	NoProxy    string
-	HttpProxy  string
-	HttpsProxy string
-}
-
-type RouterCfg struct {
-	NoProxy    string
-	HttpProxy  string
-	HttpsProxy string
-	GRAPH_JSON string
 }
 
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors,verbs=get;list;watch;create;update;patch;delete
@@ -471,8 +436,6 @@ func preProcessUserConfigmap(ctx context.Context, dynamicClient *dynamic.Dynamic
 	//adjust the values of the fields defined in manifest configmap file
 	adjustConfigmap(ns, hwType, &yamlMap, gmcGraph)
 
-	//TODO: add GMC configs into new configmap
-
 	//NOTE: the filesystem could be read-only, DONOT write it
 
 	adjustedCmBytes, err := yaml2.Marshal(yamlMap)
@@ -602,11 +565,10 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			if err == nil {
 				//check GMC config if there is specific namespace for tgillm
 				altNs := getNsFromGraph(gmcGraph, Tgi)
-				if altNs != "" {
-					data["REDIS_URL"] = fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
-				} else {
-					data["REDIS_URL"] = fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				if altNs == "" {
+					altNs = ns
 				}
+				data["REDIS_URL"] = fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
 			} else {
 				fmt.Printf("failed to get service details for %s: %v\n", redisManifest, err)
 			}
