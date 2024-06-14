@@ -1,19 +1,6 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: router-service
-spec:
-  selector:
-    app: router-service
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -46,3 +33,16 @@ spec:
         args:
         - "--graph-json"
         - {{.GRAPH_JSON}}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: router-service
+spec:
+  type: ClusterIP
+  selector:
+    app: router-service
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080

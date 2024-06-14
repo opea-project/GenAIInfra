@@ -11,6 +11,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
+	"reflect"
 	"strings"
 	"text/template"
 	"time"
@@ -28,7 +29,9 @@ import (
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
@@ -146,7 +149,7 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 					}
 				}
 
-				if createdObj.GetKind() == "Deployment" {
+				if createdObj.GetKind() == "Deployment" && step != Router {
 					var newEnvVars []corev1.EnvVar
 					if svcCfg != nil {
 						for name, value := range *svcCfg {
@@ -332,12 +335,14 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			graph.Spec.RouterConfig.Config = make(map[string]string)
 		}
 		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-		err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
+		err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, routerService)
 		if err != nil {
 			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 		}
 	}
 	graph.Status.AccessURL = getServiceURL(routerService)
+	fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
+
 	graph.Status.Status = "Success"
 	if err = r.Status().Update(context.TODO(), graph); err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
@@ -408,44 +413,9 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 	if svc != "" {
 		if obj.GetKind() == Service {
 			obj.SetName(svc)
-			selectors, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get selectors: %v", err)
-			}
-			if found {
-				selectors["app"] = svc + "-deployment" // Set the new selector.app value
-				err = unstructured.SetNestedStringMap(obj.Object, selectors, "spec", "selector")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set new selector.app: %v", err)
-				}
-			}
 		}
 		if obj.GetKind() == "Deployment" {
 			obj.SetName(svc + "-deployment")
-			// Set the labels if they're specified
-			labels, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector", "matchLabels")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get matchLabels: %v", err)
-			}
-			if found {
-				labels["app"] = svc + "-deployment"
-				err = unstructured.SetNestedStringMap(obj.Object, labels, "metadata", "selector", "matchLabels")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set new matchLabels : %v", err)
-				}
-			}
-			// Set the labels in template if they're specified
-			labels, found, err = unstructured.NestedStringMap(obj.Object, "template", "metadata", "labels")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get template Labels: %v", err)
-			}
-			if found {
-				labels["app"] = svc + "-deployment"
-				err = unstructured.SetNestedStringMap(obj.Object, labels, "template", "metadata", "labels")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set new template label: %v", err)
-				}
-			}
 		}
 	}
 
@@ -621,7 +591,28 @@ func getServiceDetailsFromManifests(filePath string) (string, int, error) {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	// Predicate to ignore updates to status subresource
+	ignoreStatusUpdatePredicate := predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			// Cast objects to your GMConnector struct
+			oldObject, ok1 := e.ObjectOld.(*mcv1alpha3.GMConnector)
+			newObject, ok2 := e.ObjectNew.(*mcv1alpha3.GMConnector)
+			if !ok1 || !ok2 {
+				// Not the correct type, allow the event through
+				return true
+			}
+
+			// Compare the old and new spec and metadata, ignore status changes
+			return reflect.DeepEqual(oldObject.Spec, newObject.Spec) &&
+				reflect.DeepEqual(oldObject.ObjectMeta, newObject.ObjectMeta)
+		},
+		// Other funcs like CreateFunc, DeleteFunc, GenericFunc can be left as default
+		// if you only want to customize the UpdateFunc behavior.
+	}
+
+	// Setup the watch with the predicate to filter events
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mcv1alpha3.GMConnector{}).
+		WithEventFilter(ignoreStatusUpdatePredicate). // Use the predicate here
 		Complete(r)
 }

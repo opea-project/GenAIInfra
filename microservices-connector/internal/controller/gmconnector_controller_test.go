@@ -96,27 +96,13 @@ var _ = Describe("GMConnector Controller", func() {
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
-			// if err != nil {
-			// 	return
-			// }
+
 			Expect(err).NotTo(HaveOccurred())
 			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
 			// Example: If you expect a certain status condition after reconciliation, verify it here.
 		})
 	})
 })
-
-// func TestGetKubeConfig(t *testing.T) {
-// 	config, err := getKubeConfig()
-// 	if err != nil {
-// 		t.Errorf("getKubeConfig() error = %v", err)
-// 		return
-// 	}
-// 	if config == nil {
-// 		t.Error("Expected kube config to be not nil")
-// 	}
-// 	// Add more assertions based on what getKubeConfig() is supposed to do
-// }
 
 func TestGetServiceURL(t *testing.T) {
 	service := &corev1.Service{
