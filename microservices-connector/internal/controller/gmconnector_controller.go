@@ -283,8 +283,8 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// 	return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for gaudi")
 	// }
 
-	for node, router := range graph.Spec.Nodes {
-		for i, step := range router.Steps {
+	for nodeName, node := range graph.Spec.Nodes {
+		for i, step := range node.Steps {
 			fmt.Println("\nreconcile resource for node:", step.StepName)
 
 			if step.Executor.ExternalService == "" {
@@ -303,11 +303,11 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
 				}
 
-				graph.Spec.Nodes[node].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
-				fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[node].Steps[i].ServiceURL)
+				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
+				fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
 			} else {
 				fmt.Println("external service is found", "name", step.ExternalService)
-				graph.Spec.Nodes[node].Steps[i].ServiceURL = step.ExternalService
+				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = step.ExternalService
 			}
 		}
 		fmt.Println()
@@ -335,7 +335,8 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			graph.Spec.RouterConfig.Config = make(map[string]string)
 		}
 		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-		err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, routerService)
+		//set empty service name, because we don't want to change router service name and deployment name
+		err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, "", &graph.Spec.RouterConfig.Config, routerService)
 		if err != nil {
 			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 		}
@@ -412,11 +413,49 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 
 	if svc != "" {
 		if obj.GetKind() == Service {
+			//read resource as a yaml, create a readable struct
+
 			obj.SetName(svc)
+			selectors, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector")
+			if err != nil {
+				return nil, fmt.Errorf("failed to get selectors: %v", err)
+			}
+			if found {
+				selectors["app"] = svc + "-deployment" // Set the new selector.app value
+				err = unstructured.SetNestedStringMap(obj.Object, selectors, "spec", "selector")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set new selector.app: %v", err)
+				}
+			}
 		}
 		if obj.GetKind() == "Deployment" {
 			obj.SetName(svc + "-deployment")
+			// Set the labels if they're specified
+			labels, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector", "matchLabels")
+			if err != nil {
+				return nil, fmt.Errorf("failed to get spec.selector.matchLabels: %v", err)
+			}
+			if found {
+				labels["app"] = svc + "-deployment"
+				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "selector", "matchLabels")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set new spec.selector.matchLabels : %v", err)
+				}
+			}
+			// Set the labels in template if they're specified
+			labels, found, err = unstructured.NestedStringMap(obj.Object, "spec", "template", "metadata", "labels")
+			if err != nil {
+				return nil, fmt.Errorf("failed to get template Labels: %v", err)
+			}
+			if found {
+				labels["app"] = svc + "-deployment"
+				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "template", "metadata", "labels")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set new template label: %v", err)
+				}
+			}
 		}
+
 	}
 
 	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
