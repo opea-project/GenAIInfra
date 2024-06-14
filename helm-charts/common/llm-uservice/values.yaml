@@ -67,3 +67,8 @@ tgi:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "1.4"
+
+global:
+  http_proxy:
+  https_proxy:
+  no_proxy:
