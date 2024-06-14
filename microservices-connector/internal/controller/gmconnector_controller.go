@@ -76,25 +76,6 @@ type RouterCfg struct {
 	GRAPH_JSON string
 }
 
-// func getKubeConfig() (*rest.Config, error) {
-// 	var config *rest.Config
-// 	var err error
-
-// 	if _, err = os.Stat("/var/run/secrets/kubernetes.io/serviceaccount/token"); err == nil {
-// 		config, err = rest.InClusterConfig()
-// 		if err != nil {
-// 			return nil, fmt.Errorf("failed to create in-cluster config: %w", err)
-// 		}
-// 	} else {
-// 		kubeconfigPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-// 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
-// 		if err != nil {
-// 			return nil, fmt.Errorf("failed to build kubeconfig: %w", err)
-// 		}
-// 	}
-// 	return config, nil
-// }
-
 func getManifestYaml(step string) string {
 	var tmpltFile string
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
@@ -195,33 +176,6 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 						if err := client.Update(ctx, deployment); err != nil {
 							fmt.Printf("Failed to update deployment: %v\n", err)
 						}
-						// modifiedObj, derr := runtime.DefaultUnstructuredConverter.ToUnstructured(deployment)
-						// if derr != nil {
-						// 	fmt.Printf("Failed to marshal updated deployment: %v", derr)
-						// }
-
-						// // Remove managedFields from the unstructured object
-						// if _, ok := modifiedObj["metadata"].(map[string]interface{}); ok {
-						// 	delete(modifiedObj["metadata"].(map[string]interface{}), "managedFields")
-						// }
-
-						// modifiedUnstructured := &unstructured.Unstructured{Object: modifiedObj}
-						// modifiedBytes, merr := json.Marshal(modifiedUnstructured)
-						// if merr != nil {
-						// 	fmt.Printf("Failed to marshal updated deployment: %v", merr)
-						// }
-						// gvr := appsv1.SchemeGroupVersion.WithResource("deployments")
-						// _, merr = dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(),
-						// 	createdObj.GetName(),
-						// 	types.ApplyPatchType,
-						// 	modifiedBytes,
-						// 	metav1.PatchOptions{
-						// 		FieldManager: "gmc-controller",
-						// 		Force:        ptr.To(true),
-						// 	})
-						// if merr != nil {
-						// 	fmt.Printf("Failed to patch deployment: %v", merr)
-						// }
 					}
 				}
 				break
@@ -312,15 +266,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// get the router config
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
-
-	// config, err := getKubeConfig()
-	// if err != nil {
-	// 	return reconcile.Result{}, err
-	// }
-	// // dynamicClient, err := dynamic.NewForConfig(config)
-	// // if err != nil {
-	// // 	return reconcile.Result{}, err
-	// // }
 
 	err := preProcessUserConfigmap(ctx, r.Client, req.NamespacedName.Namespace, xeon, graph)
 	if err != nil {
