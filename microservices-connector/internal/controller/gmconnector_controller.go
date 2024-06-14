@@ -11,7 +11,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"os"
-	"path/filepath"
 	"strings"
 	"text/template"
 	"time"
@@ -22,17 +21,11 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/meta"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/apimachinery/pkg/types"
-	"k8s.io/client-go/dynamic"
 	"k8s.io/client-go/kubernetes/scheme"
-	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
-	"k8s.io/utils/ptr"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/log"
@@ -67,6 +60,7 @@ const (
 	retriever_yaml                   = "/retriever.yaml"
 	reranking_yaml                   = "/reranking.yaml"
 	yaml_dir                         = "/tmp/microservices/yamls"
+	Service                          = "Service"
 )
 
 // GMConnectorReconciler reconciles a GMConnector object
@@ -82,26 +76,26 @@ type RouterCfg struct {
 	GRAPH_JSON string
 }
 
-func getKubeConfig() (*rest.Config, error) {
-	var config *rest.Config
-	var err error
+// func getKubeConfig() (*rest.Config, error) {
+// 	var config *rest.Config
+// 	var err error
 
-	if _, err = os.Stat("/var/run/secrets/kubernetes.io/serviceaccount/token"); err == nil {
-		config, err = rest.InClusterConfig()
-		if err != nil {
-			return nil, fmt.Errorf("failed to create in-cluster config: %w", err)
-		}
-	} else {
-		kubeconfigPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
-		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
-		if err != nil {
-			return nil, fmt.Errorf("failed to build kubeconfig: %w", err)
-		}
-	}
-	return config, nil
-}
+// 	if _, err = os.Stat("/var/run/secrets/kubernetes.io/serviceaccount/token"); err == nil {
+// 		config, err = rest.InClusterConfig()
+// 		if err != nil {
+// 			return nil, fmt.Errorf("failed to create in-cluster config: %w", err)
+// 		}
+// 	} else {
+// 		kubeconfigPath := filepath.Join(os.Getenv("HOME"), ".kube", "config")
+// 		config, err = clientcmd.BuildConfigFromFlags("", kubeconfigPath)
+// 		if err != nil {
+// 			return nil, fmt.Errorf("failed to build kubeconfig: %w", err)
+// 		}
+// 	}
+// 	return config, nil
+// }
 
-func getStepYamlTemplate(step string) string {
+func getManifestYaml(step string) string {
 	var tmpltFile string
 	//TODO add validation to rule out unexpected case like both embedding and retrieving
 	if step == Embedding {
@@ -132,9 +126,9 @@ func getStepYamlTemplate(step string) string {
 	return tmpltFile
 }
 
-func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
+func reconcileResource(ctx context.Context, client client.Client, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
 	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
-	tmpltFile := getStepYamlTemplate(step)
+	tmpltFile := getManifestYaml(step)
 	if tmpltFile == "" {
 		return errors.New("unexpected target")
 	}
@@ -144,7 +138,7 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 	}
 
 	var resources []string
-	appliedCfg, err := applyCustomConfig(step, svcCfg, yamlFile)
+	appliedCfg, err := applyRouterConfig(step, svcCfg, yamlFile)
 	if err != nil {
 		return fmt.Errorf("failed to apply user config: %v", err)
 	}
@@ -157,14 +151,14 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 		}
 		// if create failed, wait 2s and retry, this will be removed when the monitor task is implemented
 		for {
-			createdObj, err := applyResourceToK8s(ctx, dynamicClient, ns, []byte(res))
+			createdObj, err := applyResourceToK8s(ctx, client, ns, svc, []byte(res))
 			if err != nil {
 				fmt.Printf("Failed to reconcile resource: %v\n", err)
 			} else {
 				fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
 
 				// return the service obj to get the serivce URL from it
-				if retSvc != nil && createdObj.GetKind() == "Service" {
+				if retSvc != nil && createdObj.GetKind() == Service {
 					err = scheme.Scheme.Convert(createdObj, retSvc, nil)
 					if err != nil {
 						fmt.Printf("Failed to save service: %v\n", err)
@@ -196,33 +190,38 @@ func reconcileResource(ctx context.Context, dynamicClient *dynamic.DynamicClient
 								deployment.Spec.Template.Spec.Containers[i].Env,
 								newEnvVars...)
 						}
-						modifiedObj, derr := runtime.DefaultUnstructuredConverter.ToUnstructured(deployment)
-						if derr != nil {
-							fmt.Printf("Failed to marshal updated deployment: %v", derr)
-						}
 
-						// Remove managedFields from the unstructured object
-						if _, ok := modifiedObj["metadata"].(map[string]interface{}); ok {
-							delete(modifiedObj["metadata"].(map[string]interface{}), "managedFields")
+						// Update the deployment using client.Client
+						if err := client.Update(ctx, deployment); err != nil {
+							fmt.Printf("Failed to update deployment: %v\n", err)
 						}
+						// modifiedObj, derr := runtime.DefaultUnstructuredConverter.ToUnstructured(deployment)
+						// if derr != nil {
+						// 	fmt.Printf("Failed to marshal updated deployment: %v", derr)
+						// }
 
-						modifiedUnstructured := &unstructured.Unstructured{Object: modifiedObj}
-						modifiedBytes, merr := json.Marshal(modifiedUnstructured)
-						if merr != nil {
-							fmt.Printf("Failed to marshal updated deployment: %v", merr)
-						}
-						gvr := appsv1.SchemeGroupVersion.WithResource("deployments")
-						_, merr = dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(),
-							createdObj.GetName(),
-							types.ApplyPatchType,
-							modifiedBytes,
-							metav1.PatchOptions{
-								FieldManager: "gmc-controller",
-								Force:        ptr.To(true),
-							})
-						if merr != nil {
-							fmt.Printf("Failed to patch deployment: %v", merr)
-						}
+						// // Remove managedFields from the unstructured object
+						// if _, ok := modifiedObj["metadata"].(map[string]interface{}); ok {
+						// 	delete(modifiedObj["metadata"].(map[string]interface{}), "managedFields")
+						// }
+
+						// modifiedUnstructured := &unstructured.Unstructured{Object: modifiedObj}
+						// modifiedBytes, merr := json.Marshal(modifiedUnstructured)
+						// if merr != nil {
+						// 	fmt.Printf("Failed to marshal updated deployment: %v", merr)
+						// }
+						// gvr := appsv1.SchemeGroupVersion.WithResource("deployments")
+						// _, merr = dynamicClient.Resource(gvr).Namespace(ns).Patch(context.TODO(),
+						// 	createdObj.GetName(),
+						// 	types.ApplyPatchType,
+						// 	modifiedBytes,
+						// 	metav1.PatchOptions{
+						// 		FieldManager: "gmc-controller",
+						// 		Force:        ptr.To(true),
+						// 	})
+						// if merr != nil {
+						// 	fmt.Printf("Failed to patch deployment: %v", merr)
+						// }
 					}
 				}
 				break
@@ -257,7 +256,7 @@ func getServiceURL(service *corev1.Service) string {
 	return ""
 }
 
-func applyCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
+func applyRouterConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
 	var userDefinedCfg RouterCfg
 	if step == "router" {
 		userDefinedCfg = RouterCfg{
@@ -265,25 +264,25 @@ func applyCustomConfig(step string, svcCfg *map[string]string, yamlFile []byte) 
 			HttpProxy:  (*svcCfg)["http_proxy"],
 			HttpsProxy: (*svcCfg)["https_proxy"],
 			GRAPH_JSON: (*svcCfg)["nodes"]}
+		fmt.Printf("user config %v\n", userDefinedCfg)
+
+		tmpl, err := template.New("yamlTemplate").Parse(string(yamlFile))
+		if err != nil {
+			return string(yamlFile), fmt.Errorf("error parsing template: %v", err)
+		}
+
+		var appliedCfg bytes.Buffer
+		err = tmpl.Execute(&appliedCfg, userDefinedCfg)
+		if err != nil {
+			return string(yamlFile), fmt.Errorf("error executing template: %v", err)
+		} else {
+			// fmt.Printf("applied config %s\n", appliedCfg.String())
+			return appliedCfg.String(), nil
+		}
 	} else {
 		return string(yamlFile), nil
 	}
 
-	fmt.Printf("user config %v\n", userDefinedCfg)
-
-	tmpl, err := template.New("yamlTemplate").Parse(string(yamlFile))
-	if err != nil {
-		return string(yamlFile), fmt.Errorf("error parsing template: %v", err)
-	}
-
-	var appliedCfg bytes.Buffer
-	err = tmpl.Execute(&appliedCfg, userDefinedCfg)
-	if err != nil {
-		return string(yamlFile), fmt.Errorf("error executing template: %v", err)
-	} else {
-		// fmt.Printf("applied config %s\n", appliedCfg.String())
-		return appliedCfg.String(), nil
-	}
 }
 
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors,verbs=get;list;watch;create;update;patch;delete
@@ -314,16 +313,16 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 
-	config, err := getKubeConfig()
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-	dynamicClient, err := dynamic.NewForConfig(config)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
+	// config, err := getKubeConfig()
+	// if err != nil {
+	// 	return reconcile.Result{}, err
+	// }
+	// // dynamicClient, err := dynamic.NewForConfig(config)
+	// // if err != nil {
+	// // 	return reconcile.Result{}, err
+	// // }
 
-	err = preProcessUserConfigmap(ctx, dynamicClient, req.NamespacedName.Namespace, xeon, graph)
+	err := preProcessUserConfigmap(ctx, r.Client, req.NamespacedName.Namespace, xeon, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
 	}
@@ -351,7 +350,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
 
 				service := &corev1.Service{}
-				err := reconcileResource(ctx, dynamicClient, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
+				err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
 				}
@@ -388,7 +387,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			graph.Spec.RouterConfig.Config = make(map[string]string)
 		}
 		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-		err = reconcileResource(ctx, dynamicClient, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
+		err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, nil)
 		if err != nil {
 			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 		}
@@ -404,7 +403,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 // read the configmap file from the manifests
 // update the values of the fields in the configmap
 // add service details to the fields
-func preProcessUserConfigmap(ctx context.Context, dynamicClient *dynamic.DynamicClient, ns string, hwType string, gmcGraph *mcv1alpha3.GMConnector) error {
+func preProcessUserConfigmap(ctx context.Context, client client.Client, ns string, hwType string, gmcGraph *mcv1alpha3.GMConnector) error {
 	var cfgFile string
 	// var adjustFile string
 	if hwType == xeon {
@@ -437,7 +436,7 @@ func preProcessUserConfigmap(ctx context.Context, dynamicClient *dynamic.Dynamic
 	if err != nil {
 		return fmt.Errorf("failed to marshal YAML data: %v", err)
 	}
-	_, err = applyResourceToK8s(ctx, dynamicClient, ns, adjustedCmBytes)
+	_, err = applyResourceToK8s(ctx, client, ns, "", adjustedCmBytes)
 	if err != nil {
 		return fmt.Errorf("failed to apply the adjusted configmap: %v", err)
 	} else {
@@ -447,24 +446,81 @@ func preProcessUserConfigmap(ctx context.Context, dynamicClient *dynamic.Dynamic
 	return nil
 }
 
-func applyResourceToK8s(ctx context.Context, dynamicClient *dynamic.DynamicClient, ns string, resource []byte) (*unstructured.Unstructured, error) {
+func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc string, resource []byte) (*unstructured.Unstructured, error) {
 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 	obj := &unstructured.Unstructured{}
-	_, gvk, err := decUnstructured.Decode(resource, nil, obj)
+	_, _, err := decUnstructured.Decode(resource, nil, obj)
 	if err != nil {
 		return nil, fmt.Errorf("failed to decode YAML: %v", err)
 	}
-	gvr, _ := meta.UnsafeGuessKindToResource(*gvk)
-	patchBytes, err := json.Marshal(obj)
-	if err != nil {
-		return nil, fmt.Errorf("failed to marshal config to json: %v", err)
+
+	// Set the namespace if it's specified
+	if ns != "" {
+		obj.SetNamespace(ns)
 	}
 
-	return dynamicClient.Resource(gvr).Namespace(ns).Patch(ctx, obj.GetName(), types.ApplyPatchType, patchBytes, metav1.PatchOptions{
-		FieldManager: "gmc-controller",
-		Force:        ptr.To(true),
-	})
+	if svc != "" {
+		if obj.GetKind() == Service {
+			obj.SetName(svc)
+			selectors, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector")
+			if err != nil {
+				return nil, fmt.Errorf("failed to get selectors: %v", err)
+			}
+			if found {
+				selectors["app"] = svc + "-deployment" // Set the new selector.app value
+				err = unstructured.SetNestedStringMap(obj.Object, selectors, "spec", "selector")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set new selector.app: %v", err)
+				}
+			}
+		}
+		if obj.GetKind() == "Deployment" {
+			obj.SetName(svc + "-deployment")
+			// Set the labels if they're specified
+			labels, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector", "matchLabels")
+			if err != nil {
+				return nil, fmt.Errorf("failed to get matchLabels: %v", err)
+			}
+			if found {
+				labels["app"] = svc + "-deployment"
+				err = unstructured.SetNestedStringMap(obj.Object, labels, "metadata", "selector", "matchLabels")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set new matchLabels : %v", err)
+				}
+			}
+			// Set the labels in template if they're specified
+			labels, found, err = unstructured.NestedStringMap(obj.Object, "template", "metadata", "labels")
+			if err != nil {
+				return nil, fmt.Errorf("failed to get template Labels: %v", err)
+			}
+			if found {
+				labels["app"] = svc + "-deployment"
+				err = unstructured.SetNestedStringMap(obj.Object, labels, "template", "metadata", "labels")
+				if err != nil {
+					return nil, fmt.Errorf("failed to set new template label: %v", err)
+				}
+			}
+		}
+	}
+
+	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
+	// This might involve trying an Update and, if it fails because the object doesn't exist, falling back to Create.
+	err = c.Update(ctx, obj, &client.UpdateOptions{})
+	if err != nil {
+		// If the error is due to the object not existing, you can handle it here by creating the object instead.
+		// This is a simplistic approach; you might need more sophisticated error handling.
+		if apierr.IsNotFound(err) {
+			err = c.Create(ctx, obj, &client.CreateOptions{})
+			if err != nil {
+				return nil, fmt.Errorf("failed to create resource: %v", err)
+			}
+		} else {
+			return nil, fmt.Errorf("failed to update resource: %v", err)
+		}
+	}
+
+	return obj, nil
 }
 
 func getNsFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
@@ -607,7 +663,7 @@ func getServiceDetailsFromManifests(filePath string) (string, int, error) {
 		if err != nil {
 			return "", 0, err
 		}
-		if content.Service.Kind == "Service" {
+		if content.Service.Kind == Service {
 			if len(content.Service.Spec.Ports) > 0 {
 				return content.Service.Metadata.Name, content.Service.Spec.Ports[0].Port, nil
 			}

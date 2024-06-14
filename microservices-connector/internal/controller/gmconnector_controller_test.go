@@ -96,10 +96,10 @@ var _ = Describe("GMConnector Controller", func() {
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
-			if err != nil {
-				return
-			}
-			//Expect(err).NotTo(HaveOccurred())
+			// if err != nil {
+			// 	return
+			// }
+			Expect(err).NotTo(HaveOccurred())
 			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
 			// Example: If you expect a certain status condition after reconciliation, verify it here.
 		})
@@ -166,7 +166,7 @@ data:
 `
 
 	step := Router
-	actualCfg, err := applyCustomConfig(step, svcCfg, yamlFile)
+	actualCfg, err := applyRouterConfig(step, svcCfg, yamlFile)
 	if err != nil {
 		t.Errorf("applyCustomConfig() returned an error: %v", err)
 	}
@@ -192,7 +192,7 @@ data:
   key2: value2
 `)
 	expectedCfg := string(yamlFile)
-	actualCfg, err := applyCustomConfig(step, svcCfg, yamlFile)
+	actualCfg, err := applyRouterConfig(step, svcCfg, yamlFile)
 	if err != nil {
 		t.Errorf("applyCustomConfig() returned an error: %v", err)
 	}
