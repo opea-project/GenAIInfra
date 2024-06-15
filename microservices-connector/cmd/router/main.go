@@ -16,7 +16,7 @@ import (
 
 	// "regexp"
 	"strconv"
-	// "strings"
+	"strings"
 	"time"
 
 	"github.com/tidwall/gjson"
@@ -70,11 +70,32 @@ func isSuccessFul(statusCode int) bool {
 
 func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.Step {
 	if !gjson.ValidBytes(input) {
+		fmt.Println("the inpout json format is invalid")
 		return nil
 	}
 	for _, route := range routes {
-		if gjson.GetBytes(input, route.Condition).Exists() {
+		c := route.Condition
+		if gjson.GetBytes(input, c).Exists() {
 			return &route
+		}
+		if strings.ContainsAny(c, ".") || strings.ContainsAny(c, "#") {
+			continue
+		}
+		// todo define correct format
+		index := strings.Index(c, "==")
+		if index == -1 {
+			fmt.Println("No '==' found in the route.Condition")
+		} else {
+			key := strings.TrimSpace(c[:index])
+			value := strings.TrimSpace(c[index+2:])
+			v := gjson.GetBytes(input, key).String()
+			if v == value {
+				return &route
+			}
+			//default value , this requires the key ==  present in the condition with empty value
+			if v == "" {
+				return &route
+			}
 		}
 	}
 	return nil
