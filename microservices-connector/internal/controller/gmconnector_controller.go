@@ -133,57 +133,52 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 		if res == "" || !strings.Contains(res, "kind:") {
 			continue
 		}
-		// if create failed, wait 2s and retry, this will be removed when the monitor task is implemented
-		for {
-			createdObj, err := applyResourceToK8s(ctx, client, ns, svc, []byte(res))
-			if err != nil {
-				fmt.Printf("Failed to reconcile resource: %v\n", err)
-			} else {
-				fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
+		createdObj, err := applyResourceToK8s(ctx, client, ns, svc, []byte(res))
+		if err != nil {
+			fmt.Printf("Failed to reconcile resource: %v\n", err)
+		} else {
+			fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
 
-				// return the service obj to get the serivce URL from it
-				if retSvc != nil && createdObj.GetKind() == Service {
-					err = scheme.Scheme.Convert(createdObj, retSvc, nil)
-					if err != nil {
-						fmt.Printf("Failed to save service: %v\n", err)
-					}
+			// return the service obj to get the serivce URL from it
+			if retSvc != nil && createdObj.GetKind() == Service {
+				err = scheme.Scheme.Convert(createdObj, retSvc, nil)
+				if err != nil {
+					fmt.Printf("Failed to save service: %v\n", err)
 				}
-
-				if createdObj.GetKind() == "Deployment" && step != Router {
-					var newEnvVars []corev1.EnvVar
-					if svcCfg != nil {
-						for name, value := range *svcCfg {
-							if name == "endpoint" {
-								continue
-							}
-							itemEnvVar := corev1.EnvVar{
-								Name:  name,
-								Value: value,
-							}
-							newEnvVars = append(newEnvVars, itemEnvVar)
-						}
-					}
-					if len(newEnvVars) > 0 {
-						deployment := &appsv1.Deployment{}
-						err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
-						if err != nil {
-							fmt.Printf("Failed to save deployment: %v\n", err)
-						}
-						for i := range deployment.Spec.Template.Spec.Containers {
-							deployment.Spec.Template.Spec.Containers[i].Env = append(
-								deployment.Spec.Template.Spec.Containers[i].Env,
-								newEnvVars...)
-						}
-
-						// Update the deployment using client.Client
-						if err := client.Update(ctx, deployment); err != nil {
-							fmt.Printf("Failed to update deployment: %v\n", err)
-						}
-					}
-				}
-				break
 			}
-			time.Sleep(2 * time.Second)
+
+			if createdObj.GetKind() == "Deployment" && step != Router {
+				var newEnvVars []corev1.EnvVar
+				if svcCfg != nil {
+					for name, value := range *svcCfg {
+						if name == "endpoint" {
+							continue
+						}
+						itemEnvVar := corev1.EnvVar{
+							Name:  name,
+							Value: value,
+						}
+						newEnvVars = append(newEnvVars, itemEnvVar)
+					}
+				}
+				if len(newEnvVars) > 0 {
+					deployment := &appsv1.Deployment{}
+					err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
+					if err != nil {
+						fmt.Printf("Failed to save deployment: %v\n", err)
+					}
+					for i := range deployment.Spec.Template.Spec.Containers {
+						deployment.Spec.Template.Spec.Containers[i].Env = append(
+							deployment.Spec.Template.Spec.Containers[i].Env,
+							newEnvVars...)
+					}
+
+					// Update the deployment using client.Client
+					if err := client.Update(ctx, deployment); err != nil {
+						fmt.Printf("Failed to update deployment: %v\n", err)
+					}
+				}
+			}
 		}
 	}
 	return nil
@@ -413,8 +408,6 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 
 	if svc != "" {
 		if obj.GetKind() == Service {
-			//read resource as a yaml, create a readable struct
-
 			obj.SetName(svc)
 			selectors, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector")
 			if err != nil {
@@ -445,13 +438,13 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 			// Set the labels in template if they're specified
 			labels, found, err = unstructured.NestedStringMap(obj.Object, "spec", "template", "metadata", "labels")
 			if err != nil {
-				return nil, fmt.Errorf("failed to get template Labels: %v", err)
+				return nil, fmt.Errorf("failed to get spec.template.metadata.labels: %v", err)
 			}
 			if found {
 				labels["app"] = svc + "-deployment"
 				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "template", "metadata", "labels")
 				if err != nil {
-					return nil, fmt.Errorf("failed to set new template label: %v", err)
+					return nil, fmt.Errorf("failed to set spec.template.metadata.labels: %v", err)
 				}
 			}
 		}
@@ -460,21 +453,44 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 
 	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
 	// This might involve trying an Update and, if it fails because the object doesn't exist, falling back to Create.
-	err = c.Update(ctx, obj, &client.UpdateOptions{})
-	if err != nil {
-		// If the error is due to the object not existing, you can handle it here by creating the object instead.
-		// This is a simplistic approach; you might need more sophisticated error handling.
-		if apierr.IsNotFound(err) {
-			err = c.Create(ctx, obj, &client.CreateOptions{})
+	// Retry updating the resource in case of transient errors.
+	timeout := time.After(1 * time.Minute)
+	tick := time.NewTicker(1 * time.Second)
+	for {
+		select {
+		case <-ctx.Done():
+			return nil, fmt.Errorf("context cancelled")
+		case <-timeout:
+			return nil, fmt.Errorf("timed out while trying to update or create resource")
+		case <-tick.C:
+			// Get the latest version of the object
+			latest := &unstructured.Unstructured{}
+			latest.SetGroupVersionKind(obj.GroupVersionKind())
+			err = c.Get(ctx, client.ObjectKeyFromObject(obj), latest)
 			if err != nil {
-				return nil, fmt.Errorf("failed to create resource: %v", err)
+				if apierr.IsNotFound(err) {
+					// If the object doesn't exist, create it
+					err = c.Create(ctx, obj, &client.CreateOptions{})
+					if err != nil {
+						return nil, fmt.Errorf("failed to create resource: %v", err)
+					}
+				} else {
+					// If there was another error, continue
+					continue
+				}
+			} else {
+				// If the object does exist, update ithui
+				obj.SetResourceVersion(latest.GetResourceVersion()) // Ensure we're updating the latest version
+				err = c.Update(ctx, obj, &client.UpdateOptions{})
+				if err != nil {
+					continue
+				}
 			}
-		} else {
-			return nil, fmt.Errorf("failed to update resource: %v", err)
+
+			// If we reach this point, the operation was successful.
+			return obj, nil
 		}
 	}
-
-	return obj, nil
 }
 
 func getNsFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
