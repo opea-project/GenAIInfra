@@ -512,6 +512,23 @@ func getNsFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
 	return ""
 }
 
+func getSvcNameFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
+	for _, router := range gmcGraph.Spec.Nodes {
+		for _, step := range router.Steps {
+			if step.StepName == stepName {
+				// Check if InternalService is not nil
+				if step.Executor.ExternalService == "" {
+					// Check if NameSpace is not an empty string
+					if step.Executor.InternalService.ServiceName != "" {
+						return step.Executor.InternalService.ServiceName
+					}
+				}
+			}
+		}
+	}
+	return ""
+}
+
 func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, gmcGraph *mcv1alpha3.GMConnector) {
 	var embdManifest string
 	var rerankManifest string
@@ -538,11 +555,14 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			if err == nil {
 				//check GMC config if there is specific namespace for embedding
 				altNs := getNsFromGraph(gmcGraph, TeiEmbedding)
-				if altNs != "" {
-					data["TEI_EMBEDDING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
-				} else {
-					data["TEI_EMBEDDING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				if altNs == "" {
+					altNs = ns
 				}
+				altSvcName := getSvcNameFromGraph(gmcGraph, TeiEmbedding)
+				if altSvcName == "" {
+					altSvcName = svcName
+				}
+				data["TEI_EMBEDDING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
 			} else {
 				fmt.Printf("failed to get service details for %s: %v\n", embdManifest, err)
 			}
@@ -555,11 +575,14 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			if err == nil {
 				//check GMC config if there is specific namespace for reranking
 				altNs := getNsFromGraph(gmcGraph, TeiReranking)
-				if altNs != "" {
-					data["TEI_RERANKING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
-				} else {
-					data["TEI_RERANKING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				if altNs == "" {
+					altNs = ns
 				}
+				altSvcName := getSvcNameFromGraph(gmcGraph, TeiReranking)
+				if altSvcName == "" {
+					altSvcName = svcName
+				}
+				data["TEI_RERANKING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
 			} else {
 				fmt.Printf("failed to get service details for %s: %v\n", rerankManifest, err)
 			}
@@ -572,11 +595,14 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			if err == nil {
 				//check GMC config if there is specific namespace for tgillm
 				altNs := getNsFromGraph(gmcGraph, Tgi)
-				if altNs != "" {
-					data["TGI_LLM_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
-				} else {
-					data["TGI_LLM_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", svcName, ns, port)
+				if altNs == "" {
+					altNs = ns
 				}
+				altSvcName := getSvcNameFromGraph(gmcGraph, Tgi)
+				if altSvcName == "" {
+					altSvcName = svcName
+				}
+				data["TGI_LLM_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
 			} else {
 				fmt.Printf("failed to get service details for %s: %v\n", tgiManifest, err)
 			}
@@ -588,11 +614,15 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			svcName, port, err := getServiceDetailsFromManifests(redisManifest)
 			if err == nil {
 				//check GMC config if there is specific namespace for tgillm
-				altNs := getNsFromGraph(gmcGraph, Tgi)
+				altNs := getNsFromGraph(gmcGraph, VectorDB)
 				if altNs == "" {
 					altNs = ns
 				}
-				data["REDIS_URL"] = fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", svcName, altNs, port)
+				altSvcName := getSvcNameFromGraph(gmcGraph, VectorDB)
+				if altSvcName == "" {
+					altSvcName = svcName
+				}
+				data["REDIS_URL"] = fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
 			} else {
 				fmt.Printf("failed to get service details for %s: %v\n", redisManifest, err)
 			}

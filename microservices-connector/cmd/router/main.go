@@ -13,7 +13,6 @@ import (
 	"io"
 	"net/http"
 	"os"
-	"strings"
 
 	// "regexp"
 	"strconv"
@@ -74,22 +73,6 @@ func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.
 		return nil
 	}
 	for _, route := range routes {
-		c := route.Condition
-		index := strings.Index(c, "==")
-		if index == -1 {
-			fmt.Println("No '==' found in the route.Condition")
-		} else {
-			key := strings.TrimSpace(c[:index])
-			value := strings.TrimSpace(c[index+2:])
-			v := gjson.GetBytes(input, key).String()
-			if v == value {
-				return &route
-			}
-			//default value
-			if v == "" {
-				return &route
-			}
-		}
 		if gjson.GetBytes(input, route.Condition).Exists() {
 			return &route
 		}
