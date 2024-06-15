@@ -64,6 +64,8 @@ const (
 	reranking_yaml                   = "/reranking.yaml"
 	yaml_dir                         = "/tmp/microservices/yamls"
 	Service                          = "Service"
+	Deployment                       = "Deployment"
+	dplymtSubfix                     = "-deployment"
 )
 
 // GMConnectorReconciler reconciles a GMConnector object
@@ -147,7 +149,7 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 				}
 			}
 
-			if createdObj.GetKind() == "Deployment" && step != Router {
+			if createdObj.GetKind() == Deployment && step != Router {
 				var newEnvVars []corev1.EnvVar
 				if svcCfg != nil {
 					for name, value := range *svcCfg {
@@ -414,22 +416,22 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 				return nil, fmt.Errorf("failed to get selectors: %v", err)
 			}
 			if found {
-				selectors["app"] = svc + "-deployment" // Set the new selector.app value
+				selectors["app"] = svc + dplymtSubfix // Set the new selector.app value
 				err = unstructured.SetNestedStringMap(obj.Object, selectors, "spec", "selector")
 				if err != nil {
 					return nil, fmt.Errorf("failed to set new selector.app: %v", err)
 				}
 			}
 		}
-		if obj.GetKind() == "Deployment" {
-			obj.SetName(svc + "-deployment")
+		if obj.GetKind() == Deployment {
+			obj.SetName(svc + dplymtSubfix)
 			// Set the labels if they're specified
 			labels, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector", "matchLabels")
 			if err != nil {
 				return nil, fmt.Errorf("failed to get spec.selector.matchLabels: %v", err)
 			}
 			if found {
-				labels["app"] = svc + "-deployment"
+				labels["app"] = svc + dplymtSubfix
 				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "selector", "matchLabels")
 				if err != nil {
 					return nil, fmt.Errorf("failed to set new spec.selector.matchLabels : %v", err)
@@ -441,7 +443,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 				return nil, fmt.Errorf("failed to get spec.template.metadata.labels: %v", err)
 			}
 			if found {
-				labels["app"] = svc + "-deployment"
+				labels["app"] = svc + dplymtSubfix
 				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "template", "metadata", "labels")
 				if err != nil {
 					return nil, fmt.Errorf("failed to set spec.template.metadata.labels: %v", err)
