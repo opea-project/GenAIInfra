@@ -25,7 +25,6 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
-	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -311,6 +310,8 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	//to start a router controller
+	//in case the graph changes, we need to apply the changes to router service
+	//so we need to apply the router config every time
 	routerService := &corev1.Service{}
 	var router_ns string
 	if graph.Spec.RouterConfig.NameSpace == "" {
@@ -318,26 +319,23 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	} else {
 		router_ns = graph.Spec.RouterConfig.NameSpace
 	}
-	err = r.Client.Get(ctx, types.NamespacedName{Namespace: router_ns, Name: graph.Spec.RouterConfig.ServiceName}, routerService)
-	if err == nil {
-		fmt.Println("success to get router service ", graph.Spec.RouterConfig.ServiceName)
-	} else {
-		jsonBytes, err := json.Marshal(graph)
-		if err != nil {
-			// handle error
-			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
-		}
-		jsonString := string(jsonBytes)
-		if graph.Spec.RouterConfig.Config == nil {
-			graph.Spec.RouterConfig.Config = make(map[string]string)
-		}
-		graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-		//set empty service name, because we don't want to change router service name and deployment name
-		err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, "", &graph.Spec.RouterConfig.Config, routerService)
-		if err != nil {
-			return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
-		}
+
+	jsonBytes, err := json.Marshal(graph)
+	if err != nil {
+		// handle error
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
 	}
+	jsonString := string(jsonBytes)
+	if graph.Spec.RouterConfig.Config == nil {
+		graph.Spec.RouterConfig.Config = make(map[string]string)
+	}
+	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
+	//set empty service name, because we don't want to change router service name and deployment name
+	err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, routerService)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
+	}
+
 	graph.Status.AccessURL = getServiceURL(routerService)
 	fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
 
