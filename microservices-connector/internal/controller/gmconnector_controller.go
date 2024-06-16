@@ -414,7 +414,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 				return nil, fmt.Errorf("failed to get selectors: %v", err)
 			}
 			if found {
-				selectors["app"] = svc + dplymtSubfix // Set the new selector.app value
+				selectors["app"] = svc // Set the new selector.app value
 				err = unstructured.SetNestedStringMap(obj.Object, selectors, "spec", "selector")
 				if err != nil {
 					return nil, fmt.Errorf("failed to set new selector.app: %v", err)
@@ -429,7 +429,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 				return nil, fmt.Errorf("failed to get spec.selector.matchLabels: %v", err)
 			}
 			if found {
-				labels["app"] = svc + dplymtSubfix
+				labels["app"] = svc
 				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "selector", "matchLabels")
 				if err != nil {
 					return nil, fmt.Errorf("failed to set new spec.selector.matchLabels : %v", err)
@@ -441,7 +441,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 				return nil, fmt.Errorf("failed to get spec.template.metadata.labels: %v", err)
 			}
 			if found {
-				labels["app"] = svc + dplymtSubfix
+				labels["app"] = svc
 				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "template", "metadata", "labels")
 				if err != nil {
 					return nil, fmt.Errorf("failed to set spec.template.metadata.labels: %v", err)
