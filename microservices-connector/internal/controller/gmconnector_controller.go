@@ -687,9 +687,13 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				return true
 			}
 
+			specChanged := !reflect.DeepEqual(oldObject.Spec, newObject.Spec)
+			metadataChanged := !reflect.DeepEqual(oldObject.ObjectMeta, newObject.ObjectMeta)
+
+			fmt.Printf("\nspec changed %t | meta changed: %t\n", specChanged, metadataChanged)
+
 			// Compare the old and new spec and metadata, ignore status changes
-			return reflect.DeepEqual(oldObject.Spec, newObject.Spec) &&
-				reflect.DeepEqual(oldObject.ObjectMeta, newObject.ObjectMeta)
+			return specChanged || metadataChanged
 		},
 		// Other funcs like CreateFunc, DeleteFunc, GenericFunc can be left as default
 		// if you only want to customize the UpdateFunc behavior.
