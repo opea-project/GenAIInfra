@@ -47,11 +47,11 @@ jobs:
               if [ $(printf '%s\n' "${changed_files[@]}" | grep ${example} | grep -c xeon) != 0 ]; then run_hardware="xeon ${run_hardware}"; fi
               if [[ -z "$run_hardware" ]]; then run_hardware="xeon"; fi
               for hw in ${run_hardware}; do
+                  lower_example=$(echo "${example}" | tr '[:upper:]' '[:lower:]')
                   if [ $hw = "gaudi" ]; then
-                      continue # skip gaudi for K8s test temporarily
+                      run_matrix="${run_matrix}{\"example\":\"${lower_example}\",\"hardware\":\"gaudi\"},"
                   else
-                      lower_example=$(echo "${example}" | tr '[:upper:]' '[:lower:]')
-                      run_matrix="${run_matrix}{\"example\":\"${lower_example}\",\"hardware\":\"k8s\"},"
+                      run_matrix="${run_matrix}{\"example\":\"${lower_example}\",\"hardware\":\"xeon\"},"
                   fi
               done
           done
@@ -89,14 +89,14 @@ jobs:
 
       - name: Initialize manifest testing
         run: |
-          .github/workflows/scripts/e2e/manifest_test.sh init_${{ matrix.example }}
+          .github/workflows/scripts/e2e/manifest_${{ matrix.hardware }}_test.sh init_${{ matrix.example }}
 
       - name: Kubectl install
         id: install
         run: |
           echo "should_cleanup=true" >> $GITHUB_ENV
           kubectl create ns $NAMESPACE
-          .github/workflows/scripts/e2e/manifest_test.sh install_${{ matrix.example }} $NAMESPACE
+          .github/workflows/scripts/e2e/manifest_${{ matrix.hardware }}_test.sh install_${{ matrix.example }} $NAMESPACE
           echo "Testing ${{ matrix.example }}, waiting for pod ready..."
           if kubectl rollout status deployment --namespace "$NAMESPACE" --timeout "$ROLLOUT_TIMEOUT_SECONDS"; then
             echo "Testing manifests ${{ matrix.example }}, waiting for pod ready done!"
@@ -113,7 +113,7 @@ jobs:
           if $skip_validate; then
             echo "Skip validate"
           else
-            .github/workflows/scripts/e2e/manifest_test.sh validate_${{ matrix.example }} $NAMESPACE
+            .github/workflows/scripts/e2e/manifest_${{ matrix.hardware }}_test.sh validate_${{ matrix.example }} $NAMESPACE
           fi
 
       - name: Kubectl uninstall
