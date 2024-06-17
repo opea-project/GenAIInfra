@@ -136,15 +136,15 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 		}
 		createdObj, err := applyResourceToK8s(ctx, client, ns, svc, []byte(res))
 		if err != nil {
-			fmt.Printf("Failed to reconcile resource: %v\n", err)
+			return fmt.Errorf("Failed to reconcile resource: %v\n", err)
 		} else {
 			fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
 
-			// return the service obj to get the serivce URL from it
+			// return the service obj to get the service URL from it
 			if retSvc != nil && createdObj.GetKind() == Service {
 				err = scheme.Scheme.Convert(createdObj, retSvc, nil)
 				if err != nil {
-					fmt.Printf("Failed to save service: %v\n", err)
+					return fmt.Errorf("Failed to save service: %v\n", err)
 				}
 			}
 
@@ -166,7 +166,7 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 					deployment := &appsv1.Deployment{}
 					err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
 					if err != nil {
-						fmt.Printf("Failed to save deployment: %v\n", err)
+						return fmt.Errorf("Failed to save deployment: %v\n", err)
 					}
 					for i := range deployment.Spec.Template.Spec.Containers {
 						deployment.Spec.Template.Spec.Containers[i].Env = append(
@@ -176,7 +176,7 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 
 					// Update the deployment using client.Client
 					if err := client.Update(ctx, deployment); err != nil {
-						fmt.Printf("Failed to update deployment: %v\n", err)
+						return fmt.Errorf("Failed to update deployment: %v\n", err)
 					}
 				}
 			}
@@ -271,18 +271,14 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
 	}
 
-	// TODO
-	// we need add a config if the hardware is gaudi
-	// no matter guadi or xeon, the manifest read configmap by name "qna-config"
-	// err = preProcessUserConfigmap(ctx, dynamicClient, req.NamespacedName.Namespace, gaudi, graph)
-	// if err != nil {
-	// 	return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for gaudi")
-	// }
+	var totalService uint
+	var externalService uint
+	var successService uint
 
 	for nodeName, node := range graph.Spec.Nodes {
 		for i, step := range node.Steps {
 			fmt.Println("\nreconcile resource for node:", step.StepName)
-
+			totalService += 1
 			if step.Executor.ExternalService == "" {
 				var ns string
 				if step.Executor.InternalService.NameSpace == "" {
@@ -298,12 +294,14 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
 				}
-
+				successService += 1
 				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
 				fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
+
 			} else {
 				fmt.Println("external service is found", "name", step.ExternalService)
 				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = step.ExternalService
+				externalService += 1
 			}
 		}
 		fmt.Println()
@@ -339,7 +337,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	graph.Status.AccessURL = getServiceURL(routerService)
 	fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
 
-	graph.Status.Status = "Success"
+	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
 	if err = r.Status().Update(context.TODO(), graph); err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
 	}
@@ -493,7 +491,9 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 	}
 }
 
-func getNsFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
+func getNsNameFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) (string, string) {
+	var retNs string
+	var retName string
 	for _, router := range gmcGraph.Spec.Nodes {
 		for _, step := range router.Steps {
 			if step.StepName == stepName {
@@ -501,30 +501,16 @@ func getNsFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
 				if step.Executor.ExternalService == "" {
 					// Check if NameSpace is not an empty string
 					if step.Executor.InternalService.NameSpace != "" {
-						return step.Executor.InternalService.NameSpace
+						retNs = step.Executor.InternalService.NameSpace
 					}
-				}
-			}
-		}
-	}
-	return ""
-}
-
-func getSvcNameFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) string {
-	for _, router := range gmcGraph.Spec.Nodes {
-		for _, step := range router.Steps {
-			if step.StepName == stepName {
-				// Check if InternalService is not nil
-				if step.Executor.ExternalService == "" {
-					// Check if NameSpace is not an empty string
 					if step.Executor.InternalService.ServiceName != "" {
-						return step.Executor.InternalService.ServiceName
+						retName = step.Executor.InternalService.ServiceName
 					}
 				}
 			}
 		}
 	}
-	return ""
+	return retNs, retName
 }
 
 func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, gmcGraph *mcv1alpha3.GMConnector) {
@@ -552,11 +538,10 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			svcName, port, err := getServiceDetailsFromManifests(embdManifest)
 			if err == nil {
 				//check GMC config if there is specific namespace for embedding
-				altNs := getNsFromGraph(gmcGraph, TeiEmbedding)
+				altNs, altSvcName := getNsNameFromGraph(gmcGraph, TeiEmbedding)
 				if altNs == "" {
 					altNs = ns
 				}
-				altSvcName := getSvcNameFromGraph(gmcGraph, TeiEmbedding)
 				if altSvcName == "" {
 					altSvcName = svcName
 				}
@@ -572,11 +557,10 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			svcName, port, err := getServiceDetailsFromManifests(rerankManifest)
 			if err == nil {
 				//check GMC config if there is specific namespace for reranking
-				altNs := getNsFromGraph(gmcGraph, TeiReranking)
+				altNs, altSvcName := getNsNameFromGraph(gmcGraph, TeiReranking)
 				if altNs == "" {
 					altNs = ns
 				}
-				altSvcName := getSvcNameFromGraph(gmcGraph, TeiReranking)
 				if altSvcName == "" {
 					altSvcName = svcName
 				}
@@ -592,11 +576,10 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			svcName, port, err := getServiceDetailsFromManifests(tgiManifest)
 			if err == nil {
 				//check GMC config if there is specific namespace for tgillm
-				altNs := getNsFromGraph(gmcGraph, Tgi)
+				altNs, altSvcName := getNsNameFromGraph(gmcGraph, Tgi)
 				if altNs == "" {
 					altNs = ns
 				}
-				altSvcName := getSvcNameFromGraph(gmcGraph, Tgi)
 				if altSvcName == "" {
 					altSvcName = svcName
 				}
@@ -612,11 +595,10 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 			svcName, port, err := getServiceDetailsFromManifests(redisManifest)
 			if err == nil {
 				//check GMC config if there is specific namespace for tgillm
-				altNs := getNsFromGraph(gmcGraph, VectorDB)
+				altNs, altSvcName := getNsNameFromGraph(gmcGraph, VectorDB)
 				if altNs == "" {
 					altNs = ns
 				}
-				altSvcName := getSvcNameFromGraph(gmcGraph, VectorDB)
 				if altSvcName == "" {
 					altSvcName = svcName
 				}
