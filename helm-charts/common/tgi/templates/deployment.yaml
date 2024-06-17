@@ -34,6 +34,10 @@ spec:
               value: {{ .Values.LLM_MODEL_ID }}
             - name: PORT
               value: {{ .Values.port | quote }}
+            - name: HUGGING_FACE_HUB_TOKEN
+              value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+            - name: HF_TOKEN
+              value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
@@ -51,28 +55,8 @@ spec:
             - name: http
               containerPort: {{ .Values.port }}
               protocol: TCP
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: http
-#          startupProbe:
-#            httpGet:
-#              path: /
-#              port: {{ .Values.port }}
-#            initialDelaySeconds: 5
-#            periodSeconds: 5
-#            failureThreshold: 120
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: {{ .Values.port }}
-#            initialDelaySeconds: 5
-#            periodSeconds: 5
-#            failureThreshold: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-            #          command:
-            #            - "/usr/bin/bash"
       volumes:
         - name: model-volume
           hostPath:
