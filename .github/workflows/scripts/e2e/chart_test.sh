@@ -64,15 +64,14 @@ function validate_chatqna() {
     ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
     port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     # Curl the Mega Service
-    curl http://${ip_address}:${port}/v1/chatqna -H "Content-Type: application/json" -d '{
-        "model": "Intel/neural-chat-7b-v3-3",
-        "messages": "What is the revenue of Nike in 2023?"}' > ${LOG_PATH}/curl_megaservice.log
+    curl http://${ip_address}:${port}/v1/chatqna -H "Content-Type: application/json" \
+    -d '{ "messages": "What is the revenue of Nike in 2023?" }' > ${LOG_PATH}/e2e_chart_chatqna.log
     exit_code=$?
 
     echo "Checking response results, make sure the output is reasonable. "
     local status=false
-    if [[ -f $LOG_PATH/curl_megaservice.log ]] && \
-    [[ $(grep -c "billion" $LOG_PATH/curl_megaservice.log) != 0 ]]; then
+    if [[ -f ${LOG_PATH}/e2e_chart_chatqna.log ]] && \
+    [[ $(grep -c "billion" ${LOG_PATH}/e2e_chart_chatqna.log) != 0 ]]; then
         status=true
     fi
 

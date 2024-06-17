@@ -73,7 +73,7 @@ function validate_chatqna() {
    export CLIENT_POD=$(kubectl get pod -n $APP_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
    accessUrl=$(kubectl get gmc -n $APP_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
-   kubectl exec "$CLIENT_POD" -n $APP_NAMESPACE -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json' > $LOG_PATH/curl_chatqna.log
+   kubectl exec "$CLIENT_POD" -n $APP_NAMESPACE -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json' > $LOG_PATH/e2e_gmc_chatqna.log
    exit_code=$?
    if [ $exit_code -ne 0 ]; then
        echo "chatqna failed, please check the logs in ${LOG_PATH}!"
@@ -82,9 +82,10 @@ function validate_chatqna() {
 
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
-   if [[ -f $LOG_PATH/curl_chatqna.log ]] && \
-   [[ $(grep -c "billion" $LOG_PATH/curl_chatqna.log) != 0 ]]; then
+   if [[ -f $LOG_PATH/e2e_gmc_chatqna.log ]] && \
+   [[ $(grep -c "billion" $LOG_PATH/e2e_gmc_chatqna.log) != 0 ]]; then
        status=true
+       cat $LOG_PATH/e2e_gmc_chatqna.log
    fi
    if [ $status == false ]; then
        echo "Response check failed, please check the logs in artifacts!"
