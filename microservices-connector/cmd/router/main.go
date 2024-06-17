@@ -92,10 +92,7 @@ func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.
 			if v == value {
 				return &route
 			}
-			//default value , this requires the key ==  present in the condition with empty value
-			if v == "" {
-				return &route
-			}
+			//todo define default match
 		}
 	}
 	return nil
