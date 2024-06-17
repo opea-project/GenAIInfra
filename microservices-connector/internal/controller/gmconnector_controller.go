@@ -674,8 +674,10 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 			fmt.Printf("\nspec changed %t | meta changed: %t\n", specChanged, metadataChanged)
 
-			// Compare the old and new spec and metadata, ignore status changes
-			return specChanged || metadataChanged
+			// Compare the old and new spec, ignore metadata, status changes
+			// metadata change: name, namespace, such change should create a new GMC
+			// status change: depoyment status
+			return specChanged
 		},
 		// Other funcs like CreateFunc, DeleteFunc, GenericFunc can be left as default
 		// if you only want to customize the UpdateFunc behavior.
