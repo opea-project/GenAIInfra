@@ -21,11 +21,11 @@ helm install llm llm-uservice --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -
 
 ## Values
 
-| Key                      | Type   | Default                               | Description                                                                                                                              |
-| ------------------------ | ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| Key                             | Type   | Default                               | Description                                                                                                                              |
+| ------------------------------- | ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | global.HUGGINGFACEHUB_API_TOKEN | string | `""`                                  | Your own Hugging Face API token                                                                                                          |
-| image.repository         | string | `"opea/llm-tgi:latest"`               |                                                                                                                                          |
-| service.port             | string | `"9000"`                              |                                                                                                                                          |
-| tgi.LLM_MODEL_ID         | string | `"m-a-p/OpenCodeInterpreter-DS-6.7B"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                 |
-| tgi.port                 | string | `"80"`                                | Hugging Face Text Generation Inference service port                                                                                      |
-| tgi.volume               | string | `"/mnt"`                              | Cached models directory, tgi will not download if the model is cached here. The "volume" will be mounted to container as /data directory |
+| image.repository                | string | `"opea/llm-tgi:latest"`               |                                                                                                                                          |
+| service.port                    | string | `"9000"`                              |                                                                                                                                          |
+| tgi.LLM_MODEL_ID                | string | `"m-a-p/OpenCodeInterpreter-DS-6.7B"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                 |
+| tgi.port                        | string | `"80"`                                | Hugging Face Text Generation Inference service port                                                                                      |
+| tgi.volume                      | string | `"/mnt"`                              | Cached models directory, tgi will not download if the model is cached here. The "volume" will be mounted to container as /data directory |
