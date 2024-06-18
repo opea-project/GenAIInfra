@@ -173,6 +173,8 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 							deployment.Spec.Template.Spec.Containers[i].Env,
 							newEnvVars...)
 					}
+					//overwrite the managed fields is needed, we write this deployment twice here
+					deployment.ManagedFields = nil
 
 					// Update the deployment using client.Client
 					if err := client.Update(ctx, deployment); err != nil {
