@@ -9,6 +9,16 @@ MOUNT_DIR=/home/$USER_ID/charts-mnt
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
 IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
 
+function init_codetrans() {
+    # executed under path manifest/codetrans/xeon
+    # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
+    find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
+    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"$IMAGE_REPO/opea/#g" {} \;
+    # set huggingface token
+    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+}
+
 function init_codegen() {
     # executed under path manifest/codegen/xeon
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
@@ -17,6 +27,11 @@ function init_codegen() {
     find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"$IMAGE_REPO/opea/#g" {} \;
     # set huggingface token
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+}
+
+function install_codetrans {
+    echo "namespace is $NAMESPACE"
+    kubectl apply -f . -n $NAMESPACE
 }
 
 function install_codegen {
@@ -44,6 +59,35 @@ function install_chatqna {
     done
     sleep 60
     kubectl apply -f chaqna-xeon-backend-server.yaml -n $NAMESPACE
+}
+
+function validate_codetrans() {
+    ip_address=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+    port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+    echo "try to curl http://${ip_address}:${port}/v1/chat/completions..."
+    # Curl the CodeTrans LLM Service
+    curl http://${ip_address}:${port}/v1/chat/completions \
+      -X POST \
+      -d '{"query":"    ### System: Please translate the following Golang codes into  Python codes.    ### Original codes:    '\'''\'''\''Golang    \npackage main\n\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello, World!\");\n    '\'''\'''\''    ### Translated codes:"}' \
+      -H 'Content-Type: application/json' > $LOG_PATH/curl_codetrans.log
+    exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo "LLM for codetrans failed, please check the logs in ${LOG_PATH}!"
+        exit 1
+    fi
+
+    echo "Checking response results, make sure the output is reasonable. "
+    local status=false
+    if [[ -f $LOG_PATH/curl_codetrans.log ]] && \
+    [[ $(grep -c "Hello" $LOG_PATH/curl_codetrans.log) != 0 ]]; then
+        status=true
+    fi
+
+    if [ $status == false ]; then
+        echo "Response check failed, please check the logs in artifacts!"
+    else
+        echo "Response check succeed!"
+    fi
 }
 
 function validate_codegen() {
@@ -114,6 +158,11 @@ if [ $# -eq 0 ]; then
 fi
 
 case "$1" in
+    init_codetrans)
+        pushd manifests/CodeTrans/xeon
+        init_codetrans
+        popd
+        ;;
     init_codegen)
         pushd manifests/CodeGen/xeon
         init_codegen
@@ -122,6 +171,12 @@ case "$1" in
     init_chatqna)
         pushd manifests/ChatQnA
         init_chatqna
+        popd
+        ;;
+    install_codetrans)
+        pushd manifests/CodeTrans/xeon
+        NAMESPACE=$2
+        install_codetrans
         popd
         ;;
     install_codegen)
@@ -135,6 +190,11 @@ case "$1" in
         NAMESPACE=$2
         install_chatqna
         popd
+        ;;
+    validate_codetrans)
+        NAMESPACE=$2
+        SERVICE_NAME=llm-llm-uservice
+        validate_codetrans
         ;;
     validate_codegen)
         NAMESPACE=$2

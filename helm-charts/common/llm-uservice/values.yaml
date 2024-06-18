@@ -6,7 +6,6 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
 # TGI_LLM_ENDPOINT: "http://automaticallydetected"
 
 image:
@@ -67,3 +66,10 @@ tgi:
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "1.4"
+global:
+  http_proxy:
+  https_proxy:
+  no_proxy:
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  LANGCHAIN_TRACING_V2: false
+  LANGCHAIN_API_KEY: "insert-your-langchain-key-here"

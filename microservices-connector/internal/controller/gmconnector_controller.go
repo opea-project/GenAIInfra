@@ -614,21 +614,6 @@ func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, 
 	}
 }
 
-type YAMLContent struct {
-	Service struct {
-		Kind     string `yaml:"kind"`
-		Metadata struct {
-			Name string `yaml:"name"`
-		} `yaml:"metadata"`
-		Spec struct {
-			Ports []struct {
-				Name string `yaml:"name"`
-				Port int    `yaml:"port"`
-			} `yaml:"ports"`
-		} `yaml:"spec"`
-	} `yaml:"services"`
-}
-
 func getServiceDetailsFromManifests(filePath string) (string, int, error) {
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -640,14 +625,15 @@ func getServiceDetailsFromManifests(filePath string) (string, int, error) {
 		if res == "" || !strings.Contains(res, "kind: Service") {
 			continue
 		}
-		var content YAMLContent
-		err = yaml2.Unmarshal([]byte(res), &content.Service)
+		svc := &corev1.Service{}
+		decoder := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+		_, _, err = decoder.Decode([]byte(res), nil, svc)
 		if err != nil {
 			return "", 0, err
 		}
-		if content.Service.Kind == Service {
-			if len(content.Service.Spec.Ports) > 0 {
-				return content.Service.Metadata.Name, content.Service.Spec.Ports[0].Port, nil
+		if svc.Kind == "Service" {
+			if len(svc.Spec.Ports) > 0 {
+				return svc.Name, int(svc.Spec.Ports[0].Port), nil
 			}
 		}
 
