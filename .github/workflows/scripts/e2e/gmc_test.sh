@@ -7,7 +7,7 @@ USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
 MOUNT_DIR=/home/$USER_ID/charts-mnt
 IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
-CODEGEN_NAMESPACE="${APP_NAMESPACE}_codegen"
+CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 
 function install_gmc() {
     # Make sure you have to use image tag $VERSION for microservice-connector installation
