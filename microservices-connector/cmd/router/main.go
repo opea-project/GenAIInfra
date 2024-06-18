@@ -75,7 +75,7 @@ func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.
 	//  ]
 	// sample condition support by gjson query: "instances.#(modelId==\"1\")""
 	if !gjson.ValidBytes(input) {
-		fmt.Println("the inpout json format is invalid")
+		fmt.Println("the input json format is invalid")
 		return nil
 	}
 	for _, route := range routes {
