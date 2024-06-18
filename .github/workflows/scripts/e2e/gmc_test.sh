@@ -7,6 +7,7 @@ USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
 MOUNT_DIR=/home/$USER_ID/charts-mnt
 IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
+CODEGEN_NAMESPACE="${APP_NAMESPACE}_codegen"
 
 function install_gmc() {
     # Make sure you have to use image tag $VERSION for microservice-connector installation
@@ -28,6 +29,8 @@ function install_gmc() {
 function validate_gmc() {
     echo "validate chat-qna"
     validate_chatqna
+    echo "validate codegen"
+    validate_codegen
 
 }
 
@@ -84,6 +87,54 @@ function validate_chatqna() {
    local status=false
    if [[ -f $LOG_PATH/curl_chatqna.log ]] && \
    [[ $(grep -c "billion" $LOG_PATH/curl_chatqna.log) != 0 ]]; then
+       status=true
+   fi
+   if [ $status == false ]; then
+       echo "Response check failed, please check the logs in artifacts!"
+       exit 1
+   else
+       echo "Response check succeed!"
+   fi
+}
+
+function validate_codegen() {
+
+   # todo select gaudi or xeon
+   kubectl create ns $CODEGEN_NAMESPACE
+   sed -i "s|namespace: codegen|namespace: $CODEGEN_NAMESPACE|g"  $(pwd)/config/samples/codegen.yaml
+   kubectl apply -f $(pwd)/config/samples/codegen.yaml
+
+   # Wait until the router service is ready
+   echo "Waiting for the codegen router service to be ready..."
+   wait_until_pod_ready "codegen router" $CODEGEN_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $CODEGEN_NAMESPACE)
+   echo $output
+
+
+   # deploy client pod for testing
+   kubectl create deployment client-test -n $CODEGEN_NAMESPACE --image=python:3.8.13 -- sleep infinity
+
+   # wait for client pod ready
+   wait_until_pod_ready "client-test" $CODEGEN_NAMESPACE "client-test"
+   # giving time to populating data
+   sleep 60
+
+   kubectl get pods -n $CODEGEN_NAMESPACE
+   # send request to codegen
+   export CLIENT_POD=$(kubectl get pod -n $CODEGEN_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
+   echo "$CLIENT_POD"
+   accessUrl=$(kubectl get gmc -n $CODEGEN_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+   kubectl exec "$CLIENT_POD" -n $CODEGEN_NAMESPACE -- curl $accessUrl  -X POST  -d '{"messages": "def print_hello_world():"}' -H 'Content-Type: application/json' > $LOG_PATH/gmc_codegen.log
+   exit_code=$?
+   if [ $exit_code -ne 0 ]; then
+       echo "chatqna failed, please check the logs in ${LOG_PATH}!"
+       exit 1
+   fi
+
+   echo "Checking response results, make sure the output is reasonable. "
+   local status=false
+   if [[ -f $LOG_PATH/gmc_codegen.log ]] && \
+   [[ $(grep -c "print" $LOG_PATH/gmc_codegen.log) != 0 ]]; then
        status=true
    fi
    if [ $status == false ]; then
