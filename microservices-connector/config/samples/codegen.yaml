@@ -13,10 +13,6 @@ spec:
   routerConfig:
     name: router
     serviceName: router-service
-    config:
-      no_proxy: ".codegen.svc.cluster.local"
-      http_proxy: "insert-your-http-proxy-here"
-      https_proxy: "insert-your-https-proxy-here"
   nodes:
     root:
       routerType: Sequence
@@ -26,21 +22,11 @@ spec:
         internalService:
           serviceName: llm-service
           config:
-            no_proxy: ".codegen.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
-            tgi_endpoint: http://tgi-service.codegen.svc.cluster.local:9009
-            gmcTokenSecret: gmc-tokens
             endpoint: /v1/chat/completions
       - name: Tgi
         internalService:
           serviceName: tgi-service
           config:
-            no_proxy: ".codegen.svc.cluster.local"
-            http_proxy: "insert-your-http-proxy-here"
-            https_proxy: "insert-your-https-proxy-here"
-            gmcTokenSecret: gmc-tokens
-            hostPath: /root/GMC/data/tgi
-            modelId: ise-uiuc/Magicoder-S-DS-6.7B
+            LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
             endpoint: /generate
           isDownstreamService: true
