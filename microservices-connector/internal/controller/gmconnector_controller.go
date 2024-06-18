@@ -42,6 +42,7 @@ import (
 const (
 	Configmap                        = "Configmap"
 	ConfigmapGaudi                   = "ConfigmapGaudi"
+	DocSum                           = "DocSum"
 	Embedding                        = "Embedding"
 	TeiEmbedding                     = "TeiEmbedding"
 	TeiEmbeddingGaudi                = "TeiEmbeddingGaudi"
@@ -66,6 +67,7 @@ const (
 	redis_vector_db_yaml             = "/redis-vector-db.yaml"
 	retriever_yaml                   = "/retriever.yaml"
 	reranking_yaml                   = "/reranking.yaml"
+	doc_sum_yaml                     = "/backend-service.yaml"
 	yaml_dir                         = "/tmp/microservices/yamls"
 )
 
@@ -124,6 +126,8 @@ func getStepYamlTemplate(step string) string {
 		tmpltFile = yaml_dir + tgi_gaudi_service_yaml
 	} else if step == Llm {
 		tmpltFile = yaml_dir + llm_yaml
+	} else if step == DocSum {
+		tmpltFile = yaml_dir + doc_sum_yaml
 	} else if step == Router {
 		tmpltFile = yaml_dir + gmc_router_yaml
 	} else {

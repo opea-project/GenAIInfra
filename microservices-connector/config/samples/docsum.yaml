@@ -7,8 +7,8 @@ metadata:
   labels:
     app.kubernetes.io/name: gmconnector
     app.kubernetes.io/managed-by: kustomize
-  name: codegen
-  namespace: codegen
+  name: docsum
+  namespace: docsum
 spec:
   routerConfig:
     name: router
@@ -17,16 +17,16 @@ spec:
     root:
       routerType: Sequence
       steps:
-      - name: Llm
-        data: $response
-        internalService:
-          serviceName: llm-service
-          config:
-            endpoint: /v1/chat/completions
       - name: Tgi
         internalService:
           serviceName: tgi-service
           config:
-            LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
+            LLM_MODEL_ID: HuggingFaceH4/zephyr-7b-beta
+            shm-size: "1g"
             endpoint: /generate
-          isDownstreamService: true
+      - name: DocSum
+        data: $response
+        internalService:
+          serviceName: docsum-service
+          config:
+            endpoint: /v1/text_summarize
