@@ -123,7 +123,7 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 	}
 
 	var resources []string
-	appliedCfg, err := applyRouterConfig(step, svcCfg, yamlFile)
+	appliedCfg, err := patchCustomConfigToTemplates(step, svcCfg, yamlFile)
 	if err != nil {
 		return fmt.Errorf("failed to apply user config: %v", err)
 	}
@@ -209,7 +209,7 @@ func getServiceURL(service *corev1.Service) string {
 	return ""
 }
 
-func applyRouterConfig(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
+func patchCustomConfigToTemplates(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
 	var userDefinedCfg RouterCfg
 	if step == "router" {
 		userDefinedCfg = RouterCfg{

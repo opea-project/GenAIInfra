@@ -152,7 +152,7 @@ data:
 `
 
 	step := Router
-	actualCfg, err := applyRouterConfig(step, svcCfg, yamlFile)
+	actualCfg, err := patchCustomConfigToTemplates(step, svcCfg, yamlFile)
 	if err != nil {
 		t.Errorf("applyCustomConfig() returned an error: %v", err)
 	}
@@ -178,7 +178,7 @@ data:
   key2: value2
 `)
 	expectedCfg := string(yamlFile)
-	actualCfg, err := applyRouterConfig(step, svcCfg, yamlFile)
+	actualCfg, err := patchCustomConfigToTemplates(step, svcCfg, yamlFile)
 	if err != nil {
 		t.Errorf("applyCustomConfig() returned an error: %v", err)
 	}
