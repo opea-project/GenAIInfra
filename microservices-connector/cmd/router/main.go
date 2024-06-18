@@ -74,7 +74,6 @@ func isSuccessFul(statusCode int) bool {
 
 func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.Step {
 	if !gjson.ValidBytes(input) {
-		fmt.Println("the inpout json format is invalid")
 		return nil
 	}
 	for _, route := range routes {
