@@ -7,9 +7,12 @@ Helm chart for deploying Hugging Face Text Generation Inference service.
 To install the chart, run the following:
 
 ```console
-$ export MODELDIR=/mnt
-$ export MODELNAME="bigscience/bloom-560m"
-$ helm install tgi tgi --set volume=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME}
+cd GenAIInfra/helm-charts/common
+export MODELDIR=/mnt
+export MODELNAME="bigscience/bloom-560m"
+helm install tgi tgi --set volume=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME}
+# To deploy on Gaudi enabled kubernetes cluster
+# helm install tgi tgi --set volume=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --values tgi/gaudi-values.yaml
 ```
 
 By default, the tgi service will downloading the "bigscience/bloom-560m" which is about 1.1GB.
