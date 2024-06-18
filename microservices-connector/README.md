@@ -7,8 +7,7 @@ Please refer this [usage_guide](./usage_guide.md) for sample use cases.
 
 ## Description
 
-The GenAI Microservice Connector(GMC) contains the [CustomResourceDefinition(CRD)](./api/v1alpha3
-/gmconnector_types.go) and its controller to bring up the services needed for a GenAI application.
+The GenAI Microservice Connector(GMC) contains the CustomResourceDefinition(CRD) and its controller to bring up the services needed for a GenAI application.
 Istio Service Mesh can also be leveraged to facilicate communication between microservices in the GenAI application.
 
 ## Architecture
