@@ -476,13 +476,15 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 					}
 				} else {
 					// If there was another error, continue
+					fmt.Printf("get object err: %v", err)
 					continue
 				}
 			} else {
-				// If the object does exist, update ithui
+				// If the object does exist, update it
 				obj.SetResourceVersion(latest.GetResourceVersion()) // Ensure we're updating the latest version
 				err = c.Update(ctx, obj, &client.UpdateOptions{})
 				if err != nil {
+					fmt.Printf("update object err: %v", err)
 					continue
 				}
 			}
