@@ -37,6 +37,7 @@ function validate_gmc() {
 function cleanup_gmc() {
     echo "clean up microservice-connector"
     kubectl delete ns $APP_NAMESPACE
+    kubectl delete ns $CODEGEN_NAMESPACE
     kubectl delete ns $SYSTEM_NAMESPACE
     kubectl delete crd gmconnectors.gmc.opea.io
     # clean up the images
