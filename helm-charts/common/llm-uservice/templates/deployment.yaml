@@ -33,13 +33,19 @@ spec:
             - name: TGI_LLM_ENDPOINT
               value: "http://{{ .Release.Name }}-tgi:{{ .Values.tgi.service.port }}"
             - name: HUGGINGFACEHUB_API_TOKEN
-              value: {{ .Values.HUGGINGFACEHUB_API_TOKEN | quote}}
+              value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
               value: {{ .Values.global.https_proxy }}
             - name: no_proxy
               value: {{ .Values.global.no_proxy }}
+            - name: LANGCHAIN_TRACING_V2
+              value: {{ .Values.global.LANGCHAIN_TRACING_V2 | quote }}
+            - name: LANGCHAIN_API_KEY
+              value: {{ .Values.global.LANGCHAIN_API_KEY }}
+            - name: LANGCHAIN_PROJECT
+              value: "opea-llm-service"
 
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
@@ -57,14 +63,6 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: 9000
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: 9000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
