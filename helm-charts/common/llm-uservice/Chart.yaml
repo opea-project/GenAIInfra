@@ -8,6 +8,7 @@ type: application
 dependencies:
   - name: tgi
     version: "0.1.0"
+    repository: "file://../tgi"
 version: 0.1.0
 # The llm microservice server version
 appVersion: "1.0.0"

@@ -3,6 +3,11 @@
 * SPDX-License-Identifier: Apache-2.0
  */
 
+/* Modifications made to this file by [Intel] on [2024]
+*  Portions of this file are derived from kserve: https://github.com/kserve/kserve
+*  Copyright 2022 The KServe Author
+ */
+
 package main
 
 import (
