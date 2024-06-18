@@ -33,7 +33,13 @@ spec:
             - name: MODEL_ID
               value: {{ .Values.EMBEDDING_MODEL_ID | quote }}
             - name: PORT
-              value: {{ .Values.service.targetPort | quote }}
+              value: "80"
+            - name: http_proxy
+              value: {{ .Values.global.http_proxy }}
+            - name: https_proxy
+              value: {{ .Values.global.https_proxy }}
+            - name: no_proxy
+              value: {{ .Values.global.no_proxy }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -45,19 +51,19 @@ spec:
               name: shm
           ports:
             - name: http
-              containerPort: {{ .Values.service.targetPort }}
+              containerPort: 80
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: model-volume
           hostPath:
-            path: {{ .Values.hftei.volume }}
+            path: {{ .Values.global.volume }}
             type: Directory
         - name: shm
           emptyDir:
             medium: Memory
-            sizeLimit: {{ .Values.hftei.shmSize }}
+            sizeLimit: {{ .Values.shmSize }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

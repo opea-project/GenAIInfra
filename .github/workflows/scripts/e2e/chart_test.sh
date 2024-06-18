@@ -19,11 +19,11 @@ function init_codegen() {
 
 function init_chatqna() {
     # replace volume: /mnt with volume: $CHART_MOUNT
-    find . -name '*.yaml' -type f -exec sed -i "s#volume: /mnt#volume: $CHART_MOUNT#g" {} \;
+    find .. -name '*values.yaml' -type f -exec sed -i "s#volume: /mnt#volume: $CHART_MOUNT#g" {} \;
     # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" {} \;
+    find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" {} \;
     # set huggingface token
-    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+    find .. -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
 
 function validate_codegen() {
