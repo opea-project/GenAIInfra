@@ -69,6 +69,11 @@ func isSuccessFul(statusCode int) bool {
 }
 
 func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.Step {
+	//sample config supported by gjson
+	//"instances" : [
+	//	{"model_id", "1"},
+	//  ]
+	// sample condition support by gjson query: "instances.#(modelId==\"1\")""
 	if !gjson.ValidBytes(input) {
 		fmt.Println("the inpout json format is invalid")
 		return nil
@@ -78,10 +83,13 @@ func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.
 		if gjson.GetBytes(input, c).Exists() {
 			return &route
 		}
+		// ' and # will define a gjson query
 		if strings.ContainsAny(c, ".") || strings.ContainsAny(c, "#") {
 			continue
 		}
-		// todo define correct format
+		// key == value without nested json
+		// sample config support by direct query {"model_id", "1"}
+		// smaple condition support by json query: "modelId==\"1\""
 		index := strings.Index(c, "==")
 		if index == -1 {
 			fmt.Println("No '==' found in the route.Condition")
@@ -92,7 +100,6 @@ func pickupRouteByCondition(input []byte, routes []mcv1alpha3.Step) *mcv1alpha3.
 			if v == value {
 				return &route
 			}
-			//todo define default match
 		}
 	}
 	return nil
