@@ -55,17 +55,11 @@ function validate_codegen() {
 
 function validate_chatqna() {
     sleep 60
-    # make sure microservice retriever svcname=$RELEASE_NAME-retriever-usvc is ready
-    ip_address=$(kubectl get svc $RELEASE_NAME-retriever-usvc -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
-    port=$(kubectl get svc $RELEASE_NAME-retriever-usvc -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
-    until curl http://${ip_address}:${port}/v1/retrieval -X POST \
-    -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${your_embedding}"'"}' \
-    -H 'Content-Type: application/json'; do sleep 10; done
+    set -xe
     ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
     port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     # Curl the Mega Service
     curl http://${ip_address}:${port}/v1/chatqna -H "Content-Type: application/json" -d '{
-        "model": "Intel/neural-chat-7b-v3-3",
         "messages": "What is the revenue of Nike in 2023?"}' > ${LOG_PATH}/curl_megaservice.log
     exit_code=$?
 
