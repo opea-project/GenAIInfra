@@ -1,10 +1,13 @@
 # genai-microservices-connector(GMC)
 
-This repo defines the GenAI Microservice Connector for OPEA projects.
+This repo defines the GenAI Microservice Connector(GMC) for OPEA projects. GMC can be used to compose and adjust GenAI pipelines dynamically
+on kubernetes. It can leverage the microservices provided by [GenAIComps](https://github.com/opea-project/GenAIComps) and external services to compose GenAI pipelines. External services might be running in a public cloud or on-prem by providing an URL and access details such as an API key and ensuring there is network connectivity. It also allows users to adjust the pipeline on the fly like switching to a different Large language Model(LLM), adding new functions into the chain(like adding guardrails),etc. GMC supports different types of steps in the pipeline, like sequential, parallel and conditional.
+
+Please refer this [usage_guide](./usage_guide.md) for sample use cases.
 
 ## Description
 
-The GMC contains the CRD and its controller to bring up the needed services for a GenAI application.
+The GenAI Microservice Connector(GMC) contains the CustomResourceDefinition(CRD) and its controller to bring up the services needed for a GenAI application.
 Istio Service Mesh can also be leveraged to facilicate communication between microservices in the GenAI application.
 
 ## Architecture
@@ -21,14 +24,8 @@ Istio Service Mesh can also be leveraged to facilicate communication between mic
 **API** is api/v1alpha3/  
 **Controller** is at internal/controller
 
-`make manifests` to install the APIs  
-`make run` to lanch the controllers
-
 ### Prerequisites
 
-- go version v1.21.0+
-- docker version 17.03+.
-- kubectl version v1.11.3+.
 - Access to a Kubernetes v1.11.3+ cluster.
 
 ### Introduction
@@ -36,7 +33,7 @@ Istio Service Mesh can also be leveraged to facilicate communication between mic
 There are `2` components in this repo:
 
 - 1. `manager`: controller manager to handle GMC CRD
-- 2. `router`: route the traffic among the microservices defined in GMC connector
+- 2. `router`: route the traffic among the microservices defined in GMC
 
 #### How to build these binaries?
 
@@ -47,7 +44,7 @@ make build
 #### How to build docker images for these 2 components?
 
 ```sh
-make docker
+make docker.build
 ```
 
 #### How to delete these components' binaries?
@@ -61,36 +58,59 @@ make clean
 **Build and push your image to the location specified by `CTR_IMG`:**
 
 ```sh
-make docker-build docker-push CTR_IMG=<some-registry>/gmconnector:tag
+make docker.build docker.push CTR_IMG=<some-registry>/gmcmanager:tag
 ```
 
 **NOTE:** This image ought to be published in the personal registry you specified.
 And it is required to have access to pull the image from the working environment.
 Make sure you have the proper permission to the registry if the above commands don’t work.
 
-**Install the CRDs into the cluster:**
+**Install GMC CRD**
 
 ```sh
-make install
+kubectl apply -f config/crd/bases/gmc.opea.io_gmconnectors.yaml
 ```
 
-**Deploy the Manager to the cluster with the image specified by `CTR_IMG`:**
+**Get related manifests for GenAI Components**
 
 ```sh
-make deploy CTR_IMG=<some-registry>/gmconnector:tag
+mkdir -p $(pwd)/config/manifests
+cp $(dirname $(pwd))/manifests/ChatQnA/*.yaml -p $(pwd)/config/manifests/
 ```
 
-> **NOTE**: If you encounter RBAC errors, you may need to grant yourself cluster-admin
-> privileges or be logged in as admin.
-
-**Create instances of your solution**
-You can apply the samples (examples) from the config/sample:
+**Copy GMC router manifest**
 
 ```sh
-kubectl apply -k config/samples/
+cp $(pwd)/config/gmcrouter/gmc-router.yaml -p $(pwd)/config/manifests/
 ```
 
-> **NOTE**: Ensure that the samples has default values to test it out.
+**Create ConfigMap for GMC to hold GenAI Components and GMC Router manifests**
+
+```sh
+kubectl create configmap gmcyaml -n $SYSTEM_NAMESPACE --from-file $(pwd)/config/manifests
+```
+
+**NOTE:** The configmap name `gmcyaml' is defined in gmcmanager deployment Spec. Please modify accordingly if you want
+use a different name for the configmap.
+
+**Install GMC manager**
+
+```sh
+kubectl apply -f $(pwd)/config/rbac/gmc-manager-rbac.yaml
+kubectl apply -f $(pwd)/config/manager/gmc-manager.yaml
+```
+
+**Check the installation result**
+
+```sh
+kubectl get pods -n system
+NAME                              READY   STATUS    RESTARTS   AGE
+gmc-controller-78f9c748cb-ltcdv   1/1     Running   0          3m
+```
+
+### Next Step
+
+Please refer to this [usage_guide](./usage_guide.md) for sample use cases.
 
 ### To Uninstall
 
@@ -110,27 +130,4 @@ make uninstall
 
 ```sh
 make undeploy
-```
-
-## Project Distribution
-
-Following are the steps to build the installer and distribute this project to users.
-
-1. Build the installer for the image built and published in the registry:
-
-```sh
-make build-installer CTR_IMG=<some-registry>/gmconnector:tag
-```
-
-NOTE: The makefile target mentioned above generates an 'install.yaml'
-file in the dist directory. This file contains all the resources built
-with Kustomize, which are necessary to install this project without
-its dependencies.
-
-2. Using the installer
-
-Users can just run kubectl apply -f <URL for YAML BUNDLE> to install the project, i.e.:
-
-```sh
-kubectl apply -f https://raw.githubusercontent.com/<org>/gmconnector/<tag or branch>/dist/install.yaml
 ```
