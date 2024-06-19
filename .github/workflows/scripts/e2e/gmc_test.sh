@@ -125,7 +125,7 @@ function validate_codegen() {
    # send request to codegen
    export CLIENT_POD=$(kubectl get pod -n $CODEGEN_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
-   accessUrl=$(kubectl get gmc -n $CODEGEN_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+   accessUrl=$(kubectl get gmc -n $CODEGEN_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='codegen')].status.accessUrl}")
    kubectl exec "$CLIENT_POD" -n $CODEGEN_NAMESPACE -- curl $accessUrl  -X POST  -d '{"messages": "def print_hello_world():"}' -H 'Content-Type: application/json' > $LOG_PATH/gmc_codegen.log
    exit_code=$?
    if [ $exit_code -ne 0 ]; then
