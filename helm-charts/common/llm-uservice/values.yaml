@@ -58,7 +58,6 @@ affinity: {}
 tgi:
   LLM_MODEL_ID: m-a-p/OpenCodeInterpreter-DS-6.7B
   # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-  port: 80
 
   image:
     repository: ghcr.io/huggingface/text-generation-inference
