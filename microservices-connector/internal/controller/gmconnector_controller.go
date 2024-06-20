@@ -174,8 +174,10 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 							newEnvVars...)
 					}
 					//overwrite the managed fields is needed, we write this deployment twice here
-					deployment.ManagedFields = nil
-
+					deployment.SetManagedFields(nil)
+					latest := &unstructured.Unstructured{}
+					latest.SetGroupVersionKind(deployment.GroupVersionKind())
+					deployment.SetResourceVersion(latest.GetResourceVersion())
 					// Update the deployment using client.Client
 					if err := client.Update(ctx, deployment); err != nil {
 						return fmt.Errorf("Failed to update deployment: %v\n", err)
