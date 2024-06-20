@@ -121,7 +121,7 @@ func TestGetServiceURL(t *testing.T) {
 	}
 
 	expectedURL := "http://test-service.default.svc.cluster.local:8080"
-	actualURL := getServiceURL(service)
+	actualURL := GetServiceURL(service)
 
 	if actualURL != expectedURL {
 		t.Errorf("Expected URL: %s, but got: %s", expectedURL, actualURL)

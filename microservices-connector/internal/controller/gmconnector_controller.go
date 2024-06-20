@@ -17,9 +17,9 @@ import (
 	"time"
 
 	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
+	"github.com/opea-project/GenAIInfra/microservices-connector/internal/monitor"
 	"github.com/pkg/errors"
 	yaml2 "gopkg.in/yaml.v2"
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
@@ -148,7 +148,12 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 				}
 			}
 
-			if createdObj.GetKind() == Deployment && step != Router {
+			if retDply != nil && createdObj.GetKind() == Deployment {
+				err = scheme.Scheme.Convert(createdObj, retDply, nil)
+				if err != nil {
+					return fmt.Errorf("Failed to save service: %v\n", err)
+				}
+
 				var newEnvVars []corev1.EnvVar
 				if svcCfg != nil {
 					for name, value := range *svcCfg {
@@ -163,21 +168,16 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 					}
 				}
 				if len(newEnvVars) > 0 {
-					deployment := &appsv1.Deployment{}
-					err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
-					if err != nil {
-						return fmt.Errorf("Failed to save deployment: %v\n", err)
-					}
-					for i := range deployment.Spec.Template.Spec.Containers {
-						deployment.Spec.Template.Spec.Containers[i].Env = append(
-							deployment.Spec.Template.Spec.Containers[i].Env,
+					for i := range retDply.Spec.Template.Spec.Containers {
+						retDply.Spec.Template.Spec.Containers[i].Env = append(
+							retDply.Spec.Template.Spec.Containers[i].Env,
 							newEnvVars...)
 					}
 					//overwrite the managed fields is needed, we write this deployment twice here
-					deployment.ManagedFields = nil
+					retDply.ManagedFields = nil
 
 					// Update the deployment using client.Client
-					if err := client.Update(ctx, deployment); err != nil {
+					if err := client.Update(ctx, retDply); err != nil {
 						return fmt.Errorf("Failed to update deployment: %v\n", err)
 					}
 				}
@@ -187,7 +187,7 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 	return nil
 }
 
-func getServiceURL(service *corev1.Service) string {
+func GetServiceURL(service *corev1.Service) string {
 	switch service.Spec.Type {
 	case corev1.ServiceTypeClusterIP:
 		// For ClusterIP, return the cluster IP and port
@@ -277,6 +277,10 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	var externalService uint
 	var successService uint
 
+	var monitorItem monitor.MonitorCategory
+	monitorItem.Graph.Namespace = graph.Namespace
+	monitorItem.Graph.Name = graph.Name
+
 	for nodeName, node := range graph.Spec.Nodes {
 		for i, step := range node.Steps {
 			fmt.Println("\nreconcile resource for node:", step.StepName)
@@ -289,6 +293,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 					ns = step.Executor.InternalService.NameSpace
 				}
 				svcName := step.Executor.InternalService.ServiceName
+
 				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
 
 				service := &corev1.Service{}
@@ -297,7 +302,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
 				}
 				successService += 1
-				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
+				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = GetServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
 				fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
 
 			} else {
@@ -336,13 +341,14 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
 
-	graph.Status.AccessURL = getServiceURL(routerService)
+	graph.Status.AccessURL = GetServiceURL(routerService)
 	fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
 
 	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
 	if err = r.Status().Update(context.TODO(), graph); err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
 	}
+
 	return ctrl.Result{}, nil
 }
 

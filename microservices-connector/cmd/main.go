@@ -25,6 +25,7 @@ import (
 
 	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
 	"github.com/opea-project/GenAIInfra/microservices-connector/internal/controller"
+	monitor "github.com/opea-project/GenAIInfra/microservices-connector/internal/monitor"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -128,6 +129,14 @@ func main() {
 		setupLog.Error(err, "unable to set up ready check")
 		os.Exit(1)
 	}
+
+	setupLog.Info("starting monitor")
+	gmc_monitor := &monitor.GMC_monitor{
+		Client:         mgr.GetClient(),
+		Scheme:         mgr.GetScheme(),
+		ResourceStatus: make(map[monitor.NsName]monitor.MonitorCategory),
+	}
+	gmc_monitor.Start(make(<-chan monitor.MonitorCategory))
 
 	setupLog.Info("starting manager")
 	if err := mgr.Start(ctrl.SetupSignalHandler()); err != nil {
