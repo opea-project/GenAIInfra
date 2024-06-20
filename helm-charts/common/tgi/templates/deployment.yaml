@@ -60,7 +60,7 @@ spec:
       volumes:
         - name: model-volume
           hostPath:
-            path: {{ .Values.volume }}
+            path: {{ .Values.global.volume }}
             type: Directory
       {{- with .Values.nodeSelector }}
       nodeSelector:

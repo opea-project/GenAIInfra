@@ -20,12 +20,10 @@ service:
 
 # To override values in subchart llm-uservice
 llm-uservice:
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
 # To override values in subchart tgi
   tgi:
     LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
     # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-    volume: /mnt
     image:
       repository: ghcr.io/huggingface/tgi-gaudi
       tag: "1.2.1"
@@ -36,6 +34,7 @@ global:
   http_proxy:
   https_proxy:
   no_proxy:
-  # HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  volume: /mnt
   LANGCHAIN_TRACING_V2: false
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"

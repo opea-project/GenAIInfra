@@ -58,7 +58,6 @@ affinity: {}
 tgi:
   # LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
   LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
-  volume: /mnt
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
     pullPolicy: IfNotPresent
@@ -73,5 +72,6 @@ global:
   https_proxy:
   no_proxy:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  volume: /mnt
   LANGCHAIN_TRACING_V2: false
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"

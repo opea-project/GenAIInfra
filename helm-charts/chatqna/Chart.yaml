@@ -8,11 +8,15 @@ type: application
 dependencies:
   - name: llm-uservice
     version: "0.1.0"
+    repository: "file://../common/llm-uservice"
   - name: embedding-usvc
     version: "0.1.0"
+    repository: "file://../common/embedding-usvc"
   - name: reranking-usvc
     version: "0.1.0"
+    repository: "file://../common/reranking-usvc"
   - name: retriever-usvc
     version: "0.1.0"
+    repository: "file://../common/retriever-usvc"
 version: 0.1.0
 appVersion: "1.0.0"
