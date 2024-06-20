@@ -7,14 +7,24 @@ USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
 MOUNT_DIR=/home/$USER_ID/charts-mnt
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
-IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
+IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
+
+function init_docsum() {
+    # executed under path manifest/docsum/xeon
+    # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
+    find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
+    # set huggingface token
+    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+}
 
 function init_codetrans() {
     # executed under path manifest/codetrans/xeon
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
-    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"$IMAGE_REPO/opea/#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
@@ -23,10 +33,15 @@ function init_codegen() {
     # executed under path manifest/codegen/xeon
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
-    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"$IMAGE_REPO/opea/#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+}
+
+function install_docsum {
+    echo "namespace is $NAMESPACE"
+    kubectl apply -f . -n $NAMESPACE
 }
 
 function install_codetrans {
@@ -43,8 +58,8 @@ function init_chatqna() {
     # executed under path manifest/chatqna/xeon
     # replace the mount dir "path: /mnt" with "path: $CHART_MOUNT"
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/models#path: $MOUNT_DIR#g" {} \;
-    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: $IMAGE_REPO/opea/#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
@@ -59,6 +74,35 @@ function install_chatqna {
     done
     sleep 60
     kubectl apply -f chaqna-xeon-backend-server.yaml -n $NAMESPACE
+}
+
+function validate_docsum() {
+    ip_address=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+    port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+    echo "try to curl http://${ip_address}:${port}/v1/chat/docsum..."
+    # Curl the DocSum LLM Service
+    curl http://${ip_address}:${port}/v1/chat/docsum \
+      -X POST \
+      -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}' \
+      -H 'Content-Type: application/json' > $LOG_PATH/curl_docsum.log
+    exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo "LLM for docsum failed, please check the logs in ${LOG_PATH}!"
+        exit 1
+    fi
+
+    echo "Checking response results, make sure the output is reasonable. "
+    local status=false
+    if [[ -f $LOG_PATH/curl_docsum.log ]] && \
+    [[ $(grep -c "TEI" $LOG_PATH/curl_docsum.log) != 0 ]]; then
+        status=true
+    fi
+
+    if [ $status == false ]; then
+        echo "Response check failed, please check the logs in artifacts!"
+    else
+        echo "Response check succeed!"
+    fi
 }
 
 function validate_codetrans() {
@@ -158,6 +202,11 @@ if [ $# -eq 0 ]; then
 fi
 
 case "$1" in
+    init_docsum)
+        pushd manifests/DocSum/xeon
+        init_docsum
+        popd
+        ;;
     init_codetrans)
         pushd manifests/CodeTrans/xeon
         init_codetrans
@@ -171,6 +220,12 @@ case "$1" in
     init_chatqna)
         pushd manifests/ChatQnA
         init_chatqna
+        popd
+        ;;
+    install_docsum)
+        pushd manifests/DocSum/xeon
+        NAMESPACE=$2
+        install_docsum
         popd
         ;;
     install_codetrans)
@@ -191,9 +246,14 @@ case "$1" in
         install_chatqna
         popd
         ;;
+    validate_docsum)
+        NAMESPACE=$2
+        SERVICE_NAME=docsum-llm-uservice
+        validate_docsum
+        ;;
     validate_codetrans)
         NAMESPACE=$2
-        SERVICE_NAME=llm-llm-uservice
+        SERVICE_NAME=codetrans-llm-uservice
         validate_codetrans
         ;;
     validate_codegen)

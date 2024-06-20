@@ -6,11 +6,11 @@ LOG_PATH=.
 USER_ID=$(whoami)
 CHART_MOUNT=/home/$USER_ID/charts-mnt
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
-IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
+IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 
 function init_codegen() {
     # insert a prefix before opea/.*, the prefix is IMAGE_REPO
-    sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" values.yaml
+    sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" values.yaml
     # set huggingface token
     sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" values.yaml
     # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
@@ -19,11 +19,11 @@ function init_codegen() {
 
 function init_chatqna() {
     # replace volume: /mnt with volume: $CHART_MOUNT
-    find . -name '*.yaml' -type f -exec sed -i "s#volume: /mnt#volume: $CHART_MOUNT#g" {} \;
-    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" {} \;
+    find .. -name '*values.yaml' -type f -exec sed -i "s#volume: /mnt#volume: $CHART_MOUNT#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
-    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+    find .. -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
 
 function validate_codegen() {
@@ -55,17 +55,11 @@ function validate_codegen() {
 
 function validate_chatqna() {
     sleep 60
-    # make sure microservice retriever svcname=$RELEASE_NAME-retriever-usvc is ready
-    ip_address=$(kubectl get svc $RELEASE_NAME-retriever-usvc -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
-    port=$(kubectl get svc $RELEASE_NAME-retriever-usvc -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
-    until curl http://${ip_address}:${port}/v1/retrieval -X POST \
-    -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${your_embedding}"'"}' \
-    -H 'Content-Type: application/json'; do sleep 10; done
+    set -xe
     ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
     port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     # Curl the Mega Service
     curl http://${ip_address}:${port}/v1/chatqna -H "Content-Type: application/json" -d '{
-        "model": "Intel/neural-chat-7b-v3-3",
         "messages": "What is the revenue of Nike in 2023?"}' > ${LOG_PATH}/curl_megaservice.log
     exit_code=$?
 
