@@ -9,7 +9,7 @@ on:
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
       - microservices-connector/**
-      - manifests/**
+      - manifests/ChatQnA/**
   workflow_dispatch:
 
 # If there is a new commit, the previous jobs will be canceled
@@ -33,7 +33,7 @@ jobs:
         run: |
           echo "SYSTEM_NAMESPACE=opea-system-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "APP_NAMESPACE=chatqna-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "DOCKER_REGISTRY=$OPEA_IMAGE_REPO/opea" >> $GITHUB_ENV
+          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
           echo "VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
           echo "should_cleanup=false" >> $GITHUB_ENV
           echo "skip_validate=false" >> $GITHUB_ENV
