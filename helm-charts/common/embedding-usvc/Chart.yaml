@@ -2,12 +2,13 @@
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
-name: codegen
-description: The Helm chart to deploy CodeGen
+name: embedding-usvc
+description: The Helm chart for deploying embedding as microservice
 type: application
 dependencies:
-  - name: llm-uservice
+  - name: tei
     version: "0.1.0"
-    repository: "file://../common/llm-uservice"
+    repository: "file://../tei"
 version: 0.1.0
+# The embedding microservice server version
 appVersion: "1.0.0"

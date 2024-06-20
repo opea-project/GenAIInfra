@@ -1,21 +1,18 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for tgi.
+# Default values for embedding-usvc.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-
-LLM_MODEL_ID: bigscience/bloom-560m
-# LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-port: 80
+# HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
 
 image:
-  repository: ghcr.io/huggingface/text-generation-inference
+  repository: opea/embedding-tei:latest
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.4"
+  #tag: "1.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -36,6 +33,9 @@ securityContext: {}
 
 service:
   type: ClusterIP
+  # The default port for embedding service is 9000
+  port: 6000
+  targetPort: 6000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -55,9 +55,14 @@ tolerations: []
 
 affinity: {}
 
+# To override values in subchart tgi
+tei:
+  EMBEDDING_MODEL_ID: "BAAI/bge-base-en-v1.5"
+
+  image:
+    repository: ghcr.io/huggingface/text-embeddings-inference
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "cpu-1.2"
 global:
-  http_proxy:
-  https_proxy:
-  no_proxy:
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   volume: /mnt

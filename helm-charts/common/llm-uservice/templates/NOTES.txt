@@ -6,5 +6,5 @@
   sleep 1
   curl http://127.0.0.1:8080/v1/chat/completions\
   -X POST \
-  -d '{"query":"Who is Michael Jordon?","max_new_tokens":256,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
+  -d '{"query":"What is Machine Learning?","max_new_tokens":256,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
   -H 'Content-Type: application/json'

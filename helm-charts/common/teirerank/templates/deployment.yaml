@@ -4,14 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "llm-uservice.fullname" . }}
+  name: {{ include "teirerank.fullname" . }}
   labels:
-    {{- include "llm-uservice.labels" . | nindent 4 }}
+    {{- include "teirerank.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "llm-uservice.selectorLabels" . | nindent 6 }}
+      {{- include "teirerank.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "llm-uservice.selectorLabels" . | nindent 8 }}
+        {{- include "teirerank.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -28,43 +28,42 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           env:
-            - name: TGI_LLM_ENDPOINT
-              value: "http://{{ .Release.Name }}-tgi"
-            - name: HUGGINGFACEHUB_API_TOKEN
-              value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+            - name: MODEL_ID
+              value: {{ .Values.RERANK_MODEL_ID | quote }}
+            - name: PORT
+              value: "80"
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
               value: {{ .Values.global.https_proxy }}
             - name: no_proxy
               value: {{ .Values.global.no_proxy }}
-            - name: LANGCHAIN_TRACING_V2
-              value: {{ .Values.global.LANGCHAIN_TRACING_V2 | quote }}
-            - name: LANGCHAIN_API_KEY
-              value: {{ .Values.global.LANGCHAIN_API_KEY }}
-            - name: LANGCHAIN_PROJECT
-              value: "opea-llm-service"
-
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /dev/shm
+              name: shm
           ports:
-            - name: llm-uservice
-              containerPort: 9000
+            - name: http
+              containerPort: 80
               protocol: TCP
-          startupProbe:
-            exec:
-              command:
-              - curl
-              - http://{{ .Release.Name }}-tgi
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            failureThreshold: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: {{ .Values.global.volume }}
+            type: Directory
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.shmSize }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

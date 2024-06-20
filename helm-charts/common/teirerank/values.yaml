@@ -1,21 +1,19 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for tgi.
+# Default values for teirerank.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
-LLM_MODEL_ID: bigscience/bloom-560m
-# LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-port: 80
-
+shmSize: 1Gi
+RERANK_MODEL_ID: "BAAI/bge-reranker-base"
 image:
-  repository: ghcr.io/huggingface/text-generation-inference
+  repository: ghcr.io/huggingface/text-embeddings-inference
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.4"
+  tag: "cpu-1.2"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -56,8 +54,4 @@ tolerations: []
 affinity: {}
 
 global:
-  http_proxy:
-  https_proxy:
-  no_proxy:
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   volume: /mnt
