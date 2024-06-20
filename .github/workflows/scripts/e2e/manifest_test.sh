@@ -7,14 +7,14 @@ USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
 MOUNT_DIR=/home/$USER_ID/charts-mnt
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
-IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
+IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 
 function init_codetrans() {
     # executed under path manifest/codetrans/xeon
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
-    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"$IMAGE_REPO/opea/#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
@@ -23,8 +23,8 @@ function init_codegen() {
     # executed under path manifest/codegen/xeon
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
-    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"$IMAGE_REPO/opea/#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
@@ -43,8 +43,8 @@ function init_chatqna() {
     # executed under path manifest/chatqna/xeon
     # replace the mount dir "path: /mnt" with "path: $CHART_MOUNT"
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/models#path: $MOUNT_DIR#g" {} \;
-    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: $IMAGE_REPO/opea/#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }

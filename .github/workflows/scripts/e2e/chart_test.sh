@@ -6,11 +6,11 @@ LOG_PATH=.
 USER_ID=$(whoami)
 CHART_MOUNT=/home/$USER_ID/charts-mnt
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
-IMAGE_REPO=${OPEA_IMAGE_REPO:-docker.io}
+IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 
 function init_codegen() {
     # insert a prefix before opea/.*, the prefix is IMAGE_REPO
-    sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" values.yaml
+    sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" values.yaml
     # set huggingface token
     sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" values.yaml
     # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
@@ -20,8 +20,8 @@ function init_codegen() {
 function init_chatqna() {
     # replace volume: /mnt with volume: $CHART_MOUNT
     find .. -name '*values.yaml' -type f -exec sed -i "s#volume: /mnt#volume: $CHART_MOUNT#g" {} \;
-    # replace the repository "image: opea/*" with "image: $IMAGE_REPO/opea/"
-    find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: $IMAGE_REPO/opea/#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
     find .. -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
