@@ -157,33 +157,39 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 					return fmt.Errorf("Failed to save service: %v\n", err)
 				}
 
-				var newEnvVars []corev1.EnvVar
-				if svcCfg != nil {
-					for name, value := range *svcCfg {
-						if name == "endpoint" {
-							continue
+				if step != Router {
+					// we don't set router's env because
+					// we have applied the gmc_router.yaml with the customized values to args called "--graph-json"
+					// the value is from GRAPH_JSON: (*svcCfg)["nodes"]}
+					// the below logic will set again, to set to "nodes" into router's "env"
+					var newEnvVars []corev1.EnvVar
+					if svcCfg != nil {
+						for name, value := range *svcCfg {
+							if name == "endpoint" {
+								continue
+							}
+							itemEnvVar := corev1.EnvVar{
+								Name:  name,
+								Value: value,
+							}
+							newEnvVars = append(newEnvVars, itemEnvVar)
 						}
-						itemEnvVar := corev1.EnvVar{
-							Name:  name,
-							Value: value,
+					}
+					if len(newEnvVars) > 0 {
+						for i := range retDply.Spec.Template.Spec.Containers {
+							retDply.Spec.Template.Spec.Containers[i].Env = append(
+								retDply.Spec.Template.Spec.Containers[i].Env,
+								newEnvVars...)
 						}
-						newEnvVars = append(newEnvVars, itemEnvVar)
-					}
-				}
-				if len(newEnvVars) > 0 {
-					for i := range retDply.Spec.Template.Spec.Containers {
-						retDply.Spec.Template.Spec.Containers[i].Env = append(
-							retDply.Spec.Template.Spec.Containers[i].Env,
-							newEnvVars...)
-					}
-					//overwrite the managed fields is needed, we write this deployment twice here
-					retDply.SetManagedFields(nil)
-					latest := &unstructured.Unstructured{}
-					latest.SetGroupVersionKind(retDply.GroupVersionKind())
-					retDply.SetResourceVersion(latest.GetResourceVersion())
-					// Update the deployment using client.Client
-					if err := client.Update(ctx, retDply); err != nil {
-						return fmt.Errorf("Failed to update deployment: %v\n", err)
+						//overwrite the managed fields is needed, we write this deployment twice here
+						retDply.SetManagedFields(nil)
+						latest := &unstructured.Unstructured{}
+						latest.SetGroupVersionKind(retDply.GroupVersionKind())
+						retDply.SetResourceVersion(latest.GetResourceVersion())
+						// Update the deployment using client.Client
+						if err := client.Update(ctx, retDply); err != nil {
+							return fmt.Errorf("Failed to update deployment: %v\n", err)
+						}
 					}
 				}
 			}
@@ -355,12 +361,12 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	graph.Status.AccessURL = GetServiceURL(routerService)
 	fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
 
+	successService += 1
 	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
 	if err = r.Status().Update(context.TODO(), graph); err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
 	}
 
-	successService += 1
 	monitorItem.resources = append(monitorItem.resources, ServiceAndDeploy{
 		srvc: NsName{Namespace: routerService.Namespace, Name: routerService.Name},
 		dply: NsName{Namespace: routerDeployment.Namespace, Name: routerDeployment.Name},
@@ -370,7 +376,12 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	monitorItem.externalCount = externalService
 	monitorItem.totalCount = totalService
 	//send monitorItem to monitor task
-	r.MonitorChan <- monitorItem
+	select {
+	case r.MonitorChan <- monitorItem:
+		fmt.Println("Add resources to monitor task")
+	default:
+		fmt.Println("Failed to send monitorItem to the channel")
+	}
 
 	return ctrl.Result{}, nil
 }

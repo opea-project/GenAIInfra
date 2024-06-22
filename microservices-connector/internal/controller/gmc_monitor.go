@@ -16,6 +16,7 @@ import (
 	apierr "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
@@ -46,6 +47,8 @@ type ServiceAndDeploy struct {
 
 func (m GMC_monitor) Start(ch <-chan MonitorCategory, stopCh <-chan struct{}) {
 	go func() {
+		fmt.Println("Monitor task initiated.")
+
 		for {
 			select {
 			case mc := <-ch:
@@ -64,6 +67,7 @@ func (m GMC_monitor) Start(ch <-chan MonitorCategory, stopCh <-chan struct{}) {
 	go func() {
 		ticker := time.NewTicker(30 * time.Second) // Adjust the interval as needed
 		defer ticker.Stop()
+		fmt.Println("Monitor task starts to work.")
 
 		for {
 			select {
@@ -78,10 +82,13 @@ func (m GMC_monitor) Start(ch <-chan MonitorCategory, stopCh <-chan struct{}) {
 					}
 
 					if readyCnt != record.readyCount {
+						fmt.Printf("%v status changed from %d to %d\n", graph, record.readyCount, readyCnt)
 						// Update the MonitorCategory with the new count
 						// This is a placeholder. Replace with actual logic to update count.
 						record.readyCount = readyCnt
-						m.updateGMCstatus(graph, record.readyCount, record.externalCount, record.totalCount)
+						if m.updateGMCstatus(graph, record.readyCount, record.externalCount, record.totalCount) {
+							m.ResourceStatus[graph] = record
+						}
 
 					}
 				}
@@ -108,20 +115,24 @@ func (m GMC_monitor) getStatus(resource ServiceAndDeploy) bool {
 		fmt.Printf("Failed to get deployment %s@%s: %v\n", resource.dply.Name, resource.dply.Namespace, err)
 		return false
 	}
-	if GetServiceURL(service) != "" && deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Status == corev1.ConditionTrue {
+	if GetServiceURL(service) != "" && (deployment.Status.ReadyReplicas == *deployment.Spec.Replicas) {
 		return true
 	} else {
 		return false
 	}
 }
 
-func (m GMC_monitor) updateGMCstatus(gmc NsName, readyCount, externalCount, totalCount int) {
+func (m GMC_monitor) updateGMCstatus(gmc NsName, readyCount, externalCount, totalCount int) bool {
 	graph := &mcv1alpha3.GMConnector{}
 	graph.Name = gmc.Name
 	graph.Namespace = gmc.Namespace
 
 	latest := &unstructured.Unstructured{}
-	latest.SetGroupVersionKind(graph.GroupVersionKind())
+	latest.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   "gmc.opea.io", // Replace with the actual group of GMConnector
+		Version: "v1alpha3",    // Use the correct version
+		Kind:    "GMConnector", // Ensure this matches the Kind of the GMConnector
+	})
 
 	if err := m.Client.Get(context.Background(), client.ObjectKeyFromObject(graph), latest); err != nil {
 		if apierr.IsNotFound(err) {
@@ -132,11 +143,17 @@ func (m GMC_monitor) updateGMCstatus(gmc NsName, readyCount, externalCount, tota
 			fmt.Printf("get GMC %s@%s error : %v\n", gmc.Name, gmc.Namespace, err)
 		}
 	} else {
-		latest.Object["status"] = fmt.Sprintf("%d/%d/%d", readyCount, externalCount, totalCount)
+		statusObj, ok := latest.Object["status"].(map[string]interface{})
+		if !ok {
+			fmt.Println("Failed to type assert latest.Object['status'] to map[string]interface{}")
+		}
+		statusObj["status"] = fmt.Sprintf("%d/%d/%d", readyCount, externalCount, totalCount)
 		if err := m.Client.Status().Update(context.Background(), latest); err != nil {
 			fmt.Printf("Failed to update GMC status to %s: %v\n", latest.Object["status"], err)
 		} else {
 			fmt.Printf("Updated GMC %s@%s status to %s\n", gmc.Name, gmc.Namespace, latest.Object["status"])
+			return true
 		}
 	}
+	return false
 }

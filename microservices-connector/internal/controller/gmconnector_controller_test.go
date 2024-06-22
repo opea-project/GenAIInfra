@@ -88,9 +88,12 @@ var _ = Describe("GMConnector Controller", func() {
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
+			monitorChan := make(chan MonitorCategory)
+			defer close(monitorChan)
 			controllerReconciler := &GMConnectorReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
+				Client:      k8sClient,
+				Scheme:      k8sClient.Scheme(),
+				MonitorChan: monitorChan,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
