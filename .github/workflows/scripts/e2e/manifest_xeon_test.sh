@@ -41,7 +41,7 @@ function init_codegen() {
 
 function install_docsum {
     echo "namespace is $NAMESPACE"
-    kubectl apply -f ./docsum_llm.yaml -n $NAMESPACE
+    kubectl apply -f . -n $NAMESPACE
 }
 
 function install_codetrans {
@@ -203,6 +203,7 @@ fi
 
 case "$1" in
     init_docsum)
+        cp manifests/ChatQnA/qna_configmap_xeon.yaml manifests/DocSum/xeon/
         pushd manifests/DocSum/xeon
         init_docsum
         popd
