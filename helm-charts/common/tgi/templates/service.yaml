@@ -10,7 +10,7 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
+    - port: 80
       targetPort: {{ .Values.port }}
       protocol: TCP
       name: tgi

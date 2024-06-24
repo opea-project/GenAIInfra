@@ -36,7 +36,7 @@ jobs:
         run: |
           changed_charts=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | \
           grep "^$CHARTS_DIR/" | \
-          grep -vE 'README.md|common' | \
+          grep -vE 'README.md|common|update_dependency.sh' | \
           cut -d'/' -f2 | sort -u )
           # set run_matrix to be "{"chart":["chart1","chart2",...]}"
           run_matrix="{\"chart\":["
@@ -88,6 +88,7 @@ jobs:
         id: install
         run: |
           echo "should_cleanup=true" >> $GITHUB_ENV
+          helm-charts/update_dependency.sh && helm dependency update helm-charts/${{ matrix.chart }}
           if ! helm install --create-namespace --namespace $NAMESPACE --wait --timeout "$ROLLOUT_TIMEOUT_SECONDS" $RELEASE_NAME $CHARTS_DIR/${{ matrix.chart }} ; then
             echo "Failed to install chart ${{ matrix.chart }}"
             echo "skip_validate=true" >> $GITHUB_ENV

@@ -7,6 +7,8 @@ package controller
 
 import (
 	"fmt"
+	"os"
+	"os/exec"
 	"path/filepath"
 	"runtime"
 	"testing"
@@ -41,6 +43,33 @@ func TestControllers(t *testing.T) {
 var _ = BeforeSuite(func() {
 	logf.SetLogger(zap.New(zap.WriteTo(GinkgoWriter), zap.UseDevMode(true)))
 
+	err := os.MkdirAll(yaml_dir, os.ModePerm)
+	Expect(err).NotTo(HaveOccurred())
+
+	templateDir := "../../../manifests/ChatQnA"
+
+	files := []string{
+		templateDir + tei_reranking_service_yaml,
+		templateDir + embedding_yaml,
+		templateDir + tei_embedding_service_yaml,
+		templateDir + tei_embedding_gaudi_service_yaml,
+		templateDir + tgi_service_yaml,
+		templateDir + tei_reranking_service_yaml,
+		templateDir + tgi_gaudi_service_yaml,
+		templateDir + llm_yaml,
+		templateDir + redis_vector_db_yaml,
+		templateDir + retriever_yaml,
+		templateDir + reranking_yaml,
+		templateDir + "/qna_configmap_xeon.yaml",
+		templateDir + "/qna_configmap_gaudi.yaml",
+		"../../config/gmcrouter/gmc-router.yaml",
+	}
+	for _, file := range files {
+		cmd := exec.Command("cp", file, yaml_dir)
+		err = cmd.Run()
+		Expect(err).NotTo(HaveOccurred())
+	}
+
 	By("bootstrapping test environment")
 	testEnv = &envtest.Environment{
 		CRDDirectoryPaths:     []string{filepath.Join("..", "..", "config", "crd", "bases")},
@@ -55,7 +84,6 @@ var _ = BeforeSuite(func() {
 			fmt.Sprintf("1.29.0-%s-%s", runtime.GOOS, runtime.GOARCH)),
 	}
 
-	var err error
 	// cfg is defined in this file globally.
 	cfg, err = testEnv.Start()
 	Expect(err).NotTo(HaveOccurred())

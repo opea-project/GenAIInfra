@@ -10,7 +10,6 @@ replicaCount: 1
 LLM_MODEL_ID: bigscience/bloom-560m
 # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
 port: 80
-volume: /mnt
 
 image:
   repository: ghcr.io/huggingface/text-generation-inference
@@ -37,7 +36,6 @@ securityContext: {}
 
 service:
   type: ClusterIP
-  port: 80
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -62,3 +60,4 @@ global:
   https_proxy:
   no_proxy:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  volume: /mnt

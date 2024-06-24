@@ -1,0 +1,69 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "reranking-usvc.fullname" . }}
+  labels:
+    {{- include "reranking-usvc.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "reranking-usvc.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "reranking-usvc.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: TEI_RERANKING_ENDPOINT
+              value: "http://{{ .Release.Name }}-teirerank"
+            - name: http_proxy
+              value: {{ .Values.global.http_proxy }}
+            - name: https_proxy
+              value: {{ .Values.global.https_proxy }}
+            - name: no_proxy
+              value: {{ .Values.global.no_proxy }}
+            - name: LANGCHAIN_TRACING_V2
+              value: {{ .Values.global.LANGCHAIN_TRACING_V2 | quote }}
+            - name: LANGCHAIN_API_KEY
+              value: {{ .Values.global.LANGCHAIN_API_KEY }}
+            - name: LANGCHAIN_PROJECT
+              value: "opea-reranking-service"
+
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: reranking-usvc
+              containerPort:  {{ .Values.service.targetPort }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

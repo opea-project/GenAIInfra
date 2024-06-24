@@ -31,7 +31,7 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: TGI_LLM_ENDPOINT
-              value: "http://{{ .Release.Name }}-tgi:{{ .Values.tgi.service.port }}"
+              value: "http://{{ .Release.Name }}-tgi"
             - name: HUGGINGFACEHUB_API_TOKEN
               value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
             - name: http_proxy
@@ -59,7 +59,7 @@ spec:
             exec:
               command:
               - curl
-              - http://{{ .Release.Name }}-tgi:{{ .Values.tgi.service.port }}
+              - http://{{ .Release.Name }}-tgi
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
