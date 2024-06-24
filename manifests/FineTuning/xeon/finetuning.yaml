@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+   name: opea-finetune
+   namespace: default
+spec:
+   replicas: 1
+   selector:
+      matchLabels:
+         service: opea-finetune
+   template:
+      metadata:
+         labels:
+            service: opea-finetune
+      spec:
+         containers:
+            - name: opea-finetune
+              image: opea-finetune:latest
+              imagePullPolicy: IfNotPresent
+---
+apiVersion: v1
+kind: Service
+metadata:
+   name: opea-finetune-entrypoint
+   namespace: default
+spec:
+   type: NodePort
+   selector:
+      service: opea-finetune
+   ports:
+      - port: 8000
+        targetPort: 8000
+        nodePort: 30001
