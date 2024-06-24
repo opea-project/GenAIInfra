@@ -8,6 +8,8 @@ LOG_PATH=/home/$(whoami)/logs
 MOUNT_DIR=/home/$USER_ID/charts-mnt
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
+CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
+
 
 function install_gmc() {
     # Make sure you have to use image tag $VERSION for microservice-connector installation
@@ -33,6 +35,9 @@ function validate_gmc() {
     echo "validate codegen"
     validate_codegen
 
+    echo "validate codetrans"
+    validate_codetrans
+
     get_gmc_controller_logs
 }
 
@@ -40,6 +45,7 @@ function cleanup_gmc() {
     echo "clean up microservice-connector"
     kubectl delete ns $APP_NAMESPACE
     kubectl delete ns $CODEGEN_NAMESPACE
+    kubectl delete ns $CODETRANS_NAMESPACE
     kubectl delete ns $SYSTEM_NAMESPACE
     kubectl delete crd gmconnectors.gmc.opea.io
 }
@@ -135,6 +141,53 @@ function validate_codegen() {
    local status=false
    if [[ -f $LOG_PATH/gmc_codegen.log ]] && \
    [[ $(grep -c "print" $LOG_PATH/gmc_codegen.log) != 0 ]]; then
+       status=true
+   fi
+   if [ $status == false ]; then
+       echo "Response check failed, please check the logs in artifacts!"
+       exit 1
+   else
+       echo "Response check succeed!"
+   fi
+}
+
+function validate_codetrans() {
+       # todo select gaudi or xeon
+   kubectl create ns $CODETRANS_NAMESPACE
+   sed -i "s|namespace: codetrans|namespace: $CODETRANS_NAMESPACE|g"  $(pwd)/config/samples/codetrans.yaml
+   kubectl apply -f $(pwd)/config/samples/codetrans.yaml
+
+   # Wait until the router service is ready
+   echo "Waiting for the codetrans router service to be ready..."
+   wait_until_pod_ready "codetrans router" $CODETRANS_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $CODETRANS_NAMESPACE)
+   echo $output
+
+
+   # deploy client pod for testing
+   kubectl create deployment client-test -n $CODETRANS_NAMESPACE --image=python:3.8.13 -- sleep infinity
+
+   # wait for client pod ready
+   wait_until_pod_ready "client-test" $CODETRANS_NAMESPACE "client-test"
+   # giving time to populating data
+   sleep 60
+
+   kubectl get pods -n $CODETRANS_NAMESPACE
+   # send request to codetrans
+   export CLIENT_POD=$(kubectl get pod -n $CODETRANS_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
+   echo "$CLIENT_POD"
+   accessUrl=$(kubectl get gmc -n $CODETRANS_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='codetrans')].status.accessUrl}")
+   kubectl exec "$CLIENT_POD" -n $CODETRANS_NAMESPACE -- curl $accessUrl  -X POST  -d '{"query":"    ### System: Please translate the following Golang codes into  Python codes.    ### Original codes:    '\'''\'''\''Golang    \npackage main\n\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello, World!\");\n    '\'''\'''\''    ### Translated codes:"}' -H 'Content-Type: application/json' > $LOG_PATH/gmc_codetrans.log
+   exit_code=$?
+   if [ $exit_code -ne 0 ]; then
+       echo "codetrans failed, please check the logs in ${LOG_PATH}!"
+       exit 1
+   fi
+
+   echo "Checking response results, make sure the output is reasonable. "
+   local status=false
+   if [[ -f $LOG_PATH/gmc_codetrans.log ]] && \
+   [[ $(grep -c "print" $LOG_PATH/gmc_codetrans.log) != 0 ]]; then
        status=true
    fi
    if [ $status == false ]; then
