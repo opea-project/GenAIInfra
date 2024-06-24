@@ -11,6 +11,7 @@ on:
       - microservices-connector/**
       - manifests/ChatQnA/**
       - manifests/CodeGen/**
+      - .github/workflows/scripts/e2e/gmc_test.sh
   workflow_dispatch:
 
 # If there is a new commit, the previous jobs will be canceled
@@ -22,8 +23,42 @@ env:
   GOSRC_DIR: "microservices-connector"
 
 jobs:
+  image-build:
+    runs-on: docker-build-xeon
+    outputs:
+      docker_registry: ${{ steps.set_variables.outputs.DOCKER_REGISTRY }}
+      version: ${{ steps.set_variables.outputs.VERSION }}
+    steps:
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set variables
+        id: set_variables
+        run: |
+          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
+          echo "VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_OUTPUT
+          echo "VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
+
+      - name: Build image and push
+        run: |
+          cd $GOSRC_DIR
+          make docker.build
+          make docker.push
+
+      - name: Clean up images
+        if: always()
+        run: |
+          # clean up the images
+          docker rmi ${{ env.DOCKER_REGISTRY }}/gmcrouter:${{ env.VERSION }}
+          docker rmi ${{ env.DOCKER_REGISTRY }}/gmcmanager:${{ env.VERSION }}
+          echo y |  docker image prune
+
   go-e2e:
     runs-on: k8s
+    needs: image-build
     steps:
       - name: Checkout out Repo
         uses: actions/checkout@v4
@@ -34,16 +69,10 @@ jobs:
         run: |
           echo "SYSTEM_NAMESPACE=opea-system-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "APP_NAMESPACE=chatqna-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
-          echo "VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          echo "DOCKER_REGISTRY=${{ needs.image-build.outputs.docker_registry }}" >> $GITHUB_ENV
+          echo "VERSION=${{ needs.image-build.outputs.version }}" >> $GITHUB_ENV
           echo "should_cleanup=false" >> $GITHUB_ENV
           echo "skip_validate=false" >> $GITHUB_ENV
-
-      - name: Build image and push
-        run: |
-          cd $GOSRC_DIR
-          make docker.build
-          make docker.push
 
       - name: Install GMC
         run: |
