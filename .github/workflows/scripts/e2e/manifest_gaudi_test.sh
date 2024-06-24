@@ -132,9 +132,9 @@ fi
 case "$1" in
     init_docsum)
         pushd manifests/DocSum/gaudi
-	init_docsum
-	popd
-	;;
+        init_docsum
+        popd
+        ;;
     init_codegen)
         pushd manifests/CodeGen/gaudi
         init_codegen
