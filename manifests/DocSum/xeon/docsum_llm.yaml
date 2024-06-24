@@ -61,7 +61,7 @@ spec:
             - name: LANGCHAIN_PROJECT
               value: "opea-llm-service"
           securityContext: {}
-          image: opea/llm-docsum-tgi:latest
+          image: "opea/llm-docsum-tgi:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: llm-uservice
