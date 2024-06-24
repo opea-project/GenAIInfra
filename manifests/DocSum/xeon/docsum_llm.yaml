@@ -1,4 +1,3 @@
----
 # Source: llm-uservice/charts/tgi/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
@@ -50,43 +49,22 @@ spec:
         app.kubernetes.io/name: llm-uservice
         app.kubernetes.io/instance: docsum
     spec:
-      securityContext:
-        {}
+      securityContext: {}
       containers:
         - name: docsum
+          envFrom:
+            - configMapRef:
+                name: qna-config
           env:
-            - name: TGI_LLM_ENDPOINT
-              value: "http://docsum-tgi"
-            - name: HUGGINGFACEHUB_API_TOKEN
-              value: "insert-your-huggingface-token-here"
-            - name: http_proxy
-              value:
-            - name: https_proxy
-              value:
-            - name: no_proxy
-              value:
             - name: LANGCHAIN_TRACING_V2
               value: "false"
-            - name: LANGCHAIN_API_KEY
-              value: insert-your-langchain-key-here
             - name: LANGCHAIN_PROJECT
               value: "opea-llm-service"
-
-          securityContext:
-            {}
-          image: "opea/llm-docsum-tgi:latest"
+          securityContext: {}
+          image: opea/llm-docsum-tgi:latest
           imagePullPolicy: IfNotPresent
           ports:
             - name: llm-uservice
               containerPort: 9000
               protocol: TCP
-          startupProbe:
-            exec:
-              command:
-              - curl
-              - http://docsum-tgi
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            failureThreshold: 120
-          resources:
-            {}
+          resources: {}
