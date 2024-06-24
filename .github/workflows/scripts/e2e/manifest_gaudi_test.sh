@@ -33,6 +33,7 @@ function init_codegen() {
 function install_docsum {
     echo "namespace is $NAMESPACE"
     kubectl apply -f ./docsum_gaudi_llm.yaml -n $NAMESPACE
+}
 
 function install_codegen {
     echo "namespace is $NAMESPACE"
@@ -143,6 +144,12 @@ case "$1" in
     init_chatqna)
         pushd manifests/ChatQnA
         init_chatqna
+        popd
+        ;;
+    install_docsum)
+        pushd manifests/DocSum/gaudi
+        NAMESPACE=$2
+        install_docsum
         popd
         ;;
     install_codegen)
