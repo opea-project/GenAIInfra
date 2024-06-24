@@ -90,7 +90,7 @@ function validate_chatqna() {
    fi
 
    echo "Checking response results, make sure the output is reasonable. "
-   if [[ -f $LOG_PATH/curl_chatqna.log ]] 
+   if [[ -f $LOG_PATH/curl_chatqna.log ]]; then
        cat $LOG_PATH/curl_chatqna.log
    fi
    local status=false
@@ -142,7 +142,7 @@ function validate_codegen() {
 
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
-   if [[ -f $LOG_PATH/gmc_codegen.log ]] 
+   if [[ -f $LOG_PATH/gmc_codegen.log ]]; then
        cat $LOG_PATH/gmc_codegen.log
    fi
    if [[ -f $LOG_PATH/gmc_codegen.log ]] && \
@@ -193,7 +193,7 @@ function validate_codetrans() {
 
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
-   if [[ -f $LOG_PATH/gmc_codetrans.log ]] 
+   if [[ -f $LOG_PATH/gmc_codetrans.log ]]; then 
        cat $LOG_PATH/gmc_codetrans.log
    fi
    if [[ -f $LOG_PATH/gmc_codetrans.log ]] && \
