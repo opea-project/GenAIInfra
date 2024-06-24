@@ -41,7 +41,7 @@ function init_codegen() {
 
 function install_docsum {
     echo "namespace is $NAMESPACE"
-    kubectl apply -f . -n $NAMESPACE
+    kubectl apply -f ./docsum_llm.yaml -n $NAMESPACE
 }
 
 function install_codetrans {

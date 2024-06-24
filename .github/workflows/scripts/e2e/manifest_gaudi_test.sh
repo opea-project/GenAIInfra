@@ -9,6 +9,17 @@ MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 
+
+function init_docsum() {
+    # executed under path manifest/docsum/gaudi
+    # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
+    find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
+    # set huggingface token
+    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+}
+
 function init_codegen() {
     # executed under path manifest/codegen/xeon
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
@@ -18,6 +29,10 @@ function init_codegen() {
     # set huggingface token
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
 }
+
+function install_docsum {
+    echo "namespace is $NAMESPACE"
+    kubectl apply -f ./docsum_gaudi_llm.yaml -n $NAMESPACE
 
 function install_codegen {
     echo "namespace is $NAMESPACE"
@@ -115,6 +130,11 @@ if [ $# -eq 0 ]; then
 fi
 
 case "$1" in
+    init_docsum)
+        pushd manifests/DocSum/gaudi
+	init_docsum
+	popd
+	;;
     init_codegen)
         pushd manifests/CodeGen/gaudi
         init_codegen
