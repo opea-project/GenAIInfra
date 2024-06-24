@@ -57,7 +57,7 @@ var _ = Describe("GMConnector Controller", func() {
 								RouterType: "Sequence",
 								Steps: []mcv1alpha3.Step{
 									{
-										StepName: "Embedding",
+										StepName: Embedding,
 										Data:     "$response",
 										Executor: mcv1alpha3.Executor{
 											InternalService: mcv1alpha3.GMCTarget{
@@ -65,6 +65,79 @@ var _ = Describe("GMConnector Controller", func() {
 												ServiceName: "embedding-service",
 												Config: map[string]string{
 													"endpoint": "/v1/embeddings",
+												},
+											},
+										},
+									},
+									{
+										StepName: TeiEmbedding,
+										Executor: mcv1alpha3.Executor{
+											InternalService: mcv1alpha3.GMCTarget{
+												NameSpace:   "default",
+												ServiceName: "tei-embedding-service",
+												Config: map[string]string{
+													"endpoint":   "/v1/tei-embeddings",
+													"EMBD_MODEL": "somemodel",
+												},
+											},
+										},
+									},
+									{
+										StepName: VectorDB,
+										Executor: mcv1alpha3.Executor{
+											InternalService: mcv1alpha3.GMCTarget{
+												NameSpace:   "default",
+												ServiceName: "vector-service",
+												Config: map[string]string{
+													"endpoint": "/v1/vec",
+												},
+											},
+										},
+									},
+									{
+										StepName: Retriever,
+										Executor: mcv1alpha3.Executor{
+											InternalService: mcv1alpha3.GMCTarget{
+												NameSpace:   "default",
+												ServiceName: "retriever-service",
+												Config: map[string]string{
+													"endpoint": "/v1/retrv",
+												},
+											},
+										},
+									},
+									{
+										StepName: Reranking,
+										Executor: mcv1alpha3.Executor{
+											InternalService: mcv1alpha3.GMCTarget{
+												NameSpace:   "default",
+												ServiceName: "rerank-service",
+												Config: map[string]string{
+													"endpoint": "/v1/rernk",
+												},
+											},
+										},
+									},
+									{
+										StepName: Tgi,
+										Executor: mcv1alpha3.Executor{
+											InternalService: mcv1alpha3.GMCTarget{
+												NameSpace:   "default",
+												ServiceName: "tgi-service",
+												Config: map[string]string{
+													"endpoint": "/v1/tgi",
+												},
+											},
+										},
+									},
+									{
+										StepName: Llm,
+										Executor: mcv1alpha3.Executor{
+											InternalService: mcv1alpha3.GMCTarget{
+												NameSpace:   "default",
+												ServiceName: "llm-service",
+												Config: map[string]string{
+													"endpoint": "/v1/llm",
 												},
 											},
 										},
