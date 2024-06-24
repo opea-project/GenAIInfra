@@ -62,6 +62,35 @@ function install_chatqna {
     kubectl apply -f chaqna-xeon-backend-server.yaml -n $NAMESPACE
 }
 
+function validate_docsum() {
+    ip_address=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+    port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+    echo "try to curl http://${ip_address}:${port}/v1/chat/docsum..."
+    # Curl the DocSum LLM Service
+    curl http://${ip_address}:${port}/v1/chat/docsum \
+      -X POST \
+      -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}' \
+      -H 'Content-Type: application/json' > $LOG_PATH/curl_docsum.log
+    exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo "LLM for docsum failed, please check the logs in ${LOG_PATH}!"
+        exit 1
+    fi
+
+    echo "Checking response results, make sure the output is reasonable. "
+    local status=false
+    if [[ -f $LOG_PATH/curl_docsum.log ]] && \
+    [[ $(grep -c "TEI" $LOG_PATH/curl_docsum.log) != 0 ]]; then
+        status=true
+    fi
+
+    if [ $status == false ]; then
+        echo "Response check failed, please check the logs in artifacts!"
+    else
+        echo "Response check succeed!"
+    fi
+}
+
 function validate_codegen() {
     ip_address=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
     port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
@@ -164,6 +193,11 @@ case "$1" in
         NAMESPACE=$2
         install_chatqna
         popd
+        ;;
+    validate_docsum)
+        NAMESPACE=$2
+        SERVICE_NAME=docsum-llm-uservice
+        validate_docsum
         ;;
     validate_codegen)
         NAMESPACE=$2

@@ -1,89 +1,75 @@
----
-# Source: llm-uservice/charts/tgi/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-apiVersion: v1
-kind: Service
-metadata:
-  name: docsum-tgi
-  labels:
-    helm.sh/chart: tgi-0.1.0
-    app.kubernetes.io/name: tgi
-    app.kubernetes.io/instance: docsum
-    app.kubernetes.io/version: "1.4"
-    app.kubernetes.io/managed-by: Helm
-spec:
-  type: ClusterIP
-  ports:
-    - port: 80
-      targetPort: 80
-      protocol: TCP
-      name: tgi
-  selector:
-    app.kubernetes.io/name: tgi
-    app.kubernetes.io/instance: docsum
 ---
-# Source: llm-uservice/charts/tgi/templates/deployment.yaml
-# Copyright (C) 2024 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: docsum-tgi
-  labels:
-    helm.sh/chart: tgi-0.1.0
-    app.kubernetes.io/name: tgi
-    app.kubernetes.io/instance: docsum
-    app.kubernetes.io/version: "1.4"
-    app.kubernetes.io/managed-by: Helm
+  name: tgi-service-deploy
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: tgi
-      app.kubernetes.io/instance: docsum
+      app: tgi-service-deploy
   template:
     metadata:
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: "true"
       labels:
-        app.kubernetes.io/name: tgi
-        app.kubernetes.io/instance: docsum
+        app: tgi-service-deploy
     spec:
-      securityContext:
-        {}
+      hostIPC: true
       containers:
-        - name: tgi
-          env:
-            - name: MODEL_ID
-              value: Intel/neural-chat-7b-v3-3
-            - name: PORT
-              value: "80"
-            - name: HUGGING_FACE_HUB_TOKEN
-              value: "insert-your-huggingface-token-here"
-            - name: HF_TOKEN
-              value: "insert-your-huggingface-token-here"
-            - name: http_proxy
-              value:
-            - name: https_proxy
-              value:
-            - name: no_proxy
-              value:
-          securityContext:
-            {}
-          image: "ghcr.io/huggingface/text-generation-inference:1.4"
-          imagePullPolicy: IfNotPresent
-          volumeMounts:
-            - mountPath: /data
-              name: model-volume
-          ports:
-            - name: http
-              containerPort: 80
-              protocol: TCP
-          resources:
-            {}
+      - envFrom:
+        - configMapRef:
+            name: qna-config
+        image: ghcr.io/huggingface/text-generation-inference:1.4
+        name: tgi-service-deploy-demo
+        args:
+        - --model-id
+        - $(LLM_MODEL_ID)
+        #- "/data/Llama-2-7b-hf"
+        # - "/data/Mistral-7B-Instruct-v0.2"
+        # - --quantize
+        # - "bitsandbytes-fp4"
+#        - --disable-custom-kernels
+        volumeMounts:
+        - mountPath: /data
+          name: model-volume
+        - mountPath: /dev/shm
+          name: shm
+        ports:
+        - containerPort: 80
+        resources:
+          # limits:
+          #   cpu: 56000m
+          #   memory: 26Gi
+          # requests:
+          #   cpu: 56000m
+          #   memory: 26Gi
+      serviceAccountName: default
+      nodeSelector:
       volumes:
-        - name: model-volume
-          hostPath:
-            path: /mnt
-            type: Directory
+      - name: model-volume
+        hostPath:
+          # directory location on host
+          path: /mnt/models
+          # this field is optional
+          type: Directory
+      - name: shm
+        emptyDir:
+          medium: Memory
+          sizeLimit: 1Gi
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: tgi-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: tgi-service-deploy
+  ports:
+    - name: service
+      port: 9009
+      targetPort: 80
