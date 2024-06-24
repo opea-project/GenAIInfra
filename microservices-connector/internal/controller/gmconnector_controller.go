@@ -65,6 +65,7 @@ const (
 	Service                          = "Service"
 	Deployment                       = "Deployment"
 	dplymtSubfix                     = "-deployment"
+	METADATA_PLATFORM                = "gmc/platform"
 )
 
 // GMConnectorReconciler reconciles a GMConnector object
@@ -270,7 +271,12 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 
-	err := preProcessUserConfigmap(ctx, r.Client, req.NamespacedName.Namespace, xeon, graph)
+	platform := xeon
+	if labelValue, exists := graph.GetLabels()[METADATA_PLATFORM]; exists {
+		platform = labelValue
+	}
+
+	err := preProcessUserConfigmap(ctx, r.Client, req.NamespacedName.Namespace, platform, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
 	}
