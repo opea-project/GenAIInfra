@@ -7,9 +7,9 @@ metadata:
   labels:
     app.kubernetes.io/name: gmconnector
     app.kubernetes.io/managed-by: kustomize
-    gmc/platform: xeon
+    gmc/platform: gaudi
   name: chatqa
-  namespace: chatqa
+  namespace: chatqa-gaudi
 spec:
   routerConfig:
     name: router
@@ -23,9 +23,9 @@ spec:
           serviceName: embedding-svc
           config:
             endpoint: /v1/embeddings
-      - name: TeiEmbedding
+      - name: TeiEmbeddingGaudi
         internalService:
-          serviceName: tei-embedding-svc
+          serviceName: tei-embedding-gaudi-svc
           isDownstreamService: true
       - name: Retriever
         data: $response
@@ -55,9 +55,9 @@ spec:
           serviceName: llm-svc
           config:
             endpoint: /v1/chat/completions
-      - name: Tgi
+      - name: TgiGaudi
         internalService:
-          serviceName: tgi-service-m
+          serviceName: tgi-gaudi-svc
           config:
             endpoint: /generate
           isDownstreamService: true

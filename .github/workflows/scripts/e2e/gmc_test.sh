@@ -42,9 +42,6 @@ function cleanup_gmc() {
     kubectl delete ns $CODEGEN_NAMESPACE
     kubectl delete ns $SYSTEM_NAMESPACE
     kubectl delete crd gmconnectors.gmc.opea.io
-    # clean up the images
-    docker rmi $DOCKER_REGISTRY/gmcrouter:$VERSION
-    docker rmi $DOCKER_REGISTRY/gmcmanager:$VERSION
 }
 
 function validate_chatqna() {
