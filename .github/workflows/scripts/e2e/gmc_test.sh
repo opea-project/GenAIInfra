@@ -44,10 +44,16 @@ function validate_gmc() {
 
 function cleanup_gmc() {
     echo "clean up microservice-connector"
-    kubectl delete ns $APP_NAMESPACE
-    kubectl delete ns $CODEGEN_NAMESPACE
-    kubectl delete ns $CODETRANS_NAMESPACE
-    kubectl delete ns $SYSTEM_NAMESPACE
+    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$SYSTEM_NAMESPACE")
+    for ns in "${namespaces[@]}"; do
+        kubectl get namespace "$ns" &> /dev/null
+        if [ $? -eq 0 ]; then
+            echo "Deleting namespace: $ns"
+            kubectl delete namespace "$ns"
+        else
+            echo "Namespace $ns does not exist"
+        fi
+    done
     kubectl delete crd gmconnectors.gmc.opea.io
 }
 
