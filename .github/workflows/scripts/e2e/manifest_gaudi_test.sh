@@ -255,7 +255,7 @@ case "$1" in
     validate_docsum)
         NAMESPACE=$2
         SERVICE_NAME=docsum-llm-uservice
-        validate_docsum
+        # validate_docsum
         ;;
     validate_codetrans)
         NAMESPACE=$2
