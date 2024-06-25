@@ -41,6 +41,7 @@ function init_codegen() {
 
 function install_docsum {
     echo "namespace is $NAMESPACE"
+    find . -name 'qna_configmap_gaudi.yaml' -type f -exec sed -i "s#default#{$NAMESPACE}#g" {} \;
     kubectl apply -f . -n $NAMESPACE
 }
 
@@ -249,11 +250,11 @@ case "$1" in
         install_chatqna
         popd
         ;;
-    #validate_docsum)
-    #    NAMESPACE=$2
-    #    SERVICE_NAME=docsum-llm-uservice
-    #    validate_docsum
-    #    ;;
+    validate_docsum)
+        NAMESPACE=$2
+        SERVICE_NAME=docsum-llm-uservice
+        validate_docsum
+        ;;
     validate_codetrans)
         NAMESPACE=$2
         SERVICE_NAME=codetrans-llm-uservice
