@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-name: GMC E2e Tests on Xeon
+name: GMC E2e Tests on Gaudi
 
 on:
   pull_request:
@@ -16,7 +16,7 @@ on:
 
 # If there is a new commit, the previous jobs will be canceled
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-xeon
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-gaudi
   cancel-in-progress: true
 
 env:
@@ -24,7 +24,7 @@ env:
 
 jobs:
   image-build:
-    runs-on: docker-build-xeon
+    runs-on: docker-build-gaudi
     outputs:
       docker_registry: ${{ steps.set_variables.outputs.DOCKER_REGISTRY }}
       version: ${{ steps.set_variables.outputs.VERSION }}
@@ -57,7 +57,7 @@ jobs:
           echo y |  docker image prune
 
   go-e2e:
-    runs-on: xeon
+    runs-on: gaudi
     needs: image-build
     steps:
       - name: Checkout out Repo

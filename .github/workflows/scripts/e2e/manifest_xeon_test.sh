@@ -5,7 +5,7 @@
 set -xe
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
-MOUNT_DIR=/home/$USER_ID/charts-mnt
+MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 
@@ -163,8 +163,9 @@ function validate_codegen() {
 
 function validate_chatqna() {
     # make sure microservice retriever is ready
+    test_embedding=$(python3 -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)")
     until curl http://retriever-svc.$NAMESPACE:7000/v1/retrieval -X POST \
-    -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${your_embedding}"'"}' \
+    -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${test_embedding}"'"}' \
     -H 'Content-Type: application/json'; do sleep 10; done
 
     # make sure microservice tgi-svc is ready
