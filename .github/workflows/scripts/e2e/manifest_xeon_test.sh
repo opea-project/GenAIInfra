@@ -41,7 +41,7 @@ function init_codegen() {
 
 function install_docsum {
     echo "namespace is $NAMESPACE"
-    find . -name 'qna_configmap_xeon.yaml' -type f -exec sed -i "s#default#{$NAMESPACE}#g" {} \;
+    find . -name 'qna_configmap_xeon.yaml' -type f -exec sed -i "s#default#${NAMESPACE}#g" {} \;
     kubectl apply -f . -n $NAMESPACE
 }
 
