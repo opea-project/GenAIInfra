@@ -90,15 +90,15 @@ function validate_chatqna() {
    fi
 
    echo "Checking response results, make sure the output is reasonable. "
-   if [[ -f $LOG_PATH/curl_chatqna.log ]]; then
-       cat $LOG_PATH/curl_chatqna.log
-   fi
    local status=false
    if [[ -f $LOG_PATH/curl_chatqna.log ]] && \
    [[ $(grep -c "billion" $LOG_PATH/curl_chatqna.log) != 0 ]]; then
        status=true
    fi
    if [ $status == false ]; then
+       if [[ -f $LOG_PATH/curl_chatqna.log ]]; then
+           cat $LOG_PATH/curl_chatqna.log
+       fi
        echo "Response check failed, please check the logs in artifacts!"
        exit 1
    else
@@ -142,14 +142,14 @@ function validate_codegen() {
 
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
-   if [[ -f $LOG_PATH/gmc_codegen.log ]]; then
-       cat $LOG_PATH/gmc_codegen.log
-   fi
    if [[ -f $LOG_PATH/gmc_codegen.log ]] && \
    [[ $(grep -c "print" $LOG_PATH/gmc_codegen.log) != 0 ]]; then
        status=true
    fi
    if [ $status == false ]; then
+       if [[ -f $LOG_PATH/gmc_codegen.log ]]; then
+           cat $LOG_PATH/gmc_codegen.log
+       fi
        echo "Response check failed, please check the logs in artifacts!"
        cat $LOG_PATH/gmc_codegen.log
        exit 1
@@ -193,14 +193,14 @@ function validate_codetrans() {
 
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
-   if [[ -f $LOG_PATH/gmc_codetrans.log ]]; then 
-       cat $LOG_PATH/gmc_codetrans.log
-   fi
    if [[ -f $LOG_PATH/gmc_codetrans.log ]] && \
    [[ $(grep -c "print" $LOG_PATH/gmc_codetrans.log) != 0 ]]; then
        status=true
    fi
    if [ $status == false ]; then
+       if [[ -f $LOG_PATH/gmc_codetrans.log ]]; then 
+           cat $LOG_PATH/gmc_codetrans.log
+       fi
        echo "Response check failed, please check the logs in artifacts!"
        exit 1
    else
