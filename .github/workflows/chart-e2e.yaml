@@ -38,10 +38,11 @@ jobs:
           grep "^$CHARTS_DIR/" | \
           grep -vE 'README.md|common|update_dependency.sh' | \
           cut -d'/' -f2 | sort -u )
-          # set run_matrix to be "{"chart":["chart1","chart2",...]}"
-          run_matrix="{\"chart\":["
+          run_matrix="{\"include\":["
           for chart in ${changed_charts}; do
-            run_matrix="${run_matrix}\"${chart}\","
+            #run_matrix="${run_matrix}\"${chart}\","
+            run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\"},"
+            run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\"},"
           done
           run_matrix=$run_matrix"]}"
           echo "run_matrix=${run_matrix}"
@@ -49,17 +50,17 @@ jobs:
 
   Chart-test:
     needs: job1
-    if: always() && ${{ needs.job1.outputs.run_matrix.chart.length }} > 0
+    if: always() && ${{ needs.job1.outputs.run_matrix.example.length }} > 0
     strategy:
       matrix: ${{ fromJSON(needs.job1.outputs.run_matrix) }}
-    runs-on: k8s
+    runs-on: ${{ matrix.hardware }}
     continue-on-error: true
     outputs:
       should_cleanup: ${{ steps.set_boolean.outputs.should_cleanup }}
     steps:
       - name: E2e test chart
         run: |
-          echo "Matrix - chart: ${{ matrix.chart }}"
+          echo "Matrix - chart: ${{ matrix.example }}"
 
       - name: Clean Up Working Directory
         run: sudo rm -rf ${{github.workspace}}/*
@@ -71,8 +72,8 @@ jobs:
 
       - name: Set variables
         run: |
-          echo "RELEASE_NAME=${{ matrix.chart }}$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "NAMESPACE=${{ matrix.chart }}-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          echo "RELEASE_NAME=${{ matrix.example }}$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          echo "NAMESPACE=${{ matrix.example }}-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "ROLLOUT_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "KUBECTL_TIMEOUT_SECONDS=60s" >> $GITHUB_ENV
           echo "should_cleanup=false" >> $GITHUB_ENV
@@ -82,18 +83,23 @@ jobs:
 
       - name: Initialize chart testing
         run: |
-          .github/workflows/scripts/e2e/chart_test.sh init_${{ matrix.chart }}
+          .github/workflows/scripts/e2e/chart_test.sh init_${{ matrix.example }}
 
       - name: Helm install
         id: install
         run: |
           echo "should_cleanup=true" >> $GITHUB_ENV
-          helm-charts/update_dependency.sh && helm dependency update helm-charts/${{ matrix.chart }}
-          if ! helm install --create-namespace --namespace $NAMESPACE --wait --timeout "$ROLLOUT_TIMEOUT_SECONDS" $RELEASE_NAME $CHARTS_DIR/${{ matrix.chart }} ; then
-            echo "Failed to install chart ${{ matrix.chart }}"
+          helm-charts/update_dependency.sh && helm dependency update helm-charts/${{ matrix.example }}
+          value_file="values.yaml"
+          if [ "${{ matrix.hardware }}" == "gaudi" ]; then
+            value_file="gaudi-values.yaml"
+          fi
+          if ! helm install --create-namespace --namespace $NAMESPACE --wait --timeout "$ROLLOUT_TIMEOUT_SECONDS" --values $CHARTS_DIR/${{ matrix.example }}/${value_file} $RELEASE_NAME $CHARTS_DIR/${{ matrix.example }} ; then
+            echo "Failed to install chart ${{ matrix.example }}"
             echo "skip_validate=true" >> $GITHUB_ENV
             exit 1
           fi
+          sleep 120
 
       - name: Validate e2e test
         if: always()
@@ -101,7 +107,7 @@ jobs:
           if $skip_validate; then
             echo "Skip validate"
           else
-            .github/workflows/scripts/e2e/chart_test.sh validate_${{ matrix.chart }} $RELEASE_NAME $NAMESPACE
+            .github/workflows/scripts/e2e/chart_test.sh validate_${{ matrix.example }} $RELEASE_NAME $NAMESPACE
           fi
 
       - name: Helm uninstall
