@@ -9,9 +9,18 @@ MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 
-
 function init_docsum() {
-    # executed under path manifest/docsum/gaudi
+    # executed under path manifest/docsum/xeon
+    # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
+    find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
+    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
+    # set huggingface token
+    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+}
+
+function init_codetrans() {
+    # executed under path manifest/codetrans/xeon
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt#path: $MOUNT_DIR#g" {} \;
     # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
@@ -31,6 +40,11 @@ function init_codegen() {
 }
 
 function install_docsum {
+    echo "namespace is $NAMESPACE"
+    kubectl apply -f . -n $NAMESPACE
+}
+
+function install_codetrans {
     echo "namespace is $NAMESPACE"
     kubectl apply -f . -n $NAMESPACE
 }
@@ -91,13 +105,43 @@ function validate_docsum() {
     fi
 }
 
+function validate_codetrans() {
+    ip_address=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
+    port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
+    echo "try to curl http://${ip_address}:${port}/v1/chat/completions..."
+    # Curl the CodeTrans LLM Service
+    curl http://${ip_address}:${port}/v1/chat/completions \
+      -X POST \
+      -d '{"query":"    ### System: Please translate the following Golang codes into  Python codes.    ### Original codes:    '\'''\'''\''Golang    \npackage main\n\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello, World!\");\n    '\'''\'''\''    ### Translated codes:"}' \
+      -H 'Content-Type: application/json' > $LOG_PATH/curl_codetrans.log
+    exit_code=$?
+    if [ $exit_code -ne 0 ]; then
+        echo "LLM for codetrans failed, please check the logs in ${LOG_PATH}!"
+        exit 1
+    fi
+
+    echo "Checking response results, make sure the output is reasonable. "
+    local status=false
+    if [[ -f $LOG_PATH/curl_codetrans.log ]] && \
+    [[ $(grep -c "Hello" $LOG_PATH/curl_codetrans.log) != 0 ]]; then
+        status=true
+    fi
+
+    if [ $status == false ]; then
+        echo "Response check failed, please check the logs in artifacts!"
+    else
+        echo "Response check succeed!"
+    fi
+}
+
 function validate_codegen() {
     ip_address=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
     port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     echo "try to curl http://${ip_address}:${port}/v1/codegen..."
     # Curl the Mega Service
-    curl http://${ip_address}:${port}/v1/codegen -H "Content-Type: application/json" \
-    -d '{"messages": "def print_hello_world():"}' > $LOG_PATH/curl_codegen.log
+    curl http://${ip_address}:${port}/v1/codegen \
+    -H "Content-Type: application/json" \
+    -d '{"messages": "Implement a high-level API for a TODO list application. The API takes as input an operation request and updates the TODO list in place. If the request is invalid, raise an exception."}' > $LOG_PATH/curl_codegen.log
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
         echo "Megaservice codegen failed, please check the logs in ${LOG_PATH}!"
@@ -122,7 +166,7 @@ function validate_chatqna() {
     # make sure microservice retriever is ready
     test_embedding=$(python3 -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)")
     until curl http://retriever-svc.$NAMESPACE:7000/v1/retrieval -X POST \
-    -d "{\"text\":\"What is the revenue of Nike in 2023?\",\"embedding\":${test_embedding}}" \
+    -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${test_embedding}"'"}' \
     -H 'Content-Type: application/json'; do sleep 10; done
 
     # make sure microservice tgi-svc is ready
@@ -166,6 +210,11 @@ case "$1" in
         init_docsum
         popd
         ;;
+    init_codetrans)
+        pushd manifests/CodeTrans/gaudi
+        init_codetrans
+        popd
+        ;;
     init_codegen)
         pushd manifests/CodeGen/gaudi
         init_codegen
@@ -180,6 +229,12 @@ case "$1" in
         pushd manifests/DocSum/gaudi
         NAMESPACE=$2
         install_docsum
+        popd
+        ;;
+    install_codetrans)
+        pushd manifests/CodeTrans/gaudi
+        NAMESPACE=$2
+        install_codetrans
         popd
         ;;
     install_codegen)
@@ -199,6 +254,11 @@ case "$1" in
     #    SERVICE_NAME=docsum-llm-uservice
     #    validate_docsum
     #    ;;
+    validate_codetrans)
+        NAMESPACE=$2
+        SERVICE_NAME=codetrans-llm-uservice
+        validate_codetrans
+        ;;
     validate_codegen)
         NAMESPACE=$2
         SERVICE_NAME=codegen

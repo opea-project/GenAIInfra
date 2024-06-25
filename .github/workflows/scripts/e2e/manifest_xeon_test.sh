@@ -5,7 +5,7 @@
 set -xe
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
-MOUNT_DIR=/home/$USER_ID/charts-mnt
+MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 
@@ -139,8 +139,9 @@ function validate_codegen() {
     port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     echo "try to curl http://${ip_address}:${port}/v1/codegen..."
     # Curl the Mega Service
-    curl http://${ip_address}:${port}/v1/codegen -H "Content-Type: application/json" \
-    -d '{"messages": "def print_hello_world():"}' > $LOG_PATH/curl_codegen.log
+    curl http://${ip_address}:${port}/v1/codegen \
+    -H "Content-Type: application/json" \
+    -d '{"messages": "Implement a high-level API for a TODO list application. The API takes as input an operation request and updates the TODO list in place. If the request is invalid, raise an exception."}' > $LOG_PATH/curl_codegen.log
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
         echo "Megaservice codegen failed, please check the logs in ${LOG_PATH}!"
@@ -163,8 +164,9 @@ function validate_codegen() {
 
 function validate_chatqna() {
     # make sure microservice retriever is ready
+    test_embedding=$(python3 -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)")
     until curl http://retriever-svc.$NAMESPACE:7000/v1/retrieval -X POST \
-    -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${your_embedding}"'"}' \
+    -d '{"text":"What is the revenue of Nike in 2023?","embedding":"'"${test_embedding}"'"}' \
     -H 'Content-Type: application/json'; do sleep 10; done
 
     # make sure microservice tgi-svc is ready
