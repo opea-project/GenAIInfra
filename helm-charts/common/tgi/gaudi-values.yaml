@@ -7,15 +7,13 @@
 
 replicaCount: 1
 
-LLM_MODEL_ID: bigscience/bloom-560m
-# LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-port: 80
+port: 2080
 
 image:
-  repository: ghcr.io/huggingface/text-generation-inference
+  repository: ghcr.io/huggingface/tgi-gaudi
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.4"
+  tag: "1.2.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -26,13 +24,15 @@ podAnnotations: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 service:
   type: ClusterIP
@@ -46,16 +46,15 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
 # LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
 LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
-volume: /mnt
-image:
-  repository: ghcr.io/huggingface/tgi-gaudi
-  tag: "1.2.1"
 
 global:
   http_proxy:
   https_proxy:
   no_proxy:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-  volume: /mnt
+  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
+  # comment out modeluseHostPath if you want to download the model from huggingface
+  modelUseHostPath: /mnt

@@ -46,7 +46,6 @@ spec:
               value: {{ .Values.global.LANGCHAIN_API_KEY }}
             - name: LANGCHAIN_PROJECT
               value: "opea-llm-service"
-
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
