@@ -198,7 +198,7 @@ function validate_codetrans() {
        status=true
    fi
    if [ $status == false ]; then
-       if [[ -f $LOG_PATH/gmc_codetrans.log ]]; then 
+       if [[ -f $LOG_PATH/gmc_codetrans.log ]]; then
            cat $LOG_PATH/gmc_codetrans.log
        fi
        echo "Response check failed, please check the logs in artifacts!"
