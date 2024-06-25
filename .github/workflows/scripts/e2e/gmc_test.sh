@@ -194,7 +194,7 @@ function validate_codetrans() {
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
    if [[ -f $LOG_PATH/gmc_codetrans.log ]] && \
-   [[ $(grep -c "print" $LOG_PATH/gmc_codetrans.log) != 0 ]]; then
+   [[ $(grep -c "import" $LOG_PATH/gmc_codetrans.log) != 0 ]]; then
        status=true
    fi
    if [ $status == false ]; then
