@@ -42,7 +42,9 @@ function init_codegen() {
 function install_docsum {
     echo "namespace is $NAMESPACE"
     find . -name 'qna_configmap_xeon.yaml' -type f -exec sed -i "s#default#${NAMESPACE}#g" {} \;
-    kubectl apply -f . -n $NAMESPACE
+    kubectl apply -f qna_configmap_xeon.yaml -n $NAMESPACE
+    kubectl apply -f docsum_llm.yaml -n $NAMESPACE
+    kubectl apply -f tgi_service.yaml -n $NAMESPACE
 }
 
 function install_codetrans {

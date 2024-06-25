@@ -42,7 +42,9 @@ function init_codegen() {
 function install_docsum {
     echo "namespace is $NAMESPACE"
     find . -name 'qna_configmap_gaudi.yaml' -type f -exec sed -i "s#default#${NAMESPACE}#g" {} \;
-    kubectl apply -f . -n $NAMESPACE
+    kubectl apply -f qna_configmap_gaudi.yaml -n $NAMESPACE
+    kubectl apply -f docsum_gaudi_llm.yaml -n $NAMESPACE
+    kubectl apply -f tgi_gaudi_service.yaml -n $NAMESPACE
 }
 
 function install_codetrans {
