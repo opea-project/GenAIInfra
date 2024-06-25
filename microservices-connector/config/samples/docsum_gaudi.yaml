@@ -7,7 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/name: gmconnector
     app.kubernetes.io/managed-by: kustomize
-    gmc/platform: gaudi 
+    gmc/platform: gaudi
   name: docsum
   namespace: docsum-gaudi
 spec:
@@ -24,7 +24,7 @@ spec:
           serviceName: docsum-llm-uservice
           config:
             endpoint: /v1/chat/docsum
-            HUGGING_FACE_HUB_TOKEN: <HUGGING_FACE_HUB_TOKEN> 
+            HUGGING_FACE_HUB_TOKEN: <HUGGING_FACE_HUB_TOKEN>
             HF_TOKEN: <HF_TOKEN>
             PORT: "9009"
       - name: TgiGaudi
