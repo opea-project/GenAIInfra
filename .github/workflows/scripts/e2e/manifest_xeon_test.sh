@@ -139,8 +139,9 @@ function validate_codegen() {
     port=$(kubectl get svc $SERVICE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     echo "try to curl http://${ip_address}:${port}/v1/codegen..."
     # Curl the Mega Service
-    curl http://${ip_address}:${port}/v1/codegen -H "Content-Type: application/json" \
-    -d '{"messages": "def print_hello_world():"}' > $LOG_PATH/curl_codegen.log
+    curl http://${ip_address}:${port}/v1/codegen \
+    -H "Content-Type: application/json" \
+    -d '{"messages": "Implement a high-level API for a TODO list application. The API takes as input an operation request and updates the TODO list in place. If the request is invalid, raise an exception."}' > $LOG_PATH/curl_codegen.log
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
         echo "Megaservice codegen failed, please check the logs in ${LOG_PATH}!"
