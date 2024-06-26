@@ -22,13 +22,15 @@ podAnnotations: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 service:
   type: ClusterIP
@@ -53,3 +55,8 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+global:
+  http_proxy:
+  https_proxy:
+  no_proxy:
