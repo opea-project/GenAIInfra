@@ -246,6 +246,7 @@ function validate_docsum() {
        exit 1
    fi
 
+   cat "$LOG_PATH/gmc_docsum.log"
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
    if [[ -f $LOG_PATH/gmc_docsum.log ]] && \
