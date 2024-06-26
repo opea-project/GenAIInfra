@@ -10,6 +10,7 @@ MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
+DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
 
 
 function install_gmc() {
@@ -39,12 +40,15 @@ function validate_gmc() {
     echo "validate codetrans"
     validate_codetrans
 
+    echo "validate docsum"
+    validate_docsum
+
     get_gmc_controller_logs
 }
 
 function cleanup_gmc() {
     echo "clean up microservice-connector"
-    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$SYSTEM_NAMESPACE")
+    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE" "$SYSTEM_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         kubectl get namespace "$ns" &> /dev/null
         if [ $? -eq 0 ]; then
@@ -58,8 +62,6 @@ function cleanup_gmc() {
 }
 
 function validate_chatqna() {
-
-   # todo select gaudi or xeon
    kubectl create ns $APP_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $APP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
@@ -114,8 +116,6 @@ function validate_chatqna() {
 }
 
 function validate_codegen() {
-
-   # todo select gaudi or xeon
    kubectl create ns $CODEGEN_NAMESPACE
    sed -i "s|namespace: codegen|namespace: $CODEGEN_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
@@ -166,7 +166,6 @@ function validate_codegen() {
 }
 
 function validate_codetrans() {
-       # todo select gaudi or xeon
    kubectl create ns $CODETRANS_NAMESPACE
    sed -i "s|namespace: codetrans|namespace: $CODETRANS_NAMESPACE|g"  $(pwd)/config/samples/codetrans_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/codetrans_xeon.yaml
@@ -215,10 +214,60 @@ function validate_codetrans() {
    fi
 }
 
+function validate_docsum() {
+   kubectl create ns $DOCSUM_NAMESPACE
+   sed -i "s|namespace: docsum|namespace: $DOCSUM_NAMESPACE|g"  $(pwd)/config/samples/docsum_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/docsum_xeon.yaml
+
+   # Wait until the router service is ready
+   echo "Waiting for the docsum router service to be ready..."
+   wait_until_pod_ready "docsum router" $DOCSUM_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $DOCSUM_NAMESPACE)
+   echo $output
+
+
+   # deploy client pod for testing
+   kubectl create deployment client-test -n $DOCSUM_NAMESPACE --image=python:3.8.13 -- sleep infinity
+
+   # wait for client pod ready
+   wait_until_pod_ready "client-test" $DOCSUM_NAMESPACE "client-test"
+   # giving time to populating data
+   sleep 60
+
+   kubectl get pods -n $DOCSUM_NAMESPACE
+   # send request to codetrans
+   export CLIENT_POD=$(kubectl get pod -n $DOCSUM_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
+   echo "$CLIENT_POD"
+   accessUrl=$(kubectl get gmc -n $DOCSUM_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='docsum')].status.accessUrl}")
+   kubectl exec "$CLIENT_POD" -n $DOCSUM_NAMESPACE -- curl $accessUrl  -X POST  -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}'  -H 'Content-Type: application/json' > $LOG_PATH/gmc_docsum.log
+   exit_code=$?
+   if [ $exit_code -ne 0 ]; then
+       echo "docsum failed, please check the logs in ${LOG_PATH}!"
+       exit 1
+   fi
+
+   echo "Checking response results, make sure the output is reasonable. "
+   local status=false
+   if [[ -f $LOG_PATH/gmc_docsum.log ]] && \
+   [[ $(grep -c "connect" $LOG_PATH/gmc_docsum.log) != 0 ]]; then
+       status=true
+   fi
+   if [ $status == false ]; then
+       if [[ -f $LOG_PATH/gmc_docsum.log ]]; then
+           cat $LOG_PATH/gmc_docsum.log
+       fi
+       echo "Response check failed, please check the logs in artifacts!"
+       exit 1
+   else
+       echo "Response check succeed!"
+   fi
+}
+
 function init_gmc() {
     # Copy manifest into gmc
     mkdir -p $(pwd)/config/manifests
     cp $(dirname $(pwd))/manifests/ChatQnA/*.yaml -p $(pwd)/config/manifests/
+    cp $(dirname $(pwd))/manifests/DocSum/xeon/docsum_llm.yaml -p $(pwd)/config/manifests/
 
     # replace tag with for the gmc-router and gmc-manager image
     sed -i "s|opea/\(.*\):latest|opea/\1:$VERSION|g" $(pwd)/config/gmcrouter/gmc-router.yaml
@@ -235,6 +284,7 @@ function init_gmc() {
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/models#path: $MOUNT_DIR#g" {} \;
     # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
     find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: ${IMAGE_REPO}opea\"/#g" {} \;
     # set huggingface token
     # find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
