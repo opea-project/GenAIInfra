@@ -238,7 +238,7 @@ function validate_docsum() {
    # send request to codetrans
    export CLIENT_POD=$(kubectl get pod -n $DOCSUM_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
-   accessUrl=$(kubectl get gmc -n $DOCSUM_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='codetrans')].status.accessUrl}")
+   accessUrl=$(kubectl get gmc -n $DOCSUM_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='docsum')].status.accessUrl}")
    kubectl exec "$CLIENT_POD" -n $DOCSUM_NAMESPACE -- curl $accessUrl  -X POST  -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}'  -H 'Content-Type: application/json' > $LOG_PATH/gmc_docsum.log
    exit_code=$?
    if [ $exit_code -ne 0 ]; then
