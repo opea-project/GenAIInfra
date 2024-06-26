@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     gmc/platform: gaudi
   name: docsum
-  namespace: docsum-gaudi
+  namespace: docsum
 spec:
   routerConfig:
     name: router
