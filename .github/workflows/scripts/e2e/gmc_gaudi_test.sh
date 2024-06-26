@@ -48,7 +48,7 @@ function validate_gmc() {
 
 function cleanup_gmc() {
     echo "clean up microservice-connector"
-    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE" "$SYSTEM_NAMESPACE")
+    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$SYSTEM_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         kubectl get namespace "$ns" &> /dev/null
         if [ $? -eq 0 ]; then
@@ -215,13 +215,13 @@ function validate_codetrans() {
 }
 
 function validate_docsum() {
-   kubectl create ns $DOCSUM_NAMESPACE
+   # kubectl create ns $DOCSUM_NAMESPACE
    sed -i "s|namespace: docsum|namespace: $DOCSUM_NAMESPACE|g"  $(pwd)/config/samples/docsum_gaudi.yaml
    kubectl apply -f $(pwd)/config/samples/docsum_gaudi.yaml
 
    # Wait until the router service is ready
-   echo "Waiting for the codetrans router service to be ready..."
-   wait_until_pod_ready "codetrans router" $DOCSUM_NAMESPACE "router-service"
+   echo "Waiting for the docsum router service to be ready..."
+   wait_until_pod_ready "docsum router" $DOCSUM_NAMESPACE "router-service"
    output=$(kubectl get pods -n $DOCSUM_NAMESPACE)
    echo $output
 
