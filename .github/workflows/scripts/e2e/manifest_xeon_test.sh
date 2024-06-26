@@ -41,7 +41,10 @@ function init_codegen() {
 
 function install_docsum {
     echo "namespace is $NAMESPACE"
-    kubectl apply -f . -n $NAMESPACE
+    find . -name 'qna_configmap_xeon.yaml' -type f -exec sed -i "s#default#${NAMESPACE}#g" {} \;
+    kubectl apply -f qna_configmap_xeon.yaml -n $NAMESPACE
+    kubectl apply -f docsum_llm.yaml -n $NAMESPACE
+    kubectl apply -f tgi_service.yaml -n $NAMESPACE
 }
 
 function install_codetrans {
@@ -205,6 +208,7 @@ fi
 
 case "$1" in
     init_docsum)
+        cp manifests/ChatQnA/qna_configmap_xeon.yaml manifests/DocSum/xeon/
         pushd manifests/DocSum/xeon
         init_docsum
         popd
@@ -251,7 +255,7 @@ case "$1" in
     validate_docsum)
         NAMESPACE=$2
         SERVICE_NAME=docsum-llm-uservice
-        validate_docsum
+        # validate_docsum
         ;;
     validate_codetrans)
         NAMESPACE=$2

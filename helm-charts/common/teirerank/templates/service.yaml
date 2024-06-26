@@ -11,7 +11,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: 80
-      targetPort: 80
+      targetPort: {{ .Values.port }}
       protocol: TCP
       name: teirerank
   selector:

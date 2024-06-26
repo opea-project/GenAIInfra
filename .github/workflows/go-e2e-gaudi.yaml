@@ -11,7 +11,7 @@ on:
       - microservices-connector/**
       - manifests/ChatQnA/**
       - manifests/CodeGen/**
-      - .github/workflows/scripts/e2e/gmc_test.sh
+      - .github/workflows/scripts/e2e/gmc_gaudi_test.sh
   workflow_dispatch:
 
 # If there is a new commit, the previous jobs will be canceled
@@ -77,7 +77,7 @@ jobs:
       - name: Install GMC
         run: |
           echo "should_cleanup=true" >> $GITHUB_ENV
-          .github/workflows/scripts/e2e/gmc_test.sh install_gmc
+          .github/workflows/scripts/e2e/gmc_gaudi_test.sh install_gmc
           exit_status=$$?$$
           if [ $$exit_status -ne 0 ]; then
             echo "Failed to install modules"
@@ -91,12 +91,12 @@ jobs:
           if $skip_validate; then
             echo "Skip validate"
           else
-            .github/workflows/scripts/e2e/gmc_test.sh validate_gmc
+            .github/workflows/scripts/e2e/gmc_gaudi_test.sh validate_gmc
           fi
 
       - name: Cleanup modules
         if: always()
         run: |
           if $should_cleanup; then
-            .github/workflows/scripts/e2e/gmc_test.sh cleanup_gmc
+            .github/workflows/scripts/e2e/gmc_gaudi_test.sh cleanup_gmc
           fi

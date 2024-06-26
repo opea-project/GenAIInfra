@@ -7,6 +7,7 @@
 
 replicaCount: 1
 
+port: 2082
 shmSize: 1Gi
 RERANK_MODEL_ID: "BAAI/bge-reranker-base"
 image:
@@ -24,13 +25,15 @@ podAnnotations: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 service:
   type: ClusterIP
@@ -54,4 +57,9 @@ tolerations: []
 affinity: {}
 
 global:
-  volume: /mnt
+  http_proxy:
+  https_proxy:
+  no_proxy:
+  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
+  # comment out modeluseHostPath if you want to download the model from huggingface
+  modelUseHostPath: /mnt

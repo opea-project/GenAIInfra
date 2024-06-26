@@ -18,6 +18,16 @@ service:
   type: ClusterIP
   port: 7778
 
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
 # To override values in subchart llm-uservice
 llm-uservice:
   image:
@@ -34,6 +44,8 @@ global:
   https_proxy:
   no_proxy:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-  volume: /mnt
   LANGCHAIN_TRACING_V2: false
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
+  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
+  # comment out modeluseHostPath if you want to download the model from huggingface
+  modelUseHostPath: /mnt

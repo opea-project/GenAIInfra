@@ -13,7 +13,7 @@
 {{- end }}
 
 2.   Use this command to verify tei service:
-  curl ${tei_svc_ip}:6006/embed \
+  curl http://${tei_svc_ip}/embed \
     -X POST \
     -d '{"inputs":"What is Deep Learning?"}' \
     -H 'Content-Type: application/json'
