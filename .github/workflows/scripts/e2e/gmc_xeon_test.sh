@@ -267,6 +267,7 @@ function init_gmc() {
     # Copy manifest into gmc
     mkdir -p $(pwd)/config/manifests
     cp $(dirname $(pwd))/manifests/ChatQnA/*.yaml -p $(pwd)/config/manifests/
+    cp $(dirname $(pwd))/manifests/DocSum/xeon/docsum_llm.yaml -p $(pwd)/config/manifests/
 
     # replace tag with for the gmc-router and gmc-manager image
     sed -i "s|opea/\(.*\):latest|opea/\1:$VERSION|g" $(pwd)/config/gmcrouter/gmc-router.yaml
