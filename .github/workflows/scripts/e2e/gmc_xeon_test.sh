@@ -10,7 +10,7 @@ MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
-DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
+DOCSUM_NAMESPACE="${APP_NAMESPACE}"
 
 
 function install_gmc() {
@@ -48,7 +48,7 @@ function validate_gmc() {
 
 function cleanup_gmc() {
     echo "clean up microservice-connector"
-    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$SYSTEM_NAMESPACE")
+    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE" "$SYSTEM_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         kubectl get namespace "$ns" &> /dev/null
         if [ $? -eq 0 ]; then
@@ -246,7 +246,6 @@ function validate_docsum() {
        exit 1
    fi
 
-   cat "$LOG_PATH/gmc_docsum.log"
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
    if [[ -f $LOG_PATH/gmc_docsum.log ]] && \

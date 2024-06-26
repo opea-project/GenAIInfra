@@ -10,7 +10,7 @@ MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
-DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
+DOCSUM_NAMESPACE="${APP_NAMESPACE}"
 
 
 function install_gmc() {
@@ -225,7 +225,6 @@ function validate_docsum() {
    output=$(kubectl get pods -n $DOCSUM_NAMESPACE)
    echo $output
 
-
    # deploy client pod for testing
    kubectl create deployment client-test -n $DOCSUM_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
@@ -246,7 +245,6 @@ function validate_docsum() {
        exit 1
    fi
 
-   cat "$LOG_PATH/gmc_docsum.log"
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
    if [[ -f $LOG_PATH/gmc_docsum.log ]] && \
