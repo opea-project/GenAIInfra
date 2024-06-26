@@ -48,7 +48,7 @@ function validate_gmc() {
 
 function cleanup_gmc() {
     echo "clean up microservice-connector"
-    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$SYSTEM_NAMESPACE")
+    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE" "$SYSTEM_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         kubectl get namespace "$ns" &> /dev/null
         if [ $? -eq 0 ]; then
