@@ -284,6 +284,7 @@ function init_gmc() {
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/models#path: $MOUNT_DIR#g" {} \;
     # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
     find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
+    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: ${IMAGE_REPO}opea\"/#g" {} \;
     # set huggingface token
     # find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
