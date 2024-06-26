@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     gmc/platform: gaudi
   name: chatqa
-  namespace: chatqa-gaudi
+  namespace: chatqa
 spec:
   routerConfig:
     name: router

@@ -33,15 +33,23 @@ spec:
             - name: MODEL_ID
               value: {{ .Values.EMBEDDING_MODEL_ID | quote }}
             - name: PORT
-              value: "80"
+              value: {{ .Values.port | quote }}
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
               value: {{ .Values.global.https_proxy }}
             - name: no_proxy
               value: {{ .Values.global.no_proxy }}
+            - name: NUMBA_CACHE_DIR
+              value: /tmp
+            - name: TRANSFORMERS_CACHE
+              value: /tmp/transformers_cache
           securityContext:
+            {{- if .Values.global.modelUseHostPath }}
+            {}
+            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
@@ -51,15 +59,19 @@ spec:
               name: shm
           ports:
             - name: http
-              containerPort: 80
+              containerPort: {{ .Values.port }}
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: model-volume
+          {{- if .Values.global.modelUseHostPath }}
           hostPath:
-            path: {{ .Values.global.volume }}
+            path: {{ .Values.global.modelUseHostPath }}
             type: Directory
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         - name: shm
           emptyDir:
             medium: Memory

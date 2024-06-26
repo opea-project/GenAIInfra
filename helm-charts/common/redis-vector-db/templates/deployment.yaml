@@ -29,11 +29,15 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          env:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: /data
+              name: data-volume
+            - mountPath: /redisinsight
+              name: redisinsight-volume
           ports:
           {{- $redisServicePort := index .Values.service.ports 0 }}
             {{- range .Values.service.ports }}
@@ -49,6 +53,11 @@ spec:
             failureThreshold: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: data-volume
+          emptyDir: {}
+        - name: redisinsight-volume
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

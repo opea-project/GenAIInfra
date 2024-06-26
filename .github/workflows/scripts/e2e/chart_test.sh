@@ -4,26 +4,30 @@
 
 LOG_PATH=.
 USER_ID=$(whoami)
-CHART_MOUNT=/home/$USER_ID/charts-mnt
+CHART_MOUNT=/home/$USER_ID/.cache/huggingface/hub
 # IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 
 function init_codegen() {
     # insert a prefix before opea/.*, the prefix is IMAGE_REPO
-    sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" values.yaml
+    find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
-    sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" values.yaml
+    find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
     # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
-    sed -i "s#volume: .*#volume: $CHART_MOUNT#g" values.yaml
+    find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: .*#modelUseHostPath: $CHART_MOUNT#g" {} \;
+    # replace the pull policy "IfNotPresent" with "Always"
+    find .. -name '*values.yaml' -type f -exec sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" {} \;
 }
 
 function init_chatqna() {
     # replace volume: /mnt with volume: $CHART_MOUNT
-    find .. -name '*values.yaml' -type f -exec sed -i "s#volume: /mnt#volume: $CHART_MOUNT#g" {} \;
+    find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: /mnt#modelUseHostPath: $CHART_MOUNT#g" {} \;
     # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
     find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
-    find .. -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+    find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+    # replace the pull policy "IfNotPresent" with "Always"
+    find .. -name '*values.yaml' -type f -exec sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" {} \;
 }
 
 function validate_codegen() {
@@ -31,8 +35,9 @@ function validate_codegen() {
     ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
     port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
     # Curl the Mega Service
-    curl http://${ip_address}:${port}/v1/codegen -H "Content-Type: application/json" \
-    -d '{"messages": "def print_hello_world():"}' > $LOG_PATH/curl_codegen.log
+    curl http://${ip_address}:${port}/v1/codegen \
+    -H "Content-Type: application/json" \
+    -d '{"messages": "Implement a high-level API for a TODO list application. The API takes as input an operation request and updates the TODO list in place. If the request is invalid, raise an exception."}' > $LOG_PATH/curl_codegen.log
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
         echo "Megaservice codegen failed, please check the logs in ${LOG_PATH}!"

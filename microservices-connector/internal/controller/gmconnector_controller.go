@@ -47,6 +47,8 @@ const (
 	Tgi                              = "Tgi"
 	TgiGaudi                         = "TgiGaudi"
 	Llm                              = "Llm"
+	DocSum                           = "DocSum"
+	DocSumGaudi                      = "DocSumGaudi"
 	Router                           = "router"
 	xeon                             = "xeon"
 	gaudi                            = "gaudi"
@@ -61,6 +63,8 @@ const (
 	redis_vector_db_yaml             = "/redis-vector-db.yaml"
 	retriever_yaml                   = "/retriever.yaml"
 	reranking_yaml                   = "/reranking.yaml"
+	docsum_llm_yaml                  = "/docsum_llm.yaml"
+	docsum_gaudi_llm_yaml            = "/docsum_gaudi_llm.yaml"
 	yaml_dir                         = "/tmp/microservices/yamls"
 	Service                          = "Service"
 	Deployment                       = "Deployment"
@@ -107,6 +111,10 @@ func getManifestYaml(step string) string {
 		tmpltFile = yaml_dir + tgi_gaudi_service_yaml
 	} else if step == Llm {
 		tmpltFile = yaml_dir + llm_yaml
+	} else if step == DocSum {
+		tmpltFile = yaml_dir + docsum_llm_yaml
+	} else if step == DocSumGaudi {
+		tmpltFile = yaml_dir + docsum_gaudi_llm_yaml
 	} else if step == Router {
 		tmpltFile = yaml_dir + gmc_router_yaml
 	} else {

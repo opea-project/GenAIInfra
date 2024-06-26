@@ -18,29 +18,40 @@ service:
   type: ClusterIP
   port: 7778
 
+securityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
 # To override values in subchart llm-uservice
 llm-uservice:
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   image:
     repository: opea/llm-tgi:latest
   service:
     port: 9000
 # To override values in subchart tgi
   tgi:
-    # LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
-    LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
-    volume: /mnt
+    LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
+    # LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
     image:
       repository: ghcr.io/huggingface/tgi-gaudi
       tag: "1.2.1"
     resources:
       limits:
         habana.ai/gaudi: 1
+
 global:
   http_proxy:
   https_proxy:
   no_proxy:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-  volume: /mnt
   LANGCHAIN_TRACING_V2: false
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
+  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
+  # comment out modeluseHostPath if you want to download the model from huggingface
+  modelUseHostPath: /mnt
