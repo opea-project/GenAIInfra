@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     gmc/platform: gaudi
   name: codegen
-  namespace: codegen-gaudi
+  namespace: codegen
 spec:
   routerConfig:
     name: router

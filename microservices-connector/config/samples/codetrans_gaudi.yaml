@@ -9,7 +9,7 @@ metadata:
     app.kubernetes.io/managed-by: kustomize
     gmc/platform: gaudi
   name: codetrans
-  namespace: codetrans-gaudi
+  namespace: codetrans
 spec:
   routerConfig:
     name: router
