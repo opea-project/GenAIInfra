@@ -242,14 +242,14 @@ function validate_docsum() {
    kubectl exec "$CLIENT_POD" -n $DOCSUM_NAMESPACE -- curl $accessUrl  -X POST  -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}'  -H 'Content-Type: application/json' > $LOG_PATH/gmc_docsum.log
    exit_code=$?
    if [ $exit_code -ne 0 ]; then
-       echo "codetrans failed, please check the logs in ${LOG_PATH}!"
+       echo "docsum failed, please check the logs in ${LOG_PATH}!"
        exit 1
    fi
 
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
    if [[ -f $LOG_PATH/gmc_docsum.log ]] && \
-   [[ $(grep -c "import" $LOG_PATH/gmc_docsum.log) != 0 ]]; then
+   [[ $(grep -c "[DONE]" $LOG_PATH/gmc_docsum.log) != 0 ]]; then
        status=true
    fi
    if [ $status == false ]; then
