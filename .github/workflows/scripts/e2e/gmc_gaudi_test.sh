@@ -61,8 +61,8 @@ function validate_chatqna() {
 
    # todo select gaudi or xeon
    kubectl create ns $APP_NAMESPACE
-   sed -i "s|namespace: chatqa|namespace: $APP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
+   sed -i "s|namespace: chatqa|namespace: $APP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_gaudi.yaml
+   kubectl apply -f $(pwd)/config/samples/chatQnA_gaudi.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
@@ -117,8 +117,8 @@ function validate_codegen() {
 
    # todo select gaudi or xeon
    kubectl create ns $CODEGEN_NAMESPACE
-   sed -i "s|namespace: codegen|namespace: $CODEGEN_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
+   sed -i "s|namespace: codegen|namespace: $CODEGEN_NAMESPACE|g"  $(pwd)/config/samples/codegen_gaudi.yaml
+   kubectl apply -f $(pwd)/config/samples/codegen_gaudi.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the codegen router service to be ready..."
@@ -168,8 +168,8 @@ function validate_codegen() {
 function validate_codetrans() {
        # todo select gaudi or xeon
    kubectl create ns $CODETRANS_NAMESPACE
-   sed -i "s|namespace: codetrans|namespace: $CODETRANS_NAMESPACE|g"  $(pwd)/config/samples/codetrans_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/codetrans_xeon.yaml
+   sed -i "s|namespace: codetrans|namespace: $CODETRANS_NAMESPACE|g"  $(pwd)/config/samples/codetrans_gaudi.yaml
+   kubectl apply -f $(pwd)/config/samples/codetrans_gaudi.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the codetrans router service to be ready..."
