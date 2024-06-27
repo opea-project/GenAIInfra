@@ -86,7 +86,7 @@ cp $(dirname $(pwd))/manifests/DocSum/gaudi/docsum_gaudi_llm.yaml $(pwd)/config/
 cp $(pwd)/config/gmcrouter/gmc-router.yaml -p $(pwd)/config/manifests/
 ```
 
-**Create Namespace for gmcmanager deployment
+\*\*Create Namespace for gmcmanager deployment
 
 ```sh
 export SYSTEM_NAMESPACE=system
