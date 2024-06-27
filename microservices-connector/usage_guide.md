@@ -27,7 +27,7 @@ kubectl get service -n chatqa
 ```bash
 $kubectl get gmconnectors.gmc.opea.io -n chatqa
 NAME     URL                                                      READY     AGE
-chatqa   http://router-service.chatqa.svc.cluster.local:8080   Success   3m
+chatqa   http://router-service.chatqa.svc.cluster.local:8080      8/0/8     3m
 ```
 
 **Deploy one client pod for testing the chatQnA application**
