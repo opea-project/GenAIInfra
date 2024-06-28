@@ -93,7 +93,7 @@ export SYSTEM_NAMESPACE=system
 kubectl create namespace $SYSTEM_NAMESPACE
 ```
 
-**NOTE:** The SYSTEM_NAMESPACE should keep the same with the namespace defined in gmc-manager.yaml and gmc-manager-rbac.yaml.
+**NOTE:** The `SYSTEM_NAMESPACE` should keep the same with the namespace defined in gmc-manager.yaml and gmc-manager-rbac.yaml.
 
 **Create ConfigMap for GMC to hold GenAI Components and GMC Router manifests**
 
