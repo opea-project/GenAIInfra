@@ -1,0 +1,10 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: data-prep
+description: The Helm chart for deploying data prep as microservice
+type: application
+version: 0.1.0
+# The data prep microservice server version
+appVersion: "1.0.0"

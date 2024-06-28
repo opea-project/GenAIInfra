@@ -9,24 +9,19 @@ replicaCount: 1
 
 image:
   repository: opea/chatqna:latest
+  uirepository: opea/chatqna-ui:latest
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   # tag: "1.0"
-
+externalIP: 192.168.0.113
+# chatqna port: 30888
+# kubectl port-forward --address 0.0.0.0 svc/chatqna 30888:8888 &
+# dataprep port: 30452
+# UI port: 30173
 port: 8888
 service:
   type: ClusterIP
   port: 8888
-
-securityContext:
-  allowPrivilegeEscalation: false
-  runAsNonRoot: true
-  runAsUser: 1000
-  capabilities:
-    drop:
-    - ALL
-  seccompProfile:
-    type: RuntimeDefault
 
 # To override values in subchart llm-uservice
 llm-uservice:
@@ -40,14 +35,11 @@ llm-uservice:
     resources:
       limits:
         habana.ai/gaudi: 1
-
 global:
   http_proxy:
   https_proxy:
   no_proxy:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  volume: /mnt
   LANGCHAIN_TRACING_V2: false
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
-  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
-  # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt

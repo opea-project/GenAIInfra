@@ -16,3 +16,17 @@ spec:
       name: chatqna
   selector:
     {{- include "chatqna.selectorLabels" . | nindent 4 }}
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: chaqna-ui
+spec:
+  type: NodePort
+  selector:
+    app: chaqna-ui
+  ports:
+    - name: service
+      port: 5173
+      targetPort: 5173
+      nodePort: 30173
