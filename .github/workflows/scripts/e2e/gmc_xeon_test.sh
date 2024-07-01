@@ -8,6 +8,7 @@ LOG_PATH=/home/$(whoami)/logs
 MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
 
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
+CHATQNA_NAMESPACE="${APP_NAMESPACE}-chatqna"
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
 DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
@@ -16,7 +17,7 @@ DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
 function install_gmc() {
     # Make sure you have to use image tag $VERSION for microservice-connector installation
     echo "install microservice-connector, using repo $DOCKER_REGISTRY and tag $VERSION"
-    echo "using namespace $SYSTEM_NAMESPACE and $APP_NAMESPACE"
+    echo "using namespace $SYSTEM_NAMESPACE, $CHATQNA_NAMESPACE, $CODEGEN_NAMESPACE, $CODETRANS_NAMESPACE and $DOCSUM_NAMESPACE"
 
     init_gmc
 
@@ -48,7 +49,7 @@ function validate_gmc() {
 
 function cleanup_gmc() {
     echo "clean up microservice-connector"
-    namespaces=("$APP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE" "$SYSTEM_NAMESPACE")
+    namespaces=("$CHATQNA_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE" "$SYSTEM_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         kubectl get namespace "$ns" &> /dev/null
         if [ $? -eq 0 ]; then
@@ -62,36 +63,36 @@ function cleanup_gmc() {
 }
 
 function validate_chatqna() {
-   kubectl create ns $APP_NAMESPACE
-   sed -i "s|namespace: chatqa|namespace: $APP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
+   kubectl create ns $CHATQNA_NAMESPACE
+   sed -i "s|namespace: chatqa|namespace: $CHATQNA_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
-   wait_until_pod_ready "chatqna router" $APP_NAMESPACE "router-service"
-   output=$(kubectl get pods -n $APP_NAMESPACE)
+   wait_until_pod_ready "chatqna router" $CHATQNA_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $CHATQNA_NAMESPACE)
    echo $output
 
   # Wait until the tgi pod is ready
-  TGI_POD_NAME=$(kubectl get pods --namespace=$APP_NAMESPACE | grep ^tgi-service | awk '{print $1}')
-  kubectl describe pod $TGI_POD_NAME -n $APP_NAMESPACE
-  kubectl wait --for=condition=ready pod/$TGI_POD_NAME --namespace=$APP_NAMESPACE --timeout=300s
+  TGI_POD_NAME=$(kubectl get pods --namespace=$CHATQNA_NAMESPACE | grep ^tgi-service | awk '{print $1}')
+  kubectl describe pod $TGI_POD_NAME -n $CHATQNA_NAMESPACE
+  kubectl wait --for=condition=ready pod/$TGI_POD_NAME --namespace=$CHATQNA_NAMESPACE --timeout=300s
 
 
    # deploy client pod for testing
-   kubectl create deployment client-test -n $APP_NAMESPACE --image=python:3.8.13 -- sleep infinity
+   kubectl create deployment client-test -n $CHATQNA_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
    # wait for client pod ready
-   wait_until_pod_ready "client-test" $APP_NAMESPACE "client-test"
+   wait_until_pod_ready "client-test" $CHATQNA_NAMESPACE "client-test"
    # giving time to populating data
    sleep 120
 
-   kubectl get pods -n $APP_NAMESPACE
+   kubectl get pods -n $CHATQNA_NAMESPACE
    # send request to chatqnA
-   export CLIENT_POD=$(kubectl get pod -n $APP_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
+   export CLIENT_POD=$(kubectl get pod -n $CHATQNA_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
-   accessUrl=$(kubectl get gmc -n $APP_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
-   kubectl exec "$CLIENT_POD" -n $APP_NAMESPACE -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json' > $LOG_PATH/curl_chatqna.log
+   accessUrl=$(kubectl get gmc -n $CHATQNA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+   kubectl exec "$CLIENT_POD" -n $CHATQNA_NAMESPACE -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json' > $LOG_PATH/curl_chatqna.log
    exit_code=$?
    if [ $exit_code -ne 0 ]; then
        echo "chatqna failed, please check the logs in ${LOG_PATH}!"
