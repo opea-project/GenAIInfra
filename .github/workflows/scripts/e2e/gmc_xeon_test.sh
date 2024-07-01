@@ -143,7 +143,7 @@ function validate_codegen() {
    kubectl exec "$CLIENT_POD" -n $CODEGEN_NAMESPACE -- curl $accessUrl  -X POST  -d '{"messages": "def print_hello_world():"}' -H 'Content-Type: application/json' > $LOG_PATH/gmc_codegen.log
    exit_code=$?
    if [ $exit_code -ne 0 ]; then
-       echo "chatqna failed, please check the logs in ${LOG_PATH}!"
+       echo "codegen failed, please check the logs in ${LOG_PATH}!"
        exit 1
    fi
 
@@ -235,7 +235,7 @@ function validate_docsum() {
    sleep 60
 
    kubectl get pods -n $DOCSUM_NAMESPACE
-   # send request to codetrans
+   # send request to docsum
    export CLIENT_POD=$(kubectl get pod -n $DOCSUM_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
    accessUrl=$(kubectl get gmc -n $DOCSUM_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='docsum')].status.accessUrl}")
