@@ -1,0 +1,56 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Build latest images on push event
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - microservices-connector/**
+      - "!**.md"
+      - "!**.txt"
+      - "!**.png"
+      - "!.**"
+      - .github/workflows/image-build-on-push.yml
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-on-push
+  cancel-in-progress: true
+
+env:
+  GOSRC_DIR: "microservices-connector"
+
+jobs:
+  image-build:
+    strategy:
+      matrix:
+        platform: [xeon, gaudi]
+    runs-on: docker-build-${{ matrix.platform }}
+    steps:
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set variables
+        id: set_variables
+        run: |
+          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
+          echo "VERSION=latest" >> $GITHUB_ENV
+          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_OUTPUT
+          echo "VERSION=latest" >> $GITHUB_OUTPUT
+
+      - name: Build image and push
+        run: |
+          cd $GOSRC_DIR
+          make docker.build
+          make docker.push
+
+      - name: Clean up images
+        if: always()
+        run: |
+          # clean up the images
+          docker rmi ${{ env.DOCKER_REGISTRY }}/gmcrouter:${{ env.VERSION }}
+          docker rmi ${{ env.DOCKER_REGISTRY }}/gmcmanager:${{ env.VERSION }}
+          echo y |  docker image prune
