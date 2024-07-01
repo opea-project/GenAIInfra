@@ -111,9 +111,21 @@ func main() {
 		os.Exit(1)
 	}
 
+	setupLog.Info("starting monitor")
+	monitorChan := make(chan controller.MonitorCategory)
+	stopChan := make(chan struct{})
+	gmc_monitor := &controller.GMC_monitor{
+		Client:         mgr.GetClient(),
+		Scheme:         mgr.GetScheme(),
+		ResourceStatus: make(map[controller.NsName]controller.MonitorCategory),
+	}
+	gmc_monitor.Start(monitorChan, stopChan)
+
 	if err = (&controller.GMConnectorReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
+		Client:      mgr.GetClient(),
+		Scheme:      mgr.GetScheme(),
+		MonitorChan: monitorChan,
+		StopChan:    stopChan,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GMConnector")
 		os.Exit(1)
