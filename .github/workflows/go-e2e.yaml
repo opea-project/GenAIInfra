@@ -68,7 +68,7 @@ jobs:
       - name: Set variables
         run: |
           echo "SYSTEM_NAMESPACE=opea-system-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "APP_NAMESPACE=opea-app-(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          echo "APP_NAMESPACE=opea-app-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "DOCKER_REGISTRY=${{ needs.image-build.outputs.docker_registry }}" >> $GITHUB_ENV
           echo "VERSION=${{ needs.image-build.outputs.version }}" >> $GITHUB_ENV
           echo "should_cleanup=false" >> $GITHUB_ENV
