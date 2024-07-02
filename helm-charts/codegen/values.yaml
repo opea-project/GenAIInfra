@@ -19,6 +19,7 @@ service:
   port: 7778
 
 securityContext:
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000

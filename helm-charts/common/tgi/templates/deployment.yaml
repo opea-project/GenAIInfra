@@ -50,6 +50,8 @@ spec:
               value: /tmp/numba_cache
             - name: TRANSFORMERS_CACHE
               value: /tmp/transformers_cache
+            - name: HF_HOME
+              value: "/tmp/.cache/huggingface"
           securityContext:
             {{- if .Values.global.modelUseHostPath }}
             {}
@@ -61,6 +63,8 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: model-volume
+            - mountPath: /tmp
+              name: tmp
           ports:
             - name: http
               containerPort: {{ .Values.port }}
@@ -76,6 +80,8 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
