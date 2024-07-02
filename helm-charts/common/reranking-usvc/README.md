@@ -9,7 +9,7 @@ reranking-usvc depends on TEI, refer to teirerank for more config details.
 To install the chart, run the following:
 
 ```console
-$ export MODELDIR="/mnt"
+$ export MODELDIR="/mnt/opea-models"
 $ helm install reranking reranking-usvc --set global.modelUseHostPath=${MODELDIR}
 ```
 
@@ -20,4 +20,4 @@ $ helm install reranking reranking-usvc --set global.modelUseHostPath=${MODELDIR
 | image.repository          | string | `"opea/reranking-tgi:latest"` |                                                                                                                                                              |
 | service.port              | string | `"8000"`                      |                                                                                                                                                              |
 | teirerank.RERANK_MODEL_ID | string | `"BAAI/bge-reranker-base"`    | Models id from https://huggingface.co/, or predownloaded model directory                                                                                     |
-| global.modelUseHostPath   | string | `"/mnt"`                      | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
+| global.modelUseHostPath   | string | `"/mnt/opea-models"`          | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |

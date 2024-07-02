@@ -21,7 +21,7 @@ function init_codegen() {
 
 function init_chatqna() {
     # replace volume: /mnt with volume: $CHART_MOUNT
-    find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: /mnt#modelUseHostPath: $CHART_MOUNT#g" {} \;
+    find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: .*#modelUseHostPath: $CHART_MOUNT#g" {} \;
     # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
     find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token

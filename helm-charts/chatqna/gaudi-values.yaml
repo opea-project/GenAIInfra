@@ -50,4 +50,4 @@ global:
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
   # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
   # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt
+  modelUseHostPath: /mnt/opea-models
