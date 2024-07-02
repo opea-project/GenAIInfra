@@ -11,7 +11,9 @@
 package main
 
 import (
+	"bufio"
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -365,22 +367,54 @@ func routeStep(nodeName string, graph mcv1alpha3.GMConnector, input []byte, head
 }
 
 func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
-	inputBytes, _ := io.ReadAll(req.Body)
-	if response, statusCode, err := routeStep(defaultNodeName, *mcGraph, inputBytes, req.Header); err != nil {
-		log.Error(err, "failed to process request")
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(statusCode)
-		if _, err := w.Write(prepareErrorResponse(err, "Failed to process request")); err != nil {
-			log.Error(err, "failed to write mcGraphHandler response")
+	ctx, cancel := context.WithTimeout(req.Context(), time.Minute)
+	defer cancel()
+
+	done := make(chan struct{})
+	go func() {
+		defer close(done)
+
+		inputBytes, _ := io.ReadAll(req.Body)
+		response, statusCode, err := routeStep(defaultNodeName, *mcGraph, inputBytes, req.Header)
+
+		if err != nil {
+			log.Error(err, "failed to process request")
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(statusCode)
+			if _, err := w.Write(prepareErrorResponse(err, "Failed to process request")); err != nil {
+				log.Error(err, "failed to write mcGraphHandler response")
+			}
+			return
 		}
-	} else {
 		if json.Valid(response) {
 			w.Header().Set("Content-Type", "application/json")
 		}
 		w.WriteHeader(statusCode)
-		if _, err := w.Write(response); err != nil {
-			log.Error(err, "failed to write mcGraphHandler response")
+
+		writer := bufio.NewWriter(w)
+		defer func() {
+			if err := writer.Flush(); err != nil {
+				log.Error(err, "error flushing writer when processing response")
+			}
+		}()
+
+		for start := 0; start < len(response); start += 1024 {
+			end := start + 1024
+			if end > len(response) {
+				end = len(response)
+			}
+			if _, err := writer.Write(response[start:end]); err != nil {
+				log.Error(err, "failed to write mcGraphHandler response")
+				return
+			}
 		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		log.Error(errors.New("failed to process request"), "request timed out")
+		http.Error(w, "request timed out", http.StatusGatewayTimeout)
+	case <-done:
 	}
 }
 
