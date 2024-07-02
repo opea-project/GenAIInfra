@@ -8,7 +8,7 @@ To install the chart, run the following:
 
 ```console
 $ cd ${GenAIInfro_repo}/helm-charts/common
-$ export MODELDIR=/mnt/model
+$ export MODELDIR=/mnt/opea-models
 $ export MODELNAME="BAAI/bge-reranker-base"
 $ helm install teirerank teirerank --set global.modelUseHostPath=${MODELDIR} --set RERANK_MODEL_ID=${MODELNAME}
 ```
@@ -26,6 +26,6 @@ MODELNAME="/data/BAAI/bge-base-en-v1.5"
 | Key                     | Type   | Default                                           | Description                                                                                                                                                        |
 | ----------------------- | ------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | RERANK_MODEL_ID         | string | `"BAAI/bge-reranker-base"`                        | Models id from https://huggingface.co/, or predownloaded model directory                                                                                           |
-| global.modelUseHostPath | string | `"/mnt"`                                          | Cached models directory, teirerank will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
+| global.modelUseHostPath | string | `"/mnt/opea-models"`                              | Cached models directory, teirerank will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
 | image.repository        | string | `"ghcr.io/huggingface/text-embeddings-inference"` |                                                                                                                                                                    |
 | image.tag               | string | `"cpu-1.2"`                                       |                                                                                                                                                                    |
