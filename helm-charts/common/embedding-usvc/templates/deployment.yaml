@@ -52,8 +52,14 @@ spec:
             - name: embedding-usvc
               containerPort:  {{ .Values.service.targetPort }}
               protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

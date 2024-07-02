@@ -38,6 +38,8 @@ spec:
               name: data-volume
             - mountPath: /redisinsight
               name: redisinsight-volume
+            - mountPath: /tmp
+              name: tmp
           ports:
           {{- $redisServicePort := index .Values.service.ports 0 }}
             {{- range .Values.service.ports }}
@@ -57,6 +59,8 @@ spec:
         - name: data-volume
           emptyDir: {}
         - name: redisinsight-volume
+          emptyDir: {}
+        - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:

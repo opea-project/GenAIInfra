@@ -34,6 +34,8 @@ spec:
               value: "http://{{ .Release.Name }}-tgi"
             - name: HUGGINGFACEHUB_API_TOKEN
               value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+            - name: HF_HOME
+              value: "/tmp/.cache/huggingface"
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
@@ -54,6 +56,9 @@ spec:
             - name: llm-uservice
               containerPort: 9000
               protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
           startupProbe:
             exec:
               command:
@@ -64,6 +69,9 @@ spec:
             failureThreshold: 120
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
