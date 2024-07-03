@@ -415,6 +415,7 @@ func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
 		log.Error(errors.New("failed to process request"), "request timed out")
 		http.Error(w, "request timed out", http.StatusGatewayTimeout)
 	case <-done:
+		log.Info("mcGraphHandler is done")
 	}
 }
 
