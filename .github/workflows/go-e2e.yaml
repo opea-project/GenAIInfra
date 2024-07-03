@@ -9,8 +9,6 @@ on:
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
       - microservices-connector/**
-      - manifests/ChatQnA/**
-      - manifests/CodeGen/**
       - .github/workflows/scripts/e2e/gmc_xeon_test.sh
   workflow_dispatch:
 
@@ -24,40 +22,13 @@ env:
 
 jobs:
   image-build:
-    runs-on: docker-build-xeon
-    outputs:
-      docker_registry: ${{ steps.set_variables.outputs.DOCKER_REGISTRY }}
-      version: ${{ steps.set_variables.outputs.VERSION }}
-    steps:
-      - name: Checkout out Repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set variables
-        id: set_variables
-        run: |
-          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
-          echo "VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
-          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_OUTPUT
-          echo "VERSION=${{ github.event.pull_request.head.sha }}" >> $GITHUB_OUTPUT
-
-      - name: Build image and push
-        run: |
-          cd $GOSRC_DIR
-          make docker.build
-          make docker.push
-
-      - name: Clean up images
-        if: always()
-        run: |
-          # clean up the images
-          docker rmi ${{ env.DOCKER_REGISTRY }}/gmcrouter:${{ env.VERSION }}
-          docker rmi ${{ env.DOCKER_REGISTRY }}/gmcmanager:${{ env.VERSION }}
-          echo y |  docker image prune
+    uses: ./.github/workflows/reuse-gmc-image-build.yaml
+    with:
+      image_tag: ${{ github.event.pull_request.head.sha }}
+      runner_label: 'docker-build-xeon'
 
   go-e2e:
-    runs-on: xeon
+    runs-on: kind-xeon
     needs: image-build
     steps:
       - name: Checkout out Repo
@@ -67,16 +38,26 @@ jobs:
 
       - name: Set variables
         run: |
-          echo "SYSTEM_NAMESPACE=opea-system-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "APP_NAMESPACE=opea-app-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "DOCKER_REGISTRY=${{ needs.image-build.outputs.docker_registry }}" >> $GITHUB_ENV
-          echo "VERSION=${{ needs.image-build.outputs.version }}" >> $GITHUB_ENV
-          echo "should_cleanup=false" >> $GITHUB_ENV
+          echo "SYSTEM_NAMESPACE=opea-system" >> $GITHUB_ENV
+          echo "APP_NAMESPACE=opea-app" >> $GITHUB_ENV
+          echo "DOCKER_REGISTRY=${{ needs.image-build.outputs.image_repo }}" >> $GITHUB_ENV
+          echo "VERSION=${{ needs.image-build.outputs.image_tag }}" >> $GITHUB_ENV
+          # echo "should_cleanup=false" >> $GITHUB_ENV
           echo "skip_validate=false" >> $GITHUB_ENV
+          echo "KIND_MOUNT_DIR=/mnt/huggingface/hub" >> $GITHUB_ENV
+
+      - name: Set up KIND cluster
+        run: |
+          set -xe
+          cp ${{ github.workspace }}/.github/workflows/kind/cluster-config.yaml ${{ github.workspace }}/cluster-config.yaml
+          sed -i "s/1.2.3.4/$(echo $DOCKER_REGISTRY | cut -d':' -f1)/g" ${{ github.workspace }}/cluster-config.yaml
+          kind create cluster --name mycluster --config ${{ github.workspace }}/cluster-config.yaml
+          kind get clusters
+          kubectl cluster-info --context kind-mycluster
 
       - name: Install GMC
         run: |
-          echo "should_cleanup=true" >> $GITHUB_ENV
+          # echo "should_cleanup=true" >> $GITHUB_ENV
           .github/workflows/scripts/e2e/gmc_xeon_test.sh install_gmc
           exit_status=$$?$$
           if [ $$exit_status -ne 0 ]; then
@@ -86,8 +67,6 @@ jobs:
 
       - name: Run e2e tests
         run: |
-          # export DOCKER_REGISTRY={{ env.DOCKER_REGISTRY }}
-          # export VERSION={{ env.VERSION }}
           if $skip_validate; then
             echo "Skip validate"
           else
@@ -97,6 +76,4 @@ jobs:
       - name: Cleanup modules
         if: always()
         run: |
-          if $should_cleanup; then
-            .github/workflows/scripts/e2e/gmc_xeon_test.sh cleanup_gmc
-          fi
+          kind delete cluster --name mycluster
