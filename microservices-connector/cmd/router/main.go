@@ -45,6 +45,7 @@ var (
 )
 
 const (
+	ChunkSize   = 1024
 	ServiceURL  = "serviceUrl"
 	ServiceNode = "node"
 )
@@ -398,8 +399,8 @@ func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
 			}
 		}()
 
-		for start := 0; start < len(response); start += 1024 {
-			end := start + 1024
+		for start := 0; start < len(response); start += ChunkSize {
+			end := start + ChunkSize
 			if end > len(response) {
 				end = len(response)
 			}
