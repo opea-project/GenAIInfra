@@ -5,8 +5,8 @@
 set -xe
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
-MOUNT_DIR=/home/$USER_ID/.cache/huggingface/hub
-
+MOUNT_DIR=${KIND_MOUNT_DIR:-"/home/$USER_ID/.cache/huggingface/hub"}
+TOKEN_DIR=${KIND_TOKEN_DIR:-"/home/$USER_ID/.cache/huggingface/token"}
 IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 CHATQNA_NAMESPACE="${APP_NAMESPACE}-chatqna"
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
@@ -287,8 +287,8 @@ function init_gmc() {
     find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
     find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
-    # find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
-    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+    # find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat $TOKEN_DIR)#g" {} \;
+    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat $TOKEN_DIR)#g" {} \;
     # replace namespace "default" with real namespace
     # find . -name '*.yaml' -type f -exec sed -i "s#default.svc#$APP_NAMESPACE.svc#g" {} \;
 }
@@ -303,8 +303,8 @@ function wait_until_pod_ready() {
             get_gmc_controller_logs
             exit 1
         fi
-        echo "$1 is not ready yet. Retrying in 10 seconds..."
-        sleep 10
+        echo "$1 is not ready yet. Retrying in 30 seconds..."
+        sleep 30
         output=$(kubectl get pods -n $2)
         echo $output
         retry_count=$((retry_count + 1))
