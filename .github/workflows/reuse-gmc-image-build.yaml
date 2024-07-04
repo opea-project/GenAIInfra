@@ -1,0 +1,61 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: GMC Image Build
+permissions: read-all
+on:
+  workflow_call:
+    inputs:
+      image_repo:
+        required: false
+        type: string
+      image_tag:
+        required: true
+        type: string
+      runner_label:
+        required: false
+        type: string
+        default: 'xeon'
+    outputs:
+      image_repo:
+        description: "The image repository used for the image build"
+        value: ${{ jobs.image-build.outputs.docker_registry }}
+      image_tag:
+        description: "The image tag used for the image build"
+        value: ${{ jobs.image-build.outputs.version }}
+env:
+  GOSRC_DIR: "microservices-connector"
+
+jobs:
+  image-build:
+    runs-on: ${{ inputs.runner_label }}
+    outputs:
+      docker_registry: ${{ steps.set_variables.outputs.DOCKER_REGISTRY }}
+      version: ${{ steps.set_variables.outputs.VERSION }}
+    steps:
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set variables
+        id: set_variables
+        run: |
+          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
+          echo "VERSION=${{ inputs.image_tag }}" >> $GITHUB_ENV
+          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_OUTPUT
+          echo "VERSION=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
+
+      - name: Build image and push
+        run: |
+          cd $GOSRC_DIR
+          make docker.build
+          make docker.push
+
+      - name: Clean up images
+        if: always()
+        run: |
+          # clean up the images
+          docker rmi ${{ env.DOCKER_REGISTRY }}/gmcrouter:${{ env.VERSION }}
+          docker rmi ${{ env.DOCKER_REGISTRY }}/gmcmanager:${{ env.VERSION }}
+          echo y |  docker image prune
