@@ -25,6 +25,7 @@ podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext:
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -57,4 +58,4 @@ global:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
   # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt
+  modelUseHostPath: /mnt/opea-models

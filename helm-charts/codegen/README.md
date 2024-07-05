@@ -13,7 +13,7 @@ cd GenAIInfra/helm-charts/
 ./update_dependency.sh
 helm dependency update codegen
 export HFTOKEN="insert-your-huggingface-token-here"
-export MODELDIR="/mnt"
+export MODELDIR="/mnt/opea-models"
 export MODELNAME="m-a-p/OpenCodeInterpreter-DS-6.7B"
 helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservice.tgi.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device
@@ -27,5 +27,5 @@ helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 | image.repository                | string | `"opea/codegen:latest"`          |                                                                                                                                                              |
 | service.port                    | string | `"7778"`                         |                                                                                                                                                              |
 | global.HUGGINGFACEHUB_API_TOKEN | string | `""`                             | Your own Hugging Face API token                                                                                                                              |
-| global.modelUseHostPath         | string | `"/mnt"`                         | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
+| global.modelUseHostPath         | string | `"/mnt/opea-models"`             | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
 | llm-uservice.tgi.LLM_MODEL_ID   | string | `"ise-uiuc/Magicoder-S-DS-6.7B"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                                     |

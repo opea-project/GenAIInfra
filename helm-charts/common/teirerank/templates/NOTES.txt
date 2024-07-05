@@ -13,7 +13,7 @@
 {{- end }}
 
 2.   Use this command to verify teirerank service:
-  curl ${teirerank_svc_ip}/embed \
+  curl ${teirerank_svc_ip}/rerank\
     -X POST \
-    -d '{"inputs":"What is Deep Learning?"}' \
+    -d '{"query":"What is Deep Learning?", "texts": ["Deep Learning is not...", "Deep learning is..."]}' \
     -H 'Content-Type: application/json'

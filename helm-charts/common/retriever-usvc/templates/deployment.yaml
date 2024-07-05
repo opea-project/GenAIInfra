@@ -36,6 +36,8 @@ spec:
               value: "redis://{{ .Release.Name }}-redis-vector-db:6379"
             - name: INDEX_NAME
               value: "rag-redis"
+            - name: EASYOCR_MODULE_PATH
+              value: "/tmp/.EasyOCR"
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
@@ -48,6 +50,8 @@ spec:
               value: {{ .Values.global.LANGCHAIN_API_KEY }}
             - name: LANGCHAIN_PROJECT
               value: "opea-retriever-service"
+            - name: HF_HOME
+              value: "/tmp/.cache/huggingface"
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
@@ -56,6 +60,9 @@ spec:
             - name: retriever-usvc
               containerPort: 7000
               protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
           startupProbe:
             exec:
               command:
@@ -74,6 +81,9 @@ spec:
 #              port: 7000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

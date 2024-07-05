@@ -15,11 +15,11 @@ on:
       runner_label:
         required: false
         type: string
-        default: 'xeon'
+        default: 'docker-build-xeon'
     outputs:
       image_repo:
         description: "The image repository used for the image build"
-        value: ${{ jobs.image-build.outputs.docker_registry }}
+        value: ${{ jobs.image-build.outputs.image_repo }}
       image_tag:
         description: "The image tag used for the image build"
         value: ${{ jobs.image-build.outputs.version }}
@@ -30,7 +30,7 @@ jobs:
   image-build:
     runs-on: ${{ inputs.runner_label }}
     outputs:
-      docker_registry: ${{ steps.set_variables.outputs.DOCKER_REGISTRY }}
+      image_repo: ${{ steps.set_variables.outputs.IMAGE_REPO }}
       version: ${{ steps.set_variables.outputs.VERSION }}
     steps:
       - name: Checkout out Repo
@@ -43,7 +43,7 @@ jobs:
         run: |
           echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
           echo "VERSION=${{ inputs.image_tag }}" >> $GITHUB_ENV
-          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_OUTPUT
+          echo "IMAGE_REPO=${OPEA_IMAGE_REPO}" >> $GITHUB_OUTPUT
           echo "VERSION=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
 
       - name: Build image and push

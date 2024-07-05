@@ -44,6 +44,8 @@ spec:
               value: /tmp
             - name: TRANSFORMERS_CACHE
               value: /tmp/transformers_cache
+            - name: HF_HOME
+              value: "/tmp/.cache/huggingface"
           securityContext:
             {{- if .Values.global.modelUseHostPath }}
             {}
@@ -57,6 +59,8 @@ spec:
               name: model-volume
             - mountPath: /dev/shm
               name: shm
+            - mountPath: /tmp
+              name: tmp
           ports:
             - name: http
               containerPort: {{ .Values.port }}
@@ -76,6 +80,8 @@ spec:
           emptyDir:
             medium: Memory
             sizeLimit: {{ .Values.shmSize }}
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
