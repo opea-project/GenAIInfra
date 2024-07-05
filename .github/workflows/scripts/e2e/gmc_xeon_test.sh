@@ -3,33 +3,16 @@
 # SPDX-License-Identifier: Apache-2.0
 
 set -xe
+
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+source ${DIR}/utils.sh
+
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
-MOUNT_DIR=${KIND_MOUNT_DIR:-"/home/$USER_ID/.cache/huggingface/hub"}
-TOKEN_DIR=${KIND_TOKEN_DIR:-"/home/$USER_ID/.cache/huggingface/token"}
-IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
 CHATQNA_NAMESPACE="${APP_NAMESPACE}-chatqna"
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
 DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
-
-
-function install_gmc() {
-    # Make sure you have to use image tag $VERSION for microservice-connector installation
-    echo "install microservice-connector, using repo $DOCKER_REGISTRY and tag $VERSION"
-    echo "using namespace $SYSTEM_NAMESPACE, $CHATQNA_NAMESPACE, $CODEGEN_NAMESPACE, $CODETRANS_NAMESPACE and $DOCSUM_NAMESPACE"
-
-    init_gmc
-
-    kubectl apply -f $(pwd)/config/crd/bases/gmc.opea.io_gmconnectors.yaml
-    kubectl apply -f $(pwd)/config/rbac/gmc-manager-rbac.yaml
-    kubectl create configmap gmcyaml -n $SYSTEM_NAMESPACE --from-file $(pwd)/config/manifests
-    kubectl apply -f $(pwd)/config/manager/gmc-manager.yaml
-
-    # Wait until the gmc controller pod is ready
-    wait_until_pod_ready "gmc-controller" $SYSTEM_NAMESPACE "gmc-controller"
-    kubectl get pods -n $SYSTEM_NAMESPACE
-}
 
 function validate_gmc() {
     echo "validate chat-qna"
@@ -47,19 +30,17 @@ function validate_gmc() {
     get_gmc_controller_logs
 }
 
-function cleanup_gmc() {
+function cleanup_apps() {
     echo "clean up microservice-connector"
-    namespaces=("$CHATQNA_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE" "$SYSTEM_NAMESPACE")
+    namespaces=("$CHATQNA_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
     for ns in "${namespaces[@]}"; do
-        kubectl get namespace "$ns" &> /dev/null
-        if [ $? -eq 0 ]; then
+        if kubectl get namespace $ns > /dev/null 2>&1; then
             echo "Deleting namespace: $ns"
             kubectl delete namespace "$ns"
         else
             echo "Namespace $ns does not exist"
         fi
     done
-    kubectl delete crd gmconnectors.gmc.opea.io
 }
 
 function validate_chatqna() {
@@ -85,7 +66,7 @@ function validate_chatqna() {
    # wait for client pod ready
    wait_until_pod_ready "client-test" $CHATQNA_NAMESPACE "client-test"
    # giving time to populating data
-   sleep 120
+   sleep 90
 
    kubectl get pods -n $CHATQNA_NAMESPACE
    # send request to chatqnA
@@ -264,99 +245,19 @@ function validate_docsum() {
    fi
 }
 
-function init_gmc() {
-    # Copy manifest into gmc
-    mkdir -p $(pwd)/config/manifests
-    cp $(dirname $(pwd))/manifests/ChatQnA/*.yaml -p $(pwd)/config/manifests/
-    cp $(dirname $(pwd))/manifests/DocSum/xeon/docsum_llm.yaml -p $(pwd)/config/manifests/
-
-    # replace tag with for the gmc-router and gmc-manager image
-    sed -i "s|opea/\(.*\):latest|opea/\1:$VERSION|g" $(pwd)/config/gmcrouter/gmc-router.yaml
-    sed -i "s|opea/\(.*\):latest|opea/\1:$VERSION|g" $(pwd)/config/manager/gmc-manager.yaml
-    cp $(pwd)/config/gmcrouter/gmc-router.yaml -p $(pwd)/config/manifests/
-
-
-
-    # replace namespace for gmc-router and gmc-manager
-    sed -i "s|namespace: system|namespace: $SYSTEM_NAMESPACE|g"  $(pwd)/config/manager/gmc-manager.yaml
-    sed -i "s|namespace: system|namespace: $SYSTEM_NAMESPACE|g"  $(pwd)/config/rbac/gmc-manager-rbac.yaml
-    sed -i "s|name: system|name: $SYSTEM_NAMESPACE|g" $(pwd)/config/rbac/gmc-manager-rbac.yaml
-    # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
-    find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/models#path: $MOUNT_DIR#g" {} \;
-    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
-    find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
-    find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
-    # set huggingface token
-    # find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat $TOKEN_DIR)#g" {} \;
-    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat $TOKEN_DIR)#g" {} \;
-    # replace namespace "default" with real namespace
-    # find . -name '*.yaml' -type f -exec sed -i "s#default.svc#$APP_NAMESPACE.svc#g" {} \;
-}
-
-function wait_until_pod_ready() {
-    echo "Waiting for the $1 to be ready..."
-    max_retries=30
-    retry_count=0
-    while ! is_pod_ready $2 $3; do
-        if [ $retry_count -ge $max_retries ]; then
-            echo "$1 is not ready after waiting for a significant amount of time"
-            get_gmc_controller_logs
-            exit 1
-        fi
-        echo "$1 is not ready yet. Retrying in 30 seconds..."
-        sleep 30
-        output=$(kubectl get pods -n $2)
-        echo $output
-        retry_count=$((retry_count + 1))
-    done
-}
-
-function is_pod_ready() {
-    if [ "$2" == "gmc-controller" ]; then
-      pod_status=$(kubectl get pods -n $1 -o jsonpath='{.items[].status.conditions[?(@.type=="Ready")].status}')
-    else
-      pod_status=$(kubectl get pods -n $1 -l app=$2 -o jsonpath='{.items[].status.conditions[?(@.type=="Ready")].status}')
-    fi
-    if [ "$pod_status" == "True" ]; then
-        return 0
-    else
-        return 1
-    fi
-}
-
-function get_gmc_controller_logs() {
-    # Fetch the name of the pod with the app-name gmc-controller in the specified namespace
-    pod_name=$(kubectl get pods -n $SYSTEM_NAMESPACE -l control-plane=gmc-controller -o jsonpath='{.items[0].metadata.name}')
-
-    # Check if the pod name was found
-    if [ -z "$pod_name" ]; then
-        echo "No pod found with app-name gmc-controller in namespace $SYSTEM_NAMESPACE"
-        return 1
-    fi
-
-    # Get the logs of the found pod
-    echo "Fetching logs for pod $pod_name in namespace $SYSTEM_NAMESPACE..."
-    kubectl logs $pod_name -n $SYSTEM_NAMESPACE
-}
-
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <function_name>"
     exit 1
 fi
 
 case "$1" in
-    install_gmc)
-        pushd microservices-connector
-        install_gmc
-        popd
-        ;;
     validate_gmc)
         pushd microservices-connector
         validate_gmc
         popd
         ;;
-    cleanup_gmc)
-        cleanup_gmc
+    cleanup_apps)
+        cleanup_apps
         ;;
     *)
         echo "Unknown function: $1"

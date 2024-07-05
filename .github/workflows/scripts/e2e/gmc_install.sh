@@ -48,8 +48,8 @@ function init_gmc() {
     sed -i "s|opea/\(.*\):latest|opea/\1:$VERSION|g" $(pwd)/config/gmcrouter/gmc-router.yaml
     sed -i "s|opea/\(.*\):latest|opea/\1:$VERSION|g" $(pwd)/config/manager/gmc-manager.yaml
     # replace the pull policy "IfNotPresent" with "Always"
-    sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" $(pwd)/config/gmcrouter/gmc-router.yaml
-    sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" $(pwd)/config/manager/gmc-manager.yaml
+    sed -i "s#imagePullPolicy: IfNotPresent#imagePullPolicy: Always#g" $(pwd)/config/gmcrouter/gmc-router.yaml
+    sed -i "s#imagePullPolicy: IfNotPresent#imagePullPolicy: Always#g" $(pwd)/config/manager/gmc-manager.yaml
 
     cp $(pwd)/config/gmcrouter/gmc-router.yaml -p $(pwd)/config/manifests/
 
@@ -64,8 +64,9 @@ function init_gmc() {
     find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
     find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
-    # find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat $TOKEN_DIR)#g" {} \;
     find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat $TOKEN_DIR)#g" {} \;
+    # replace the pull policy "IfNotPresent" with "Always"
+    find . -name '*.yaml' -type f -exec sed -i "s#imagePullPolicy: IfNotPresent#imagePullPolicy: Always#g" {} \;
 }
 
 function cleanup_gmc() {

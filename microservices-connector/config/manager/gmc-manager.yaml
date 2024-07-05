@@ -28,6 +28,7 @@ spec:
       - command:
         - /manager
         image: opea/gmcmanager:latest
+        imagePullPolicy: IfNotPresent
         name: manager
         volumeMounts:
         - name: yaml-file
