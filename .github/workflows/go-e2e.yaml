@@ -9,6 +9,8 @@ on:
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
       - microservices-connector/**
+      - manifests/ChatQnA/**
+      - manifests/DocSum/xeon/docsum*
       - .github/workflows/scripts/e2e/gmc_xeon_test.sh
   workflow_dispatch:
 
@@ -42,23 +44,14 @@ jobs:
           echo "APP_NAMESPACE=opea-app" >> $GITHUB_ENV
           echo "DOCKER_REGISTRY=${{ needs.image-build.outputs.image_repo }}" >> $GITHUB_ENV
           echo "VERSION=${{ needs.image-build.outputs.image_tag }}" >> $GITHUB_ENV
-          # echo "should_cleanup=false" >> $GITHUB_ENV
+          echo "should_cleanup=false" >> $GITHUB_ENV
           echo "skip_validate=false" >> $GITHUB_ENV
           echo "KIND_MOUNT_DIR=/mnt/huggingface/hub" >> $GITHUB_ENV
 
-      - name: Set up KIND cluster
-        run: |
-          set -xe
-          cp ${{ github.workspace }}/.github/workflows/kind/cluster-config.yaml ${{ github.workspace }}/cluster-config.yaml
-          sed -i "s/1.2.3.4/$(echo $DOCKER_REGISTRY | cut -d':' -f1)/g" ${{ github.workspace }}/cluster-config.yaml
-          kind create cluster --name mycluster --config ${{ github.workspace }}/cluster-config.yaml
-          kind get clusters
-          kubectl cluster-info --context kind-mycluster
-
       - name: Install GMC
         run: |
-          # echo "should_cleanup=true" >> $GITHUB_ENV
-          .github/workflows/scripts/e2e/gmc_xeon_test.sh install_gmc
+          echo "should_cleanup=true" >> $GITHUB_ENV
+          .github/workflows/scripts/e2e/gmc_install.sh install_gmc
           exit_status=$$?$$
           if [ $$exit_status -ne 0 ]; then
             echo "Failed to install modules"
@@ -76,4 +69,7 @@ jobs:
       - name: Cleanup modules
         if: always()
         run: |
-          kind delete cluster --name mycluster
+          if $should_cleanup; then
+            .github/workflows/scripts/e2e/gmc_xeon_test.sh cleanup_apps
+            .github/workflows/scripts/e2e/gmc_install.sh cleanup_gmc
+          fi

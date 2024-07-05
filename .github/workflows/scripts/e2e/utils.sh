@@ -4,7 +4,7 @@
 
 function wait_until_pod_ready() {
     echo "Waiting for the $1 to be ready..."
-    max_retries=30
+    max_retries=60
     retry_count=0
     while ! is_pod_ready $2 $3; do
         if [ $retry_count -ge $max_retries ]; then
@@ -13,7 +13,7 @@ function wait_until_pod_ready() {
             exit 1
         fi
         echo "$1 is not ready yet. Retrying in 30 seconds..."
-        sleep 30
+        sleep 15
         output=$(kubectl get pods -n $2)
         echo $output
         retry_count=$((retry_count + 1))
