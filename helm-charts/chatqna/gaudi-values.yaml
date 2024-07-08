@@ -29,18 +29,16 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# To override values in subchart llm-uservice
-llm-uservice:
 # To override values in subchart tgi
-  tgi:
-    LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
-    # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-    image:
-      repository: ghcr.io/huggingface/tgi-gaudi
-      tag: "1.2.1"
-    resources:
-      limits:
-        habana.ai/gaudi: 1
+tgi:
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
+  image:
+    repository: ghcr.io/huggingface/tgi-gaudi
+    tag: "1.2.1"
+  resources:
+    limits:
+      habana.ai/gaudi: 1
 
 global:
   http_proxy:

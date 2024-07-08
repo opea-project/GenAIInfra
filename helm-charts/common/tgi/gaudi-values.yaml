@@ -48,8 +48,8 @@ tolerations: []
 
 affinity: {}
 
-# LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
-LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
+LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
+# LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
 
 global:
   http_proxy:

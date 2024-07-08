@@ -2,22 +2,21 @@
 
 Helm chart for deploying reranking microservice.
 
-reranking-usvc depends on TEI, refer to teirerank for more config details.
+reranking-usvc depends on TEI, set the TEI_RERANKING_ENDPOINT as teirerank endpoint.
 
 ## Installing the Chart
 
 To install the chart, run the following:
 
 ```console
-$ export MODELDIR="/mnt/opea-models"
-$ helm install reranking reranking-usvc --set global.modelUseHostPath=${MODELDIR}
+export TEI_RERANKING_ENDPOINT="http://teirerank"
+helm install reranking reranking-usvc --set TEI_RERANKING_ENDPOINT=${TEI_RERANKING_ENDPOINT}
 ```
 
 ## Values
 
-| Key                       | Type   | Default                       | Description                                                                                                                                                  |
-| ------------------------- | ------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| image.repository          | string | `"opea/reranking-tgi:latest"` |                                                                                                                                                              |
-| service.port              | string | `"8000"`                      |                                                                                                                                                              |
-| teirerank.RERANK_MODEL_ID | string | `"BAAI/bge-reranker-base"`    | Models id from https://huggingface.co/, or predownloaded model directory                                                                                     |
-| global.modelUseHostPath   | string | `"/mnt/opea-models"`          | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
+| Key                    | Type   | Default                       | Description |
+| ---------------------- | ------ | ----------------------------- | ----------- |
+| image.repository       | string | `"opea/reranking-tgi:latest"` |             |
+| TEI_RERANKING_ENDPOINT | string | `""`                          |             |
+| service.port           | string | `"8000"`                      |             |

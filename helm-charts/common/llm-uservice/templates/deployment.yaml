@@ -31,7 +31,11 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: TGI_LLM_ENDPOINT
+              {{- if .Values.TGI_LLM_ENDPOINT }}
+              value: {{ .Values.TGI_LLM_ENDPOINT | quote}}
+              {{- else }}
               value: "http://{{ .Release.Name }}-tgi"
+              {{- end }}
             - name: HUGGINGFACEHUB_API_TOKEN
               value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
             - name: HF_HOME
@@ -63,7 +67,11 @@ spec:
             exec:
               command:
               - curl
+              {{- if .Values.TGI_LLM_ENDPOINT }}
+              - {{ .Values.TGI_LLM_ENDPOINT }}
+              {{- else }}
               - http://{{ .Release.Name }}-tgi
+              {{- end }}
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
