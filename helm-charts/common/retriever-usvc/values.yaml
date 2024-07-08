@@ -7,6 +7,8 @@
 
 replicaCount: 1
 
+TEI_EMBEDDING_ENDPOINT: ""
+REDIS_URL: ""
 image:
   repository: opea/retriever-redis:latest
   pullPolicy: IfNotPresent

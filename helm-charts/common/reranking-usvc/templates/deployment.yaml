@@ -31,7 +31,11 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: TEI_RERANKING_ENDPOINT
+              {{- if .Values.TEI_RERANKING_ENDPOINT }}
+              value: {{ .Values.TEI_RERANKING_ENDPOINT | quote}}
+              {{- else }}
               value: "http://{{ .Release.Name }}-teirerank"
+              {{- end }}
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
