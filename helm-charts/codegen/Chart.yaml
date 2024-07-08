@@ -6,6 +6,9 @@ name: codegen
 description: The Helm chart to deploy CodeGen
 type: application
 dependencies:
+  - name: tgi
+    version: "0.1.0"
+    repository: "file://../common/tgi"
   - name: llm-uservice
     version: "0.1.0"
     repository: "file://../common/llm-uservice"
