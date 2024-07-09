@@ -39,7 +39,6 @@ service:
   type: ClusterIP
   # The default port for retriever service is 7000
   port: 7000
-  targetPort: 7000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

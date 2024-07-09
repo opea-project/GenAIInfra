@@ -54,7 +54,7 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - name: embedding-usvc
-              containerPort:  {{ .Values.service.targetPort }}
+              containerPort: 6000
               protocol: TCP
           volumeMounts:
             - mountPath: /tmp

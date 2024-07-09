@@ -38,7 +38,6 @@ service:
   type: ClusterIP
   # The default port for embedding service is 9000
   port: 6000
-  targetPort: 6000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
