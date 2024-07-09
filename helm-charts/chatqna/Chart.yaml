@@ -30,5 +30,8 @@ dependencies:
   - name: retriever-usvc
     version: "0.1.0"
     repository: "file://../common/retriever-usvc"
+  - name: data-prep
+    version: "0.1.0"
+    repository: "file://../common/data-prep"
 version: 0.1.0
 appVersion: "1.0.0"
