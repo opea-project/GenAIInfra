@@ -38,6 +38,10 @@ spec:
               value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
             - name: HF_TOKEN
               value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+            - name: MAX_INPUT_TOKENS
+              value: "1024"
+            - name: MAX_TOTAL_TOKENS
+              value: "4096"
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
