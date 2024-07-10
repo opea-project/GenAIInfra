@@ -1,0 +1,100 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "web-retriever.fullname" . }}
+  labels:
+    {{- include "web-retriever.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "web-retriever.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "web-retriever.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: TEI_EMBEDDING_ENDPOINT
+              {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
+              value: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote}}
+              {{- else }}
+              value: "http://{{ .Release.Name }}-tei"
+              {{- end }}
+            - name: GOOGLE_API_KEY
+              value: {{ .Values.GOOGLE_API_KEY }}
+            - name: GOOGLE_CSE_ID
+              value: {{ .Values.GOOGLE_CSE_ID }}
+            - name: EASYOCR_MODULE_PATH
+              value: "/tmp/.EasyOCR"
+            - name: http_proxy
+              value: {{ .Values.global.http_proxy }}
+            - name: https_proxy
+              value: {{ .Values.global.https_proxy }}
+            - name: no_proxy
+              value: {{ .Values.global.no_proxy }}
+            - name: HF_HOME
+              value: "/tmp/.cache/huggingface"
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: web-retriever
+              containerPort: 7077
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          startupProbe:
+            exec:
+              command:
+              - curl
+              {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
+              - {{ .Values.TEI_EMBEDDING_ENDPOINT }}
+              {{- else }}
+              - http://{{ .Release.Name }}-tei
+              {{- end }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: 7000
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 7000
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
