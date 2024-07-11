@@ -6,17 +6,18 @@ set -exo pipefail
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-function setup_kuberay_and_start_ray() {
-    # Install kuberay
+function install_kuberay_and_start_ray() {
+    # Install KubeRay
     ./install-kuberay.sh
 
-    # Start ray cluster
+    # Start Ray Cluster with Autoscaling
     ./start-ray-cluster.sh
 }
 
 function validate_ray() {
-    echo "setup kuberay and start ray cluster"
-    setup_kuberay_and_start_ray
+    echo "Install KubeRay and Start Ray Cluster with Autoscaling"
+
+    install_kuberay_and_start_ray
 
     # Wait for ray cluster to be ready
     sleep 20
@@ -34,6 +35,14 @@ function validate_ray() {
     python ray-test.py
 }
 
+function cleanup() {
+    # Delete Ray Cluster
+    ./delete-ray-cluster.sh
+
+    # Uninstall KuebRay
+    ./uninstall-kuberay.sh
+}
+
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <function_name>"
     exit 1
@@ -49,3 +58,5 @@ case "$1" in
         echo "Unknown function: $1"
         ;;
 esac
+
+cleanup
