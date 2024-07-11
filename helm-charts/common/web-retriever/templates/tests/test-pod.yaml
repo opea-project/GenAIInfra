@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v1
 kind: Pod
 metadata:
@@ -12,7 +15,7 @@ spec:
     - name: curl
       #image: alpine/curl
       image: python:3.10.14
-      command: ['sh', '-c'] 
+      command: ['sh', '-c']
       args:
         - |
           your_embedding=$(python -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)");
