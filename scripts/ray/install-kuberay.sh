@@ -2,6 +2,8 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+set -exo pipefail
+
 helm repo add kuberay https://ray-project.github.io/kuberay-helm/
 helm repo update
 
