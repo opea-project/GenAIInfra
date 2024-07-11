@@ -76,6 +76,8 @@ kubectl apply -f config/crd/bases/gmc.opea.io_gmconnectors.yaml
 ```sh
 mkdir -p $(pwd)/config/manifests
 cp $(dirname $(pwd))/manifests/ChatQnA/*.yaml -p $(pwd)/config/manifests/
+cp $(dirname $(pwd))/manifests/DocSum/xeon/docsum_llm.yaml $(pwd)/config/manifests/
+cp $(dirname $(pwd))/manifests/DocSum/gaudi/docsum_gaudi_llm.yaml $(pwd)/config/manifests/
 ```
 
 **Copy GMC router manifest**
@@ -83,6 +85,15 @@ cp $(dirname $(pwd))/manifests/ChatQnA/*.yaml -p $(pwd)/config/manifests/
 ```sh
 cp $(pwd)/config/gmcrouter/gmc-router.yaml -p $(pwd)/config/manifests/
 ```
+
+\*\*Create Namespace for gmcmanager deployment
+
+```sh
+export SYSTEM_NAMESPACE=system
+kubectl create namespace $SYSTEM_NAMESPACE
+```
+
+**NOTE:** The `SYSTEM_NAMESPACE` should keep the same with the namespace defined in gmc-manager.yaml and gmc-manager-rbac.yaml.
 
 **Create ConfigMap for GMC to hold GenAI Components and GMC Router manifests**
 

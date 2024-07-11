@@ -7,6 +7,8 @@
 
 replicaCount: 1
 
+TEI_EMBEDDING_ENDPOINT: ""
+REDIS_URL: ""
 image:
   repository: opea/retriever-redis:latest
   pullPolicy: IfNotPresent
@@ -23,6 +25,7 @@ podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext:
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -36,7 +39,6 @@ service:
   type: ClusterIP
   # The default port for retriever service is 7000
   port: 7000
-  targetPort: 7000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

@@ -1,15 +1,14 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for llm-uservice.
+# Default values for data-prep.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-# TGI_LLM_ENDPOINT: "http://automaticallydetected"
 
 image:
-  repository: opea/llm-tgi:latest
+  repository: opea/dataprep-redis:latest
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   # tag: "1.0"
@@ -24,6 +23,7 @@ podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext:
+  readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -35,8 +35,8 @@ securityContext:
 
 service:
   type: ClusterIP
-  # The default port for llm service is 9000
-  port: 9000
+  # The default port for data prep service is 6007
+  port: 6007
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -56,19 +56,6 @@ tolerations: []
 
 affinity: {}
 
-# To override values in subchart tgi
-tgi:
-  # LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
-  LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
-  image:
-    repository: ghcr.io/huggingface/tgi-gaudi
-    pullPolicy: IfNotPresent
-    tag: "1.2.1"
-  resources:
-    limits:
-      habana.ai/gaudi: 1
-
-
 global:
   http_proxy:
   https_proxy:
@@ -76,6 +63,3 @@ global:
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   LANGCHAIN_TRACING_V2: false
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
-  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
-  # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt

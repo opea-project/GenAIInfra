@@ -6,8 +6,8 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-# HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
 
+TEI_RERANKING_ENDPOINT: ""
 image:
   repository: opea/reranking-tei:latest
   pullPolicy: IfNotPresent
@@ -24,6 +24,7 @@ podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext:
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -37,7 +38,6 @@ service:
   type: ClusterIP
   # The default port for reranking service is 9000
   port: 8000
-  targetPort: 8000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -57,14 +57,11 @@ tolerations: []
 
 affinity: {}
 
-# To override values in subchart teirerank
-teirerank:
-  RERANK_MODEL_ID: "BAAI/bge-reranker-base"
-
 global:
   http_proxy:
   https_proxy:
   no_proxy:
+  # HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
   # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt
+  modelUseHostPath: /mnt/opea-models

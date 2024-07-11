@@ -31,7 +31,11 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: TEI_EMBEDDING_ENDPOINT
+              {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
+              value: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote}}
+              {{- else }}
               value: "http://{{ .Release.Name }}-tei"
+              {{- end }}
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
@@ -50,10 +54,16 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - name: embedding-usvc
-              containerPort:  {{ .Values.service.targetPort }}
+              containerPort: 6000
               protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

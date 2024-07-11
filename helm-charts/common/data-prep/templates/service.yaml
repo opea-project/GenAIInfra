@@ -4,15 +4,15 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "embedding-usvc.fullname" . }}
+  name: {{ include "data-prep.fullname" . }}
   labels:
-    {{- include "embedding-usvc.labels" . | nindent 4 }}
+    {{- include "data-prep.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 6000
+      targetPort: 6007
       protocol: TCP
-      name: embedding-usvc
+      name: data-prep
   selector:
-    {{- include "embedding-usvc.selectorLabels" . | nindent 4 }}
+    {{- include "data-prep.selectorLabels" . | nindent 4 }}

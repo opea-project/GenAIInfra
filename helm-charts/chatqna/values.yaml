@@ -19,6 +19,7 @@ service:
   port: 8888
 
 securityContext:
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -28,12 +29,10 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# To override values in subchart llm-uservice
-llm-uservice:
 # To override values in subchart tgi
-  tgi:
-    LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
-    # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
+tgi:
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
 
 global:
   http_proxy:
@@ -44,4 +43,4 @@ global:
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
   # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
   # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt
+  modelUseHostPath: /mnt/opea-models

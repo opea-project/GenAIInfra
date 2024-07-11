@@ -5,10 +5,6 @@ apiVersion: v2
 name: embedding-usvc
 description: The Helm chart for deploying embedding as microservice
 type: application
-dependencies:
-  - name: tei
-    version: "0.1.0"
-    repository: "file://../tei"
 version: 0.1.0
 # The embedding microservice server version
 appVersion: "1.0.0"

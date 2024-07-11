@@ -7,6 +7,7 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
@@ -14,6 +15,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"strings"
 	"testing"
 	"time"
 
@@ -773,4 +775,49 @@ func TestMain(t *testing.T) {
 
 	// Simulate doing some work or waiting for a condition
 	time.Sleep(2 * time.Second)
+}
+
+func TestMcGraphHandler_Timeout(t *testing.T) {
+	// Mock server with a context timeout of 1 second
+	handler := http.HandlerFunc(mcGraphHandler)
+	server := httptest.NewServer(handler)
+	defer server.Close()
+
+	client := server.Client()
+
+	// Create a request with a short context timeout
+	req, err := http.NewRequest(http.MethodGet, server.URL, nil)
+	if err != nil {
+		t.Fatalf("failed to create request: %v", err)
+	}
+	ctx, cancel := context.WithTimeout(req.Context(), time.Second)
+	defer cancel()
+	req = req.WithContext(ctx)
+
+	// Send the request
+	resp, err := client.Do(req)
+	if err != nil {
+		t.Fatalf("request failed: %v", err)
+	}
+
+	defer func() {
+		if err := resp.Body.Close(); err != nil {
+			t.Errorf("error closing response body: %v", err)
+		}
+	}()
+
+	// Check if the response status code is StatusInternalServerError (500)
+	if resp.StatusCode != http.StatusInternalServerError {
+		t.Errorf("expected status %d; got %d", http.StatusInternalServerError, resp.StatusCode)
+	}
+
+	// Read and validate the response body
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		t.Fatalf("failed to read response body: %v", err)
+	}
+	expectedErrorMessage := "Failed to process request"
+	if !strings.Contains(string(body), expectedErrorMessage) {
+		t.Errorf("expected error message '%s'; got '%s'", expectedErrorMessage, string(body))
+	}
 }

@@ -4,14 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "reranking-usvc.fullname" . }}
+  name: {{ include "data-prep.fullname" . }}
   labels:
-    {{- include "reranking-usvc.labels" . | nindent 4 }}
+    {{- include "data-prep.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "reranking-usvc.selectorLabels" . | nindent 6 }}
+      {{- include "data-prep.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "reranking-usvc.selectorLabels" . | nindent 8 }}
+        {{- include "data-prep.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -30,12 +30,24 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           env:
-            - name: TEI_RERANKING_ENDPOINT
-              {{- if .Values.TEI_RERANKING_ENDPOINT }}
-              value: {{ .Values.TEI_RERANKING_ENDPOINT | quote}}
+            - name: TEI_ENDPOINT
+              {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
+              value: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote}}
               {{- else }}
-              value: "http://{{ .Release.Name }}-teirerank"
+              value: "http://{{ .Release.Name }}-tei"
               {{- end }}
+            - name: REDIS_URL
+              {{- if .Values.REDIS_URL }}
+              value: {{ .Values.REDIS_URL | quote}}
+              {{- else }}
+              value: "redis://{{ .Release.Name }}-redis-vector-db:6379"
+              {{- end }}
+            - name: INDEX_NAME
+              value: "rag-redis"
+            - name: HUGGINGFACEHUB_API_TOKEN
+              value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+            - name: HF_HOME
+              value: "/tmp/.cache/huggingface"
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
@@ -47,18 +59,26 @@ spec:
             - name: LANGCHAIN_API_KEY
               value: {{ .Values.global.LANGCHAIN_API_KEY }}
             - name: LANGCHAIN_PROJECT
-              value: "opea-reranking-service"
+              value: "opea-dataprep-service"
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: reranking-usvc
-              containerPort: 8000
+            - name: data-prep
+              containerPort: 6007
               protocol: TCP
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+#          livenessProbe:
+#            httpGet:
+#              path: /
+#              port: 7000
+#          readinessProbe:
+#            httpGet:
+#              path: /
+#              port: 7000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

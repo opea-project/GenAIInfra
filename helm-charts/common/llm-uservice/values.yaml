@@ -6,7 +6,7 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-# TGI_LLM_ENDPOINT: "http://automaticallydetected"
+TGI_LLM_ENDPOINT: ""
 
 image:
   repository: opea/llm-tgi:latest
@@ -24,6 +24,7 @@ podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext:
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -56,16 +57,6 @@ tolerations: []
 
 affinity: {}
 
-# To override values in subchart tgi
-tgi:
-  LLM_MODEL_ID: m-a-p/OpenCodeInterpreter-DS-6.7B
-  # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
-
-  image:
-    repository: ghcr.io/huggingface/text-generation-inference
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "1.4"
 global:
   http_proxy:
   https_proxy:
@@ -75,4 +66,4 @@ global:
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
   # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
   # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt
+  modelUseHostPath: /mnt/opea-models

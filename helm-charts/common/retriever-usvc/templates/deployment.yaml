@@ -31,11 +31,21 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: TEI_EMBEDDING_ENDPOINT
+              {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
+              value: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote}}
+              {{- else }}
               value: "http://{{ .Release.Name }}-tei"
+              {{- end }}
             - name: REDIS_URL
+              {{- if .Values.REDIS_URL }}
+              value: {{ .Values.REDIS_URL | quote}}
+              {{- else }}
               value: "redis://{{ .Release.Name }}-redis-vector-db:6379"
+              {{- end }}
             - name: INDEX_NAME
               value: "rag-redis"
+            - name: EASYOCR_MODULE_PATH
+              value: "/tmp/.EasyOCR"
             - name: http_proxy
               value: {{ .Values.global.http_proxy }}
             - name: https_proxy
@@ -48,6 +58,8 @@ spec:
               value: {{ .Values.global.LANGCHAIN_API_KEY }}
             - name: LANGCHAIN_PROJECT
               value: "opea-retriever-service"
+            - name: HF_HOME
+              value: "/tmp/.cache/huggingface"
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
@@ -56,11 +68,18 @@ spec:
             - name: retriever-usvc
               containerPort: 7000
               protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
           startupProbe:
             exec:
               command:
               - curl
+              {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
+              - {{ .Values.TEI_EMBEDDING_ENDPOINT }}
+              {{- else }}
               - http://{{ .Release.Name }}-tei
+              {{- end }}
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
@@ -74,6 +93,9 @@ spec:
 #              port: 7000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
