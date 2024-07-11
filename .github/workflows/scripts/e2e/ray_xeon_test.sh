@@ -27,6 +27,9 @@ function validate_ray() {
     # Check if raycluster-autoscaler-head is ready
     kubectl get pods | grep "raycluster-autoscaler-head" | grep "Running"
 
+    # Port forward to allow local tests
+    kubectl port-forward services/raycluster-autoscaler-head-svc 10001:10001 8265:8265 6379:6379 8080:8080 -n default &
+
     # Run ray test
     python ray-test.py
 }
