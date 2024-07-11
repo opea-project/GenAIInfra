@@ -6,7 +6,7 @@ set -exo pipefail
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
 
-function install_kuberay_and_start_ray() {
+function install_kuberay_and_start_ray_cluster() {
     # Install KubeRay
     ./install-kuberay.sh
 
@@ -14,24 +14,34 @@ function install_kuberay_and_start_ray() {
     ./start-ray-cluster.sh
 }
 
+function setup_client_side() {
+    # Install Ray
+    pip install ray==2.23.0
+
+    echo "Current Python version: $(python --version | awk '{print $2}')"
+    echo "Current Ray version: $(ray --version | awk '{print $3}')"
+}
+
 function validate_ray() {
     echo "Install KubeRay and Start Ray Cluster with Autoscaling"
-
-    install_kuberay_and_start_ray
+    install_kuberay_and_start_ray_cluster
 
     # Wait for ray cluster to be ready
-    sleep 20
+    sleep 10
 
-    # Check if kuberay-operator is ready
+    echo "Check if kuberay-operator is ready"
     kubectl get pods | grep "kuberay-operator" | grep "Running"
 
-    # Check if raycluster-autoscaler-head is ready
+    echo "Check if raycluster-autoscaler-head is ready"
     kubectl get pods | grep "raycluster-autoscaler-head" | grep "Running"
 
-    # Port forward to allow local tests
-    kubectl port-forward services/raycluster-autoscaler-head-svc 10001:10001 8265:8265 6379:6379 8080:8080 -n default &
+    echo "Port forward to allow local tests"
+    kubectl port-forward services/raycluster-autoscaler-head-svc 10001:10001 8265:8265 6379:6379 8080:8080 &
 
-    # Run ray test
+    echo "Setup client-side environments"
+    setup_client_side()
+
+    echo "Run basic Ray app test"
     python ray-test.py
 }
 
