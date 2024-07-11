@@ -38,7 +38,7 @@ fi
 
 case "$1" in
     validate_ray)
-        pushd scripts/kuberay
+        pushd scripts/ray
         validate_ray
         popd
         ;;
