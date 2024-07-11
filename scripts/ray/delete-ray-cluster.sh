@@ -4,4 +4,6 @@
 
 set -exo pipefail
 
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
+
 kubectl delete -f $DIR/ray-cluster-autoscaler.yaml
