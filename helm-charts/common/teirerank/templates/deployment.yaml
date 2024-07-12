@@ -29,23 +29,14 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          env:
-            - name: MODEL_ID
-              value: {{ .Values.RERANK_MODEL_ID | quote }}
-            - name: PORT
-              value: {{ .Values.port | quote }}
-            - name: http_proxy
-              value: {{ .Values.global.http_proxy }}
-            - name: https_proxy
-              value: {{ .Values.global.https_proxy }}
-            - name: no_proxy
-              value: {{ .Values.global.no_proxy }}
-            - name: NUMBA_CACHE_DIR
-              value: /tmp
-            - name: TRANSFORMERS_CACHE
-              value: /tmp/transformers_cache
-            - name: HF_HOME
-              value: "/tmp/.cache/huggingface"
+          envFrom:
+            - configMapRef:
+                name: {{ include "teirerank.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
           securityContext:
             {{- if .Values.global.modelUseHostPath }}
             {}

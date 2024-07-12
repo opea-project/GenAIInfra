@@ -29,33 +29,14 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
-          env:
-            - name: MODEL_ID
-              value: {{ .Values.LLM_MODEL_ID }}
-            - name: PORT
-              value: {{ .Values.port | quote }}
-            - name: HUGGING_FACE_HUB_TOKEN
-              value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
-            - name: HF_TOKEN
-              value: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
-            - name: MAX_INPUT_TOKENS
-              value: "1024"
-            - name: MAX_TOTAL_TOKENS
-              value: "4096"
-            - name: http_proxy
-              value: {{ .Values.global.http_proxy }}
-            - name: https_proxy
-              value: {{ .Values.global.https_proxy }}
-            - name: no_proxy
-              value: {{ .Values.global.no_proxy }}
-            - name: HABANA_LOGS
-              value: /tmp/habana_logs
-            - name: NUMBA_CACHE_DIR
-              value: /tmp/numba_cache
-            - name: TRANSFORMERS_CACHE
-              value: /tmp/transformers_cache
-            - name: HF_HOME
-              value: "/tmp/.cache/huggingface"
+          envFrom:
+            - configMapRef:
+                name: {{ include "tgi.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
           securityContext:
             {{- if .Values.global.modelUseHostPath }}
             {}

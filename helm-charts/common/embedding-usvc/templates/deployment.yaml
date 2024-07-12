@@ -29,25 +29,14 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
-          env:
-            - name: TEI_EMBEDDING_ENDPOINT
-              {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
-              value: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote}}
-              {{- else }}
-              value: "http://{{ .Release.Name }}-tei"
-              {{- end }}
-            - name: http_proxy
-              value: {{ .Values.global.http_proxy }}
-            - name: https_proxy
-              value: {{ .Values.global.https_proxy }}
-            - name: no_proxy
-              value: {{ .Values.global.no_proxy }}
-            - name: LANGCHAIN_TRACING_V2
-              value: {{ .Values.global.LANGCHAIN_TRACING_V2 | quote }}
-            - name: LANGCHAIN_API_KEY
-              value: {{ .Values.global.LANGCHAIN_API_KEY }}
-            - name: LANGCHAIN_PROJECT
-              value: "opea-embedding-service"
+          envFrom:
+            - configMapRef:
+                name: {{ include "embedding-usvc.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}"
