@@ -15,8 +15,8 @@ function install_kuberay_and_start_ray_cluster() {
 }
 
 function setup_client_side() {
-    # Install Ray
-    pip install ray==2.23.0
+    # Install Ray client
+    pip install ray[client]==2.23.0
 
     echo "Current Python version: $(python --version | awk '{print $2}')"
     echo "Current Ray version: $(ray --version | awk '{print $3}')"
@@ -39,7 +39,7 @@ function validate_ray() {
     kubectl port-forward services/raycluster-autoscaler-head-svc 10001:10001 8265:8265 6379:6379 8080:8080 &
 
     echo "Setup client-side environments"
-    setup_client_side()
+    setup_client_side
 
     echo "Run basic Ray app test"
     python ray-test.py
