@@ -56,6 +56,12 @@ tolerations: []
 
 affinity: {}
 
+# text embedding inference service URL, e.g. http://<service-name>:<port>
+TEI_EMBEDDING_ENDPOINT: ""
+
+# redis DB service URL, e.g. redis://<service-name>:<port>
+REDIS_URL: ""
+
 global:
   http_proxy:
   https_proxy:
