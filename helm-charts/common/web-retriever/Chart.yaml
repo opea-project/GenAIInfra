@@ -1,0 +1,10 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: web-retriever
+description: The Helm chart for deploying web retriever as microservice
+type: application
+version: 0.8.0
+# The web retriever microservice server version
+appVersion: "1.0.0"
