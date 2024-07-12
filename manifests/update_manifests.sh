@@ -5,7 +5,7 @@
 
 CUR_DIR=$(cd $(dirname "$0") && pwd)
 
-# 
+#
 # generate_yaml llm-uservice
 #
 function generate_yaml {
