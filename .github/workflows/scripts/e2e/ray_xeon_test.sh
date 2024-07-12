@@ -22,6 +22,36 @@ function setup_client_side() {
     echo "Current Ray version: $(ray --version | awk '{print $3}')"
 }
 
+function wait_until_ray_head_pod_ready() {
+    max_retries=10
+    retry_count=0
+
+    while true; do
+        # Get the name of the Ray head pod
+        pod_name=$(kubectl get pods --selector=ray.io/node-type=head -o custom-columns=POD:metadata.name --no-headers)
+
+        # Check if the pod name was found
+        if [ -z "$pod_name" ]; then
+            pod_status = "False"
+        else
+            # Get the status of the Ray head pod
+            pod_status=$(kubectl get pod $pod_name -o jsonpath='{.status.conditions[?(@.type=="Ready")].status}')
+        fi
+
+        if [ "$pod_status" == "True" ]; then
+            echo "Ray head pod is ready."
+            break
+        elif [ $retry_count -ge $max_retries ]; then
+            echo "Ray head pod is not ready after waiting for a significant amount of time."
+            exit 1
+        else
+            echo "Ray head pod is not ready yet. Retrying in 10 seconds..."
+            sleep 10
+            retry_count=$((retry_count + 1))
+        fi
+    done
+}
+
 function validate_ray() {
     echo "Install KubeRay and Start Ray Cluster with Autoscaling"
     install_kuberay_and_start_ray_cluster
@@ -34,6 +64,9 @@ function validate_ray() {
 
     echo "Check if raycluster-autoscaler-head is ready"
     kubectl get pods | grep "raycluster-autoscaler-head" | grep "Running"
+
+    echo "Waiting for the Ray head pod to be ready..."
+    wait_until_ray_head_pod_ready
 
     echo "Port forward to allow local tests"
     kubectl port-forward services/raycluster-autoscaler-head-svc 10001:10001 8265:8265 6379:6379 8080:8080 &
