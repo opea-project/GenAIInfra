@@ -19,7 +19,7 @@ concurrency:
 
 jobs:
   ray-validate:
-    runs-on: kind-xeon
+    runs-on: xeon
     steps:
       - name: Checkout out Repo
         uses: actions/checkout@v4
