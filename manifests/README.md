@@ -7,32 +7,27 @@
 ## Deploy On Xeon
 
 ```
-cd GenAIInfra/manifests/${component}/xeon
+cd GenAIInfra/manifests/common
+export component=<component>
 export HUGGINGFACEHUB_API_TOKEN="YourOwnToken"
-sed -i "s/insert-your-huggingface-token-here/${HUGGINGFACEHUB_API_TOKEN}/g" *.yaml
-kubectl apply -f *.yaml
+sed -i "s/insert-your-huggingface-token-here/${HUGGINGFACEHUB_API_TOKEN}/g" ${component}.yaml
+kubectl apply -f ${component}.yaml
 ```
 
 ## Deploy On Gaudi
 
 ```
-cd GenAIInfra/manifests/${component}/gaudi
+cd GenAIInfra/manifests/common
+export component=<component>
 export HUGGINGFACEHUB_API_TOKEN="YourOwnToken"
-sed -i "s/insert-your-huggingface-token-here/${HUGGINGFACEHUB_API_TOKEN}/g" *.yaml
-kubectl apply -f *.yaml
+# if there is a manifest file named after ${component}_gaudi.yaml
+sed -i "s/insert-your-huggingface-token-here/${HUGGINGFACEHUB_API_TOKEN}/g" ${component}_gaudi.yaml
+kubectl apply -f ${component}_gaudi.yaml
+# else apply the xeon manifest file
+sed -i "s/insert-your-huggingface-token-here/${HUGGINGFACEHUB_API_TOKEN}/g" ${component}.yaml
+kubectl apply -f ${component}.yaml
 ```
 
 ## Generate the manifest file from helm chart
 
-Refer to update_manifests.sh for details.
-
-Here is the one example:
-
-```
-cd GenAIInfra/manifests/CodeTrans
-export HF_TOKEN="insert-your-huggingface-token-here"
-export MODELDIR="/mnt"
-helm template codetrans ../../helm-charts/common/llm-uservice --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set image.repository="opea/llm-tgi:latest" --set tgi.volume=${MODELDIR} --set tgi.LLM_MODEL_ID="HuggingFaceH4/mistral-7b-grok" --values ../../helm-charts/common/llm-uservice/values.yaml > xeon/llm.yaml
-helm template codetrans ../../helm-charts/common/llm-uservice --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set image.repository="opea/llm-tgi:latest" --set tgi.volume=${MODELDIR} --set tgi.LLM_MODEL_ID="HuggingFaceH4/mistral-7b-grok" --values ../../helm-charts/common/llm-uservice/gaudi-values.yaml > gaudi/llm.yaml
-
-```
+Refer to [update_manifests.sh](update_manifests.sh) for details.
