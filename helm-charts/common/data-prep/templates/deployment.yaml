@@ -48,14 +48,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: 7000
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: 7000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
