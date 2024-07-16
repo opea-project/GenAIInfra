@@ -1,0 +1,25 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "tgi.fullname" . }}-testpod"
+  labels:
+    {{- include "tgi.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    #"helm.sh/hook-delete-policy": "hook-succeeded, hook-failure"
+spec:
+  containers:
+    - name: curl
+      image: alpine/curl
+      #image: python:3.10.14
+      command: ['sh', '-c']
+      args:
+        - |
+          curl http://{{ include "tgi.fullname" . }}/generate -sS --fail-with-body \
+            -X POST \
+            -d '{"inputs":"What is Deep Learning?","parameters":{"max_new_tokens":17, "do_sample": true}}' \
+            -H 'Content-Type: application/json'
+  restartPolicy: Never
