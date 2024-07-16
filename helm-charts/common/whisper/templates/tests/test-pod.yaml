@@ -18,7 +18,7 @@ spec:
       command: ['sh', '-c']
       args:
         - |
-          curl http://{{ include "whisper.fullname" . }}:{{ .Values.service.port }}/v1/asr \
+          curl -sS --fail-with-body http://{{ include "whisper.fullname" . }}:{{ .Values.service.port }}/v1/asr \
             -X POST \
             -d '{"audio": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"}' \
             -H 'Content-Type: application/json'
