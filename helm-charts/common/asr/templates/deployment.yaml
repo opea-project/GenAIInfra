@@ -48,26 +48,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-                #startupProbe:
-                #  exec:
-                #    command:
-                #    - curl
-                #    {{- if .Values.ASR_ENDPOINT }}
-                #    - {{ .Values.ASR_ENDPOINT }}
-                #    {{- else }}
-                #    - http://{{ .Release.Name }}-whisper
-                #    {{- end }}
-                #  initialDelaySeconds: 5
-                #  periodSeconds: 5
-                #  failureThreshold: 120
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: 7000
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: 7000
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
