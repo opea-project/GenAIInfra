@@ -1,0 +1,25 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "teirerank.fullname" . }}-testpod"
+  labels:
+    {{- include "teirerank.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    #"helm.sh/hook-delete-policy": "hook-succeeded, hook-failure"
+spec:
+  containers:
+    - name: curl
+      image: alpine/curl
+      #image: python:3.10.14
+      command: ['sh', '-c']
+      args:
+        - |
+          curl http://{{ include "teirerank.fullname" . }}/rerank -sS --fail-with-body \
+            -X POST \
+            -d '{"query":"What is Deep Learning?", "texts": ["Deep Learning is not...", "Deep learning is..."]}' -H 'Content-Type: application/json' \
+            -H 'Content-Type: application/json'
+  restartPolicy: Never
