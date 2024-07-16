@@ -120,8 +120,31 @@ func getManifestYaml(step string) string {
 	return tmpltFile
 }
 
-func reconcileResource(ctx context.Context, client client.Client, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
-	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
+func reconcileResource(platform string, ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router, routerConfig *mcv1alpha3.RouterConfig, retSvc *corev1.Service) error {
+	var step string
+	var svcCfg *map[string]string
+	var svc string
+	ns := graphNs
+	if stepCfg == nil && nodeCfg == nil && routerConfig != nil {
+		step = Router
+		fmt.Printf("get router config: %v\n", routerConfig)
+		svcCfg = &routerConfig.Config
+		if routerConfig.NameSpace != "" {
+			ns = routerConfig.NameSpace
+		}
+		svc = routerConfig.ServiceName
+	} else if stepCfg != nil && nodeCfg != nil && routerConfig == nil {
+		step = stepCfg.StepName
+		svcCfg = &stepCfg.InternalService.Config
+		fmt.Printf("get step %s config: %v\n", step, stepCfg)
+		if stepCfg.InternalService.NameSpace != "" {
+			ns = stepCfg.InternalService.NameSpace
+		}
+		svc = stepCfg.InternalService.ServiceName
+	} else {
+		return errors.New("unexpected resource")
+	}
+
 	tmpltFile := getManifestYaml(step)
 	if tmpltFile == "" {
 		return errors.New("unexpected target")
@@ -143,26 +166,57 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 		if res == "" || !strings.Contains(res, "kind:") {
 			continue
 		}
-		createdObj, err := applyResourceToK8s(ctx, client, ns, svc, []byte(res))
+
+		var bytesToApply []byte
+
+		decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+		obj := &unstructured.Unstructured{}
+		_, _, err := decUnstructured.Decode([]byte(res), nil, obj)
 		if err != nil {
-			return fmt.Errorf("Failed to reconcile resource: %v\n", err)
-		} else {
-			fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
+			return fmt.Errorf("failed to decode YAML: %v", err)
+		}
+		// Set the namespace if it's specified
+		if ns != "" {
+			obj.SetNamespace(ns)
+		}
 
-			// return the service obj to get the service URL from it
-			if retSvc != nil && createdObj.GetKind() == Service {
-				err = scheme.Scheme.Convert(createdObj, retSvc, nil)
-				if err != nil {
-					return fmt.Errorf("Failed to save service: %v\n", err)
-				}
+		if obj.GetKind() == Service && svc != "" {
+			service_obj := &corev1.Service{}
+			err = runtime.DefaultUnstructuredConverter.FromUnstructured(obj.UnstructuredContent(), service_obj)
+			if err != nil {
+				return fmt.Errorf("failed to convert unstructured to service: %v", err)
 			}
+			service_obj.SetName(svc)
+			service_obj.Spec.Selector["app"] = svc
 
-			if createdObj.GetKind() == Deployment && step != Router {
+			bytesToApply, err = yaml2.Marshal(service_obj)
+			if err != nil {
+				return fmt.Errorf("failed to marshal service data: %v", err)
+			}
+		} else if obj.GetKind() == Deployment {
+			deployment_obj := &appsv1.Deployment{}
+			err = runtime.DefaultUnstructuredConverter.FromUnstructured(obj.UnstructuredContent(), deployment_obj)
+			if err != nil {
+				return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+			}
+			if svc != "" {
+				deployment_obj.SetName(svc + dplymtSubfix)
+				// Set the labels if they're specified
+				deployment_obj.Spec.Selector.MatchLabels["app"] = svc
+				deployment_obj.Spec.Template.Labels["app"] = svc
+			}
+			if step != Router {
+				// router has been handled by patchCustomConfigToTemplates, avoid conflict here
+				// unless patchCustomConfigToTemplates is deleted in future, we handle env and args here
 				var newEnvVars []corev1.EnvVar
 				if svcCfg != nil {
 					for name, value := range *svcCfg {
 						if name == "endpoint" {
 							continue
+						}
+						if keyIsSomeEndpoint(name) {
+							ds := findDownStreamService(value, stepCfg, nodeCfg)
+							value = getDsEndpoint(platform, name, graphNs, ds)
 						}
 						itemEnvVar := corev1.EnvVar{
 							Name:  name,
@@ -172,30 +226,147 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 					}
 				}
 				if len(newEnvVars) > 0 {
-					deployment := &appsv1.Deployment{}
-					err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
-					if err != nil {
-						return fmt.Errorf("Failed to save deployment: %v\n", err)
-					}
-					for i := range deployment.Spec.Template.Spec.Containers {
-						deployment.Spec.Template.Spec.Containers[i].Env = append(
-							deployment.Spec.Template.Spec.Containers[i].Env,
+					for i := range deployment_obj.Spec.Template.Spec.Containers {
+						deployment_obj.Spec.Template.Spec.Containers[i].Env = append(
+							deployment_obj.Spec.Template.Spec.Containers[i].Env,
 							newEnvVars...)
-					}
-					//overwrite the managed fields is needed, we write this deployment twice here
-					deployment.SetManagedFields(nil)
-					latest := &unstructured.Unstructured{}
-					latest.SetGroupVersionKind(deployment.GroupVersionKind())
-					deployment.SetResourceVersion(latest.GetResourceVersion())
-					// Update the deployment using client.Client
-					if err := client.Update(ctx, deployment); err != nil {
-						return fmt.Errorf("Failed to update deployment: %v\n", err)
+						// deployment.Spec.Template.Spec.Containers[i].Args = append(
 					}
 				}
 			}
+			bytesToApply, err = yaml2.Marshal(deployment_obj)
+			if err != nil {
+				return fmt.Errorf("failed to marshal deployment data: %v", err)
+			}
+		} else {
+			bytesToApply, err = yaml2.Marshal(obj)
+			if err != nil {
+				return fmt.Errorf("failed to marshal object data: %v", err)
+			}
+		}
+
+		createdObj, err := applyResourceToK8s(ctx, client, ns, bytesToApply)
+		if err != nil {
+			return fmt.Errorf("failed to reconcile resource: %v", err)
+		} else {
+			fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
+
+			// return the service obj to get the service URL from it
+			if retSvc != nil && createdObj.GetKind() == Service {
+				err = scheme.Scheme.Convert(createdObj, retSvc, nil)
+				if err != nil {
+					return fmt.Errorf("failed to save service: %v", err)
+				}
+			}
+		}
+		// if createdObj.GetKind() == Deployment && step != Router {
+		// 	var newEnvVars []corev1.EnvVar
+		// 	if svcCfg != nil {
+		// 		for name, value := range *svcCfg {
+		// 			if name == "endpoint" {
+		// 				continue
+		// 			}
+		// 			itemEnvVar := corev1.EnvVar{
+		// 				Name:  name,
+		// 				Value: value,
+		// 			}
+		// 			newEnvVars = append(newEnvVars, itemEnvVar)
+		// 		}
+		// 	}
+		// 	if len(newEnvVars) > 0 {
+		// 		deployment := &appsv1.Deployment{}
+		// 		err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
+		// 		if err != nil {
+		// 			return fmt.Errorf("Failed to save deployment: %v\n", err)
+		// 		}
+		// 		for i := range deployment.Spec.Template.Spec.Containers {
+		// 			deployment.Spec.Template.Spec.Containers[i].Env = append(
+		// 				deployment.Spec.Template.Spec.Containers[i].Env,
+		// 				newEnvVars...)
+		// 		}
+		// 		//overwrite the managed fields is needed, we write this deployment twice here
+		// 		deployment.SetManagedFields(nil)
+		// 		latest := &unstructured.Unstructured{}
+		// 		latest.SetGroupVersionKind(deployment.GroupVersionKind())
+		// 		deployment.SetResourceVersion(latest.GetResourceVersion())
+		// 		// Update the deployment using client.Client
+		// 		if err := client.Update(ctx, deployment); err != nil {
+		// 			return fmt.Errorf("Failed to update deployment: %v\n", err)
+		// 		}
+		// 	}
+
+	}
+	return nil
+}
+
+func keyIsSomeEndpoint(keyname string) bool {
+	return keyname == "TEI_EMBEDDING_ENDPOINT" || keyname == "TEI_RERANKING_ENDPOINT" || keyname == "TGI_LLM_ENDPOINT"
+}
+
+func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) *mcv1alpha3.Step {
+	if stepCfg == nil || nodeCfg == nil {
+		return nil
+	}
+	for _, otherStep := range nodeCfg.Steps {
+		if otherStep.StepName == dsName && otherStep.InternalService.IsDownstreamService {
+			return &otherStep
 		}
 	}
 	return nil
+}
+
+func getDsEndpoint(platform string, keyname string, reqNS string, ds *mcv1alpha3.Step) string {
+	if ds == nil {
+		return ""
+	}
+	var embdManifest string
+	var rerankManifest string
+	var tgiManifest string
+	var redisManifest string
+	if platform == xeon {
+		embdManifest = yaml_dir + tei_embedding_service_yaml
+		rerankManifest = yaml_dir + tei_reranking_service_yaml
+		tgiManifest = yaml_dir + tgi_service_yaml
+		redisManifest = yaml_dir + redis_vector_db_yaml
+	} else if platform == gaudi {
+		embdManifest = yaml_dir + tei_embedding_gaudi_service_yaml
+		rerankManifest = yaml_dir + tei_reranking_service_yaml
+		tgiManifest = yaml_dir + tgi_gaudi_service_yaml
+		redisManifest = yaml_dir + redis_vector_db_yaml
+	} else {
+		fmt.Printf("unexpected hardware type %s", platform)
+		return ""
+	}
+
+	var svcName string
+	var port int
+	var err error
+
+	if keyname == "TEI_EMBEDDING_ENDPOINT" {
+		svcName, port, err = getServiceDetailsFromManifests(embdManifest)
+	} else if keyname == "TEI_RERANKING_ENDPOINT" {
+		svcName, port, err = getServiceDetailsFromManifests(rerankManifest)
+	} else if keyname == "TGI_LLM_ENDPOINT" {
+		svcName, port, err = getServiceDetailsFromManifests(tgiManifest)
+	} else if keyname == "REDIS_URL" {
+		svcName, port, err = getServiceDetailsFromManifests(redisManifest)
+	}
+
+	if err == nil {
+		//check GMC config if there is specific namespace for embedding
+		altNs, altSvcName := getNsNameFromStep(ds)
+		if altNs == "" {
+			altNs = reqNS
+		}
+		if altSvcName == "" {
+			altSvcName = svcName
+		}
+		return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
+	} else {
+		fmt.Printf("failed to get service details for %s: %v\n", embdManifest, err)
+	}
+	return ""
+
 }
 
 func getServiceURL(service *corev1.Service) string {
@@ -284,6 +455,8 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		platform = labelValue
 	}
 
+	// TO BE DELETED
+	// this is deprecated when new manifests in merged
 	err := preProcessUserConfigmap(ctx, r.Client, req.NamespacedName.Namespace, platform, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
@@ -295,22 +468,20 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	for nodeName, node := range graph.Spec.Nodes {
 		for i, step := range node.Steps {
+			if step.NodeName != "" {
+				fmt.Println("\nthis is a nested step: ", step.StepName)
+				continue
+			}
 			fmt.Println("\nreconcile resource for node:", step.StepName)
 			totalService += 1
 			if step.Executor.ExternalService == "" {
-				var ns string
-				if step.Executor.InternalService.NameSpace == "" {
-					ns = req.Namespace
-				} else {
-					ns = step.Executor.InternalService.NameSpace
-				}
-				svcName := step.Executor.InternalService.ServiceName
-				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
+				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
 				service := &corev1.Service{}
-				err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
+				// err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
+				err := reconcileResource(platform, ctx, r.Client, graph.Namespace, &step, &node, nil, service)
 				if err != nil {
-					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
+					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.Executor.InternalService.ServiceName)
 				}
 				successService += 1
 				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
@@ -329,13 +500,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
 	routerService := &corev1.Service{}
-	var router_ns string
-	if graph.Spec.RouterConfig.NameSpace == "" {
-		router_ns = req.Namespace
-	} else {
-		router_ns = graph.Spec.RouterConfig.NameSpace
-	}
-
 	jsonBytes, err := json.Marshal(graph)
 	if err != nil {
 		// handle error
@@ -347,7 +511,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
 	//set empty service name, because we don't want to change router service name and deployment name
-	err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, routerService)
+	err = reconcileResource(platform, ctx, r.Client, graph.Namespace, nil, nil, &graph.Spec.RouterConfig, routerService)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
@@ -362,6 +526,8 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return ctrl.Result{}, nil
 }
 
+// TO BE DELETED
+// this is deprecated when new manifests in merged
 // read the configmap file from the manifests
 // update the values of the fields in the configmap
 // add service details to the fields
@@ -398,7 +564,7 @@ func preProcessUserConfigmap(ctx context.Context, client client.Client, ns strin
 	if err != nil {
 		return fmt.Errorf("failed to marshal YAML data: %v", err)
 	}
-	_, err = applyResourceToK8s(ctx, client, ns, "", adjustedCmBytes)
+	_, err = applyResourceToK8s(ctx, client, ns, adjustedCmBytes)
 	if err != nil {
 		return fmt.Errorf("failed to apply the adjusted configmap: %v", err)
 	} else {
@@ -408,7 +574,7 @@ func preProcessUserConfigmap(ctx context.Context, client client.Client, ns strin
 	return nil
 }
 
-func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc string, resource []byte) (*unstructured.Unstructured, error) {
+func applyResourceToK8s(ctx context.Context, c client.Client, ns string, resource []byte) (*unstructured.Unstructured, error) {
 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
 
 	obj := &unstructured.Unstructured{}
@@ -422,50 +588,42 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 		obj.SetNamespace(ns)
 	}
 
-	if svc != "" {
-		if obj.GetKind() == Service {
-			obj.SetName(svc)
-			selectors, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get selectors: %v", err)
-			}
-			if found {
-				selectors["app"] = svc // Set the new selector.app value
-				err = unstructured.SetNestedStringMap(obj.Object, selectors, "spec", "selector")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set new selector.app: %v", err)
-				}
-			}
-		}
-		if obj.GetKind() == Deployment {
-			obj.SetName(svc + dplymtSubfix)
-			// Set the labels if they're specified
-			labels, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector", "matchLabels")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get spec.selector.matchLabels: %v", err)
-			}
-			if found {
-				labels["app"] = svc
-				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "selector", "matchLabels")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set new spec.selector.matchLabels : %v", err)
-				}
-			}
-			// Set the labels in template if they're specified
-			labels, found, err = unstructured.NestedStringMap(obj.Object, "spec", "template", "metadata", "labels")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get spec.template.metadata.labels: %v", err)
-			}
-			if found {
-				labels["app"] = svc
-				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "template", "metadata", "labels")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set spec.template.metadata.labels: %v", err)
-				}
-			}
-		}
+	// if svc != "" {
+	// 	if obj.GetKind() == Service {
+	// 		alt_obj := &corev1.Service{}
+	// 		err = runtime.DefaultUnstructuredConverter.FromUnstructured(obj.UnstructuredContent(), alt_obj)
+	// 		if err != nil {
+	// 			return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
+	// 		}
+	// 		alt_obj.SetName(svc)
+	// 		alt_obj.Spec.Selector["app"] = svc
+	// 	}
+	// 	if obj.GetKind() == Deployment {
+	// 		alt_obj := &appsv1.Deployment{}
+	// 		err = runtime.DefaultUnstructuredConverter.FromUnstructured(obj.UnstructuredContent(), alt_obj)
+	// 		if err != nil {
+	// 			return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+	// 		}
+	// 		alt_obj.SetName(svc + dplymtSubfix)
+	// 		// Set the labels if they're specified
+	// 		alt_obj.Spec.Selector.MatchLabels["app"] = svc
+	// 		alt_obj.Spec.Template.Labels["app"] = svc
+	// 		// var newEnvVars []corev1.EnvVar
+	// 		// if svcCfg != nil {
+	// 		// 	for name, value := range *svcCfg {
+	// 		// 		if name == "endpoint" {
+	// 		// 			continue
+	// 		// 		}
+	// 		// 		itemEnvVar := corev1.EnvVar{
+	// 		// 			Name:  name,
+	// 		// 			Value: value,
+	// 		// 		}
+	// 		// 		newEnvVars = append(newEnvVars, itemEnvVar)
+	// 		// 	}
+	// 		// }
+	// 	}
 
-	}
+	// }
 
 	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
 	// This might involve trying an Update and, if it fails because the object doesn't exist, falling back to Create.
@@ -511,28 +669,39 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 	}
 }
 
-func getNsNameFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) (string, string) {
+func getNsNameFromStep(step *mcv1alpha3.Step) (string, string) {
 	var retNs string
 	var retName string
-	for _, router := range gmcGraph.Spec.Nodes {
-		for _, step := range router.Steps {
-			if step.StepName == stepName {
-				// Check if InternalService is not nil
-				if step.Executor.ExternalService == "" {
-					// Check if NameSpace is not an empty string
-					if step.Executor.InternalService.NameSpace != "" {
-						retNs = step.Executor.InternalService.NameSpace
-					}
-					if step.Executor.InternalService.ServiceName != "" {
-						retName = step.Executor.InternalService.ServiceName
-					}
-				}
-			}
+
+	// Check if InternalService is not nil
+	if step.Executor.ExternalService == "" {
+		// Check if NameSpace is not an empty string
+		if step.Executor.InternalService.NameSpace != "" {
+			retNs = step.Executor.InternalService.NameSpace
+		}
+		if step.Executor.InternalService.ServiceName != "" {
+			retName = step.Executor.InternalService.ServiceName
 		}
 	}
+
 	return retNs, retName
 }
 
+// TO BE DELETED
+// this is deprecated when new manifests in merged
+func getNsNameFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) (string, string) {
+	for _, router := range gmcGraph.Spec.Nodes {
+		for _, step := range router.Steps {
+			if step.StepName == stepName {
+				return getNsNameFromStep(&step)
+			}
+		}
+	}
+	return "", ""
+}
+
+// TO BE DELETED
+// this is deprecated when new manifests in merged
 func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, gmcGraph *mcv1alpha3.GMConnector) {
 	var embdManifest string
 	var rerankManifest string
