@@ -8,7 +8,7 @@ The GenAIInfra repository is organized under four main directories, which includ
 
 | Directory           | Purpose                                                                                                                     |
 | ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `microservices-connector`       | GenAI Microservices Connector(GMC) for deploying and adjusting[GenAIExamples](https://github.com/opea-project/GenAIExamples) on Kubernetes. |
+| `microservices-connector`       | GenAI Microservices Connector(GMC) for deploying and adjusting [GenAIExamples](https://github.com/opea-project/GenAIExamples) on Kubernetes. |
 | `helm-charts`       | Helm charts for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes.                     |
 | `kubernetes-addons` | Deploy Kubernetes add-ons for OPEA.                                                                                         |
 | `manifests`         | Manifests for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes and on Docker Compose. |
