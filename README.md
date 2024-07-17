@@ -6,13 +6,13 @@ GenAIInfra is the containerization and cloud native suite for OPEA, including ar
 
 The GenAIInfra repository is organized under four main directories, which include artifacts for OPEA deploying:
 
-| Directory           | Purpose                                                                                                                     |
-| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `microservices-connector`       | GenAI Microservices Connector(GMC) for deploying and adjusting [GenAIExamples](https://github.com/opea-project/GenAIExamples) on Kubernetes. |
-| `helm-charts`       | Helm charts for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes.                     |
-| `kubernetes-addons` | Deploy Kubernetes add-ons for OPEA.                                                                                         |
-| `manifests`         | Manifests for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes and on Docker Compose. |
-| `scripts`           | Scripts for testing, tools for facilitate OPEA deployment, and etc.                                                         |
+| Directory                 | Purpose                                                                                                                                      |
+| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `microservices-connector` | GenAI Microservices Connector (GMC) supports the launching, monitoring, and updating of GenAI microservice chains, such as those in [GenAIExamples](https://github.com/opea-project/GenAIExamples) on Kubernetes. It essentially supports a Kubernetes Custom Resource Definition for GenAI chains/pipelines that may be comprised of sequential, conditional, and parallel steps. |
+| `helm-charts`             | Helm charts for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes.                                       |
+| `kubernetes-addons`       | Deploy Kubernetes add-ons for OPEA.                                                                                                          |
+| `manifests`               | Manifests for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes and on Docker Compose.                   |
+| `scripts`                 | Scripts for testing, tools to facilitate OPEA deployment, and etc.                                                                          |
 
 ## Prerequisite
 
@@ -42,14 +42,12 @@ NOTE: Please make sure you configure the appropriate container runtime based on 
 
 ## Usages
 
-### Use GenAI Microservices Connector(GMC) to deploy and adjust GenAIExamples
+### Use GenAI Microservices Connector (GMC) to deploy and adjust GenAIExamples
 
 Follow [GMC README](https://github.com/opea-project/GenAIInfra/blob/main/microservices-connector/README.md)
-to install GMC into your kubernetes cluster. GMC provides sample config for GenAIExamples under `microservices-connector/config/samples`. Select the example workflow you want to deploy, deploy the example (e.g. DocSum) using `kubectl`:
+to install GMC into your kubernetes cluster. [GenAIExamples](https://github.com/opea-project/GenAIExamples) contains several sample GenAI example use case pipelines such as ChatQnA, DocSum, etc.
+Once you have deployed GMC in your Kubernetes cluster, you can deploy any of the example pipelines by following its Readme file (e.g. [Docsum](https://github.com/opea-project/GenAIExamples/blob/main/DocSum/kubernetes/README.md)).
 
-```shell
-kubectl apply -f ./microservices-connector/config/samples/docsum_xeon.yaml
-```
 
 ### Use helm charts to deploy
 
