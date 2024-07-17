@@ -8,3 +8,12 @@ type: application
 version: 0.8.0
 # The retriever microservice server version
 appVersion: "1.0.0"
+dependencies:
+  - name: tei
+    version: 0.8.0
+    repository: file://../tei
+    condition: autodependency.enabled
+  - name: redis-vector-db
+    version: 0.8.0
+    repository: file://../redis-vector-db
+    condition: autodependency.enabled
