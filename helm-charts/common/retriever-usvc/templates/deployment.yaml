@@ -48,6 +48,7 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+          {{- if not .Values.noProbe }}
           startupProbe:
             exec:
               command:
@@ -60,14 +61,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
-#          livenessProbe:
-#            httpGet:
-#              path: /
-#              port: 7000
-#          readinessProbe:
-#            httpGet:
-#              path: /
-#              port: 7000
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

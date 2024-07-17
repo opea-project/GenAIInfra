@@ -1,0 +1,109 @@
+---
+# Source: embedding-usvc/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: embedding-usvc-config
+  labels:
+    helm.sh/chart: embedding-usvc-0.8.0
+    app.kubernetes.io/name: embedding-usvc
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  TEI_EMBEDDING_ENDPOINT: "http://embedding-usvc-tei"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LANGCHAIN_TRACING_V2: "false"
+  LANGCHAIN_API_KEY: insert-your-langchain-key-here
+  LANGCHAIN_PROJECT: "opea-embedding-service"
+---
+# Source: embedding-usvc/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: embedding-usvc
+  labels:
+    helm.sh/chart: embedding-usvc-0.8.0
+    app.kubernetes.io/name: embedding-usvc
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6000
+      targetPort: 6000
+      protocol: TCP
+      name: embedding-usvc
+  selector:
+    app.kubernetes.io/name: embedding-usvc
+    app.kubernetes.io/instance: embedding-usvc
+---
+# Source: embedding-usvc/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedding-usvc
+  labels:
+    helm.sh/chart: embedding-usvc-0.8.0
+    app.kubernetes.io/name: embedding-usvc
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-usvc
+      app.kubernetes.io/instance: embedding-usvc
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: embedding-usvc
+        app.kubernetes.io/instance: embedding-usvc
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: embedding-usvc
+          envFrom:
+            - configMapRef:
+                name: embedding-usvc-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/embedding-tei:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: embedding-usvc
+              containerPort: 6000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          resources:
+            {}
+      volumes:
+        - name: tmp
+          emptyDir: {}
