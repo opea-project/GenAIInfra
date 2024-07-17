@@ -8,3 +8,8 @@ type: application
 version: 0.8.0
 # The llm microservice server version
 appVersion: "1.0.0"
+dependencies:
+  - name: tgi
+    version: 0.8.0
+    repository: file://../tgi
+    condition: autodependency.enabled
