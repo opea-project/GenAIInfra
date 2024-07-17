@@ -27,6 +27,7 @@ spec:
             HUGGING_FACE_HUB_TOKEN: <HUGGING_FACE_HUB_TOKEN>
             HF_TOKEN: <HF_TOKEN>
             PORT: "9009"
+            TGI_LLM_ENDPOINT: Tgi
       - name: Tgi
         internalService:
           serviceName: tgi-svc
