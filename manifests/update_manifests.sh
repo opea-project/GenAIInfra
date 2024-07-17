@@ -20,6 +20,7 @@ function generate_yaml {
 }
 
 mkdir -p $OUTPUTDIR
+${CUR_DIR}/../helm-charts/update_dependency.sh
 cd $CUR_DIR
 for chart in ${CUR_DIR}/../helm-charts/common/*
 do
