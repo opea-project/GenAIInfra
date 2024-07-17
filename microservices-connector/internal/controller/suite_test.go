@@ -68,6 +68,7 @@ var _ = BeforeSuite(func() {
 	templateDir := "../../../manifests/common"
 
 	files := []string{
+		templateDir + "/tei.yaml",
 		templateDir + "/tei_gaudi.yaml",
 		templateDir + "/embedding-usvc.yaml",
 		templateDir + "/redis-vector-db.yaml",
