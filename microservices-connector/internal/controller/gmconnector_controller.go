@@ -71,6 +71,20 @@ const (
 	METADATA_PLATFORM                = "gmc/platform"
 )
 
+var yamlDict = map[string]string{TeiEmbedding: yaml_dir + "/tei.yaml",
+	TeiEmbeddingGaudi: yaml_dir + "/tei_gaudi.yaml",
+	Embedding:         yaml_dir + "/embedding-usvc.yaml",
+	VectorDB:          yaml_dir + "/redis-vector-db.yaml",
+	Retriever:         yaml_dir + "/retriever-usvc.yaml",
+	Reranking:         yaml_dir + "/reranking-usvc.yaml",
+	TeiReranking:      yaml_dir + "/teirerank.yaml",
+	Tgi:               yaml_dir + "/tgi.yaml",
+	TgiGaudi:          yaml_dir + "/tgi_gaudi.yaml",
+	Llm:               yaml_dir + "/llm-uservice.yaml",
+	DocSum:            yaml_dir + "/docsum-llm-uservice.yaml",
+	Router:            yaml_dir + "/gmc-router.yaml",
+}
+
 // GMConnectorReconciler reconciles a GMConnector object
 type GMConnectorReconciler struct {
 	client.Client
@@ -84,42 +98,51 @@ type RouterCfg struct {
 	GRAPH_JSON string
 }
 
-func getManifestYaml(step string) string {
-	var tmpltFile string
-	//TODO add validation to rule out unexpected case like both embedding and retrieving
-	if step == Embedding {
-		tmpltFile = yaml_dir + embedding_yaml
-	} else if step == TeiEmbedding {
-		tmpltFile = yaml_dir + tei_embedding_service_yaml
-	} else if step == TeiEmbeddingGaudi {
-		tmpltFile = yaml_dir + tei_embedding_gaudi_service_yaml
-	} else if step == VectorDB {
-		tmpltFile = yaml_dir + redis_vector_db_yaml
-	} else if step == Retriever {
-		tmpltFile = yaml_dir + retriever_yaml
-	} else if step == Reranking {
-		tmpltFile = yaml_dir + reranking_yaml
-	} else if step == TeiReranking {
-		tmpltFile = yaml_dir + tei_reranking_service_yaml
-	} else if step == Tgi {
-		tmpltFile = yaml_dir + tgi_service_yaml
-	} else if step == TgiGaudi {
-		tmpltFile = yaml_dir + tgi_gaudi_service_yaml
-	} else if step == Llm {
-		tmpltFile = yaml_dir + llm_yaml
-	} else if step == DocSum {
-		tmpltFile = yaml_dir + docsum_llm_yaml
-	} else if step == DocSumGaudi {
-		tmpltFile = yaml_dir + docsum_gaudi_llm_yaml
-	} else if step == Router {
-		tmpltFile = yaml_dir + gmc_router_yaml
+func lookupManifestDir(step string) string {
+	value, exist := yamlDict[step]
+	if exist {
+		return value
 	} else {
 		return ""
 	}
-	return tmpltFile
 }
 
-func reconcileResource(ctx context.Context, client client.Client, platform string, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) error {
+// func getManifestYaml(step string) string {
+// 	var tmpltFile string
+// 	//TODO add validation to rule out unexpected case like both embedding and retrieving
+// 	if step == Embedding {
+// 		tmpltFile = yaml_dir + embedding_yaml
+// 	} else if step == TeiEmbedding {
+// 		tmpltFile = yaml_dir + tei_embedding_service_yaml
+// 	} else if step == TeiEmbeddingGaudi {
+// 		tmpltFile = yaml_dir + tei_embedding_gaudi_service_yaml
+// 	} else if step == VectorDB {
+// 		tmpltFile = yaml_dir + redis_vector_db_yaml
+// 	} else if step == Retriever {
+// 		tmpltFile = yaml_dir + retriever_yaml
+// 	} else if step == Reranking {
+// 		tmpltFile = yaml_dir + reranking_yaml
+// 	} else if step == TeiReranking {
+// 		tmpltFile = yaml_dir + tei_reranking_service_yaml
+// 	} else if step == Tgi {
+// 		tmpltFile = yaml_dir + tgi_service_yaml
+// 	} else if step == TgiGaudi {
+// 		tmpltFile = yaml_dir + tgi_gaudi_service_yaml
+// 	} else if step == Llm {
+// 		tmpltFile = yaml_dir + llm_yaml
+// 	} else if step == DocSum {
+// 		tmpltFile = yaml_dir + docsum_llm_yaml
+// 	} else if step == DocSumGaudi {
+// 		tmpltFile = yaml_dir + docsum_gaudi_llm_yaml
+// 	} else if step == Router {
+// 		tmpltFile = yaml_dir + gmc_router_yaml
+// 	} else {
+// 		return ""
+// 	}
+// 	return tmpltFile
+// }
+
+func reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) error {
 	if stepCfg == nil || nodeCfg == nil {
 		return errors.New("invalid svc config")
 	}
@@ -195,7 +218,11 @@ func reconcileResource(ctx context.Context, client client.Client, platform strin
 					}
 					if keyIsSomeEndpoint(name) {
 						ds := findDownStreamService(value, stepCfg, nodeCfg)
-						value = getDsEndpoint(platform, name, graphNs, ds)
+						value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
+						// value = getDsEndpoint(platform, name, graphNs, ds)
+						if err != nil {
+							return fmt.Errorf("failed to find downstream service endpoint: %v", err)
+						}
 					}
 					itemEnvVar := corev1.EnvVar{
 						Name:  name,
@@ -240,7 +267,7 @@ func reconcileResource(ctx context.Context, client client.Client, platform strin
 }
 
 func keyIsSomeEndpoint(keyname string) bool {
-	return keyname == "TEI_EMBEDDING_ENDPOINT" || keyname == "TEI_RERANKING_ENDPOINT" || keyname == "TGI_LLM_ENDPOINT"
+	return keyname == "TEI_EMBEDDING_ENDPOINT" || keyname == "TEI_RERANKING_ENDPOINT" || keyname == "TGI_LLM_ENDPOINT" || keyname == "REDIS_URL"
 }
 
 func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) *mcv1alpha3.Step {
@@ -255,59 +282,86 @@ func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv
 	return nil
 }
 
-func getDsEndpoint(platform string, keyname string, reqNS string, ds *mcv1alpha3.Step) string {
-	if ds == nil {
-		return ""
-	}
-	var embdManifest string
-	var rerankManifest string
-	var tgiManifest string
-	var redisManifest string
-	if platform == xeon {
-		embdManifest = yaml_dir + tei_embedding_service_yaml
-		rerankManifest = yaml_dir + tei_reranking_service_yaml
-		tgiManifest = yaml_dir + tgi_service_yaml
-		redisManifest = yaml_dir + redis_vector_db_yaml
-	} else if platform == gaudi {
-		embdManifest = yaml_dir + tei_embedding_gaudi_service_yaml
-		rerankManifest = yaml_dir + tei_reranking_service_yaml
-		tgiManifest = yaml_dir + tgi_gaudi_service_yaml
-		redisManifest = yaml_dir + redis_vector_db_yaml
-	} else {
-		fmt.Printf("unexpected hardware type %s", platform)
-		return ""
+func getDownstreamSvcEndpoint(graphNs string, dsName string, stepCfg *mcv1alpha3.Step) (string, error) {
+	tmplt := lookupManifestDir(dsName)
+	if tmplt == "" {
+		return "", errors.New(fmt.Sprintf("failed to find yaml file for %s", dsName))
 	}
 
-	var svcName string
-	var port int
-	var err error
-
-	if keyname == "TEI_EMBEDDING_ENDPOINT" {
-		svcName, port, err = getServiceDetailsFromManifests(embdManifest)
-	} else if keyname == "TEI_RERANKING_ENDPOINT" {
-		svcName, port, err = getServiceDetailsFromManifests(rerankManifest)
-	} else if keyname == "TGI_LLM_ENDPOINT" {
-		svcName, port, err = getServiceDetailsFromManifests(tgiManifest)
-	} else if keyname == "REDIS_URL" {
-		svcName, port, err = getServiceDetailsFromManifests(redisManifest)
-	}
-
+	svcName, port, err := getServiceDetailsFromManifests(tmplt)
 	if err == nil {
 		//check GMC config if there is specific namespace for embedding
-		altNs, altSvcName := getNsNameFromStep(ds)
+		altNs, altSvcName := getNsNameFromStep(stepCfg)
 		if altNs == "" {
-			altNs = reqNS
+			altNs = graphNs
 		}
 		if altSvcName == "" {
 			altSvcName = svcName
 		}
-		return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
-	} else {
-		fmt.Printf("failed to get service details for %s: %v\n", embdManifest, err)
-	}
-	return ""
 
+		if dsName == VectorDB {
+			return fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port), nil
+		} else {
+			return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port), nil
+		}
+	} else {
+		return "", errors.New(fmt.Sprintf("failed to get service details for %s: %v\n", dsName, err))
+	}
 }
+
+// func getDsEndpoint(platform string, keyname string, reqNS string, ds *mcv1alpha3.Step) string {
+// 	if ds == nil {
+// 		return ""
+// 	}
+// 	var embdManifest string
+// 	var rerankManifest string
+// 	var tgiManifest string
+// 	var redisManifest string
+// 	if platform == xeon {
+// 		embdManifest = yaml_dir + tei_embedding_service_yaml
+// 		rerankManifest = yaml_dir + tei_reranking_service_yaml
+// 		tgiManifest = yaml_dir + tgi_service_yaml
+// 		redisManifest = yaml_dir + redis_vector_db_yaml
+// 	} else if platform == gaudi {
+// 		embdManifest = yaml_dir + tei_embedding_gaudi_service_yaml
+// 		rerankManifest = yaml_dir + tei_reranking_service_yaml
+// 		tgiManifest = yaml_dir + tgi_gaudi_service_yaml
+// 		redisManifest = yaml_dir + redis_vector_db_yaml
+// 	} else {
+// 		fmt.Printf("unexpected hardware type %s", platform)
+// 		return ""
+// 	}
+
+// 	var svcName string
+// 	var port int
+// 	var err error
+
+// 	if keyname == "TEI_EMBEDDING_ENDPOINT" {
+// 		svcName, port, err = getServiceDetailsFromManifests(embdManifest)
+// 	} else if keyname == "TEI_RERANKING_ENDPOINT" {
+// 		svcName, port, err = getServiceDetailsFromManifests(rerankManifest)
+// 	} else if keyname == "TGI_LLM_ENDPOINT" {
+// 		svcName, port, err = getServiceDetailsFromManifests(tgiManifest)
+// 	} else if keyname == "REDIS_URL" {
+// 		svcName, port, err = getServiceDetailsFromManifests(redisManifest)
+// 	}
+
+// 	if err == nil {
+// 		//check GMC config if there is specific namespace for embedding
+// 		altNs, altSvcName := getNsNameFromStep(ds)
+// 		if altNs == "" {
+// 			altNs = reqNS
+// 		}
+// 		if altSvcName == "" {
+// 			altSvcName = svcName
+// 		}
+// 		return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
+// 	} else {
+// 		fmt.Printf("failed to get service details for %s: %v\n", embdManifest, err)
+// 	}
+// 	return ""
+
+// }
 
 func getServiceURL(service *corev1.Service) string {
 	switch service.Spec.Type {
@@ -361,17 +415,17 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 
-	platform := xeon
-	if labelValue, exists := graph.GetLabels()[METADATA_PLATFORM]; exists {
-		platform = labelValue
-	}
+	// platform := xeon
+	// if labelValue, exists := graph.GetLabels()[METADATA_PLATFORM]; exists {
+	// 	platform = labelValue
+	// }
 
 	// TO BE DELETED
 	// this is deprecated when new manifests in merged
-	err := preProcessUserConfigmap(ctx, r.Client, graph.Namespace, platform)
-	if err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file")
-	}
+	// err := preProcessUserConfigmap(ctx, r.Client, graph.Namespace, platform)
+	// if err != nil {
+	// 	return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file")
+	// }
 
 	var totalService uint
 	var externalService uint
@@ -389,7 +443,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
 				// err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
-				err := reconcileResource(ctx, r.Client, platform, graph.Namespace, &step, &node)
+				err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.Executor.InternalService.ServiceName)
 				}
@@ -407,7 +461,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	//to start a router service
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
-	err = reconcileRouterService(ctx, r.Client, graph)
+	err := reconcileRouterService(ctx, r.Client, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
@@ -420,7 +474,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 }
 
 func getTemplateBytes(resourceType string) ([]byte, error) {
-	tmpltFile := getManifestYaml(resourceType)
+	tmpltFile := lookupManifestDir(resourceType)
 	if tmpltFile == "" {
 		return nil, errors.New("unexpected target")
 	}
@@ -524,38 +578,38 @@ func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFi
 // read the configmap file from the manifests
 // update the values of the fields in the configmap
 // add service details to the fields
-func preProcessUserConfigmap(ctx context.Context, client client.Client, ns string, hwType string) error {
-	var cfgFile string
-	// var adjustFile string
-	if hwType == xeon {
-		cfgFile = yaml_dir + "/qna_configmap_xeon.yaml"
-	} else if hwType == gaudi {
-		cfgFile = yaml_dir + "/qna_configmap_gaudi.yaml"
-	} else {
-		return fmt.Errorf("unexpected hardware type %s", hwType)
-	}
-	yamlData, err := os.ReadFile(cfgFile)
-	if err != nil {
-		return fmt.Errorf("failed to read %s : %v", cfgFile, err)
-	}
+// func preProcessUserConfigmap(ctx context.Context, client client.Client, ns string, hwType string) error {
+// 	var cfgFile string
+// 	// var adjustFile string
+// 	if hwType == xeon {
+// 		cfgFile = yaml_dir + "/qna_configmap_xeon.yaml"
+// 	} else if hwType == gaudi {
+// 		cfgFile = yaml_dir + "/qna_configmap_gaudi.yaml"
+// 	} else {
+// 		return fmt.Errorf("unexpected hardware type %s", hwType)
+// 	}
+// 	yamlData, err := os.ReadFile(cfgFile)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to read %s : %v", cfgFile, err)
+// 	}
 
-	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
-	obj := &unstructured.Unstructured{}
-	_, _, err = decUnstructured.Decode(yamlData, nil, obj)
-	if err != nil {
-		return fmt.Errorf("failed to decode configmap YAML: %v", err)
-	}
-	obj.SetNamespace(ns)
+// 	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+// 	obj := &unstructured.Unstructured{}
+// 	_, _, err = decUnstructured.Decode(yamlData, nil, obj)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to decode configmap YAML: %v", err)
+// 	}
+// 	obj.SetNamespace(ns)
 
-	err = applyResourceToK8s(ctx, client, obj)
-	if err != nil {
-		return fmt.Errorf("failed to apply the adjusted configmap: %v", err)
-	} else {
-		fmt.Printf("Success to apply the adjusted configmap\n")
-	}
+// 	err = applyResourceToK8s(ctx, client, obj)
+// 	if err != nil {
+// 		return fmt.Errorf("failed to apply the adjusted configmap: %v", err)
+// 	} else {
+// 		fmt.Printf("Success to apply the adjusted configmap\n")
+// 	}
 
-	return nil
-}
+// 	return nil
+// }
 
 func applyResourceToK8s(ctx context.Context, c client.Client, obj *unstructured.Unstructured) error {
 	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
@@ -591,7 +645,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, obj *unstructured.
 				obj.SetResourceVersion(latest.GetResourceVersion()) // Ensure we're updating the latest version
 				err = c.Update(ctx, obj, &client.UpdateOptions{})
 				if err != nil {
-					fmt.Printf("update object err: %v", err)
+					fmt.Printf("\nupdate object err: %v", err)
 					continue
 				}
 			}
