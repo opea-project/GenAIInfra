@@ -60,9 +60,9 @@ tolerations: []
 affinity: {}
 
 global:
-  http_proxy:
-  https_proxy:
-  no_proxy:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
   # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
   # comment out modeluseHostPath if you want to download the model from huggingface
   modelUseHostPath: /mnt/opea-models
