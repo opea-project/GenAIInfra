@@ -151,7 +151,7 @@ jobs:
             echo "Checking response results, make sure the output is reasonable. "
             teststatus=false
             if [[ -f $LOG_PATH/charts-${chart}.log ]] && \
-            [[ $(grep -c "Failed" $LOG_PATH/charts-${chart}.log) != 0 ]]; then
+            [[ $(grep -c "^Phase:.*Failed" $LOG_PATH/charts-${chart}.log) != 0 ]]; then
                 teststatus=false
             else
                 teststatus=true
