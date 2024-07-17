@@ -1,0 +1,25 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "llm-uservice.fullname" . }}-testpod"
+  labels:
+    {{- include "llm-uservice.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    #"helm.sh/hook-delete-policy": "hook-succeeded, hook-failure"
+spec:
+  containers:
+    - name: curl
+      image: alpine/curl
+      #image: python:3.10.14
+      command: ['sh', '-c']
+      args:
+        - |
+          curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \
+            -X POST \
+            -d '{"query":"What is Deep Learning?","max_new_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
+            -H 'Content-Type: application/json'
+  restartPolicy: Never
