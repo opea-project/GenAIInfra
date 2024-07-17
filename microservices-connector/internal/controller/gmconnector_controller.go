@@ -6,12 +6,14 @@
 package controller
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
 	"os"
 	"reflect"
 	"strings"
+	"text/template"
 	"time"
 
 	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
@@ -117,36 +119,23 @@ func getManifestYaml(step string) string {
 	return tmpltFile
 }
 
-func reconcileResource(platform string, ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router, routerConfig *mcv1alpha3.RouterConfig, retSvc *corev1.Service) error {
-	var step string
-	var svcCfg *map[string]string
-	var svc string
-	ns := graphNs
-	if stepCfg == nil && nodeCfg == nil && routerConfig != nil {
-		step = Router
-		fmt.Printf("get router config: %v\n", routerConfig)
-		svcCfg = &routerConfig.Config
-		if routerConfig.NameSpace != "" {
-			ns = routerConfig.NameSpace
-		}
-		svc = routerConfig.ServiceName
-	} else if stepCfg != nil && nodeCfg != nil && routerConfig == nil {
-		step = stepCfg.StepName
-		svcCfg = &stepCfg.InternalService.Config
-		fmt.Printf("get step %s config: %v\n", step, stepCfg)
-		if stepCfg.InternalService.NameSpace != "" {
-			ns = stepCfg.InternalService.NameSpace
-		}
-		svc = stepCfg.InternalService.ServiceName
-	} else {
-		return errors.New("unexpected resource")
+func reconcileResource(ctx context.Context, client client.Client, platform string, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) error {
+	if stepCfg == nil || nodeCfg == nil {
+		return errors.New("invalid svc config")
 	}
 
-	tmpltFile := getManifestYaml(step)
-	if tmpltFile == "" {
-		return errors.New("unexpected target")
+	fmt.Printf("get resource config: %v\n", *stepCfg)
+
+	// by default, the svc's namespace is the same as the graph
+	// unless it's specifically defined in yaml
+	ns := graphNs
+	if stepCfg.InternalService.NameSpace != "" {
+		ns = stepCfg.InternalService.NameSpace
 	}
-	yamlFile, err := os.ReadFile(tmpltFile)
+	svc := stepCfg.InternalService.ServiceName
+	svcCfg := &stepCfg.InternalService.Config
+
+	yamlFile, err := getTemplateBytes(stepCfg.StepName)
 	if err != nil {
 		return fmt.Errorf("failed to read YAML file: %v", err)
 	}
@@ -165,11 +154,13 @@ func reconcileResource(platform string, ctx context.Context, client client.Clien
 		if err != nil {
 			return fmt.Errorf("failed to decode YAML: %v", err)
 		}
-		// Set the namespace if it's specified
+
+		// Set the namespace according to user defined value
 		if ns != "" {
 			obj.SetNamespace(ns)
 		}
 
+		// set the service name according to user defined value, and related selectors/labels
 		if obj.GetKind() == Service && svc != "" {
 			service_obj := &corev1.Service{}
 			err = scheme.Scheme.Convert(obj, service_obj, nil)
@@ -195,6 +186,7 @@ func reconcileResource(platform string, ctx context.Context, client client.Clien
 				deployment_obj.Spec.Template.Labels["app"] = svc
 			}
 
+			// append the user defined ENVs
 			var newEnvVars []corev1.EnvVar
 			if svcCfg != nil {
 				for name, value := range *svcCfg {
@@ -219,9 +211,6 @@ func reconcileResource(platform string, ctx context.Context, client client.Clien
 						newEnvVars...)
 				}
 			}
-			if step == Router && svcCfg != nil && (*svcCfg)["nodes"] != "" {
-				deployment_obj.Spec.Template.Spec.Containers[0].Args = []string{"graph-json", (*svcCfg)["nodes"]}
-			}
 
 			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 			if err != nil {
@@ -229,18 +218,21 @@ func reconcileResource(platform string, ctx context.Context, client client.Clien
 			}
 		}
 
-		createdObj, err := applyResourceToK8s(ctx, client, ns, obj)
+		err = applyResourceToK8s(ctx, client, obj)
 		if err != nil {
 			return fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {
-			fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
+			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
 
 			// return the service obj to get the service URL from it
-			if retSvc != nil && createdObj.GetKind() == Service {
-				err = scheme.Scheme.Convert(createdObj, retSvc, nil)
+			if obj.GetKind() == Service {
+				service := &corev1.Service{}
+				err = scheme.Scheme.Convert(obj, service, nil)
 				if err != nil {
 					return fmt.Errorf("failed to save service: %v", err)
 				}
+				stepCfg.ServiceURL = getServiceURL(service) + stepCfg.InternalService.Config["endpoint"]
+				fmt.Printf("the service URL is: %s\n", stepCfg.ServiceURL)
 			}
 		}
 	}
@@ -376,7 +368,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	// TO BE DELETED
 	// this is deprecated when new manifests in merged
-	err := preProcessUserConfigmap(ctx, r.Client, req.NamespacedName.Namespace, platform)
+	err := preProcessUserConfigmap(ctx, r.Client, graph.Namespace, platform)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file")
 	}
@@ -396,15 +388,12 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if step.Executor.ExternalService == "" {
 				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
-				service := &corev1.Service{}
 				// err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
-				err := reconcileResource(platform, ctx, r.Client, graph.Namespace, &step, &node, nil, service)
+				err := reconcileResource(ctx, r.Client, platform, graph.Namespace, &step, &node)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.Executor.InternalService.ServiceName)
 				}
 				successService += 1
-				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
-				fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
 
 			} else {
 				fmt.Println("external service is found", "name", step.ExternalService)
@@ -415,33 +404,119 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		fmt.Println()
 	}
 
-	//to start a router controller
+	//to start a router service
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
-	routerService := &corev1.Service{}
-	jsonBytes, err := json.Marshal(graph)
-	if err != nil {
-		// handle error
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
-	}
-	jsonString := string(jsonBytes)
-	if graph.Spec.RouterConfig.Config == nil {
-		graph.Spec.RouterConfig.Config = make(map[string]string)
-	}
-	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-	err = reconcileResource(platform, ctx, r.Client, graph.Namespace, nil, nil, &graph.Spec.RouterConfig, routerService)
+	err = reconcileRouterService(ctx, r.Client, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
-
-	graph.Status.AccessURL = getServiceURL(routerService)
-	fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
 
 	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
 	if err = r.Status().Update(context.TODO(), graph); err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
 	}
 	return ctrl.Result{}, nil
+}
+
+func getTemplateBytes(resourceType string) ([]byte, error) {
+	tmpltFile := getManifestYaml(resourceType)
+	if tmpltFile == "" {
+		return nil, errors.New("unexpected target")
+	}
+	yamlBytes, err := os.ReadFile(tmpltFile)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read YAML file: %v", err)
+	}
+	return yamlBytes, nil
+}
+
+func reconcileRouterService(ctx context.Context, client client.Client, graph *mcv1alpha3.GMConnector) error {
+	routerService := &corev1.Service{}
+	jsonBytes, err := json.Marshal(graph)
+	if err != nil {
+		// handle error
+		return errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
+	}
+	jsonString := string(jsonBytes)
+	if graph.Spec.RouterConfig.Config == nil {
+		graph.Spec.RouterConfig.Config = make(map[string]string)
+	}
+	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
+
+	templateBytes, err := getTemplateBytes(Router)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to get template bytes for %s", Router)
+	}
+	var resources []string
+	appliedCfg, err := applyRouterConfigToTemplates(Router, &graph.Spec.RouterConfig.Config, templateBytes)
+	if err != nil {
+		return fmt.Errorf("failed to apply user config: %v", err)
+	}
+
+	resources = strings.Split(appliedCfg, "---")
+	for _, res := range resources {
+		if res == "" || !strings.Contains(res, "kind:") {
+			continue
+		}
+		decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+		obj := &unstructured.Unstructured{}
+		_, _, err := decUnstructured.Decode([]byte(res), nil, obj)
+		if err != nil {
+			return fmt.Errorf("failed to decode YAML: %v", err)
+		}
+
+		if graph.Spec.RouterConfig.NameSpace != "" {
+			obj.SetNamespace(graph.Spec.RouterConfig.NameSpace)
+		} else {
+			obj.SetNamespace(graph.Namespace)
+		}
+
+		err = applyResourceToK8s(ctx, client, obj)
+		if err != nil {
+			return fmt.Errorf("failed to reconcile resource: %v", err)
+		} else {
+			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
+		}
+		if obj.GetKind() == Service {
+			err = scheme.Scheme.Convert(obj, routerService, nil)
+			if err != nil {
+				return fmt.Errorf("failed to save router service: %v", err)
+			}
+			graph.Status.AccessURL = getServiceURL(routerService)
+			fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
+		}
+	}
+	return nil
+}
+
+func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
+	var userDefinedCfg RouterCfg
+	if step == "router" {
+		userDefinedCfg = RouterCfg{
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
+			GRAPH_JSON: (*svcCfg)["nodes"]}
+		fmt.Printf("user config %v\n", userDefinedCfg)
+
+		tmpl, err := template.New("yamlTemplate").Parse(string(yamlFile))
+		if err != nil {
+			return string(yamlFile), fmt.Errorf("error parsing template: %v", err)
+		}
+
+		var appliedCfg bytes.Buffer
+		err = tmpl.Execute(&appliedCfg, userDefinedCfg)
+		if err != nil {
+			return string(yamlFile), fmt.Errorf("error executing template: %v", err)
+		} else {
+			// fmt.Printf("applied config %s\n", appliedCfg.String())
+			return appliedCfg.String(), nil
+		}
+	} else {
+		return string(yamlFile), nil
+	}
+
 }
 
 // TO BE DELETED
@@ -470,8 +545,9 @@ func preProcessUserConfigmap(ctx context.Context, client client.Client, ns strin
 	if err != nil {
 		return fmt.Errorf("failed to decode configmap YAML: %v", err)
 	}
+	obj.SetNamespace(ns)
 
-	_, err = applyResourceToK8s(ctx, client, ns, obj)
+	err = applyResourceToK8s(ctx, client, obj)
 	if err != nil {
 		return fmt.Errorf("failed to apply the adjusted configmap: %v", err)
 	} else {
@@ -481,13 +557,7 @@ func preProcessUserConfigmap(ctx context.Context, client client.Client, ns strin
 	return nil
 }
 
-func applyResourceToK8s(ctx context.Context, c client.Client, ns string, obj *unstructured.Unstructured) (*unstructured.Unstructured, error) {
-	// Set the namespace if it's specified
-	// TO BE DELETED: this is only for <preProcessUserConfigmap>, when the new manifest is merged, this can be removed
-	if ns != "" {
-		obj.SetNamespace(ns)
-	}
-
+func applyResourceToK8s(ctx context.Context, c client.Client, obj *unstructured.Unstructured) error {
 	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
 	// This might involve trying an Update and, if it fails because the object doesn't exist, falling back to Create.
 	// Retry updating the resource in case of transient errors.
@@ -496,9 +566,9 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, obj *un
 	for {
 		select {
 		case <-ctx.Done():
-			return nil, fmt.Errorf("context cancelled")
+			return fmt.Errorf("context cancelled")
 		case <-timeout:
-			return nil, fmt.Errorf("timed out while trying to update or create resource")
+			return fmt.Errorf("timed out while trying to update or create resource")
 		case <-tick.C:
 			// Get the latest version of the object
 			latest := &unstructured.Unstructured{}
@@ -509,7 +579,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, obj *un
 					// If the object doesn't exist, create it
 					err = c.Create(ctx, obj, &client.CreateOptions{})
 					if err != nil {
-						return nil, fmt.Errorf("failed to create resource: %v", err)
+						return fmt.Errorf("failed to create resource: %v", err)
 					}
 				} else {
 					// If there was another error, continue
@@ -527,7 +597,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, obj *un
 			}
 
 			// If we reach this point, the operation was successful.
-			return obj, nil
+			return nil
 		}
 	}
 }
