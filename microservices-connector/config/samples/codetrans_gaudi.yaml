@@ -24,6 +24,7 @@ spec:
           serviceName: codetrans-service
           config:
             endpoint: /v1/chat/completions
+            TGI_LLM_ENDPOINT: TgiGaudi
       - name: TgiGaudi
         internalService:
           serviceName: tgi-gaudi-svc
