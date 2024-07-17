@@ -1,0 +1,101 @@
+---
+# Source: redis-vector-db/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-vector-db
+  labels:
+    helm.sh/chart: redis-vector-db-0.8.0
+    app.kubernetes.io/name: redis-vector-db
+    app.kubernetes.io/instance: redis-vector-db
+    app.kubernetes.io/version: "7.2.0-v9"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+      - port: 6379
+        targetPort: 6379
+        protocol: TCP
+        name: redis-service
+      - port: 8001
+        targetPort: 8001
+        protocol: TCP
+        name: redis-insight
+  selector:
+    app.kubernetes.io/name: redis-vector-db
+    app.kubernetes.io/instance: redis-vector-db
+---
+# Source: redis-vector-db/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis-vector-db
+  labels:
+    helm.sh/chart: redis-vector-db-0.8.0
+    app.kubernetes.io/name: redis-vector-db
+    app.kubernetes.io/instance: redis-vector-db
+    app.kubernetes.io/version: "7.2.0-v9"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis-vector-db
+      app.kubernetes.io/instance: redis-vector-db
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: redis-vector-db
+        app.kubernetes.io/instance: redis-vector-db
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: redis-vector-db
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "redis/redis-stack:7.2.0-v9"
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - mountPath: /data
+              name: data-volume
+            - mountPath: /redisinsight
+              name: redisinsight-volume
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: redis-service
+              containerPort: 6379
+              protocol: TCP
+            - name: redis-insight
+              containerPort: 8001
+              protocol: TCP
+          startupProbe:
+            tcpSocket:
+              port: 6379 # Probe the Redis port
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
+          resources:
+            {}
+      volumes:
+        - name: data-volume
+          emptyDir: {}
+        - name: redisinsight-volume
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
