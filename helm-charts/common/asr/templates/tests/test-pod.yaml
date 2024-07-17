@@ -18,7 +18,7 @@ spec:
       command: ['sh', '-c']
       args:
         - |
-          curl http://{{ include "asr.fullname" . }}:{{ .Values.service.port }}/v1/audio/transcriptions \
+          curl -sS --fail-with-body http://{{ include "asr.fullname" . }}:{{ .Values.service.port }}/v1/audio/transcriptions \
             -XPOST \
             -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"}' \
             -H 'Content-Type: application/json'
