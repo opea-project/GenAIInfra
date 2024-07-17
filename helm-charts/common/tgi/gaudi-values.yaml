@@ -52,9 +52,9 @@ LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
 # LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
 
 global:
-  http_proxy:
-  https_proxy:
-  no_proxy:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
   # comment out modeluseHostPath if you want to download the model from huggingface

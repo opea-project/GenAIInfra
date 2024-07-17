@@ -20,16 +20,31 @@ By default, the tgi service will downloading the "bigscience/bloom-560m" which i
 
 If you already cached the model locally, you can pass it to container like this example:
 
-MODELDIR=/home/ubuntu/hfmodels
+MODELDIR=/mnt/opea-models
 
 MODELNAME="/data/models--bigscience--bloom-560m"
 
+## Verify
+
+To verify the installation, run the command `kubectl get pod` to make sure all pods are runinng.
+
+Then run the command `kubectl port-forward svc/tgi 2080:80` to expose the tgi service for access.
+
+Open another terminal and run the following command to verify the service if working:
+
+```console
+curl http://localhost:2080/generate \
+    -X POST \
+    -d '{"inputs":"What is Deep Learning?","parameters":{"max_new_tokens":17, "do_sample": true}}' \
+    -H 'Content-Type: application/json'
+```
+
 ## Values
 
-| Key                     | Type   | Default                                           | Description                                                                                                                                                  |
-| ----------------------- | ------ | ------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| LLM_MODEL_ID            | string | `"bigscience/bloom-560m"`                         | Models id from https://huggingface.co/, or predownloaded model directory                                                                                     |
-| port                    | string | `2080`                                            | Hugging Face Text Generation Inference service port                                                                                                          |
-| global.modelUseHostPath | string | `"/mnt/opea-models"`                              | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
-| image.repository        | string | `"ghcr.io/huggingface/text-generation-inference"` |                                                                                                                                                              |
-| image.tag               | string | `"1.4"`                                           |                                                                                                                                                              |
+| Key                             | Type   | Default                                           | Description                                                                                                                                                                                                           |
+| ------------------------------- | ------ | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LLM_MODEL_ID                    | string | `"bigscience/bloom-560m"`                         | Models id from https://huggingface.co/, or predownloaded model directory                                                                                                                                              |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here`              | Hugging Face API token                                                                                                                                                                                                |
+| global.modelUseHostPath         | string | `"/mnt/opea-models"`                              | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
+| image.repository                | string | `"ghcr.io/huggingface/text-generation-inference"` |                                                                                                                                                                                                                       |
+| image.tag                       | string | `"1.4"`                                           |                                                                                                                                                                                                                       |

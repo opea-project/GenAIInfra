@@ -1,19 +1,20 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for whisper.
+# Default values for tei.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
 
-ASR_MODEL_PATH: "openai/whisper-small"
-
+port: 2081
+shmSize: 1Gi
+EMBEDDING_MODEL_ID: "BAAI/bge-base-en-v1.5"
 image:
-  repository: opea/whisper:latest
+  repository: opea/tei-gaudi
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: latest
 
 imagePullSecrets: []
 nameOverride: ""
@@ -25,7 +26,7 @@ podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext:
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -37,10 +38,10 @@ securityContext:
 
 service:
   type: ClusterIP
-  # The default port for whisper service is 7066
-  port: 7066
 
-resources: {}
+resources:
+  limits:
+    habana.ai/gaudi: 1
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -62,4 +63,6 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
+  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
+  # comment out modeluseHostPath if you want to download the model from huggingface
   modelUseHostPath: /mnt/opea-models
