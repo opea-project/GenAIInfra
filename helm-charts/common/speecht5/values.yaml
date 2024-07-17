@@ -7,8 +7,8 @@
 
 replicaCount: 1
 
-  # TTS_MODEL_PATH: "microsoft/speecht5_tts"
-  # VOCODE_MODEL: "microsoft/speecht5_hifigan"
+TTS_MODEL_PATH: "microsoft/speecht5_tts"
+#VOCODE_MODEL: "microsoft/speecht5_hifigan"
 
 image:
   repository: opea/speecht5:latest
@@ -60,7 +60,7 @@ tolerations: []
 affinity: {}
 
 global:
-  http_proxy:
-  https_proxy:
-  no_proxy:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
   modelUseHostPath: /mnt/opea-models
