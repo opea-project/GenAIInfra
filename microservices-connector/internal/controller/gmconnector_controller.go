@@ -142,13 +142,14 @@ func lookupManifestDir(step string) string {
 // 	return tmpltFile
 // }
 
-func reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) error {
+func reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) ([]*unstructured.Unstructured, error) {
 	if stepCfg == nil || nodeCfg == nil {
-		return errors.New("invalid svc config")
+		return nil, errors.New("invalid svc config")
 	}
 
 	fmt.Printf("get resource config: %v\n", *stepCfg)
 
+	var retObjs []*unstructured.Unstructured
 	// by default, the svc's namespace is the same as the graph
 	// unless it's specifically defined in yaml
 	ns := graphNs
@@ -160,7 +161,7 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 
 	yamlFile, err := getTemplateBytes(stepCfg.StepName)
 	if err != nil {
-		return fmt.Errorf("failed to read YAML file: %v", err)
+		return nil, fmt.Errorf("failed to read YAML file: %v", err)
 	}
 
 	resources := strings.Split(string(yamlFile), "---")
@@ -175,7 +176,7 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 		obj := &unstructured.Unstructured{}
 		_, _, err := decUnstructured.Decode([]byte(res), nil, obj)
 		if err != nil {
-			return fmt.Errorf("failed to decode YAML: %v", err)
+			return nil, fmt.Errorf("failed to decode YAML: %v", err)
 		}
 
 		// Set the namespace according to user defined value
@@ -188,19 +189,19 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 			service_obj := &corev1.Service{}
 			err = scheme.Scheme.Convert(obj, service_obj, nil)
 			if err != nil {
-				return fmt.Errorf("failed to convert unstructured to service: %v", err)
+				return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
 			}
 			service_obj.SetName(svc)
 			service_obj.Spec.Selector["app"] = svc
 			err = scheme.Scheme.Convert(service_obj, obj, nil)
 			if err != nil {
-				return fmt.Errorf("failed to convert unstructured to service: %v", err)
+				return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
 			}
 		} else if obj.GetKind() == Deployment {
 			deployment_obj := &appsv1.Deployment{}
 			err = scheme.Scheme.Convert(obj, deployment_obj, nil)
 			if err != nil {
-				return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+				return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
 			}
 			if svc != "" {
 				deployment_obj.SetName(svc + dplymtSubfix)
@@ -221,7 +222,7 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 						value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
 						// value = getDsEndpoint(platform, name, graphNs, ds)
 						if err != nil {
-							return fmt.Errorf("failed to find downstream service endpoint: %v", err)
+							return nil, fmt.Errorf("failed to find downstream service endpoint: %v", err)
 						}
 					}
 					itemEnvVar := corev1.EnvVar{
@@ -241,29 +242,19 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 
 			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 			if err != nil {
-				return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+				return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
 			}
 		}
 
 		err = applyResourceToK8s(ctx, client, obj)
 		if err != nil {
-			return fmt.Errorf("failed to reconcile resource: %v", err)
+			return nil, fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {
 			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
-
-			// return the service obj to get the service URL from it
-			if obj.GetKind() == Service {
-				service := &corev1.Service{}
-				err = scheme.Scheme.Convert(obj, service, nil)
-				if err != nil {
-					return fmt.Errorf("failed to save service: %v", err)
-				}
-				stepCfg.ServiceURL = getServiceURL(service) + stepCfg.InternalService.Config["endpoint"]
-				fmt.Printf("the service URL is: %s\n", stepCfg.ServiceURL)
-			}
+			retObjs = append(retObjs, obj)
 		}
 	}
-	return nil
+	return retObjs, nil
 }
 
 func keyIsSomeEndpoint(keyname string) bool {
@@ -446,12 +437,24 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
 				// err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
-				err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node)
+				objs, err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.Executor.InternalService.ServiceName)
 				}
-				successService += 1
-
+				if len(objs) != 0 {
+					for _, obj := range objs {
+						if obj.GetKind() == Service {
+							service := &corev1.Service{}
+							err = scheme.Scheme.Convert(obj, service, nil)
+							if err != nil {
+								return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service")
+							}
+							graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.InternalService.Config["endpoint"]
+							fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
+							successService += 1
+						}
+					}
+				}
 			} else {
 				fmt.Println("external service is found", "name", step.ExternalService)
 				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = step.ExternalService
