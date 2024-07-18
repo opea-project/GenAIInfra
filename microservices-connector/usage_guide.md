@@ -67,3 +67,6 @@ kubectl get deployment tgi-svc-deployment -n chatqa -o jsonpath="{.spec.template
 ```bash
 kubectl exec "$CLIENT_POD" -n chatqa -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json'
 ```
+
+## Use GMC and Istio to compose an OPEA Pipeline with authentication and authorization enabled
+The critical steps of authentication and authorization are vital to maintaining the integrity and safety of our GenAI workload. Please check the [readme](config/authN-authZ/README.md) file for more details.
