@@ -35,6 +35,7 @@ spec:
           config:
             endpoint: /v1/retrieval
             REDIS_URL: VectorDB
+            TEI_EMBEDDING_ENDPOINT: TeiEmbedding
       - name: VectorDB
         internalService:
           serviceName: redis-vector-db

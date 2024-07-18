@@ -283,6 +283,9 @@ func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv
 }
 
 func getDownstreamSvcEndpoint(graphNs string, dsName string, stepCfg *mcv1alpha3.Step) (string, error) {
+	if stepCfg == nil {
+		return "", errors.New(fmt.Sprintf("empty stepCfg for %s", dsName))
+	}
 	tmplt := lookupManifestDir(dsName)
 	if tmplt == "" {
 		return "", errors.New(fmt.Sprintf("failed to find yaml file for %s", dsName))
