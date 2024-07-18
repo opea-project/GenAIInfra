@@ -1,4 +1,5 @@
 # Use GMC and Istio to compose an OPEA Pipeline with authentication and authorization enabled
+
 Authentication and authorization are essential measures that ensure the secure operation of our GenAI workload. Currently we provide two options to implement the task : via bearer JWT token and via keycloak.
 And here we use the chatQnA pipeline as an example.
 
