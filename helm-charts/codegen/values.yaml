@@ -37,8 +37,7 @@ llm-uservice:
     port: 9000
 # To override values in subchart tgi
 tgi:
-  LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
-  # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
+  LLM_MODEL_ID: meta-llama/CodeLlama-7b-hf
 
 global:
   http_proxy:

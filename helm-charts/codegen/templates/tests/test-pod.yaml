@@ -1,0 +1,24 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "codegen.fullname" . }}-testpod"
+  labels:
+    {{- include "codegen.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    #"helm.sh/hook-delete-policy": "hook-succeeded, hook-failure"
+spec:
+  containers:
+    - name: curl
+      image: alpine/curl
+      #image: python:3.10.14
+      command: ['sh', '-c']
+      args:
+        - |
+          curl http://{{ include "codegen.fullname" . }}:{{ .Values.service.port }}/v1/codegen -sS --fail-with-body \
+            -d '{"messages": "def print_hello_world():"}' \
+            -H 'Content-Type: application/json'
+  restartPolicy: Never
