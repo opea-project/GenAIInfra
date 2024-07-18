@@ -29,13 +29,22 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+# wait for issue https://github.com/opea-project/GenAIExamples/issues/426 to be resolved
+#tei:
+#  image:
+#    repository: opea/tei-gaudi
+#    tag: "latest"
+#  resources:
+#    limits:
+#      habana.ai/gaudi: 1
+
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
-    tag: "1.2.1"
+    tag: "2.0.1"
   resources:
     limits:
       habana.ai/gaudi: 1
