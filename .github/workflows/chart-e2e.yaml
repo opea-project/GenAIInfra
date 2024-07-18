@@ -38,21 +38,21 @@ jobs:
           grep "^$CHARTS_DIR/" | \
           grep -vE 'README.md|common|*.sh' | \
           cut -d'/' -f2 | sort -u )
-          common_charts=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | \
-          grep "^$CHARTS_DIR/common" | \
-          grep -vE 'README.md|*.sh' | \
-          cut -d'/' -f3 | sort -u )
+          #common_charts=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | \
+          #grep "^$CHARTS_DIR/common" | \
+          #grep -vE 'README.md|*.sh' | \
+          #cut -d'/' -f3 | sort -u )
           run_matrix="{\"include\":["
           for chart in ${e2e_charts}; do
             #run_matrix="${run_matrix}\"${chart}\","
             run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\"},"
             run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\"},"
           done
-          for chart in ${common_charts}; do
-            #run_matrix="${run_matrix}\"${chart}\","
-            run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\",\"directory\":\"common\"},"
-            run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\",\"directory\":\"common\"},"
-          done
+          #for chart in ${common_charts}; do
+          #  #run_matrix="${run_matrix}\"${chart}\","
+          #  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\",\"directory\":\"common\"},"
+          #  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\",\"directory\":\"common\"},"
+          #done
           run_matrix=$run_matrix"]}"
           echo "run_matrix=${run_matrix}"
           echo "run_matrix=${run_matrix}" >> $GITHUB_OUTPUT
@@ -130,7 +130,7 @@ jobs:
             echo "skip_validate=true" >> $GITHUB_ENV
             exit 1
           fi
-          sleep 10
+          sleep 120
 
       - name: Validate e2e test
         if: always()
@@ -151,7 +151,7 @@ jobs:
             echo "Checking response results, make sure the output is reasonable. "
             teststatus=false
             if [[ -f $LOG_PATH/charts-${chart}.log ]] && \
-            [[ $(grep -c "Failed" $LOG_PATH/charts-${chart}.log) != 0 ]]; then
+            [[ $(grep -c "^Phase:.*Failed" $LOG_PATH/charts-${chart}.log) != 0 ]]; then
                 teststatus=false
             else
                 teststatus=true

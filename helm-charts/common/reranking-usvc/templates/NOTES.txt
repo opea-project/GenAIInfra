@@ -1,7 +1,0 @@
-1. Get the application IP or URL by running these commands:
-  export reranking_uservice_svc_ip=$(kubectl get svc --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "reranking-usvc.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].spec.clusterIP}") && echo ${reranking_uservice_svc_ip}
-2.   Use this command to verify tei service:
-  curl ${reranking_uservice_svc_ip}:{{ .Values.service.port }}/v1/rerankings\
-  -X POST \
-  -d '{"initial_query":"What is Deep Learning?", "retrieved_docs": [{"text":"Deep Learning is not..."}, {"text":"Deep learning is..."}]}' \
-  -H 'Content-Type: application/json'

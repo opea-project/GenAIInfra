@@ -13,7 +13,7 @@ image:
   repository: ghcr.io/huggingface/text-generation-inference
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.4"
+  tag: "2.1.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -56,8 +56,7 @@ tolerations: []
 
 affinity: {}
 
-LLM_MODEL_ID: bigscience/bloom-560m
-# LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
+LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 global:
   http_proxy: ""

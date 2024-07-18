@@ -8,3 +8,8 @@ type: application
 version: 0.8.0
 # The asr microservice server version
 appVersion: "1.0.0"
+dependencies:
+  - name: whisper
+    version: 0.8.0
+    repository: file://../whisper
+    condition: autodependency.enabled

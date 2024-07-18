@@ -5,6 +5,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+autodependency:
+  enabled: false
+
 replicaCount: 1
 
 ASR_ENDPOINT: ""

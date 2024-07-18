@@ -11,10 +11,10 @@ metadata:
     helm.sh/chart: tgi-0.8.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
-    app.kubernetes.io/version: "1.4"
+    app.kubernetes.io/version: "2.1.0"
     app.kubernetes.io/managed-by: Helm
 data:
-  MODEL_ID: "ise-uiuc/Magicoder-S-DS-6.7B"
+  MODEL_ID: "Intel/neural-chat-7b-v3-3"
   PORT: "2080"
   HUGGING_FACE_HUB_TOKEN: "insert-your-huggingface-token-here"
   HF_TOKEN: "insert-your-huggingface-token-here"
@@ -40,7 +40,7 @@ metadata:
     helm.sh/chart: tgi-0.8.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
-    app.kubernetes.io/version: "1.4"
+    app.kubernetes.io/version: "2.1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -65,7 +65,7 @@ metadata:
     helm.sh/chart: tgi-0.8.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
-    app.kubernetes.io/version: "1.4"
+    app.kubernetes.io/version: "2.1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -91,7 +91,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "ghcr.io/huggingface/tgi-gaudi:1.2.1"
+          image: "ghcr.io/huggingface/tgi-gaudi:2.0.1"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /data

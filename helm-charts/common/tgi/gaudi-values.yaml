@@ -13,7 +13,7 @@ image:
   repository: ghcr.io/huggingface/tgi-gaudi
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "1.2.1"
+  tag: "2.0.1"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -48,8 +48,7 @@ tolerations: []
 
 affinity: {}
 
-LLM_MODEL_ID: ise-uiuc/Magicoder-S-DS-6.7B
-# LLM_MODEL_ID: /data/Magicoder-S-DS-6.7B
+LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 global:
   http_proxy: ""
