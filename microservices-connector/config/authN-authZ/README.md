@@ -11,8 +11,20 @@ Before composing an OPEA pipeline with authN & authZ using GMC, user need to ins
 
 ```sh
 kubectl create ns chatqa
-kubectl label ns chatqa istio-injection=enabled
 kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
+
+# patch the router deployment to enable istio sidecar injection
+kubectl patch deployment -n chatqa router-service-deployment  --patch '{
+  "spec": {
+    "template": {
+      "metadata": {
+        "labels": {
+          "sidecar.istio.io/inject": "true"
+        }
+      }
+    }
+  }
+}'
 ```
 
 ## Perform authentication and authorization via bearer JWT tokens
@@ -58,6 +70,9 @@ kubectl create deployment client-test -n chatqa --image=python:3.8.13 -- sleep i
 
 export CLIENT_POD=$(kubectl get pod -n chatqa -l app=client-test -o jsonpath={.items..metadata.name})
 export accessUrl=$(kubectl get gmc -n chatqa -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+
+# try without token. Shall get response: "RBAC: access denied 403"
+kubectl exec -it -n chatqa $CLIENT_POD -- curl -X POST $accessUrl -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -sS -H 'Content-Type: application/json' -w " %{http_code}\n"
 
 # try with an invalid token. Shall get response: "RBAC: access denied 403"
 kubectl exec -it -n chatqa $CLIENT_POD -- curl -X POST $accessUrl -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -sS -H 'Authorization: Bearer $TOKEN1' -H 'Content-Type: application/json' -w " %{http_code}\n"
