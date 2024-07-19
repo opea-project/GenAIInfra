@@ -266,7 +266,7 @@ func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv
 		return nil
 	}
 	for _, otherStep := range nodeCfg.Steps {
-		if otherStep.StepName == dsName && otherStep.InternalService.IsDownstreamService {
+		if otherStep.InternalService.ServiceName == dsName && otherStep.InternalService.IsDownstreamService {
 			return &otherStep
 		}
 	}

@@ -23,7 +23,7 @@ spec:
           serviceName: embedding-svc
           config:
             endpoint: /v1/embeddings
-            TEI_EMBEDDING_ENDPOINT: TeiEmbedding
+            TEI_EMBEDDING_ENDPOINT: tei-embedding-svc
       - name: TeiEmbedding
         internalService:
           serviceName: tei-embedding-svc
@@ -35,7 +35,7 @@ spec:
           config:
             endpoint: /v1/retrieval
             REDIS_URL: VectorDB
-            TEI_EMBEDDING_ENDPOINT: TeiEmbedding
+            TEI_EMBEDDING_ENDPOINT: redis-vector-db
       - name: VectorDB
         internalService:
           serviceName: redis-vector-db
@@ -46,7 +46,7 @@ spec:
           serviceName: reranking-svc
           config:
             endpoint: /v1/reranking
-            TEI_RERANKING_ENDPOINT: TeiReranking
+            TEI_RERANKING_ENDPOINT: tei-reranking-svc
       - name: TeiReranking
         internalService:
           serviceName: tei-reranking-svc
@@ -59,7 +59,7 @@ spec:
           serviceName: llm-svc
           config:
             endpoint: /v1/chat/completions
-            TGI_LLM_ENDPOINT: Tgi
+            TGI_LLM_ENDPOINT: tgi-service-m
       - name: Tgi
         internalService:
           serviceName: tgi-service-m

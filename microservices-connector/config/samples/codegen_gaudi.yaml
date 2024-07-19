@@ -24,7 +24,7 @@ spec:
           serviceName: llm-service
           config:
             endpoint: /v1/chat/completions
-            TGI_LLM_ENDPOINT: TgiGaudi
+            TGI_LLM_ENDPOINT: tgi-gaudi-svc
       - name: TgiGaudi
         internalService:
           serviceName: tgi-gaudi-svc

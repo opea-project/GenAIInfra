@@ -24,7 +24,7 @@ spec:
           serviceName: codetrans-service
           config:
             endpoint: /v1/chat/completions
-            TGI_LLM_ENDPOINT: Tgi
+            TGI_LLM_ENDPOINT: tgi-service
       - name: Tgi
         internalService:
           serviceName: tgi-service
