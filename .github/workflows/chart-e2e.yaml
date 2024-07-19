@@ -112,6 +112,7 @@ jobs:
           helm-charts/update_dependency.sh && helm dependency update helm-charts/${{ matrix.directory }}/${{ matrix.example }}
           value_file="values.yaml"
           if [ "${{ matrix.hardware }}" == "gaudi" ]; then
+            EXTRAPARAM="--set tgi.image.tag=1.2.1"
             if [ -f helm-charts/${{ matrix.directory }}/${{ matrix.example }}/gaudi-values.yaml ]; then
               value_file="gaudi-values.yaml"
             else
@@ -123,7 +124,7 @@ jobs:
           fi
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
-              --set autodependency.enabled=true \
+              --set autodependency.enabled=true ${EXTRAPARAM} \
               --values $CHARTS_DIR/${{ matrix.directory }}/${{ matrix.example }}/${value_file} \
               $RELEASE_NAME $CHARTS_DIR/${{ matrix.directory }}/${{ matrix.example }} ; then
             echo "Failed to install chart ${{ matrix.example }}"
