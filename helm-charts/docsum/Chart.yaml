@@ -1,0 +1,16 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: docsum
+description: The Helm chart to deploy DocSum
+type: application
+dependencies:
+  - name: tgi
+    version: 0.8.0
+    repository: "file://../common/tgi"
+  - name: llm-uservice
+    version: 0.8.0
+    repository: "file://../common/llm-uservice"
+version: 0.8.0
+appVersion: "1.0.0"
