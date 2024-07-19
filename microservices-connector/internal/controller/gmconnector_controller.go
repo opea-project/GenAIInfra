@@ -51,6 +51,7 @@ const (
 	Router                           = "router"
 	xeon                             = "xeon"
 	gaudi                            = "gaudi"
+	WebRetriever                     = "WebRetriever"
 	tei_reranking_service_yaml       = "/tei_reranking_service.yaml"
 	embedding_yaml                   = "/embedding.yaml"
 	tei_embedding_service_yaml       = "/tei_embedding_service.yaml"
@@ -83,6 +84,7 @@ var yamlDict = map[string]string{TeiEmbedding: yaml_dir + "/tei.yaml",
 	Llm:               yaml_dir + "/llm-uservice.yaml",
 	DocSum:            yaml_dir + "/docsum-llm-uservice.yaml",
 	Router:            yaml_dir + "/gmc-router.yaml",
+	WebRetriever:      yaml_dir + "/web-retriever.yaml",
 }
 
 // GMConnectorReconciler reconciles a GMConnector object
