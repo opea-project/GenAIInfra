@@ -2,24 +2,41 @@
 
 Helm chart for deploying asr microservice.
 
-Web retriever depends on whisper, you should set ASR_ENDPOINT endpoints before start.
+asr depends on whisper, you should set ASR_ENDPOINT endpoints before start.
 
-## Installing the Chart
+## (Option1): Installing the chart separately:
 
-To install the chart, run the following:
+First, you need to install the whisper chart, please refer to the [whisper](../whisper) chart for more information.
+
+After you've deployted the whisper chart successfully, please run `kubectl get svc` to get the whisper service endpoint, i.e `http://whisper:7066`.
+
+To install the asr chart, run the following:
 
 ```console
+cd GenAIInfra/helm-charts/common/asr
 export ASR_ENDPOINT="http://whisper:7066"
-helm install asr asr --set ASR_ENDPOINT=${ASR_ENDPOINT}
+helm dependency update
+helm install asr . --set ASR_ENDPOINT=${ASR_ENDPOINT}
+```
+
+## (Option2): Installing the chart with dependencies automatically:
+
+```console
+cd GenAIInfra/helm-charts/common/asr
+helm dependency update
+helm install asr . --set autodependency.enabled=true
 ```
 
 ## Verify
 
-Use port-forward to access it from localhost.
+To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
+
+Then run the command `kubectl port-forward svc/asr 9099:9099` to expose the asr service for access.
+
+Open another terminal and run the following command to verify the service if working:
 
 ```console
-kubectl port-forward service/asr 1234:9099 &
-curl http://localhost:1234/v1/audio/transcriptions \
+curl http://localhost:9099/v1/audio/transcriptions \
   -XPOST \
   -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"}' \
   -H 'Content-Type: application/json'

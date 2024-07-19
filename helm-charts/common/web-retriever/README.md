@@ -4,27 +4,44 @@ Helm chart for deploying Web Retriever microservice.
 
 Web retriever depends on tei, you should set TEI_EMBEDDING_ENDPOINT endpoints before start.
 
-## Installing the Chart
+## (Option1): Installing the chart separately:
 
-To install the chart, run the following:
+First, you need to install the tei chart, please refer to the [tei](../tei) chart for more information.
+
+After you've deployted the tei chart successfully, please run `kubectl get svc` to get the tei service endpoint, i.e `http://tei`.
+
+To install the web-retriever chart, run the following:
 
 ```console
+cd GenAIInfra/helm-charts/common/web-retriever
+helm dependency update
 export TEI_EMBEDDING_ENDPOINT="http://tei"
 export GOOGLE_API_KEY="yourownkey"
 export GOOGLE_CSE_ID="yourownid"
-helm install web-retriever web-retriever --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} \
---set GOOGLE_API_KEY=${GOOGLE_API_KEY} \
---set GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
+helm install web-retriever . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set GOOGLE_API_KEY=${GOOGLE_API_KEY} --set GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
+```
+
+## (Option2): Installing the chart with dependencies automatically:
+
+```console
+cd GenAIInfra/helm-charts/common/web-retriever
+helm dependency update
+export GOOGLE_API_KEY="yourownkey"
+export GOOGLE_CSE_ID="yourownid"
+helm install web-retriever . --set autodependency.enabled=true --set GOOGLE_API_KEY=${GOOGLE_API_KEY} --set GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
 ```
 
 ## Verify
 
-Use port-forward to access it from localhost.
+To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
+
+Then run the command `kubectl port-forward svc/web-retriever 7077:7077` to expose the web-retriever service for access.
+
+Open another terminal and run the following command to verify the service if working:
 
 ```console
-kubectl port-forward service/web-retriever 1234:7077 &
 your_embedding=$(python -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)")
-curl http://localhost:1234/v1/web_retrieval \
+curl http://localhost:7077/v1/web_retrieval \
   -X POST \
   -d "{\"text\":\"What is OPEA?\",\"embedding\":${your_embedding}}" \
   -H 'Content-Type: application/json'

@@ -8,3 +8,9 @@ type: application
 version: 0.8.0
 # The tts microservice server version
 appVersion: "1.0.0"
+
+dependencies:
+  - name: speecht5
+    version: 0.8.0
+    repository: file://../speecht5
+    condition: autodependency.enabled
