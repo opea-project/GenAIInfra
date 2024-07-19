@@ -262,6 +262,7 @@ func keyIsSomeEndpoint(keyname string) bool {
 }
 
 func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) *mcv1alpha3.Step {
+	fmt.Printf("find downstream service for %s with name %s \n", stepCfg.StepName, dsName)
 	if stepCfg == nil || nodeCfg == nil {
 		return nil
 	}
@@ -277,7 +278,7 @@ func getDownstreamSvcEndpoint(graphNs string, dsName string, stepCfg *mcv1alpha3
 	if stepCfg == nil {
 		return "", errors.New(fmt.Sprintf("empty stepCfg for %s", dsName))
 	}
-	tmplt := lookupManifestDir(dsName)
+	tmplt := lookupManifestDir(stepCfg.StepName)
 	if tmplt == "" {
 		return "", errors.New(fmt.Sprintf("failed to find yaml file for %s", dsName))
 	}
