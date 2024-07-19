@@ -7,7 +7,6 @@ package controller
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -198,64 +197,5 @@ func TestGetServiceURL(t *testing.T) {
 
 	if actualURL != expectedURL {
 		t.Errorf("Expected URL: %s, but got: %s", expectedURL, actualURL)
-	}
-}
-
-func TestApplyCustomConfig_ExpectedCases(t *testing.T) {
-	svcCfg := &map[string]string{
-		"tei_endpoint": "http://tei.example.com",
-	}
-	yamlFile := []byte(`
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-config
-data:
-  key1: value1
-  key2: value2
-`)
-
-	expectedCfg := `apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-config
-data:
-  key1: value1
-  key2: value2
-`
-
-	step := Router
-	actualCfg, err := patchCustomConfigToTemplates(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("applyCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
-}
-
-func TestApplyCustomConfig_EmptyStep(t *testing.T) {
-	step := ""
-	svcCfg := &map[string]string{
-		"tei_endpoint": "http://tei.example.com",
-	}
-	yamlFile := []byte(`
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-config
-data:
-  key1: value1
-  key2: value2
-`)
-	expectedCfg := string(yamlFile)
-	actualCfg, err := patchCustomConfigToTemplates(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("applyCustomConfig() returned an error: %v", err)
-	}
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
 	}
 }

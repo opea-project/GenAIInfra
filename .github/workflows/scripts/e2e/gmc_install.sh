@@ -36,6 +36,7 @@ function copy_manifests() {
     # Copy manifest into gmc
     mkdir -p $(pwd)/config/manifests
     cp $(dirname $(pwd))/manifests/ChatQnA/*.yaml -p $(pwd)/config/manifests/
+    cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
     cp $(dirname $(pwd))/manifests/DocSum/xeon/docsum_llm.yaml -p $(pwd)/config/manifests/
     cp $(dirname $(pwd))/manifests/DocSum/gaudi/docsum_gaudi_llm.yaml -p $(pwd)/config/manifests/
 }
@@ -59,7 +60,8 @@ function init_gmc() {
     sed -i "s|name: system|name: $SYSTEM_NAMESPACE|g" $(pwd)/config/rbac/gmc-manager-rbac.yaml
 
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
-    find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/models#path: $MOUNT_DIR#g" {} \;
+    # find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/models#path: $MOUNT_DIR#g" {} \;
+    find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/opea-models#path: $MOUNT_DIR#g" {} \;
     # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
     find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
     find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
