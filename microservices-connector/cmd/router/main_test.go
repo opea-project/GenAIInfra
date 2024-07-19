@@ -110,7 +110,7 @@ func TestSimpleModelChainer(t *testing.T) {
 		"Authorization": {"Bearer Token"},
 	}
 
-	res, _, err := routeStep("root", gmcGraph, jsonBytes, headers)
+	res, _, err := routeStep("root", gmcGraph, jsonBytes, jsonBytes, headers)
 	if err != nil {
 		return
 	}
@@ -211,7 +211,7 @@ func TestSimpleServiceEnsemble(t *testing.T) {
 	headers := http.Header{
 		"Authorization": {"Bearer Token"},
 	}
-	res, _, err := routeStep("root", gmcGraph, jsonBytes, headers)
+	res, _, err := routeStep("root", gmcGraph, jsonBytes, jsonBytes, headers)
 	if err != nil {
 		return
 	}
@@ -446,7 +446,7 @@ func TestMCWithCondition(t *testing.T) {
 	headers := http.Header{
 		"Authorization": {"Bearer Token"},
 	}
-	res, _, err := routeStep("root", gmcGraph, jsonBytes, headers)
+	res, _, err := routeStep("root", gmcGraph, jsonBytes, jsonBytes, headers)
 	if err != nil {
 		return
 	}

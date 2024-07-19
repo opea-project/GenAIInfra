@@ -94,11 +94,14 @@ jobs:
         run: |
           # .github/workflows/scripts/e2e/chart_test.sh init_value
           # Replace values for CI test environment
+          USER_ID=$(whoami)
+          CHART_MOUNT=/home/$USER_ID/.cache/huggingface/hub
+          HFTOKEN=$(cat /home/$USER_ID/.cache/huggingface/token)
           pushd helm-charts
           # insert a prefix before opea/.*, the prefix is OPEA_IMAGE_REPO
           find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
           # set huggingface token
-          find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
+          find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#${HFTOKEN}#g" {} \;
           # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
           find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: .*#modelUseHostPath: $CHART_MOUNT#g" {} \;
           # replace the pull policy "IfNotPresent" with "Always"
@@ -112,6 +115,7 @@ jobs:
           helm-charts/update_dependency.sh && helm dependency update helm-charts/${{ matrix.directory }}/${{ matrix.example }}
           value_file="values.yaml"
           if [ "${{ matrix.hardware }}" == "gaudi" ]; then
+            EXTRAPARAM="--set tgi.image.tag=1.2.1"
             if [ -f helm-charts/${{ matrix.directory }}/${{ matrix.example }}/gaudi-values.yaml ]; then
               value_file="gaudi-values.yaml"
             else
@@ -123,7 +127,7 @@ jobs:
           fi
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
-              --set autodependency.enabled=true \
+              --set autodependency.enabled=true ${EXTRAPARAM} \
               --values $CHARTS_DIR/${{ matrix.directory }}/${{ matrix.example }}/${value_file} \
               $RELEASE_NAME $CHARTS_DIR/${{ matrix.directory }}/${{ matrix.example }} ; then
             echo "Failed to install chart ${{ matrix.example }}"
@@ -141,7 +145,7 @@ jobs:
             # .github/workflows/scripts/e2e/chart_test.sh validate_${{ matrix.example }} $RELEASE_NAME $NAMESPACE
             LOG_PATH=/home/$(whoami)/logs
             chart=${{ matrix.example }}
-            helm test -n $NAMESPACE $RELEASE_NAME --logs > ${LOG_PATH}/charts-${chart}.log
+            helm test -n $NAMESPACE $RELEASE_NAME --logs |tee ${LOG_PATH}/charts-${chart}.log
             exit_code=$?
             if [ $exit_code -ne 0 ]; then
                 echo "Chart ${chart} test failed, please check the logs in ${LOG_PATH}!"

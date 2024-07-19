@@ -18,8 +18,16 @@ spec:
       command: ['sh', '-c']
       args:
         - |
-          curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \
-            -X POST \
-            -d '{"query":"What is Deep Learning?","max_new_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
-            -H 'Content-Type: application/json'
+          {{- if contains "llm-docsum-tgi" .Values.image.repository }}
+          # Try with docsum endpoint
+            curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/docsum -sS --fail-with-body \
+              -X POST \
+              -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}' \
+              -H 'Content-Type: application/json'
+          {{- else }}
+            curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \
+              -X POST \
+              -d '{"query":"What is Deep Learning?","max_new_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
+              -H 'Content-Type: application/json'
+          {{- end }}
   restartPolicy: Never
