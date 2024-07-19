@@ -295,7 +295,7 @@ func getDownstreamSvcEndpoint(graphNs string, dsName string, stepCfg *mcv1alpha3
 			altSvcName = svcName
 		}
 
-		if dsName == VectorDB {
+		if stepCfg.StepName == VectorDB {
 			return fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port), nil
 		} else {
 			return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port), nil
