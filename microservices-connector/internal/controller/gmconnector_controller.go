@@ -262,10 +262,11 @@ func keyIsSomeEndpoint(keyname string) bool {
 }
 
 func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) *mcv1alpha3.Step {
-	fmt.Printf("find downstream service for %s with name %s \n", stepCfg.StepName, dsName)
 	if stepCfg == nil || nodeCfg == nil {
 		return nil
 	}
+	fmt.Printf("find downstream service for %s with name %s \n", stepCfg.StepName, dsName)
+
 	for _, otherStep := range nodeCfg.Steps {
 		if otherStep.InternalService.ServiceName == dsName && otherStep.InternalService.IsDownstreamService {
 			return &otherStep
