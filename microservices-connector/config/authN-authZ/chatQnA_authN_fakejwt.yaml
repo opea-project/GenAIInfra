@@ -1,0 +1,14 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: fake-jwt-example
+spec:
+  jwtRules:
+  - issuer: testing@secure.istio.io
+    jwksUri: https://raw.githubusercontent.com/istio/istio/release-1.22/security/tools/jwt/samples/jwks.json
+  selector:
+    matchLabels:
+      app: router-service
