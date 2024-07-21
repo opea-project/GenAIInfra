@@ -9,6 +9,7 @@ import (
 	"context"
 	"strings"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -161,9 +162,26 @@ var _ = Describe("GMConnector Controller", func() {
 		})
 		It("should successfully reconcile the resource", func() {
 			By("Reconciling the created resource")
+
+			// Create a GMC_monitor instance
+			gmcMonitor := GMC_monitor{
+				Client:         k8sClient,          // Replace with a mock client for testing
+				Scheme:         k8sClient.Scheme(), // Replace with a mock scheme for testing
+				ResourceStatus: make(map[NsName]MonitorCategory),
+			}
+
+			// Create channels for communication
+			monitorChan := make(chan MonitorCategory)
+			stopCh := make(chan struct{})
+
+			// Start the monitor
+			go gmcMonitor.Start(monitorChan, stopCh)
+
+			defer close(monitorChan)
 			controllerReconciler := &GMConnectorReconciler{
-				Client: k8sClient,
-				Scheme: k8sClient.Scheme(),
+				Client:      k8sClient,
+				Scheme:      k8sClient.Scheme(),
+				MonitorChan: monitorChan,
 			}
 
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
@@ -171,8 +189,27 @@ var _ = Describe("GMConnector Controller", func() {
 			})
 
 			Expect(err).NotTo(HaveOccurred())
+			time.Sleep(45 * time.Second)
 			// TODO(user): Add more specific assertions depending on your controller's reconciliation logic.
 			// Example: If you expect a certain status condition after reconciliation, verify it here.
+			// close(monitorChan)
+			// routerService := ServiceAndDeploy{
+			// 	srvc: NsName{
+			// 		Namespace: "default",
+			// 		Name:      "router-service",
+			// 	},
+			// 	dply: NsName{
+			// 		Namespace: "default",
+			// 		Name:      "router-service-deployment",
+			// 	},
+			// }
+			// result := gmcMonitor.getStatus(routerService)
+			// fmt.Printf("result %v", result)
+
+			// updateGMCstatus
+			// stop the monitor
+			close(stopCh)
+
 		})
 	})
 })
@@ -194,7 +231,7 @@ func TestGetServiceURL(t *testing.T) {
 	}
 
 	expectedURL := "http://test-service.default.svc.cluster.local:8080"
-	actualURL := getServiceURL(service)
+	actualURL := GetServiceURL(service)
 
 	if actualURL != expectedURL {
 		t.Errorf("Expected URL: %s, but got: %s", expectedURL, actualURL)

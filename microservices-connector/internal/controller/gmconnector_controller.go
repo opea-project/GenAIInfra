@@ -76,6 +76,9 @@ const (
 type GMConnectorReconciler struct {
 	client.Client
 	Scheme *runtime.Scheme
+
+	MonitorChan chan MonitorCategory
+	StopChan    chan struct{}
 }
 
 type RouterCfg struct {
@@ -120,7 +123,7 @@ func getManifestYaml(step string) string {
 	return tmpltFile
 }
 
-func reconcileResource(ctx context.Context, client client.Client, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
+func reconcileResource(ctx context.Context, client client.Client, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service, retDply *appsv1.Deployment) error {
 	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
 	tmpltFile := getManifestYaml(step)
 	if tmpltFile == "" {
@@ -157,39 +160,45 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 				}
 			}
 
-			if createdObj.GetKind() == Deployment && step != Router {
-				var newEnvVars []corev1.EnvVar
-				if svcCfg != nil {
-					for name, value := range *svcCfg {
-						if name == "endpoint" {
-							continue
-						}
-						itemEnvVar := corev1.EnvVar{
-							Name:  name,
-							Value: value,
-						}
-						newEnvVars = append(newEnvVars, itemEnvVar)
-					}
+			if retDply != nil && createdObj.GetKind() == Deployment {
+				err = scheme.Scheme.Convert(createdObj, retDply, nil)
+				if err != nil {
+					return fmt.Errorf("Failed to save service: %v\n", err)
 				}
-				if len(newEnvVars) > 0 {
-					deployment := &appsv1.Deployment{}
-					err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
-					if err != nil {
-						return fmt.Errorf("Failed to save deployment: %v\n", err)
+
+				if step != Router {
+					// we don't set router's env because
+					// we have applied the gmc_router.yaml with the customized values to args called "--graph-json"
+					// the value is from GRAPH_JSON: (*svcCfg)["nodes"]}
+					// the below logic will set again, to set to "nodes" into router's "env"
+					var newEnvVars []corev1.EnvVar
+					if svcCfg != nil {
+						for name, value := range *svcCfg {
+							if name == "endpoint" {
+								continue
+							}
+							itemEnvVar := corev1.EnvVar{
+								Name:  name,
+								Value: value,
+							}
+							newEnvVars = append(newEnvVars, itemEnvVar)
+						}
 					}
-					for i := range deployment.Spec.Template.Spec.Containers {
-						deployment.Spec.Template.Spec.Containers[i].Env = append(
-							deployment.Spec.Template.Spec.Containers[i].Env,
-							newEnvVars...)
-					}
-					//overwrite the managed fields is needed, we write this deployment twice here
-					deployment.SetManagedFields(nil)
-					latest := &unstructured.Unstructured{}
-					latest.SetGroupVersionKind(deployment.GroupVersionKind())
-					deployment.SetResourceVersion(latest.GetResourceVersion())
-					// Update the deployment using client.Client
-					if err := client.Update(ctx, deployment); err != nil {
-						return fmt.Errorf("Failed to update deployment: %v\n", err)
+					if len(newEnvVars) > 0 {
+						for i := range retDply.Spec.Template.Spec.Containers {
+							retDply.Spec.Template.Spec.Containers[i].Env = append(
+								retDply.Spec.Template.Spec.Containers[i].Env,
+								newEnvVars...)
+						}
+						//overwrite the managed fields is needed, we write this deployment twice here
+						retDply.SetManagedFields(nil)
+						latest := &unstructured.Unstructured{}
+						latest.SetGroupVersionKind(retDply.GroupVersionKind())
+						retDply.SetResourceVersion(latest.GetResourceVersion())
+						// Update the deployment using client.Client
+						if err := client.Update(ctx, retDply); err != nil {
+							return fmt.Errorf("Failed to update deployment: %v\n", err)
+						}
 					}
 				}
 			}
@@ -198,7 +207,7 @@ func reconcileResource(ctx context.Context, client client.Client, step string, n
 	return nil
 }
 
-func getServiceURL(service *corev1.Service) string {
+func GetServiceURL(service *corev1.Service) string {
 	switch service.Spec.Type {
 	case corev1.ServiceTypeClusterIP:
 		// For ClusterIP, return the cluster IP and port
@@ -289,9 +298,13 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
 	}
 
-	var totalService uint
-	var externalService uint
-	var successService uint
+	var totalService int
+	var externalService int
+	var successService int
+
+	var monitorItem MonitorCategory
+	monitorItem.Graph.Namespace = graph.Namespace
+	monitorItem.Graph.Name = graph.Name
 
 	for nodeName, node := range graph.Spec.Nodes {
 		for i, step := range node.Steps {
@@ -305,16 +318,22 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 					ns = step.Executor.InternalService.NameSpace
 				}
 				svcName := step.Executor.InternalService.ServiceName
+
 				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
 
 				service := &corev1.Service{}
-				err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
+				deployment := &appsv1.Deployment{}
+				err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service, deployment)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
 				}
 				successService += 1
-				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
+				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = GetServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
 				fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
+				monitorItem.resources = append(monitorItem.resources, ServiceAndDeploy{
+					srvc: NsName{Namespace: service.Namespace, Name: service.Name},
+					dply: NsName{Namespace: deployment.Namespace, Name: deployment.Name},
+				})
 
 			} else {
 				fmt.Println("external service is found", "name", step.ExternalService)
@@ -329,12 +348,14 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
 	routerService := &corev1.Service{}
+	routerDeployment := &appsv1.Deployment{}
 	var router_ns string
 	if graph.Spec.RouterConfig.NameSpace == "" {
 		router_ns = req.Namespace
 	} else {
 		router_ns = graph.Spec.RouterConfig.NameSpace
 	}
+	totalService += 1
 
 	jsonBytes, err := json.Marshal(graph)
 	if err != nil {
@@ -347,18 +368,35 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
 	//set empty service name, because we don't want to change router service name and deployment name
-	err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, routerService)
+	err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, routerService, routerDeployment)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
-
-	graph.Status.AccessURL = getServiceURL(routerService)
+	graph.Status.AccessURL = GetServiceURL(routerService)
 	fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
 
+	successService += 1
 	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
 	if err = r.Status().Update(context.TODO(), graph); err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
 	}
+
+	monitorItem.resources = append(monitorItem.resources, ServiceAndDeploy{
+		srvc: NsName{Namespace: routerService.Namespace, Name: routerService.Name},
+		dply: NsName{Namespace: routerDeployment.Namespace, Name: routerDeployment.Name},
+	})
+
+	monitorItem.readyCount = successService
+	monitorItem.externalCount = externalService
+	monitorItem.totalCount = totalService
+	//send monitorItem to monitor task
+	select {
+	case r.MonitorChan <- monitorItem:
+		fmt.Println("Add resources to monitor task")
+	default:
+		fmt.Println("Failed to send monitorItem to the channel")
+	}
+
 	return ctrl.Result{}, nil
 }
 
