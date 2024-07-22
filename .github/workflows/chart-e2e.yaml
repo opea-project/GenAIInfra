@@ -44,7 +44,6 @@ jobs:
           #cut -d'/' -f3 | sort -u )
           run_matrix="{\"include\":["
           for chart in ${e2e_charts}; do
-            #run_matrix="${run_matrix}\"${chart}\","
             run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\"},"
             run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\"},"
           done
@@ -89,10 +88,15 @@ jobs:
           echo "skip_validate=false" >> $GITHUB_ENV
           echo "RELEASENAME=$RELEASE_NAME"
           echo "NAMESPACE=$NAMESPACE"
+          if [ -n "${{ matrix.directory }}" ]; then
+            echo "CHART_FOLDER=$CHARTS_DIR/${{ matrix.directory }}/${{ matrix.example }}" >> $GITHUB_ENV
+          else
+            echo "CHART_FOLDER=$CHARTS_DIR/${{ matrix.example }}" >> $GITHUB_ENV
+          fi
+
 
       - name: Initialize chart testing
         run: |
-          # .github/workflows/scripts/e2e/chart_test.sh init_value
           # Replace values for CI test environment
           USER_ID=$(whoami)
           CHART_MOUNT=/home/$USER_ID/.cache/huggingface/hub
@@ -111,12 +115,13 @@ jobs:
       - name: Helm install
         id: install
         run: |
+          set -xe
           echo "should_cleanup=true" >> $GITHUB_ENV
-          helm-charts/update_dependency.sh && helm dependency update helm-charts/${{ matrix.directory }}/${{ matrix.example }}
+          helm-charts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER}}
           value_file="values.yaml"
           if [ "${{ matrix.hardware }}" == "gaudi" ]; then
-            EXTRAPARAM="--set tgi.image.tag=1.2.1"
-            if [ -f helm-charts/${{ matrix.directory }}/${{ matrix.example }}/gaudi-values.yaml ]; then
+            # EXTRAPARAM="--set tgi.image.tag=1.2.1"
+            if [ -f ${{ env.CHART_FOLDER}}/gaudi-values.yaml ]; then
               value_file="gaudi-values.yaml"
             else
               echo "No Gaudi version for chart ${{ matrix.example }}, skip test"
@@ -127,9 +132,9 @@ jobs:
           fi
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
-              --set autodependency.enabled=true ${EXTRAPARAM} \
-              --values $CHARTS_DIR/${{ matrix.directory }}/${{ matrix.example }}/${value_file} \
-              $RELEASE_NAME $CHARTS_DIR/${{ matrix.directory }}/${{ matrix.example }} ; then
+              --set autodependency.enabled=true \
+              --values ${{ env.CHART_FOLDER}}/${value_file} \
+              $RELEASE_NAME ${{ env.CHART_FOLDER}} ; then
             echo "Failed to install chart ${{ matrix.example }}"
             echo "skip_validate=true" >> $GITHUB_ENV
             exit 1
@@ -139,10 +144,10 @@ jobs:
       - name: Validate e2e test
         if: always()
         run: |
+          set -xe
           if $skip_validate; then
             echo "Skip validate"
           else
-            # .github/workflows/scripts/e2e/chart_test.sh validate_${{ matrix.example }} $RELEASE_NAME $NAMESPACE
             LOG_PATH=/home/$(whoami)/logs
             chart=${{ matrix.example }}
             helm test -n $NAMESPACE $RELEASE_NAME --logs |tee ${LOG_PATH}/charts-${chart}.log
