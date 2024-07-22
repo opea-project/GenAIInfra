@@ -7,7 +7,6 @@ package controller
 
 import (
 	"context"
-	"strings"
 	"testing"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -63,7 +62,8 @@ var _ = Describe("GMConnector Controller", func() {
 												NameSpace:   "default",
 												ServiceName: "embedding-service",
 												Config: map[string]string{
-													"endpoint": "/v1/embeddings",
+													"endpoint":               "/v1/embeddings",
+													"TEI_EMBEDDING_ENDPOINT": "tei-embedding-service",
 												},
 											},
 										},
@@ -75,9 +75,10 @@ var _ = Describe("GMConnector Controller", func() {
 												NameSpace:   "default",
 												ServiceName: "tei-embedding-service",
 												Config: map[string]string{
-													"endpoint":   "/v1/tei-embeddings",
-													"EMBD_MODEL": "somemodel",
+													"endpoint": "/v1/tei-embeddings",
+													"MODEL_ID": "somemodel",
 												},
+												IsDownstreamService: true,
 											},
 										},
 									},
@@ -90,6 +91,7 @@ var _ = Describe("GMConnector Controller", func() {
 												Config: map[string]string{
 													"endpoint": "/v1/vec",
 												},
+												IsDownstreamService: true,
 											},
 										},
 									},
@@ -100,7 +102,9 @@ var _ = Describe("GMConnector Controller", func() {
 												NameSpace:   "default",
 												ServiceName: "retriever-service",
 												Config: map[string]string{
-													"endpoint": "/v1/retrv",
+													"endpoint":               "/v1/retrv",
+													"REDIS_URL":              "vector-service",
+													"TEI_EMBEDDING_ENDPOINT": "tei-embedding-service",
 												},
 											},
 										},
@@ -112,8 +116,22 @@ var _ = Describe("GMConnector Controller", func() {
 												NameSpace:   "default",
 												ServiceName: "rerank-service",
 												Config: map[string]string{
-													"endpoint": "/v1/rernk",
+													"endpoint":               "/v1/reranking",
+													"TEI_RERANKING_ENDPOINT": "tei-reranking-svc",
 												},
+											},
+										},
+									},
+									{
+										StepName: TeiReranking,
+										Executor: mcv1alpha3.Executor{
+											InternalService: mcv1alpha3.GMCTarget{
+												NameSpace:   "default",
+												ServiceName: "tei-reranking-svc",
+												Config: map[string]string{
+													"endpoint": "/rernk",
+												},
+												IsDownstreamService: true,
 											},
 										},
 									},
@@ -122,10 +140,11 @@ var _ = Describe("GMConnector Controller", func() {
 										Executor: mcv1alpha3.Executor{
 											InternalService: mcv1alpha3.GMCTarget{
 												NameSpace:   "default",
-												ServiceName: "tgi-service",
+												ServiceName: "tgi-service-name",
 												Config: map[string]string{
-													"endpoint": "/v1/tgi",
+													"endpoint": "/generate",
 												},
+												IsDownstreamService: true,
 											},
 										},
 									},
@@ -136,7 +155,8 @@ var _ = Describe("GMConnector Controller", func() {
 												NameSpace:   "default",
 												ServiceName: "llm-service",
 												Config: map[string]string{
-													"endpoint": "/v1/llm",
+													"endpoint":         "/v1/llm",
+													"TGI_LLM_ENDPOINT": "tgi-service-name",
 												},
 											},
 										},
@@ -198,64 +218,5 @@ func TestGetServiceURL(t *testing.T) {
 
 	if actualURL != expectedURL {
 		t.Errorf("Expected URL: %s, but got: %s", expectedURL, actualURL)
-	}
-}
-
-func TestApplyCustomConfig_ExpectedCases(t *testing.T) {
-	svcCfg := &map[string]string{
-		"tei_endpoint": "http://tei.example.com",
-	}
-	yamlFile := []byte(`
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-config
-data:
-  key1: value1
-  key2: value2
-`)
-
-	expectedCfg := `apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-config
-data:
-  key1: value1
-  key2: value2
-`
-
-	step := Router
-	actualCfg, err := patchCustomConfigToTemplates(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("applyCustomConfig() returned an error: %v", err)
-	}
-
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
-	}
-
-}
-
-func TestApplyCustomConfig_EmptyStep(t *testing.T) {
-	step := ""
-	svcCfg := &map[string]string{
-		"tei_endpoint": "http://tei.example.com",
-	}
-	yamlFile := []byte(`
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: my-config
-data:
-  key1: value1
-  key2: value2
-`)
-	expectedCfg := string(yamlFile)
-	actualCfg, err := patchCustomConfigToTemplates(step, svcCfg, yamlFile)
-	if err != nil {
-		t.Errorf("applyCustomConfig() returned an error: %v", err)
-	}
-	if strings.TrimSpace(actualCfg) != strings.TrimSpace(expectedCfg) {
-		t.Errorf("Expected config:\n%v\n\nBut got:\n%v", expectedCfg, actualCfg)
 	}
 }
