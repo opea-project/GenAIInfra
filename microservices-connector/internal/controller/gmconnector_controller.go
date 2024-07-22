@@ -18,7 +18,6 @@ import (
 
 	mcv1alpha3 "github.com/opea-project/GenAIInfra/microservices-connector/api/v1alpha3"
 	"github.com/pkg/errors"
-	yaml2 "gopkg.in/yaml.v2"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
@@ -35,42 +34,46 @@ import (
 )
 
 const (
-	Configmap                        = "Configmap"
-	ConfigmapGaudi                   = "ConfigmapGaudi"
-	Embedding                        = "Embedding"
-	TeiEmbedding                     = "TeiEmbedding"
-	TeiEmbeddingGaudi                = "TeiEmbeddingGaudi"
-	VectorDB                         = "VectorDB"
-	Retriever                        = "Retriever"
-	Reranking                        = "Reranking"
-	TeiReranking                     = "TeiReranking"
-	Tgi                              = "Tgi"
-	TgiGaudi                         = "TgiGaudi"
-	Llm                              = "Llm"
-	DocSum                           = "DocSum"
-	DocSumGaudi                      = "DocSumGaudi"
-	Router                           = "router"
-	xeon                             = "xeon"
-	gaudi                            = "gaudi"
-	tei_reranking_service_yaml       = "/tei_reranking_service.yaml"
-	embedding_yaml                   = "/embedding.yaml"
-	tei_embedding_service_yaml       = "/tei_embedding_service.yaml"
-	tei_embedding_gaudi_service_yaml = "/tei_embedding_gaudi_service.yaml"
-	tgi_service_yaml                 = "/tgi_service.yaml"
-	tgi_gaudi_service_yaml           = "/tgi_gaudi_service.yaml"
-	llm_yaml                         = "/llm.yaml"
-	gmc_router_yaml                  = "/gmc-router.yaml"
-	redis_vector_db_yaml             = "/redis-vector-db.yaml"
-	retriever_yaml                   = "/retriever.yaml"
-	reranking_yaml                   = "/reranking.yaml"
-	docsum_llm_yaml                  = "/docsum_llm.yaml"
-	docsum_gaudi_llm_yaml            = "/docsum_gaudi_llm.yaml"
-	yaml_dir                         = "/tmp/microservices/yamls"
-	Service                          = "Service"
-	Deployment                       = "Deployment"
-	dplymtSubfix                     = "-deployment"
-	METADATA_PLATFORM                = "gmc/platform"
+	Configmap         = "Configmap"
+	ConfigmapGaudi    = "ConfigmapGaudi"
+	Embedding         = "Embedding"
+	TeiEmbedding      = "TeiEmbedding"
+	TeiEmbeddingGaudi = "TeiEmbeddingGaudi"
+	VectorDB          = "VectorDB"
+	Retriever         = "Retriever"
+	Reranking         = "Reranking"
+	TeiReranking      = "TeiReranking"
+	Tgi               = "Tgi"
+	TgiGaudi          = "TgiGaudi"
+	Llm               = "Llm"
+	DocSum            = "DocSum"
+	DocSumGaudi       = "DocSumGaudi"
+	Router            = "router"
+	xeon              = "xeon"
+	gaudi             = "gaudi"
+	WebRetriever      = "WebRetriever"
+	yaml_dir          = "/tmp/microservices/yamls"
+	Service           = "Service"
+	Deployment        = "Deployment"
+	dplymtSubfix      = "-deployment"
+	METADATA_PLATFORM = "gmc/platform"
 )
+
+var yamlDict = map[string]string{
+	TeiEmbedding:      yaml_dir + "/tei.yaml",
+	TeiEmbeddingGaudi: yaml_dir + "/tei_gaudi.yaml",
+	Embedding:         yaml_dir + "/embedding-usvc.yaml",
+	VectorDB:          yaml_dir + "/redis-vector-db.yaml",
+	Retriever:         yaml_dir + "/retriever-usvc.yaml",
+	Reranking:         yaml_dir + "/reranking-usvc.yaml",
+	TeiReranking:      yaml_dir + "/teirerank.yaml",
+	Tgi:               yaml_dir + "/tgi.yaml",
+	TgiGaudi:          yaml_dir + "/tgi_gaudi.yaml",
+	Llm:               yaml_dir + "/llm-uservice.yaml",
+	DocSum:            yaml_dir + "/docsum-llm-uservice.yaml",
+	Router:            yaml_dir + "/gmc-router.yaml",
+	WebRetriever:      yaml_dir + "/web-retriever.yaml",
+}
 
 // GMConnectorReconciler reconciles a GMConnector object
 type GMConnectorReconciler struct {
@@ -85,117 +88,176 @@ type RouterCfg struct {
 	GRAPH_JSON string
 }
 
-func getManifestYaml(step string) string {
-	var tmpltFile string
-	//TODO add validation to rule out unexpected case like both embedding and retrieving
-	if step == Embedding {
-		tmpltFile = yaml_dir + embedding_yaml
-	} else if step == TeiEmbedding {
-		tmpltFile = yaml_dir + tei_embedding_service_yaml
-	} else if step == TeiEmbeddingGaudi {
-		tmpltFile = yaml_dir + tei_embedding_gaudi_service_yaml
-	} else if step == VectorDB {
-		tmpltFile = yaml_dir + redis_vector_db_yaml
-	} else if step == Retriever {
-		tmpltFile = yaml_dir + retriever_yaml
-	} else if step == Reranking {
-		tmpltFile = yaml_dir + reranking_yaml
-	} else if step == TeiReranking {
-		tmpltFile = yaml_dir + tei_reranking_service_yaml
-	} else if step == Tgi {
-		tmpltFile = yaml_dir + tgi_service_yaml
-	} else if step == TgiGaudi {
-		tmpltFile = yaml_dir + tgi_gaudi_service_yaml
-	} else if step == Llm {
-		tmpltFile = yaml_dir + llm_yaml
-	} else if step == DocSum {
-		tmpltFile = yaml_dir + docsum_llm_yaml
-	} else if step == DocSumGaudi {
-		tmpltFile = yaml_dir + docsum_gaudi_llm_yaml
-	} else if step == Router {
-		tmpltFile = yaml_dir + gmc_router_yaml
+func lookupManifestDir(step string) string {
+	value, exist := yamlDict[step]
+	if exist {
+		return value
 	} else {
 		return ""
 	}
-	return tmpltFile
 }
 
-func reconcileResource(ctx context.Context, client client.Client, step string, ns string, svc string, svcCfg *map[string]string, retSvc *corev1.Service) error {
-	fmt.Printf("get step %s config for %s@%s: %v\n", step, svc, ns, svcCfg)
-	tmpltFile := getManifestYaml(step)
-	if tmpltFile == "" {
-		return errors.New("unexpected target")
-	}
-	yamlFile, err := os.ReadFile(tmpltFile)
-	if err != nil {
-		return fmt.Errorf("failed to read YAML file: %v", err)
+func reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) ([]*unstructured.Unstructured, error) {
+	if stepCfg == nil || nodeCfg == nil {
+		return nil, errors.New("invalid svc config")
 	}
 
-	var resources []string
-	appliedCfg, err := patchCustomConfigToTemplates(step, svcCfg, yamlFile)
-	if err != nil {
-		return fmt.Errorf("failed to apply user config: %v", err)
+	fmt.Printf("get resource config: %v\n", *stepCfg)
+
+	var retObjs []*unstructured.Unstructured
+	// by default, the svc's namespace is the same as the graph
+	// unless it's specifically defined in yaml
+	ns := graphNs
+	if stepCfg.InternalService.NameSpace != "" {
+		ns = stepCfg.InternalService.NameSpace
 	}
-	resources = strings.Split(appliedCfg, "---")
+	svc := stepCfg.InternalService.ServiceName
+	svcCfg := &stepCfg.InternalService.Config
+
+	yamlFile, err := getTemplateBytes(stepCfg.StepName)
+	if err != nil {
+		return nil, fmt.Errorf("failed to read YAML file: %v", err)
+	}
+
+	resources := strings.Split(string(yamlFile), "---")
 	fmt.Printf("The raw yaml file has been split into %v yaml files\n", len(resources))
 
 	for _, res := range resources {
 		if res == "" || !strings.Contains(res, "kind:") {
 			continue
 		}
-		createdObj, err := applyResourceToK8s(ctx, client, ns, svc, []byte(res))
+
+		decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+		obj := &unstructured.Unstructured{}
+		_, _, err := decUnstructured.Decode([]byte(res), nil, obj)
 		if err != nil {
-			return fmt.Errorf("Failed to reconcile resource: %v\n", err)
+			return nil, fmt.Errorf("failed to decode YAML: %v", err)
+		}
+
+		// Set the namespace according to user defined value
+		if ns != "" {
+			obj.SetNamespace(ns)
+		}
+
+		// set the service name according to user defined value, and related selectors/labels
+		if obj.GetKind() == Service && svc != "" {
+			service_obj := &corev1.Service{}
+			err = scheme.Scheme.Convert(obj, service_obj, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
+			}
+			service_obj.SetName(svc)
+			service_obj.Spec.Selector["app"] = svc
+			err = scheme.Scheme.Convert(service_obj, obj, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
+			}
+		} else if obj.GetKind() == Deployment {
+			deployment_obj := &appsv1.Deployment{}
+			err = scheme.Scheme.Convert(obj, deployment_obj, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+			}
+			if svc != "" {
+				deployment_obj.SetName(svc + dplymtSubfix)
+				// Set the labels if they're specified
+				deployment_obj.Spec.Selector.MatchLabels["app"] = svc
+				deployment_obj.Spec.Template.Labels["app"] = svc
+			}
+
+			// append the user defined ENVs
+			var newEnvVars []corev1.EnvVar
+			if svcCfg != nil {
+				for name, value := range *svcCfg {
+					if name == "endpoint" || name == "nodes" {
+						continue
+					}
+					if isDownStreamEndpointKey(name) {
+						ds := findDownStreamService(value, stepCfg, nodeCfg)
+						value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
+						// value = getDsEndpoint(platform, name, graphNs, ds)
+						if err != nil {
+							return nil, fmt.Errorf("failed to find downstream service endpoint: %v", err)
+						}
+					}
+					itemEnvVar := corev1.EnvVar{
+						Name:  name,
+						Value: value,
+					}
+					newEnvVars = append(newEnvVars, itemEnvVar)
+				}
+			}
+			if len(newEnvVars) > 0 {
+				for i := range deployment_obj.Spec.Template.Spec.Containers {
+					deployment_obj.Spec.Template.Spec.Containers[i].Env = append(
+						deployment_obj.Spec.Template.Spec.Containers[i].Env,
+						newEnvVars...)
+				}
+			}
+
+			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
+			if err != nil {
+				return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+			}
+		}
+
+		err = applyResourceToK8s(ctx, client, obj)
+		if err != nil {
+			return nil, fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {
-			fmt.Printf("Success to reconcile %s: %s\n", createdObj.GetKind(), createdObj.GetName())
+			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
+			retObjs = append(retObjs, obj)
+		}
+	}
+	return retObjs, nil
+}
 
-			// return the service obj to get the service URL from it
-			if retSvc != nil && createdObj.GetKind() == Service {
-				err = scheme.Scheme.Convert(createdObj, retSvc, nil)
-				if err != nil {
-					return fmt.Errorf("Failed to save service: %v\n", err)
-				}
-			}
+func isDownStreamEndpointKey(keyname string) bool {
+	return keyname == "TEI_EMBEDDING_ENDPOINT" || keyname == "TEI_RERANKING_ENDPOINT" || keyname == "TGI_LLM_ENDPOINT" || keyname == "REDIS_URL"
+}
 
-			if createdObj.GetKind() == Deployment && step != Router {
-				var newEnvVars []corev1.EnvVar
-				if svcCfg != nil {
-					for name, value := range *svcCfg {
-						if name == "endpoint" {
-							continue
-						}
-						itemEnvVar := corev1.EnvVar{
-							Name:  name,
-							Value: value,
-						}
-						newEnvVars = append(newEnvVars, itemEnvVar)
-					}
-				}
-				if len(newEnvVars) > 0 {
-					deployment := &appsv1.Deployment{}
-					err = runtime.DefaultUnstructuredConverter.FromUnstructured(createdObj.UnstructuredContent(), deployment)
-					if err != nil {
-						return fmt.Errorf("Failed to save deployment: %v\n", err)
-					}
-					for i := range deployment.Spec.Template.Spec.Containers {
-						deployment.Spec.Template.Spec.Containers[i].Env = append(
-							deployment.Spec.Template.Spec.Containers[i].Env,
-							newEnvVars...)
-					}
-					//overwrite the managed fields is needed, we write this deployment twice here
-					deployment.SetManagedFields(nil)
-					latest := &unstructured.Unstructured{}
-					latest.SetGroupVersionKind(deployment.GroupVersionKind())
-					deployment.SetResourceVersion(latest.GetResourceVersion())
-					// Update the deployment using client.Client
-					if err := client.Update(ctx, deployment); err != nil {
-						return fmt.Errorf("Failed to update deployment: %v\n", err)
-					}
-				}
-			}
+func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) *mcv1alpha3.Step {
+	if stepCfg == nil || nodeCfg == nil {
+		return nil
+	}
+	fmt.Printf("find downstream service for %s with name %s \n", stepCfg.StepName, dsName)
+
+	for _, otherStep := range nodeCfg.Steps {
+		if otherStep.InternalService.ServiceName == dsName && otherStep.InternalService.IsDownstreamService {
+			return &otherStep
 		}
 	}
 	return nil
+}
+
+func getDownstreamSvcEndpoint(graphNs string, dsName string, stepCfg *mcv1alpha3.Step) (string, error) {
+	if stepCfg == nil {
+		return "", errors.New(fmt.Sprintf("empty stepCfg for %s", dsName))
+	}
+	tmplt := lookupManifestDir(stepCfg.StepName)
+	if tmplt == "" {
+		return "", errors.New(fmt.Sprintf("failed to find yaml file for %s", dsName))
+	}
+
+	svcName, port, err := getServiceDetailsFromManifests(tmplt)
+	if err == nil {
+		//check GMC config if there is specific namespace for embedding
+		altNs, altSvcName := getNsNameFromStep(stepCfg)
+		if altNs == "" {
+			altNs = graphNs
+		}
+		if altSvcName == "" {
+			altSvcName = svcName
+		}
+
+		if stepCfg.StepName == VectorDB {
+			return fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port), nil
+		} else {
+			return fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port), nil
+		}
+	} else {
+		return "", errors.New(fmt.Sprintf("failed to get service details for %s: %v\n", dsName, err))
+	}
 }
 
 func getServiceURL(service *corev1.Service) string {
@@ -220,35 +282,6 @@ func getServiceURL(service *corev1.Service) string {
 		return service.Spec.ExternalName
 	}
 	return ""
-}
-
-func patchCustomConfigToTemplates(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
-	var userDefinedCfg RouterCfg
-	if step == "router" {
-		userDefinedCfg = RouterCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-			GRAPH_JSON: (*svcCfg)["nodes"]}
-		fmt.Printf("user config %v\n", userDefinedCfg)
-
-		tmpl, err := template.New("yamlTemplate").Parse(string(yamlFile))
-		if err != nil {
-			return string(yamlFile), fmt.Errorf("error parsing template: %v", err)
-		}
-
-		var appliedCfg bytes.Buffer
-		err = tmpl.Execute(&appliedCfg, userDefinedCfg)
-		if err != nil {
-			return string(yamlFile), fmt.Errorf("error executing template: %v", err)
-		} else {
-			// fmt.Printf("applied config %s\n", appliedCfg.String())
-			return appliedCfg.String(), nil
-		}
-	} else {
-		return string(yamlFile), nil
-	}
-
 }
 
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors,verbs=get;list;watch;create;update;patch;delete
@@ -279,43 +312,40 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 
-	platform := xeon
-	if labelValue, exists := graph.GetLabels()[METADATA_PLATFORM]; exists {
-		platform = labelValue
-	}
-
-	err := preProcessUserConfigmap(ctx, r.Client, req.NamespacedName.Namespace, platform, graph)
-	if err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to pre-process the Configmap file for xeon")
-	}
-
 	var totalService uint
 	var externalService uint
 	var successService uint
 
 	for nodeName, node := range graph.Spec.Nodes {
 		for i, step := range node.Steps {
+			if step.NodeName != "" {
+				fmt.Println("\nthis is a nested step: ", step.StepName)
+				continue
+			}
 			fmt.Println("\nreconcile resource for node:", step.StepName)
 			totalService += 1
 			if step.Executor.ExternalService == "" {
-				var ns string
-				if step.Executor.InternalService.NameSpace == "" {
-					ns = req.Namespace
-				} else {
-					ns = step.Executor.InternalService.NameSpace
-				}
-				svcName := step.Executor.InternalService.ServiceName
-				fmt.Println("trying to reconcile internal service [", svcName, "] in namespace ", ns)
+				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
-				service := &corev1.Service{}
-				err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
+				// err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
+				objs, err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node)
 				if err != nil {
-					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", svcName)
+					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.Executor.InternalService.ServiceName)
 				}
-				successService += 1
-				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.Executor.InternalService.Config["endpoint"]
-				fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
-
+				if len(objs) != 0 {
+					for _, obj := range objs {
+						if obj.GetKind() == Service {
+							service := &corev1.Service{}
+							err = scheme.Scheme.Convert(obj, service, nil)
+							if err != nil {
+								return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service")
+							}
+							graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.InternalService.Config["endpoint"]
+							fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
+							successService += 1
+						}
+					}
+				}
 			} else {
 				fmt.Println("external service is found", "name", step.ExternalService)
 				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = step.ExternalService
@@ -325,35 +355,13 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		fmt.Println()
 	}
 
-	//to start a router controller
+	//to start a router service
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
-	routerService := &corev1.Service{}
-	var router_ns string
-	if graph.Spec.RouterConfig.NameSpace == "" {
-		router_ns = req.Namespace
-	} else {
-		router_ns = graph.Spec.RouterConfig.NameSpace
-	}
-
-	jsonBytes, err := json.Marshal(graph)
-	if err != nil {
-		// handle error
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
-	}
-	jsonString := string(jsonBytes)
-	if graph.Spec.RouterConfig.Config == nil {
-		graph.Spec.RouterConfig.Config = make(map[string]string)
-	}
-	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-	//set empty service name, because we don't want to change router service name and deployment name
-	err = reconcileResource(ctx, r.Client, graph.Spec.RouterConfig.Name, router_ns, graph.Spec.RouterConfig.ServiceName, &graph.Spec.RouterConfig.Config, routerService)
+	err := reconcileRouterService(ctx, r.Client, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
-
-	graph.Status.AccessURL = getServiceURL(routerService)
-	fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
 
 	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
 	if err = r.Status().Update(context.TODO(), graph); err != nil {
@@ -362,111 +370,107 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return ctrl.Result{}, nil
 }
 
-// read the configmap file from the manifests
-// update the values of the fields in the configmap
-// add service details to the fields
-func preProcessUserConfigmap(ctx context.Context, client client.Client, ns string, hwType string, gmcGraph *mcv1alpha3.GMConnector) error {
-	var cfgFile string
-	// var adjustFile string
-	if hwType == xeon {
-		cfgFile = yaml_dir + "/qna_configmap_xeon.yaml"
-	} else if hwType == gaudi {
-		cfgFile = yaml_dir + "/qna_configmap_gaudi.yaml"
-	} else {
-		return fmt.Errorf("unexpected hardware type %s", hwType)
+func getTemplateBytes(resourceType string) ([]byte, error) {
+	tmpltFile := lookupManifestDir(resourceType)
+	if tmpltFile == "" {
+		return nil, errors.New("unexpected target")
 	}
-	yamlData, err := os.ReadFile(cfgFile)
+	yamlBytes, err := os.ReadFile(tmpltFile)
 	if err != nil {
-		return fmt.Errorf("failed to read %s : %v", cfgFile, err)
+		return nil, fmt.Errorf("failed to read YAML file: %v", err)
 	}
+	return yamlBytes, nil
+}
 
-	fmt.Printf("adjust config: %s\n", cfgFile)
-
-	// Unmarshal the YAML data into a map
-	var yamlMap map[string]interface{}
-	err = yaml2.Unmarshal(yamlData, &yamlMap)
+func reconcileRouterService(ctx context.Context, client client.Client, graph *mcv1alpha3.GMConnector) error {
+	routerService := &corev1.Service{}
+	jsonBytes, err := json.Marshal(graph)
 	if err != nil {
-		return fmt.Errorf("failed to unmarshal YAML data: %v", err)
+		// handle error
+		return errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
 	}
+	jsonString := string(jsonBytes)
+	if graph.Spec.RouterConfig.Config == nil {
+		graph.Spec.RouterConfig.Config = make(map[string]string)
+	}
+	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
 
-	//adjust the values of the fields defined in manifest configmap file
-	adjustConfigmap(ns, hwType, &yamlMap, gmcGraph)
-
-	//NOTE: the filesystem could be read-only, DONOT write it
-
-	adjustedCmBytes, err := yaml2.Marshal(yamlMap)
+	templateBytes, err := getTemplateBytes(Router)
 	if err != nil {
-		return fmt.Errorf("failed to marshal YAML data: %v", err)
+		return errors.Wrapf(err, "Failed to get template bytes for %s", Router)
 	}
-	_, err = applyResourceToK8s(ctx, client, ns, "", adjustedCmBytes)
+	var resources []string
+	appliedCfg, err := applyRouterConfigToTemplates(Router, &graph.Spec.RouterConfig.Config, templateBytes)
 	if err != nil {
-		return fmt.Errorf("failed to apply the adjusted configmap: %v", err)
-	} else {
-		fmt.Printf("Success to apply the adjusted configmap\n")
+		return fmt.Errorf("failed to apply user config: %v", err)
 	}
 
+	resources = strings.Split(appliedCfg, "---")
+	for _, res := range resources {
+		if res == "" || !strings.Contains(res, "kind:") {
+			continue
+		}
+		decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+		obj := &unstructured.Unstructured{}
+		_, _, err := decUnstructured.Decode([]byte(res), nil, obj)
+		if err != nil {
+			return fmt.Errorf("failed to decode YAML: %v", err)
+		}
+
+		if graph.Spec.RouterConfig.NameSpace != "" {
+			obj.SetNamespace(graph.Spec.RouterConfig.NameSpace)
+		} else {
+			obj.SetNamespace(graph.Namespace)
+		}
+
+		err = applyResourceToK8s(ctx, client, obj)
+		if err != nil {
+			return fmt.Errorf("failed to reconcile resource: %v", err)
+		} else {
+			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
+		}
+		if obj.GetKind() == Service {
+			err = scheme.Scheme.Convert(obj, routerService, nil)
+			if err != nil {
+				return fmt.Errorf("failed to save router service: %v", err)
+			}
+			graph.Status.AccessURL = getServiceURL(routerService)
+			fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
+		}
+	}
 	return nil
 }
 
-func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc string, resource []byte) (*unstructured.Unstructured, error) {
-	decUnstructured := yaml.NewDecodingSerializer(unstructured.UnstructuredJSONScheme)
+func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFile []byte) (string, error) {
+	var userDefinedCfg RouterCfg
+	if step == "router" {
+		userDefinedCfg = RouterCfg{
+			NoProxy:    (*svcCfg)["no_proxy"],
+			HttpProxy:  (*svcCfg)["http_proxy"],
+			HttpsProxy: (*svcCfg)["https_proxy"],
+			GRAPH_JSON: (*svcCfg)["nodes"]}
+		fmt.Printf("user config %v\n", userDefinedCfg)
 
-	obj := &unstructured.Unstructured{}
-	_, _, err := decUnstructured.Decode(resource, nil, obj)
-	if err != nil {
-		return nil, fmt.Errorf("failed to decode YAML: %v", err)
-	}
-
-	// Set the namespace if it's specified
-	if ns != "" {
-		obj.SetNamespace(ns)
-	}
-
-	if svc != "" {
-		if obj.GetKind() == Service {
-			obj.SetName(svc)
-			selectors, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get selectors: %v", err)
-			}
-			if found {
-				selectors["app"] = svc // Set the new selector.app value
-				err = unstructured.SetNestedStringMap(obj.Object, selectors, "spec", "selector")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set new selector.app: %v", err)
-				}
-			}
-		}
-		if obj.GetKind() == Deployment {
-			obj.SetName(svc + dplymtSubfix)
-			// Set the labels if they're specified
-			labels, found, err := unstructured.NestedStringMap(obj.Object, "spec", "selector", "matchLabels")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get spec.selector.matchLabels: %v", err)
-			}
-			if found {
-				labels["app"] = svc
-				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "selector", "matchLabels")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set new spec.selector.matchLabels : %v", err)
-				}
-			}
-			// Set the labels in template if they're specified
-			labels, found, err = unstructured.NestedStringMap(obj.Object, "spec", "template", "metadata", "labels")
-			if err != nil {
-				return nil, fmt.Errorf("failed to get spec.template.metadata.labels: %v", err)
-			}
-			if found {
-				labels["app"] = svc
-				err = unstructured.SetNestedStringMap(obj.Object, labels, "spec", "template", "metadata", "labels")
-				if err != nil {
-					return nil, fmt.Errorf("failed to set spec.template.metadata.labels: %v", err)
-				}
-			}
+		tmpl, err := template.New("yamlTemplate").Parse(string(yamlFile))
+		if err != nil {
+			return string(yamlFile), fmt.Errorf("error parsing template: %v", err)
 		}
 
+		var appliedCfg bytes.Buffer
+		err = tmpl.Execute(&appliedCfg, userDefinedCfg)
+		if err != nil {
+			return string(yamlFile), fmt.Errorf("error executing template: %v", err)
+		} else {
+			// fmt.Printf("applied config %s\n", appliedCfg.String())
+			return appliedCfg.String(), nil
+		}
+	} else {
+		return string(yamlFile), nil
 	}
 
+}
+
+func applyResourceToK8s(ctx context.Context, c client.Client, obj *unstructured.Unstructured) error {
 	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
 	// This might involve trying an Update and, if it fails because the object doesn't exist, falling back to Create.
 	// Retry updating the resource in case of transient errors.
@@ -475,20 +479,20 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 	for {
 		select {
 		case <-ctx.Done():
-			return nil, fmt.Errorf("context cancelled")
+			return fmt.Errorf("context cancelled")
 		case <-timeout:
-			return nil, fmt.Errorf("timed out while trying to update or create resource")
+			return fmt.Errorf("timed out while trying to update or create resource")
 		case <-tick.C:
 			// Get the latest version of the object
 			latest := &unstructured.Unstructured{}
 			latest.SetGroupVersionKind(obj.GroupVersionKind())
-			err = c.Get(ctx, client.ObjectKeyFromObject(obj), latest)
+			err := c.Get(ctx, client.ObjectKeyFromObject(obj), latest)
 			if err != nil {
 				if apierr.IsNotFound(err) {
 					// If the object doesn't exist, create it
 					err = c.Create(ctx, obj, &client.CreateOptions{})
 					if err != nil {
-						return nil, fmt.Errorf("failed to create resource: %v", err)
+						return fmt.Errorf("failed to create resource: %v", err)
 					}
 				} else {
 					// If there was another error, continue
@@ -500,138 +504,33 @@ func applyResourceToK8s(ctx context.Context, c client.Client, ns string, svc str
 				obj.SetResourceVersion(latest.GetResourceVersion()) // Ensure we're updating the latest version
 				err = c.Update(ctx, obj, &client.UpdateOptions{})
 				if err != nil {
-					fmt.Printf("update object err: %v", err)
+					fmt.Printf("\nupdate object err: %v", err)
 					continue
 				}
 			}
 
 			// If we reach this point, the operation was successful.
-			return obj, nil
+			return nil
 		}
 	}
 }
 
-func getNsNameFromGraph(gmcGraph *mcv1alpha3.GMConnector, stepName string) (string, string) {
+func getNsNameFromStep(step *mcv1alpha3.Step) (string, string) {
 	var retNs string
 	var retName string
-	for _, router := range gmcGraph.Spec.Nodes {
-		for _, step := range router.Steps {
-			if step.StepName == stepName {
-				// Check if InternalService is not nil
-				if step.Executor.ExternalService == "" {
-					// Check if NameSpace is not an empty string
-					if step.Executor.InternalService.NameSpace != "" {
-						retNs = step.Executor.InternalService.NameSpace
-					}
-					if step.Executor.InternalService.ServiceName != "" {
-						retName = step.Executor.InternalService.ServiceName
-					}
-				}
-			}
-		}
-	}
-	return retNs, retName
-}
 
-func adjustConfigmap(ns string, hwType string, yamlMap *map[string]interface{}, gmcGraph *mcv1alpha3.GMConnector) {
-	var embdManifest string
-	var rerankManifest string
-	var tgiManifest string
-	var redisManifest string
-	if hwType == xeon {
-		embdManifest = yaml_dir + tei_embedding_service_yaml
-		rerankManifest = yaml_dir + tei_reranking_service_yaml
-		tgiManifest = yaml_dir + tgi_service_yaml
-		redisManifest = yaml_dir + redis_vector_db_yaml
-	} else if hwType == gaudi {
-		embdManifest = yaml_dir + tei_embedding_gaudi_service_yaml
-		rerankManifest = yaml_dir + tei_reranking_service_yaml
-		tgiManifest = yaml_dir + tgi_gaudi_service_yaml
-		redisManifest = yaml_dir + redis_vector_db_yaml
-	} else {
-		fmt.Printf("unexpected hardware type %s", hwType)
-		return
+	// Check if InternalService is not nil
+	if step.Executor.ExternalService == "" {
+		// Check if NameSpace is not an empty string
+		if step.Executor.InternalService.NameSpace != "" {
+			retNs = step.Executor.InternalService.NameSpace
+		}
+		if step.Executor.InternalService.ServiceName != "" {
+			retName = step.Executor.InternalService.ServiceName
+		}
 	}
-	if data, ok := (*yamlMap)["data"].(map[interface{}]interface{}); ok {
-		// Update the value of "TEI_EMBEDDING_ENDPOINT" field
-		if _, ok := data["TEI_EMBEDDING_ENDPOINT"].(string); ok {
-			svcName, port, err := getServiceDetailsFromManifests(embdManifest)
-			if err == nil {
-				//check GMC config if there is specific namespace for embedding
-				altNs, altSvcName := getNsNameFromGraph(gmcGraph, TeiEmbedding)
-				if altNs == "" {
-					altNs = ns
-				}
-				if altSvcName == "" {
-					altSvcName = svcName
-				}
-				data["TEI_EMBEDDING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
-			} else {
-				fmt.Printf("failed to get service details for %s: %v\n", embdManifest, err)
-			}
-		} else {
-			fmt.Printf("failed to get data for TEI_EMBEDDING_ENDPOINT\n")
-		}
-		// Update the value of "TEI_RERANKING_ENDPOINT" field
-		if _, ok = data["TEI_RERANKING_ENDPOINT"].(string); ok {
-			svcName, port, err := getServiceDetailsFromManifests(rerankManifest)
-			if err == nil {
-				//check GMC config if there is specific namespace for reranking
-				altNs, altSvcName := getNsNameFromGraph(gmcGraph, TeiReranking)
-				if altNs == "" {
-					altNs = ns
-				}
-				if altSvcName == "" {
-					altSvcName = svcName
-				}
-				data["TEI_RERANKING_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
-			} else {
-				fmt.Printf("failed to get service details for %s: %v\n", rerankManifest, err)
-			}
-		} else {
-			fmt.Printf("failed to get data for TEI_RERANKING_ENDPOINT\n")
-		}
-		// Update the value of "TGI_LLM_ENDPOINT" field
-		if _, ok = data["TGI_LLM_ENDPOINT"].(string); ok {
-			svcName, port, err := getServiceDetailsFromManifests(tgiManifest)
-			if err == nil {
-				//check GMC config if there is specific namespace for tgillm
-				altNs, altSvcName := getNsNameFromGraph(gmcGraph, Tgi)
-				if altNs == "" {
-					altNs = ns
-				}
-				if altSvcName == "" {
-					altSvcName = svcName
-				}
-				data["TGI_LLM_ENDPOINT"] = fmt.Sprintf("http://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
-			} else {
-				fmt.Printf("failed to get service details for %s: %v\n", tgiManifest, err)
-			}
-		} else {
-			fmt.Printf("failed to get data for TGI_LLM_ENDPOINT\n")
-		}
-		// Update the value of "REDIS_URL" field
-		if _, ok = data["REDIS_URL"].(string); ok {
-			svcName, port, err := getServiceDetailsFromManifests(redisManifest)
-			if err == nil {
-				//check GMC config if there is specific namespace for tgillm
-				altNs, altSvcName := getNsNameFromGraph(gmcGraph, VectorDB)
-				if altNs == "" {
-					altNs = ns
-				}
-				if altSvcName == "" {
-					altSvcName = svcName
-				}
-				data["REDIS_URL"] = fmt.Sprintf("redis://%s.%s.svc.cluster.local:%d", altSvcName, altNs, port)
-			} else {
-				fmt.Printf("failed to get service details for %s: %v\n", redisManifest, err)
-			}
-		} else {
-			fmt.Printf("failed to get data for REDIS_URL\n")
-		}
-	} else {
-		fmt.Printf("failed to interpret data %v\n", data)
-	}
+
+	return retNs, retName
 }
 
 func getServiceDetailsFromManifests(filePath string) (string, int, error) {

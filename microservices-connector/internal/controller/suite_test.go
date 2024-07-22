@@ -46,26 +46,44 @@ var _ = BeforeSuite(func() {
 	err := os.MkdirAll(yaml_dir, os.ModePerm)
 	Expect(err).NotTo(HaveOccurred())
 
-	templateDir := "../../../manifests/ChatQnA"
+	// templateDir := "../../../manifests/ChatQnA"
+
+	// files := []string{
+	// 	templateDir + tei_reranking_service_yaml,
+	// 	templateDir + embedding_yaml,
+	// 	templateDir + tei_embedding_service_yaml,
+	// 	templateDir + tei_embedding_gaudi_service_yaml,
+	// 	templateDir + tgi_service_yaml,
+	// 	templateDir + tei_reranking_service_yaml,
+	// 	templateDir + tgi_gaudi_service_yaml,
+	// 	templateDir + llm_yaml,
+	// 	templateDir + redis_vector_db_yaml,
+	// 	templateDir + retriever_yaml,
+	// 	templateDir + reranking_yaml,
+	// 	templateDir + "/qna_configmap_xeon.yaml",
+	// 	templateDir + "/qna_configmap_gaudi.yaml",
+	// 	"../../config/gmcrouter/gmc-router.yaml",
+	// }
+
+	templateDir := "../../../manifests/common"
 
 	files := []string{
-		templateDir + tei_reranking_service_yaml,
-		templateDir + embedding_yaml,
-		templateDir + tei_embedding_service_yaml,
-		templateDir + tei_embedding_gaudi_service_yaml,
-		templateDir + tgi_service_yaml,
-		templateDir + tei_reranking_service_yaml,
-		templateDir + tgi_gaudi_service_yaml,
-		templateDir + llm_yaml,
-		templateDir + redis_vector_db_yaml,
-		templateDir + retriever_yaml,
-		templateDir + reranking_yaml,
-		templateDir + "/qna_configmap_xeon.yaml",
-		templateDir + "/qna_configmap_gaudi.yaml",
+		templateDir + "/tei.yaml",
+		templateDir + "/tei_gaudi.yaml",
+		templateDir + "/embedding-usvc.yaml",
+		templateDir + "/redis-vector-db.yaml",
+		templateDir + "/retriever-usvc.yaml",
+		templateDir + "/reranking-usvc.yaml",
+		templateDir + "/teirerank.yaml",
+		templateDir + "/tgi.yaml",
+		templateDir + "/tgi_gaudi.yaml",
+		templateDir + "/llm-uservice.yaml",
+		templateDir + "/docsum-llm-uservice.yaml",
 		"../../config/gmcrouter/gmc-router.yaml",
 	}
 	for _, file := range files {
 		cmd := exec.Command("cp", file, yaml_dir)
+		// cmd := exec.Command("ls", file)
 		err = cmd.Run()
 		Expect(err).NotTo(HaveOccurred())
 	}
