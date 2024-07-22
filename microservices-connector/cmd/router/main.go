@@ -210,7 +210,7 @@ func handleSwitchNode(
 	if route.NodeName != "" {
 		stepType = ServiceNode
 	}
-	log.Info("Starting execution of step", "type", stepType, "stepName", route.StepName)
+	log.Info("Starting execution of step", "Node Name", route.NodeName, "type", stepType, "stepName", route.StepName)
 	if responseBytes, statusCode, err = executeStep(route, graph, initInput, request, headers); err != nil {
 		return nil, 500, err
 	}
@@ -248,6 +248,7 @@ func handleSwitchPipeline(nodeName string,
 			)
 			continue
 		}
+		log.Info("Current Step Information", "Node Name", nodeName, "Step Index", index)
 		request := input
 		if route.Data == "$response" && index > 0 {
 			request = responseBytes
@@ -406,6 +407,7 @@ func routeStep(nodeName string,
 ) ([]byte, int, error) {
 	defer timeTrack(time.Now(), "node", nodeName)
 	currentNode := graph.Spec.Nodes[nodeName]
+	log.Info("Current Node", "Node Name", nodeName)
 
 	if currentNode.RouterType == mcv1alpha3.Switch {
 		return handleSwitchPipeline(nodeName, graph, initInput, input, headers)
