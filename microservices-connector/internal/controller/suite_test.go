@@ -83,6 +83,7 @@ var _ = BeforeSuite(func() {
 	}
 	for _, file := range files {
 		cmd := exec.Command("cp", file, yaml_dir)
+		// cmd := exec.Command("ls", file)
 		err = cmd.Run()
 		Expect(err).NotTo(HaveOccurred())
 	}
