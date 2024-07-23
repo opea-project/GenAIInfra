@@ -1,0 +1,23 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Test
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, ready_for_review, synchronize]
+    paths:
+      - .github/workflows/test.yaml
+  workflow_dispatch:
+
+jobs:
+  job1:
+    name: Print-Env
+    runs-on: ubuntu-latest
+    steps:
+      - name: Print Env
+        env: # Or as an environment variable
+          SUPER_SECRET: ${{ secrets.GOOGLE_API_KEY }}
+        run: |
+          echo "$SUPER_SECRET"
