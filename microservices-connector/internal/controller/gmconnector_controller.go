@@ -159,19 +159,19 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 			service_obj := &corev1.Service{}
 			err = scheme.Scheme.Convert(obj, service_obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
+				return nil, fmt.Errorf("failed to convert unstructured to service %s: %v", svc, err)
 			}
 			service_obj.SetName(svc)
 			service_obj.Spec.Selector["app"] = svc
 			err = scheme.Scheme.Convert(service_obj, obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
+				return nil, fmt.Errorf("failed to convert service %s to object: %v", svc, err)
 			}
 		} else if obj.GetKind() == Deployment {
 			deployment_obj := &appsv1.Deployment{}
 			err = scheme.Scheme.Convert(obj, deployment_obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+				return nil, fmt.Errorf("failed to convert unstructured to deployment %s: %v", obj.GetName(), err)
 			}
 			if svc != "" {
 				deployment_obj.SetName(svc + dplymtSubfix)
@@ -192,7 +192,7 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 						value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
 						// value = getDsEndpoint(platform, name, graphNs, ds)
 						if err != nil {
-							return nil, fmt.Errorf("failed to find downstream service endpoint: %v", err)
+							return nil, fmt.Errorf("failed to find downstream service endpoint %s-%s: %v", name, value, err)
 						}
 					}
 					itemEnvVar := corev1.EnvVar{
@@ -212,7 +212,7 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 
 			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+				return nil, fmt.Errorf("failed to convert deployment %s to obj: %v", deployment_obj.GetName(), err)
 			}
 		}
 
@@ -348,10 +348,9 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if step.Executor.ExternalService == "" {
 				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
-				// err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
 				objs, err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node)
 				if err != nil {
-					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.Executor.InternalService.ServiceName)
+					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.StepName)
 				}
 				if len(objs) != 0 {
 					for _, obj := range objs {
@@ -359,7 +358,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 							service := &corev1.Service{}
 							err = scheme.Scheme.Convert(obj, service, nil)
 							if err != nil {
-								return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service")
+								return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to convert service %s", obj.GetName())
 							}
 							graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.InternalService.Config["endpoint"]
 							fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
@@ -450,19 +449,19 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 				service_obj := &corev1.Service{}
 				err = scheme.Scheme.Convert(obj, service_obj, nil)
 				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to service: %v", err)
+					return fmt.Errorf("failed to convert unstructured to router service %s: %v", routerSvcName, err)
 				}
 				service_obj.SetName(routerSvcName)
 				service_obj.Spec.Selector["app"] = routerSvcName
 				err = scheme.Scheme.Convert(service_obj, obj, nil)
 				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to service: %v", err)
+					return fmt.Errorf("failed to convert router service %s to obj: %v", routerSvcName, err)
 				}
 			} else if obj.GetKind() == Deployment {
 				deployment_obj := &appsv1.Deployment{}
 				err = scheme.Scheme.Convert(obj, deployment_obj, nil)
 				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+					return fmt.Errorf("failed to convert unstructured to router deployment %s: %v", routerSvcName+dplymtSubfix, err)
 				}
 				deployment_obj.SetName(routerSvcName + dplymtSubfix)
 				// Set the labels if they're specified
@@ -470,7 +469,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 				deployment_obj.Spec.Template.Labels["app"] = routerSvcName
 				err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+					return fmt.Errorf("failed to convert router deployment %s to obj: %v", routerSvcName+dplymtSubfix, err)
 				}
 			}
 		}
