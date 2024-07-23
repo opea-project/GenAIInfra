@@ -438,7 +438,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 				service_obj.Spec.Selector["app"] = routerSvcName
 				err = scheme.Scheme.Convert(service_obj, obj, nil)
 				if err != nil {
-					fmt.Errorf("failed to convert unstructured to service: %v", err)
+					return fmt.Errorf("failed to convert unstructured to service: %v", err)
 				}
 			} else if obj.GetKind() == Deployment {
 				deployment_obj := &appsv1.Deployment{}
