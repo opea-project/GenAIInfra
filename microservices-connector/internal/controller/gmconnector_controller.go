@@ -34,31 +34,31 @@ import (
 )
 
 const (
-       Configmap                = "Configmap"
-       ConfigmapGaudi           = "ConfigmapGaudi"
-       Embedding                = "Embedding"
-       TeiEmbedding             = "TeiEmbedding"
-       TeiEmbeddingGaudi        = "TeiEmbeddingGaudi"
-       VectorDB                 = "VectorDB"
-       Retriever                = "Retriever"
-       Reranking                = "Reranking"
-       TeiReranking             = "TeiReranking"
-       Tgi                      = "Tgi"
-       TgiGaudi                 = "TgiGaudi"
-       Llm                      = "Llm"
-       DocSum                   = "DocSum"
-       DocSumGaudi              = "DocSumGaudi"
-       Router                   = "router"
-       DataPrep                 = "DataPrep"
-       xeon                     = "xeon"
-       gaudi                    = "gaudi"
-       WebRetriever             = "WebRetriever"
-       yaml_dir                 = "/tmp/microservices/yamls"
-       Service                  = "Service"
-       Deployment               = "Deployment"
-       dplymtSubfix             = "-deployment"
-       METADATA_PLATFORM        = "gmc/platform"
-       DefaultRouterServiceName = "router-service"
+	Configmap                = "Configmap"
+	ConfigmapGaudi           = "ConfigmapGaudi"
+	Embedding                = "Embedding"
+	TeiEmbedding             = "TeiEmbedding"
+	TeiEmbeddingGaudi        = "TeiEmbeddingGaudi"
+	VectorDB                 = "VectorDB"
+	Retriever                = "Retriever"
+	Reranking                = "Reranking"
+	TeiReranking             = "TeiReranking"
+	Tgi                      = "Tgi"
+	TgiGaudi                 = "TgiGaudi"
+	Llm                      = "Llm"
+	DocSum                   = "DocSum"
+	DocSumGaudi              = "DocSumGaudi"
+	Router                   = "router"
+	DataPrep                 = "DataPrep"
+	xeon                     = "xeon"
+	gaudi                    = "gaudi"
+	WebRetriever             = "WebRetriever"
+	yaml_dir                 = "/tmp/microservices/yamls"
+	Service                  = "Service"
+	Deployment               = "Deployment"
+	dplymtSubfix             = "-deployment"
+	METADATA_PLATFORM        = "gmc/platform"
+	DefaultRouterServiceName = "router-service"
 )
 
 var yamlDict = map[string]string{
@@ -75,7 +75,7 @@ var yamlDict = map[string]string{
 	DocSum:            yaml_dir + "/docsum-llm-uservice.yaml",
 	Router:            yaml_dir + "/gmc-router.yaml",
 	WebRetriever:      yaml_dir + "/web-retriever.yaml",
-        DataPrep:          yaml_dir + "/data-prep.yaml",
+	DataPrep:          yaml_dir + "/data-prep.yaml",
 }
 
 // GMConnectorReconciler reconciles a GMConnector object
@@ -455,7 +455,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 					return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
 				}
 			}
-	        }
+		}
 
 		err = applyResourceToK8s(ctx, client, obj)
 		if err != nil {
