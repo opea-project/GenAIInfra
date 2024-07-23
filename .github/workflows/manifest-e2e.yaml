@@ -10,6 +10,7 @@ on:
     paths:
       - manifests/**
       - .github/workflows/manifest-e2e.yaml
+      - "!manifests/common/**"
   workflow_dispatch:
 
 concurrency:
