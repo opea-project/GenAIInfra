@@ -38,7 +38,11 @@ spec:
                 optional: true
             {{- end }}
           securityContext:
+            {{- if .Values.global.modelUseHostPath }}
+            {}
+            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- end }}
           image: "{{ .Values.image.repository }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
