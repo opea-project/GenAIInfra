@@ -34,36 +34,37 @@ import (
 )
 
 const (
-	Configmap         = "Configmap"
-	ConfigmapGaudi    = "ConfigmapGaudi"
-	Embedding         = "Embedding"
-	TeiEmbedding      = "TeiEmbedding"
-	TeiEmbeddingGaudi = "TeiEmbeddingGaudi"
-	VectorDB          = "VectorDB"
-	Retriever         = "Retriever"
-	Reranking         = "Reranking"
-	TeiReranking      = "TeiReranking"
-	Tgi               = "Tgi"
-	TgiGaudi          = "TgiGaudi"
-	Llm               = "Llm"
-	DocSum            = "DocSum"
-	DocSumGaudi       = "DocSumGaudi"
-	Router            = "router"
-	xeon              = "xeon"
-	gaudi             = "gaudi"
-	WebRetriever      = "WebRetriever"
-	yaml_dir          = "/tmp/microservices/yamls/"
-	Service           = "Service"
-	Deployment        = "Deployment"
-	dplymtSubfix      = "-deployment"
-	METADATA_PLATFORM = "gmc/platform"
-	ASR               = "Asr"
-	TTS               = "Tts"
-	SpeechT5          = "SpeechT5"
-	SpeechT5Gaudi     = "SpeechT5Gaudi"
-	Whisper           = "Whisper"
-	WhisperGaudi      = "WhisperGaudi"
-	DataPrep          = "DataPrep"
+	Configmap                = "Configmap"
+	ConfigmapGaudi           = "ConfigmapGaudi"
+	Embedding                = "Embedding"
+	TeiEmbedding             = "TeiEmbedding"
+	TeiEmbeddingGaudi        = "TeiEmbeddingGaudi"
+	VectorDB                 = "VectorDB"
+	Retriever                = "Retriever"
+	Reranking                = "Reranking"
+	TeiReranking             = "TeiReranking"
+	Tgi                      = "Tgi"
+	TgiGaudi                 = "TgiGaudi"
+	Llm                      = "Llm"
+	DocSum                   = "DocSum"
+	DocSumGaudi              = "DocSumGaudi"
+	Router                   = "router"
+	DataPrep                 = "DataPrep"
+	xeon                     = "xeon"
+	gaudi                    = "gaudi"
+	WebRetriever             = "WebRetriever"
+	yaml_dir                 = "/tmp/microservices/yamls/"
+	Service                  = "Service"
+	Deployment               = "Deployment"
+	dplymtSubfix             = "-deployment"
+	METADATA_PLATFORM        = "gmc/platform"
+	DefaultRouterServiceName = "router-service"
+	ASR                      = "Asr"
+	TTS                      = "Tts"
+	SpeechT5                 = "SpeechT5"
+	SpeechT5Gaudi            = "SpeechT5Gaudi"
+	Whisper                  = "Whisper"
+	WhisperGaudi             = "WhisperGaudi"
 )
 
 var yamlDict = map[string]string{
@@ -414,6 +415,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 		graph.Spec.RouterConfig.Config = make(map[string]string)
 	}
 	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
+	routerSvcName := graph.Spec.RouterConfig.ServiceName
 
 	templateBytes, err := getTemplateBytes(Router)
 	if err != nil {
@@ -441,6 +443,36 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 			obj.SetNamespace(graph.Spec.RouterConfig.NameSpace)
 		} else {
 			obj.SetNamespace(graph.Namespace)
+		}
+
+		if routerSvcName != "" && routerSvcName != DefaultRouterServiceName {
+			if obj.GetKind() == Service {
+				service_obj := &corev1.Service{}
+				err = scheme.Scheme.Convert(obj, service_obj, nil)
+				if err != nil {
+					return fmt.Errorf("failed to convert unstructured to service: %v", err)
+				}
+				service_obj.SetName(routerSvcName)
+				service_obj.Spec.Selector["app"] = routerSvcName
+				err = scheme.Scheme.Convert(service_obj, obj, nil)
+				if err != nil {
+					return fmt.Errorf("failed to convert unstructured to service: %v", err)
+				}
+			} else if obj.GetKind() == Deployment {
+				deployment_obj := &appsv1.Deployment{}
+				err = scheme.Scheme.Convert(obj, deployment_obj, nil)
+				if err != nil {
+					return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+				}
+				deployment_obj.SetName(routerSvcName + dplymtSubfix)
+				// Set the labels if they're specified
+				deployment_obj.Spec.Selector.MatchLabels["app"] = routerSvcName
+				deployment_obj.Spec.Template.Labels["app"] = routerSvcName
+				err = scheme.Scheme.Convert(deployment_obj, obj, nil)
+				if err != nil {
+					return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+				}
+			}
 		}
 
 		err = applyResourceToK8s(ctx, client, obj)
