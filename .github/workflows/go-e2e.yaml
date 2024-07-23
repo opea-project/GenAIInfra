@@ -9,8 +9,7 @@ on:
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
       - microservices-connector/**
-      - manifests/ChatQnA/**
-      - manifests/DocSum/xeon/docsum*
+      - manifests/common/**
       - .github/workflows/scripts/e2e/gmc_xeon_test.sh
   workflow_dispatch:
 
