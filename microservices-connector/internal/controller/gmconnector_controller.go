@@ -33,33 +33,33 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
 
- const (
-	 Configmap                = "Configmap"
-	 ConfigmapGaudi           = "ConfigmapGaudi"
-	 Embedding                = "Embedding"
-	 TeiEmbedding             = "TeiEmbedding"
-	 TeiEmbeddingGaudi        = "TeiEmbeddingGaudi"
-	 VectorDB                 = "VectorDB"
-	 Retriever                = "Retriever"
-	 Reranking                = "Reranking"
-	 TeiReranking             = "TeiReranking"
-	 Tgi                      = "Tgi"
-	 TgiGaudi                 = "TgiGaudi"
-	 Llm                      = "Llm"
-	 DocSum                   = "DocSum"
-	 DocSumGaudi              = "DocSumGaudi"
-	 Router                   = "router"
-	 DataPrep                 = "DataPrep"
-	 xeon                     = "xeon"
-	 gaudi                    = "gaudi"
-	 WebRetriever             = "WebRetriever"
-	 yaml_dir                 = "/tmp/microservices/yamls"
-	 Service                  = "Service"
-	 Deployment               = "Deployment"
-	 dplymtSubfix             = "-deployment"
-	 METADATA_PLATFORM        = "gmc/platform"
-	 DefaultRouterServiceName = "router-service"
- )
+const (
+       Configmap                = "Configmap"
+       ConfigmapGaudi           = "ConfigmapGaudi"
+       Embedding                = "Embedding"
+       TeiEmbedding             = "TeiEmbedding"
+       TeiEmbeddingGaudi        = "TeiEmbeddingGaudi"
+       VectorDB                 = "VectorDB"
+       Retriever                = "Retriever"
+       Reranking                = "Reranking"
+       TeiReranking             = "TeiReranking"
+       Tgi                      = "Tgi"
+       TgiGaudi                 = "TgiGaudi"
+       Llm                      = "Llm"
+       DocSum                   = "DocSum"
+       DocSumGaudi              = "DocSumGaudi"
+       Router                   = "router"
+       DataPrep                 = "DataPrep"
+       xeon                     = "xeon"
+       gaudi                    = "gaudi"
+       WebRetriever             = "WebRetriever"
+       yaml_dir                 = "/tmp/microservices/yamls"
+       Service                  = "Service"
+       Deployment               = "Deployment"
+       dplymtSubfix             = "-deployment"
+       METADATA_PLATFORM        = "gmc/platform"
+       DefaultRouterServiceName = "router-service"
+)
 
 var yamlDict = map[string]string{
 	TeiEmbedding:      yaml_dir + "/tei.yaml",
@@ -427,7 +427,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 			obj.SetNamespace(graph.Namespace)
 		}
 
-		if routerSvcName != "" && routerSvcName != DefaultRouterServiceName{
+		if routerSvcName != "" && routerSvcName != DefaultRouterServiceName {
 			if obj.GetKind() == Service {
 				service_obj := &corev1.Service{}
 				err = scheme.Scheme.Convert(obj, service_obj, nil)
@@ -455,7 +455,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 					return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
 				}
 			}
-		 }
+	        }
 
 		err = applyResourceToK8s(ctx, client, obj)
 		if err != nil {
