@@ -47,7 +47,6 @@ const (
 	TgiGaudi                 = "TgiGaudi"
 	Llm                      = "Llm"
 	DocSum                   = "DocSum"
-	DocSumGaudi              = "DocSumGaudi"
 	Router                   = "router"
 	DataPrep                 = "DataPrep"
 	xeon                     = "xeon"

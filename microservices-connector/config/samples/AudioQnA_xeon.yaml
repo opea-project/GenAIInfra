@@ -33,7 +33,7 @@ spec:
       - name: Tgi
         internalService:
           serviceName: tgi-svc
-          config: 
+          config:
             endpoint: /generate
             MODEL_ID: Intel/neural-chat-7b-v3-3
           isDownstreamService: true
@@ -57,4 +57,3 @@ spec:
           config:
             endpoint: /v1/audio/speech
             TTS_ENDPOINT: speecht5-svc
-
