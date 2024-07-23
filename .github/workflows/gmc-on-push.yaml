@@ -8,7 +8,7 @@ on:
     branches: ["main"]
     paths:
       - microservices-connector/**
-      - manifests/**
+      - manifests/common/**
       - "!**.md"
       - "!**.txt"
       - "!**.png"
