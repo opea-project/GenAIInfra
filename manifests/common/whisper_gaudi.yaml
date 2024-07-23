@@ -84,15 +84,7 @@ spec:
                 name: extra-env-config
                 optional: true
           securityContext:
-            allowPrivilegeEscalation: false
-            capabilities:
-              drop:
-              - ALL
-            readOnlyRootFilesystem: false
-            runAsNonRoot: true
-            runAsUser: 1000
-            seccompProfile:
-              type: RuntimeDefault
+            {}
           image: "opea/whisper-gaudi:latest"
           imagePullPolicy: IfNotPresent
           ports:
