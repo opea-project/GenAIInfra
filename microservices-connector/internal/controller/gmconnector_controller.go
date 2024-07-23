@@ -52,27 +52,41 @@ const (
 	xeon              = "xeon"
 	gaudi             = "gaudi"
 	WebRetriever      = "WebRetriever"
-	yaml_dir          = "/tmp/microservices/yamls"
+	yaml_dir          = "/tmp/microservices/yamls/"
 	Service           = "Service"
 	Deployment        = "Deployment"
 	dplymtSubfix      = "-deployment"
 	METADATA_PLATFORM = "gmc/platform"
+	ASR               = "Asr"
+	TTS               = "Tts"
+	SpeechT5          = "SpeechT5"
+	SpeechT5Gaudi     = "SpeechT5Gaudi"
+	Whisper           = "Whisper"
+	WhisperGaudi      = "WhisperGaudi"
+	DataPrep          = "DataPrep"
 )
 
 var yamlDict = map[string]string{
-	TeiEmbedding:      yaml_dir + "/tei.yaml",
-	TeiEmbeddingGaudi: yaml_dir + "/tei_gaudi.yaml",
-	Embedding:         yaml_dir + "/embedding-usvc.yaml",
-	VectorDB:          yaml_dir + "/redis-vector-db.yaml",
-	Retriever:         yaml_dir + "/retriever-usvc.yaml",
-	Reranking:         yaml_dir + "/reranking-usvc.yaml",
-	TeiReranking:      yaml_dir + "/teirerank.yaml",
-	Tgi:               yaml_dir + "/tgi.yaml",
-	TgiGaudi:          yaml_dir + "/tgi_gaudi.yaml",
-	Llm:               yaml_dir + "/llm-uservice.yaml",
-	DocSum:            yaml_dir + "/docsum-llm-uservice.yaml",
-	Router:            yaml_dir + "/gmc-router.yaml",
-	WebRetriever:      yaml_dir + "/web-retriever.yaml",
+	TeiEmbedding:      yaml_dir + "tei.yaml",
+	TeiEmbeddingGaudi: yaml_dir + "tei_gaudi.yaml",
+	Embedding:         yaml_dir + "embedding-usvc.yaml",
+	VectorDB:          yaml_dir + "redis-vector-db.yaml",
+	Retriever:         yaml_dir + "retriever-usvc.yaml",
+	Reranking:         yaml_dir + "reranking-usvc.yaml",
+	TeiReranking:      yaml_dir + "teirerank.yaml",
+	Tgi:               yaml_dir + "tgi.yaml",
+	TgiGaudi:          yaml_dir + "tgi_gaudi.yaml",
+	Llm:               yaml_dir + "llm-uservice.yaml",
+	DocSum:            yaml_dir + "docsum-llm-uservice.yaml",
+	Router:            yaml_dir + "gmc-router.yaml",
+	WebRetriever:      yaml_dir + "web-retriever.yaml",
+	ASR:               yaml_dir + "asr.yaml",
+	TTS:               yaml_dir + "tts.yaml",
+	SpeechT5:          yaml_dir + "speecht5.yaml",
+	SpeechT5Gaudi:     yaml_dir + "speecht5_gaudi.yaml",
+	Whisper:           yaml_dir + "whisper.yaml",
+	WhisperGaudi:      yaml_dir + "whisper_gaudi.yaml",
+	DataPrep:          yaml_dir + "data-prep.yaml",
 }
 
 // GMConnectorReconciler reconciles a GMConnector object
@@ -213,7 +227,13 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 }
 
 func isDownStreamEndpointKey(keyname string) bool {
-	return keyname == "TEI_EMBEDDING_ENDPOINT" || keyname == "TEI_RERANKING_ENDPOINT" || keyname == "TGI_LLM_ENDPOINT" || keyname == "REDIS_URL"
+	return keyname == "TEI_EMBEDDING_ENDPOINT" ||
+		keyname == "TEI_RERANKING_ENDPOINT" ||
+		keyname == "TGI_LLM_ENDPOINT" ||
+		keyname == "REDIS_URL" ||
+		keyname == "ASR_ENDPOINT" ||
+		keyname == "TTS_ENDPOINT" ||
+		keyname == "TEI_ENDPOINT"
 }
 
 func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) *mcv1alpha3.Step {
