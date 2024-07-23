@@ -24,7 +24,7 @@ spec:
           config:
             endpoint: /v1/asr
           isDownstreamService: true
-      - name: ASR
+      - name: Asr
         internalService:
           serviceName: asr-svc
           config:
@@ -50,7 +50,7 @@ spec:
           config:
             endpoint: /v1/tts
           isDownstreamService: true
-      - name: TTS
+      - name: Tts
         data: $response
         internalService:
           serviceName: tts-svc
