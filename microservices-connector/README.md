@@ -20,8 +20,8 @@ Istio Service Mesh can also be leveraged to facilicate communication between mic
 
 ## Getting Started
 
-**CRD** defines are at config/crd/bases/  
-**API** is api/v1alpha3/  
+**CRD** defines are at config/crd/bases/
+**API** is api/v1alpha3/
 **Controller** is at internal/controller
 
 ### Prerequisites
@@ -75,9 +75,7 @@ kubectl apply -f config/crd/bases/gmc.opea.io_gmconnectors.yaml
 
 ```sh
 mkdir -p $(pwd)/config/manifests
-cp $(dirname $(pwd))/manifests/ChatQnA/*.yaml -p $(pwd)/config/manifests/
-cp $(dirname $(pwd))/manifests/DocSum/xeon/docsum_llm.yaml $(pwd)/config/manifests/
-cp $(dirname $(pwd))/manifests/DocSum/gaudi/docsum_gaudi_llm.yaml $(pwd)/config/manifests/
+cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
 ```
 
 **Copy GMC router manifest**
