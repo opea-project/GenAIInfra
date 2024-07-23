@@ -36,8 +36,6 @@ function copy_manifests() {
     # Copy manifest into gmc
     mkdir -p $(pwd)/config/manifests
     cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
-    cp $(dirname $(pwd))/manifests/DocSum/xeon/docsum_llm.yaml -p $(pwd)/config/manifests/
-    cp $(dirname $(pwd))/manifests/DocSum/gaudi/docsum_gaudi_llm.yaml -p $(pwd)/config/manifests/
 }
 
 function init_gmc() {
