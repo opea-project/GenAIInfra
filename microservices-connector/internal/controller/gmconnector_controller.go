@@ -52,29 +52,41 @@ const (
 	xeon                     = "xeon"
 	gaudi                    = "gaudi"
 	WebRetriever             = "WebRetriever"
-	yaml_dir                 = "/tmp/microservices/yamls"
+	yaml_dir                 = "/tmp/microservices/yamls/"
 	Service                  = "Service"
 	Deployment               = "Deployment"
 	dplymtSubfix             = "-deployment"
 	METADATA_PLATFORM        = "gmc/platform"
 	DefaultRouterServiceName = "router-service"
+	ASR                      = "Asr"
+	TTS                      = "Tts"
+	SpeechT5                 = "SpeechT5"
+	SpeechT5Gaudi            = "SpeechT5Gaudi"
+	Whisper                  = "Whisper"
+	WhisperGaudi             = "WhisperGaudi"
 )
 
 var yamlDict = map[string]string{
-	TeiEmbedding:      yaml_dir + "/tei.yaml",
-	TeiEmbeddingGaudi: yaml_dir + "/tei_gaudi.yaml",
-	Embedding:         yaml_dir + "/embedding-usvc.yaml",
-	VectorDB:          yaml_dir + "/redis-vector-db.yaml",
-	Retriever:         yaml_dir + "/retriever-usvc.yaml",
-	Reranking:         yaml_dir + "/reranking-usvc.yaml",
-	TeiReranking:      yaml_dir + "/teirerank.yaml",
-	Tgi:               yaml_dir + "/tgi.yaml",
-	TgiGaudi:          yaml_dir + "/tgi_gaudi.yaml",
-	Llm:               yaml_dir + "/llm-uservice.yaml",
-	DocSum:            yaml_dir + "/docsum-llm-uservice.yaml",
-	Router:            yaml_dir + "/gmc-router.yaml",
-	WebRetriever:      yaml_dir + "/web-retriever.yaml",
-	DataPrep:          yaml_dir + "/data-prep.yaml",
+	TeiEmbedding:      yaml_dir + "tei.yaml",
+	TeiEmbeddingGaudi: yaml_dir + "tei_gaudi.yaml",
+	Embedding:         yaml_dir + "embedding-usvc.yaml",
+	VectorDB:          yaml_dir + "redis-vector-db.yaml",
+	Retriever:         yaml_dir + "retriever-usvc.yaml",
+	Reranking:         yaml_dir + "reranking-usvc.yaml",
+	TeiReranking:      yaml_dir + "teirerank.yaml",
+	Tgi:               yaml_dir + "tgi.yaml",
+	TgiGaudi:          yaml_dir + "tgi_gaudi.yaml",
+	Llm:               yaml_dir + "llm-uservice.yaml",
+	DocSum:            yaml_dir + "docsum-llm-uservice.yaml",
+	Router:            yaml_dir + "gmc-router.yaml",
+	WebRetriever:      yaml_dir + "web-retriever.yaml",
+	ASR:               yaml_dir + "asr.yaml",
+	TTS:               yaml_dir + "tts.yaml",
+	SpeechT5:          yaml_dir + "speecht5.yaml",
+	SpeechT5Gaudi:     yaml_dir + "speecht5_gaudi.yaml",
+	Whisper:           yaml_dir + "whisper.yaml",
+	WhisperGaudi:      yaml_dir + "whisper_gaudi.yaml",
+	DataPrep:          yaml_dir + "data-prep.yaml",
 }
 
 // GMConnectorReconciler reconciles a GMConnector object
@@ -146,19 +158,19 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 			service_obj := &corev1.Service{}
 			err = scheme.Scheme.Convert(obj, service_obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
+				return nil, fmt.Errorf("failed to convert unstructured to service %s: %v", svc, err)
 			}
 			service_obj.SetName(svc)
 			service_obj.Spec.Selector["app"] = svc
 			err = scheme.Scheme.Convert(service_obj, obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to service: %v", err)
+				return nil, fmt.Errorf("failed to convert service %s to object: %v", svc, err)
 			}
 		} else if obj.GetKind() == Deployment {
 			deployment_obj := &appsv1.Deployment{}
 			err = scheme.Scheme.Convert(obj, deployment_obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+				return nil, fmt.Errorf("failed to convert unstructured to deployment %s: %v", obj.GetName(), err)
 			}
 			if svc != "" {
 				deployment_obj.SetName(svc + dplymtSubfix)
@@ -179,7 +191,7 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 						value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
 						// value = getDsEndpoint(platform, name, graphNs, ds)
 						if err != nil {
-							return nil, fmt.Errorf("failed to find downstream service endpoint: %v", err)
+							return nil, fmt.Errorf("failed to find downstream service endpoint %s-%s: %v", name, value, err)
 						}
 					}
 					itemEnvVar := corev1.EnvVar{
@@ -199,7 +211,7 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 
 			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+				return nil, fmt.Errorf("failed to convert deployment %s to obj: %v", deployment_obj.GetName(), err)
 			}
 		}
 
@@ -215,7 +227,13 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 }
 
 func isDownStreamEndpointKey(keyname string) bool {
-	return keyname == "TEI_EMBEDDING_ENDPOINT" || keyname == "TEI_RERANKING_ENDPOINT" || keyname == "TGI_LLM_ENDPOINT" || keyname == "REDIS_URL" || keyname == "TEI_ENDPOINT"
+	return keyname == "TEI_EMBEDDING_ENDPOINT" ||
+		keyname == "TEI_RERANKING_ENDPOINT" ||
+		keyname == "TGI_LLM_ENDPOINT" ||
+		keyname == "REDIS_URL" ||
+		keyname == "ASR_ENDPOINT" ||
+		keyname == "TTS_ENDPOINT" ||
+		keyname == "TEI_ENDPOINT"
 }
 
 func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) *mcv1alpha3.Step {
@@ -329,10 +347,9 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if step.Executor.ExternalService == "" {
 				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
-				// err := reconcileResource(ctx, r.Client, step.StepName, ns, svcName, &step.Executor.InternalService.Config, service)
 				objs, err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node)
 				if err != nil {
-					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.Executor.InternalService.ServiceName)
+					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.StepName)
 				}
 				if len(objs) != 0 {
 					for _, obj := range objs {
@@ -340,7 +357,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 							service := &corev1.Service{}
 							err = scheme.Scheme.Convert(obj, service, nil)
 							if err != nil {
-								return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service")
+								return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to convert service %s", obj.GetName())
 							}
 							graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.InternalService.Config["endpoint"]
 							fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
@@ -431,19 +448,19 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 				service_obj := &corev1.Service{}
 				err = scheme.Scheme.Convert(obj, service_obj, nil)
 				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to service: %v", err)
+					return fmt.Errorf("failed to convert unstructured to router service %s: %v", routerSvcName, err)
 				}
 				service_obj.SetName(routerSvcName)
 				service_obj.Spec.Selector["app"] = routerSvcName
 				err = scheme.Scheme.Convert(service_obj, obj, nil)
 				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to service: %v", err)
+					return fmt.Errorf("failed to convert router service %s to obj: %v", routerSvcName, err)
 				}
 			} else if obj.GetKind() == Deployment {
 				deployment_obj := &appsv1.Deployment{}
 				err = scheme.Scheme.Convert(obj, deployment_obj, nil)
 				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+					return fmt.Errorf("failed to convert unstructured to router deployment %s: %v", routerSvcName+dplymtSubfix, err)
 				}
 				deployment_obj.SetName(routerSvcName + dplymtSubfix)
 				// Set the labels if they're specified
@@ -451,7 +468,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 				deployment_obj.Spec.Template.Labels["app"] = routerSvcName
 				err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to deployment: %v", err)
+					return fmt.Errorf("failed to convert router deployment %s to obj: %v", routerSvcName+dplymtSubfix, err)
 				}
 			}
 		}
