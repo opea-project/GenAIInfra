@@ -1,0 +1,23 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: router
+spec:
+  action: ALLOW
+  rules:
+  - when:
+    - key: request.auth.claims[iss]
+      values:
+      - 'http://${KEYCLOAK_ADDR}/realms/istio'
+    - key: request.auth.claims[preferred_username]
+      values:
+      - 'mary'
+    - key: request.auth.claims[aud]
+      values:
+      - 'istio'
+  selector:
+    matchLabels:
+      app: router-service

@@ -1,0 +1,34 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: router-gateway
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - '*'
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: chatqna-router
+  namespace: chatqa
+spec:
+  gateways:
+  - default/router-gateway
+  hosts:
+  - '*'
+  http:
+  - route:
+    - destination:
+        host: router-service
+        port:
+          number: 8080
