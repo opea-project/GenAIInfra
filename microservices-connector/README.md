@@ -83,6 +83,7 @@ cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
 ```sh
 cp $(pwd)/config/gmcrouter/gmc-router.yaml -p $(pwd)/config/manifests/
 ```
+
 **NOTE:**
 before apply the manifests, please replace your own huggingface tokens in the manifests
 
