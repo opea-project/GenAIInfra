@@ -29,14 +29,13 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# wait for issue https://github.com/opea-project/GenAIExamples/issues/426 to be resolved
-#tei:
-#  image:
-#    repository: opea/tei-gaudi
-#    tag: "latest"
-#  resources:
-#    limits:
-#      habana.ai/gaudi: 1
+tei:
+  image:
+    repository: ghcr.io/huggingface/tei-gaudi
+    tag: synapse_1.16
+  resources:
+    limits:
+      habana.ai/gaudi: 1
 
 # To override values in subchart tgi
 tgi:
