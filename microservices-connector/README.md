@@ -73,8 +73,6 @@ kubectl apply -f config/crd/bases/gmc.opea.io_gmconnectors.yaml
 
 **Get related manifests for GenAI Components**
 
-
-
 ```sh
 mkdir -p $(pwd)/config/manifests
 cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
@@ -85,12 +83,14 @@ cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
 ```sh
 cp $(pwd)/config/gmcrouter/gmc-router.yaml -p $(pwd)/config/manifests/
 ```
-**NOTE:** 
+
+**NOTE:**
 before apply the manifests, please replace your own huggingface tokens in the manifests
 
 ```sh
 find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$YOURTOKEN#g" {} \;
 ```
+
 if you have pre-defined directory to save the models on you cluster hosts, please set the path to the manifests
 
 ```sh
