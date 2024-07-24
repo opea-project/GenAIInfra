@@ -64,4 +64,3 @@ spec:
   selector:
     app: keycloak
   type: LoadBalancer
-

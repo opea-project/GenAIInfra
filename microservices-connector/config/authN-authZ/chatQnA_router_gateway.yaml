@@ -32,4 +32,3 @@ spec:
         host: router-service
         port:
           number: 8080
-

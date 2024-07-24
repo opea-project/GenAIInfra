@@ -104,7 +104,7 @@ export KEYCLOAK_ADDR=${HOST_IP}:${KEYCLOAK_PORT}
 
 **Note:** Double check if the host ip captured is the correct ip.
 
-Access the Keycloak admin console through the ```KEYCLOAK_ADDR``` to configure the users. Use the username and password specified in the yaml file to login.
+Access the Keycloak admin console through the `KEYCLOAK_ADDR` to configure the users. Use the username and password specified in the yaml file to login.
 
 The user management is done via Keycloak and the configuration steps look like this:
 
@@ -135,6 +135,7 @@ envsubst < $(pwd)/config/authN-authZ/chatQnA_authZ_keycloak.yaml | kubectl -n ch
 **Validate authentication and authorization with different JWT tokens**
 
 Fetch ID tokens for the two different users. **Note:** Remember to replace the `password` in the curl url and turn off the all the 'Required actions' under the 'Authentication' section.
+
 ```bash
 # get id token for mary. Please replace the password inside the url.
 export TOKENA=$(curl -X POST 'http://${KEYCLOAK_ADDR}/realms/istio/protocol/openid-connect/token' -H 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'grant_type=password' --data-urlencode 'client_id=istio' --data-urlencode 'username=mary' -d 'password=${PASSWORD}' -d 'scope=openid' -d 'response_type=id_token' | jq -r .id_token)
