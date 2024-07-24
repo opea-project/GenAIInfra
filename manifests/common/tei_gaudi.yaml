@@ -87,7 +87,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/tei-gaudi:latest"
+          image: "ghcr.io/huggingface/tei-gaudi:synapse_1.16"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /data
