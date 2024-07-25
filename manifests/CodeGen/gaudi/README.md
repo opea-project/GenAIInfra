@@ -1,4 +1,4 @@
-<h1 align="center" id="title">Deploy CodeGen in Kubernetes Cluster on Xeon</h1>
+# Deploy CodeGen in Kubernetes Cluster on Xeon
 
 ## Deploy Services
 
