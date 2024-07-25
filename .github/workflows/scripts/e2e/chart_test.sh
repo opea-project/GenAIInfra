@@ -2,86 +2,55 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-LOG_PATH=.
-USER_ID=$(whoami)
-CHART_MOUNT=/home/$USER_ID/.cache/huggingface/hub
-# IMAGE_REPO is $OPEA_IMAGE_REPO, or else ""
-IMAGE_REPO=${OPEA_IMAGE_REPO:-""}
+#set -xe
 
-function init_codegen() {
-    # insert a prefix before opea/.*, the prefix is IMAGE_REPO
-    find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" {} \;
-    # set huggingface token
-    find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
-    # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
-    find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: .*#modelUseHostPath: $CHART_MOUNT#g" {} \;
-    # replace the pull policy "IfNotPresent" with "Always"
-    find .. -name '*values.yaml' -type f -exec sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" {} \;
+function dump_pods_status() {
+    namespace=$1
+    echo "-----DUMP POD STATUS in NS $namespace------"
+
+    # get pod status
+    outputs=$(kubectl get pods -n $namespace -owide)
+    echo $outputs
+    echo "-----------------------------------"
+
+    # Get all pods in the namespace and their statuses
+    pods=$(kubectl get pods -n $namespace --no-headers)
+
+    # Loop through each pod
+    echo "$pods" | while read -r line; do
+        pod_name=$(echo $line | awk '{print $1}')
+        ready=$(echo $line | awk '{print $2}')
+        status=$(echo $line | awk '{print $3}')
+
+        # Extract the READY count
+        ready_count=$(echo $ready | cut -d'/' -f1)
+        required_count=$(echo $ready | cut -d'/' -f2)
+
+        # Check if the pod is not in "Running" status or READY count is less than required
+        if [[ "$status" != "Running" || "$ready_count" -lt "$required_count" ]]; then
+            echo "Pod: $pod_name"
+            echo "Details:"
+            kubectl describe pod $pod_name -n $namespace
+            echo "-----------------------------------"
+        fi
+    done
 }
 
-function init_chatqna() {
-    # replace volume: /mnt with volume: $CHART_MOUNT
-    find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: .*#modelUseHostPath: $CHART_MOUNT#g" {} \;
-    # replace the repository "image: opea/*" with "image: ${IMAGE_REPO}opea/"
-    find .. -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${IMAGE_REPO}opea/#g" {} \;
-    # set huggingface token
-    find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat /home/$USER_ID/.cache/huggingface/token)#g" {} \;
-    # replace the pull policy "IfNotPresent" with "Always"
-    find .. -name '*values.yaml' -type f -exec sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" {} \;
-}
+function dump_failed_pod_logs() {
+    namespace=$1
+    logfile=$2
 
-function validate_codegen() {
-    # validate mega service
-    ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
-    port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
-    # Curl the Mega Service
-    curl http://${ip_address}:${port}/v1/codegen \
-    -H "Content-Type: application/json" \
-    -d '{"messages": "Implement a high-level API for a TODO list application. The API takes as input an operation request and updates the TODO list in place. If the request is invalid, raise an exception."}' > $LOG_PATH/curl_codegen.log
-    exit_code=$?
-    if [ $exit_code -ne 0 ]; then
-        echo "Megaservice codegen failed, please check the logs in ${LOG_PATH}!"
-        exit 1
-    fi
+    failed_test_suite=$(awk '/TEST SUITE:/{suite=$0} /Phase:/{if($2=="Failed"){print suite; exit}}' "$logfile")
+    failed_svc_name=$(echo "$failed_test_suite" | sed 's/^[ \t]*//;s/^TEST SUITE:[ \t]*//;s/-testpod$//')
 
-    echo "Checking response results, make sure the output is reasonable. "
-    local status=false
-    if [[ -f $LOG_PATH/curl_codegen.log ]] && \
-    [[ $(grep -c "print" $LOG_PATH/curl_codegen.log) != 0 ]]; then
-        status=true
-    fi
-
-    if [ $status == false ]; then
-        echo "Response check failed, please check the logs in artifacts!"
-    else
-        echo "Response check succeed!"
+    if [[ -n $failed_svc_name ]]; then
+        # Get the exact pod name
+        pod_name=$(kubectl get pods -n $namespace | grep -v 'testpod' | grep $failed_svc_name | awk '{print $1}')
+        echo "------DUMP POD $pod_name LOG in NS $namespace---------"
+        kubectl logs $pod_name -n $namespace
     fi
 }
 
-function validate_chatqna() {
-    sleep 60
-    set -xe
-    ip_address=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.clusterIP}')
-    port=$(kubectl get svc $RELEASE_NAME -n $NAMESPACE -o jsonpath='{.spec.ports[0].port}')
-    # Curl the Mega Service
-    curl http://${ip_address}:${port}/v1/chatqna -H "Content-Type: application/json" -d '{
-        "messages": "What is the revenue of Nike in 2023?"}' > ${LOG_PATH}/curl_megaservice.log
-    exit_code=$?
-
-    echo "Checking response results, make sure the output is reasonable. "
-    local status=false
-    if [[ -f $LOG_PATH/curl_megaservice.log ]] && \
-    [[ $(grep -c "billion" $LOG_PATH/curl_megaservice.log) != 0 ]]; then
-        status=true
-    fi
-
-    if [ $status == false ]; then
-        echo "Response check failed, please check the logs in artifacts!"
-        exit 1
-    else
-        echo "Response check succeed!"
-    fi
-}
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <function_name>"
@@ -89,25 +58,11 @@ if [ $# -eq 0 ]; then
 fi
 
 case "$1" in
-    init_codegen)
-        pushd helm-charts/codegen
-        init_codegen
-        popd
+    dump_pods_status)
+        dump_pods_status $2
         ;;
-    validate_codegen)
-        RELEASE_NAME=$2
-        NAMESPACE=$3
-        validate_codegen
-        ;;
-    init_chatqna)
-        pushd helm-charts/chatqna
-        init_chatqna
-        popd
-        ;;
-    validate_chatqna)
-        RELEASE_NAME=$2
-        NAMESPACE=$3
-        validate_chatqna
+    dump_failed_pod_logs)
+        dump_failed_pod_logs $2 $3
         ;;
     *)
         echo "Unknown function: $1"

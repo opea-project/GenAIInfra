@@ -120,7 +120,6 @@ jobs:
           helm-charts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER}}
           value_file="values.yaml"
           if [ "${{ matrix.hardware }}" == "gaudi" ]; then
-            # EXTRAPARAM="--set tgi.image.tag=1.2.1"
             if [ -f ${{ env.CHART_FOLDER}}/gaudi-values.yaml ]; then
               value_file="gaudi-values.yaml"
             else
@@ -137,6 +136,7 @@ jobs:
               $RELEASE_NAME ${{ env.CHART_FOLDER}} ; then
             echo "Failed to install chart ${{ matrix.example }}"
             echo "skip_validate=true" >> $GITHUB_ENV
+            .github/workflows/scripts/e2e/chart_test.sh dump_pods_status $NAMESPACE
             exit 1
           fi
           sleep 120
@@ -162,6 +162,7 @@ jobs:
             if [[ -f $LOG_PATH/charts-${chart}.log ]] && \
             [[ $(grep -c "^Phase:.*Failed" $LOG_PATH/charts-${chart}.log) != 0 ]]; then
                 teststatus=false
+                .github/workflows/scripts/e2e/chart_test.sh dump_failed_pod_logs $NAMESPACE $LOG_PATH/charts-${chart}.log
             else
                 teststatus=true
             fi
