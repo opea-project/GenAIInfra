@@ -1,4 +1,4 @@
-<h1 align="center" id="title">Deploy Autoscaling Ray Cluster with KubeRay in Kubernetes Cluster</h1>
+# Deploy Autoscaling Ray Cluster with KubeRay in Kubernetes Cluster
 
 ## Install KubeRay
 

@@ -1,4 +1,4 @@
-<h1 align="center" id="title">Kubernetes manifests for GenAIComps</h1>
+# Kubernetes manifests for GenAIComps
 
 > [NOTE]
 > The manifests are generated from helm charts automatically.

@@ -1,4 +1,4 @@
-<h1 align="center" id="title">Deploy ChatQnA in Kubernetes Cluster on Xeon</h1>
+# Deploy ChatQnA in Kubernetes Cluster on Xeon
 
 ## Prebuilt images
 
@@ -20,7 +20,7 @@ For Gaudi:
 - tgi-service: ghcr.io/huggingface/tgi-gaudi:1.2.1
 
 > [NOTE]  
-> Please refer README [for Xeon](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/docker-composer/xeon/README.md) and [for Gaudi](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/docker-composer/gaudi/README.md) to build the opea images
+> Refer to the README [for Xeon](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/docker-composer/xeon/README.md) and [for Gaudi](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/docker-composer/gaudi/README.md) to build the opea images
 
 ## Deploy Services with Xeon
 
