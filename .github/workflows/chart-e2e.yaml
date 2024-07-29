@@ -142,7 +142,6 @@ jobs:
             .github/workflows/scripts/e2e/chart_test.sh dump_pods_status $NAMESPACE
             exit 1
           fi
-          sleep 120
 
       - name: Validate e2e test
         if: always()
