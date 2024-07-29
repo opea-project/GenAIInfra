@@ -102,6 +102,26 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: v1/health_check
+              port: embedding-usvc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: embedding-usvc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: embedding-usvc
+            initialDelaySeconds: 5
+            periodSeconds: 5
           resources:
             {}
       volumes:
