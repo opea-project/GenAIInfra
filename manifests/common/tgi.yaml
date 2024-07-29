@@ -16,10 +16,7 @@ metadata:
 data:
   MODEL_ID: "Intel/neural-chat-7b-v3-3"
   PORT: "2080"
-  HUGGING_FACE_HUB_TOKEN: "insert-your-huggingface-token-here"
   HF_TOKEN: "insert-your-huggingface-token-here"
-  MAX_INPUT_TOKENS: "1024"
-  MAX_TOTAL_TOKENS: "4096"
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
@@ -104,24 +101,21 @@ spec:
               protocol: TCP
           livenessProbe:
             failureThreshold: 24
-            httpGet:
-              path: /health
-              port: http
             initialDelaySeconds: 5
             periodSeconds: 5
+            tcpSocket:
+              port: http
           readinessProbe:
-            httpGet:
-              path: /health
-              port: http
             initialDelaySeconds: 5
             periodSeconds: 5
+            tcpSocket:
+              port: http
           startupProbe:
             failureThreshold: 120
-            httpGet:
-              path: /health
-              port: http
             initialDelaySeconds: 5
             periodSeconds: 5
+            tcpSocket:
+              port: http
           resources:
             {}
       volumes:

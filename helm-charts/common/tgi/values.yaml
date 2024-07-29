@@ -50,26 +50,45 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+# Use TCP probe instead of HTTP due to bug #483
+# https://github.com/opea-project/GenAIExamples/issues/483
 livenessProbe:
-  httpGet:
-    path: /health
+  tcpSocket:
     port: http
   initialDelaySeconds: 5
   periodSeconds: 5
   failureThreshold: 24
 readinessProbe:
-  httpGet:
-    path: /health
+  tcpSocket:
     port: http
   initialDelaySeconds: 5
   periodSeconds: 5
 startupProbe:
-  httpGet:
-    path: /health
+  tcpSocket:
     port: http
   initialDelaySeconds: 5
   periodSeconds: 5
   failureThreshold: 120
+#livenessProbe:
+#  httpGet:
+#    path: /health
+#    port: http
+#  initialDelaySeconds: 5
+#  periodSeconds: 5
+#  failureThreshold: 24
+#readinessProbe:
+#  httpGet:
+#    path: /health
+#    port: http
+#  initialDelaySeconds: 5
+#  periodSeconds: 5
+#startupProbe:
+#  httpGet:
+#    path: /health
+#    port: http
+#  initialDelaySeconds: 5
+#  periodSeconds: 5
+#  failureThreshold: 120
 
 nodeSelector: {}
 

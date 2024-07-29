@@ -10,10 +10,7 @@ metadata:
 data:
   MODEL_ID: {{ .Values.LLM_MODEL_ID | quote }}
   PORT: {{ .Values.port | quote }}
-  HUGGING_FACE_HUB_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
-  MAX_INPUT_TOKENS: "1024"
-  MAX_TOTAL_TOKENS: "4096"
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
