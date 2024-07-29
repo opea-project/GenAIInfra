@@ -46,6 +46,7 @@ jobs:
           echo "should_cleanup=false" >> $GITHUB_ENV
           echo "skip_validate=false" >> $GITHUB_ENV
           echo "KIND_MOUNT_DIR=/mnt/huggingface/hub" >> $GITHUB_ENV
+          echo "KIND_TOKEN_DIR=/mnt/huggingface/token" >> $GITHUB_ENV
 
       - name: Install GMC
         run: |

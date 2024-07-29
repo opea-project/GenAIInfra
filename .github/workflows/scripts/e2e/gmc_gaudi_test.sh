@@ -9,6 +9,7 @@ source ${DIR}/utils.sh
 
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
+TOKEN_DIR=${KIND_TOKEN_DIR:-"/home/$USER_ID/.cache/huggingface/token"}
 CHATQNA_NAMESPACE="${APP_NAMESPACE}-chatqna"
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
@@ -46,6 +47,7 @@ function cleanup_apps() {
 function validate_chatqna() {
    kubectl create ns $CHATQNA_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $CHATQNA_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_gaudi.yaml
+   sed -i "s|insert-your-huggingface-token-here|$(cat $TOKEN_DIR)|g"  $(pwd)/config/samples/chatQnA_gaudi.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_gaudi.yaml
 
    # Wait until the router service is ready

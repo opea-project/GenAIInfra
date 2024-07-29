@@ -114,6 +114,8 @@ spec:
             config:
               endpoint: /generate
               MODEL_ID: Intel/neural-chat-7b-v3-3
+              HUGGING_FACE_HUB_TOKEN: "insert-your-huggingface-token-here"
+              HF_TOKEN: "insert-your-huggingface-token-here"
             isDownstreamService: true
         - name: TgiGaudi
           internalService:
@@ -121,4 +123,6 @@ spec:
             config:
               endpoint: /generate
               MODEL_ID: openlm-research/open_llama_3b
+              HUGGING_FACE_HUB_TOKEN: "insert-your-huggingface-token-here"
+              HF_TOKEN: "insert-your-huggingface-token-here"
             isDownstreamService: true

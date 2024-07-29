@@ -63,7 +63,7 @@ function init_gmc() {
     find . -name '*.yaml' -type f -exec sed -i "s#image: opea/*#image: ${IMAGE_REPO}opea/#g" {} \;
     find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/*#image: \"${IMAGE_REPO}opea/#g" {} \;
     # set huggingface token
-    find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat $TOKEN_DIR)#g" {} \;
+    #find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$(cat $TOKEN_DIR)#g" {} \;
     # replace the pull policy "IfNotPresent" with "Always"
     find . -name '*.yaml' -type f -exec sed -i "s#imagePullPolicy: IfNotPresent#imagePullPolicy: Always#g" {} \;
 }

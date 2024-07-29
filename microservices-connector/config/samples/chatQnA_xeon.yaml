@@ -60,9 +60,12 @@ spec:
           config:
             endpoint: /v1/chat/completions
             TGI_LLM_ENDPOINT: tgi-service-m
+            HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
       - name: Tgi
         internalService:
           serviceName: tgi-service-m
           config:
             endpoint: /generate
+            HUGGING_FACE_HUB_TOKEN: "insert-your-huggingface-token-here"
+            HF_TOKEN: "insert-your-huggingface-token-here"
           isDownstreamService: true
