@@ -19,10 +19,7 @@ function dump_pod_log() {
 function dump_pods_status() {
     namespace=$1
     echo "-----DUMP POD STATUS in NS $namespace------"
-
-    # get pod status
-    outputs=$(kubectl get pods -n $namespace -owide)
-    echo $outputs
+    kubectl get pods -n $namespace -o wide
     echo "-----------------------------------"
 
     # Get all pods in the namespace and their statuses
