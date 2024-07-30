@@ -4,6 +4,18 @@
 
 #set -xe
 
+function dump_pod_log() {
+    pod_name=$1
+    namespace=$2
+    echo "-----------Pod: $pod_name---------"
+    echo "#kubectl describe pod $pod_name -n $namespace"
+    kubectl describe pod $pod_name -n $namespace
+    echo "-----------------------------------"
+    echo "#kubectl logs $pod_name -n $namespace"
+    kubectl logs $pod_name -n $namespace
+    echo "-----------------------------------"
+}
+
 function dump_pods_status() {
     namespace=$1
     echo "-----DUMP POD STATUS in NS $namespace------"
@@ -28,10 +40,7 @@ function dump_pods_status() {
 
         # Check if the pod is not in "Running" status or READY count is less than required
         if [[ "$status" != "Running" || "$ready_count" -lt "$required_count" ]]; then
-            echo "Pod: $pod_name"
-            echo "Details:"
-            kubectl describe pod $pod_name -n $namespace
-            echo "-----------------------------------"
+            dump_pod_log $pod_name $namespace
         fi
     done
 }
@@ -45,12 +54,24 @@ function dump_failed_pod_logs() {
 
     if [[ -n $failed_svc_name ]]; then
         # Get the exact pod name
-        pod_name=$(kubectl get pods -n $namespace | grep -v 'testpod' | grep $failed_svc_name | awk '{print $1}')
-        echo "------DUMP POD $pod_name LOG in NS $namespace---------"
-        kubectl logs $pod_name -n $namespace
+        pods=$(kubectl get pods -n $namespace | grep -v 'testpod' | grep $failed_svc_name | awk '{print $1}')
+        for pod_name in $pods
+        do
+            dump_pod_log $pod_name $namespace
+        done
     fi
 }
 
+function dump_all_pod_logs() {
+    namespace=$1
+    echo "-----DUMP POD STATUS AND LOG in NS $namespace------"
+
+    pods=$(kubectl get pods -n $namespace -o jsonpath='{.items[*].metadata.name}')
+    for pod_name in $pods
+    do
+        dump_pod_log $pod_name $namespace
+    done
+}
 
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <function_name>"
@@ -63,6 +84,9 @@ case "$1" in
         ;;
     dump_failed_pod_logs)
         dump_failed_pod_logs $2 $3
+        ;;
+    dump_all_pod_logs)
+        dump_all_pod_logs $2
         ;;
     *)
         echo "Unknown function: $1"

@@ -44,12 +44,16 @@ jobs:
           cut -d'/' -f3 | sort -u )
           run_matrix="{\"include\":["
           for chart in ${e2e_charts}; do
-            run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\"},"
+            if [ -f $CHARTS_DIR/$chart/gaudi-values.yaml ]; then
+              run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\"},"
+            fi
             run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\"},"
           done
           for chart in ${common_charts}; do
-           run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\",\"directory\":\"common\"},"
-           run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\",\"directory\":\"common\"},"
+            if [ -f $CHARTS_DIR/common/$chart/gaudi-values.yaml ]; then
+              run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\",\"directory\":\"common\"},"
+            fi
+            run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\",\"directory\":\"common\"},"
           done
           run_matrix=$run_matrix"]}"
           echo "run_matrix=${run_matrix}"
@@ -119,14 +123,7 @@ jobs:
           helm-charts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER}}
           value_file="values.yaml"
           if [ "${{ matrix.hardware }}" == "gaudi" ]; then
-            if [ -f ${{ env.CHART_FOLDER}}/gaudi-values.yaml ]; then
-              value_file="gaudi-values.yaml"
-            else
-              echo "No Gaudi version for chart ${{ matrix.example }}, skip test"
-              echo "skip_validate=true" >> $GITHUB_ENV
-              echo "should_cleanup=false" >> $GITHUB_ENV
-              exit 0
-            fi
+            value_file="gaudi-values.yaml"
           fi
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
@@ -161,7 +158,7 @@ jobs:
             if [[ -f $LOG_PATH/charts-${chart}.log ]] && \
             [[ $(grep -c "^Phase:.*Failed" $LOG_PATH/charts-${chart}.log) != 0 ]]; then
                 teststatus=false
-                .github/workflows/scripts/e2e/chart_test.sh dump_failed_pod_logs $NAMESPACE $LOG_PATH/charts-${chart}.log
+                .github/workflows/scripts/e2e/chart_test.sh dump_all_pod_logs $NAMESPACE
             else
                 teststatus=true
             fi
