@@ -48,32 +48,20 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-          {{- if .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.startupProbe }}
+          {{- if not .Values.noProbe }}
           startupProbe:
-            {{- toYaml .Values.startupProbe | nindent 12 }}
+            exec:
+              command:
+              - curl
+              {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
+              - {{ .Values.TEI_EMBEDDING_ENDPOINT }}
+              {{- else }}
+              - http://{{ .Release.Name }}-tei
+              {{- end }}
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
           {{- end }}
-          #{{- if not .Values.noProbe }}
-          #startupProbe:
-          #  exec:
-          #    command:
-          #    - curl
-          #    {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
-          #    - {{ .Values.TEI_EMBEDDING_ENDPOINT }}
-          #    {{- else }}
-          #    - http://{{ .Release.Name }}-tei
-          #    {{- end }}
-          #  initialDelaySeconds: 5
-          #  periodSeconds: 5
-          #  failureThreshold: 120
-          #{{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
