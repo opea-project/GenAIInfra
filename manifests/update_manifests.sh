@@ -14,9 +14,11 @@ function generate_yaml {
   outputdir=$2
 
   helm template $chart ../helm-charts/common/$chart --skip-tests --values ../helm-charts/common/$chart/values.yaml --set global.extraEnvConfig=extra-env-config,noProbe=true > ${outputdir}/$chart.yaml
-  if [ -f ../helm-charts/common/$chart/gaudi-values.yaml ]; then
-    helm template $chart ../helm-charts/common/$chart --skip-tests --values ../helm-charts/common/$chart/gaudi-values.yaml --set global.extraEnvConfig=extra-env-config,noProbe=true  > ${outputdir}/${chart}_gaudi.yaml
-  fi
+
+  for f in `ls ../helm-charts/common/$chart/*-values.yaml 2>/dev/null `; do
+    ext=$(basename $f | cut -d'-' -f1)
+    helm template $chart ../helm-charts/common/$chart --skip-tests --values ${f} --set global.extraEnvConfig=extra-env-config,noProbe=true  > ${outputdir}/${chart}_${ext}.yaml
+  done
 }
 
 mkdir -p $OUTPUTDIR
