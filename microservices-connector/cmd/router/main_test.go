@@ -12,6 +12,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -819,5 +820,97 @@ func TestMcGraphHandler_Timeout(t *testing.T) {
 	expectedErrorMessage := "Failed to process request"
 	if !strings.Contains(string(body), expectedErrorMessage) {
 		t.Errorf("expected error message '%s'; got '%s'", expectedErrorMessage, string(body))
+	}
+}
+
+func TestMcDataHandler(t *testing.T) {
+	// Start a local HTTP server
+	service1 := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+		_, err := io.ReadAll(req.Body)
+		if err != nil {
+			return
+		}
+		response := map[string]interface{}{"predictions": "1"}
+		responseBytes, _ := json.Marshal(response)
+		_, err = rw.Write(responseBytes)
+		if err != nil {
+			return
+		}
+	}))
+	service1Url, err := apis.ParseURL(service1.URL)
+	if err != nil {
+		t.Fatalf("Failed to parse model url")
+	}
+	defer service1.Close()
+
+	// Create a buffer to store the multipart form data
+	var buf bytes.Buffer
+	writer := multipart.NewWriter(&buf)
+
+	// Add form fields
+	err = writer.WriteField("key", "value")
+	if err != nil {
+		t.Fatalf("failed to write form field: %v", err)
+	}
+
+	// Add a file field
+	part, err := writer.CreateFormFile("file", "filename.txt")
+	if err != nil {
+		t.Fatalf("failed to create form file: %v", err)
+	}
+	_, err = part.Write([]byte("file content"))
+	if err != nil {
+		t.Fatalf("failed to write to form file: %v", err)
+	}
+
+	// Close the writer to finalize the multipart form
+	err = writer.Close()
+	if err != nil {
+		t.Fatalf("failed to close writer: %v", err)
+	}
+
+	// Create a new HTTP request with the multipart form data
+	req := httptest.NewRequest(http.MethodPost, "/dataprep", &buf)
+	req.Header.Set("Content-Type", writer.FormDataContentType())
+
+	// Create a ResponseRecorder to capture the response
+	rr := httptest.NewRecorder()
+
+	// Mock the mcGraph data
+	mcGraph = &mcv1alpha3.GMConnector{
+		Spec: mcv1alpha3.GMConnectorSpec{
+			Nodes: map[string]mcv1alpha3.Router{
+				"root": {
+					Steps: []mcv1alpha3.Step{
+						{
+							StepName:   "DataPrep",
+							ServiceURL: service1Url.String(),
+							Executor: mcv1alpha3.Executor{
+								InternalService: mcv1alpha3.GMCTarget{
+									NameSpace:   "default",
+									ServiceName: "example-service",
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	// Call the mcDataHandler function
+	mcDataHandler(rr, req)
+
+	// Check the response status code
+	if status := rr.Code; status != http.StatusOK {
+		t.Errorf("handler returned wrong status code: got %v want %v",
+			status, http.StatusOK)
+	}
+
+	// Check the response body if needed
+	expected := "{\"predictions\":\"1\"}"
+	if strings.TrimSpace(rr.Body.String()) != expected {
+		t.Errorf("handler returned unexpected body: got %v want %v",
+			rr.Body.String(), expected)
 	}
 }

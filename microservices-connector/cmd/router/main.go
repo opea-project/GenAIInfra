@@ -18,6 +18,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"mime/multipart"
 	"net/http"
 	"os"
 
@@ -48,6 +49,7 @@ const (
 	ChunkSize   = 1024
 	ServiceURL  = "serviceUrl"
 	ServiceNode = "node"
+	DataPrep    = "DataPrep"
 )
 
 type EnsembleStepOutput struct {
@@ -477,6 +479,109 @@ func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
 	}
 }
 
+func mcDataHandler(w http.ResponseWriter, r *http.Request) {
+	defaultNode := mcGraph.Spec.Nodes[defaultNodeName]
+	for i := range defaultNode.Steps {
+		step := &defaultNode.Steps[i]
+		if DataPrep == step.StepName {
+			log.Info("Starting execution of step", "stepName", step.StepName)
+			serviceURL := getServiceURLByStepTarget(step, mcGraph.Namespace)
+			log.Info("ServiceURL is", "serviceURL", serviceURL)
+			// Parse the multipart form in the request
+			err := r.ParseMultipartForm(64 << 20) // 64 MB is the default used by ParseMultipartForm
+			if err != nil {
+				http.Error(w, "Failed to parse multipart form", http.StatusBadRequest)
+				return
+			}
+			// Create a buffer to hold the new form data
+			var buf bytes.Buffer
+			writer := multipart.NewWriter(&buf)
+			// Copy all form fields from the original request to the new request
+			for key, values := range r.MultipartForm.Value {
+				for _, value := range values {
+					err := writer.WriteField(key, value)
+					if err != nil {
+						http.Error(w, "Failed to write form field", http.StatusInternalServerError)
+						return
+					}
+				}
+			}
+			// Copy all files from the original request to the new request
+			for key, fileHeaders := range r.MultipartForm.File {
+				for _, fileHeader := range fileHeaders {
+					file, err := fileHeader.Open()
+					if err != nil {
+						http.Error(w, "Failed to open file", http.StatusInternalServerError)
+						return
+					}
+					defer func() {
+						if err := file.Close(); err != nil {
+							log.Error(err, "error closing file")
+						}
+					}()
+					part, err := writer.CreateFormFile(key, fileHeader.Filename)
+					if err != nil {
+						http.Error(w, "Failed to create form file", http.StatusInternalServerError)
+						return
+					}
+					_, err = io.Copy(part, file)
+					if err != nil {
+						http.Error(w, "Failed to copy file", http.StatusInternalServerError)
+						return
+					}
+				}
+			}
+			err = writer.Close()
+			if err != nil {
+				http.Error(w, "Failed to close writer", http.StatusInternalServerError)
+				return
+			}
+			req, err := http.NewRequest(r.Method, serviceURL, &buf)
+			if err != nil {
+				http.Error(w, "Failed to create new request", http.StatusInternalServerError)
+				return
+			}
+			// Copy headers from the original request to the new request
+			for key, values := range r.Header {
+				for _, value := range values {
+					req.Header.Add(key, value)
+				}
+			}
+			req.Header.Set("Content-Type", writer.FormDataContentType())
+			client := &http.Client{}
+			resp, err := client.Do(req)
+			if err != nil {
+				http.Error(w, "Failed to send request to backend", http.StatusInternalServerError)
+				return
+			}
+			defer func() {
+				if err := resp.Body.Close(); err != nil {
+					log.Error(err, "error closing response body stream")
+				}
+			}()
+			// Copy the response headers from the backend service to the original client
+			for key, values := range resp.Header {
+				for _, value := range values {
+					w.Header().Add(key, value)
+				}
+			}
+			w.WriteHeader(resp.StatusCode)
+			// Copy the response body from the backend service to the original client
+			_, err = io.Copy(w, resp.Body)
+			if err != nil {
+				log.Error(err, "failed to copy response body")
+			}
+		}
+	}
+}
+
+func initializeRoutes() *http.ServeMux {
+	mux := http.NewServeMux()
+	mux.HandleFunc("/", mcGraphHandler)
+	mux.HandleFunc("/dataprep", mcDataHandler)
+	return mux
+}
+
 func main() {
 	flag.Parse()
 	logf.SetLogger(zap.New())
@@ -488,13 +593,13 @@ func main() {
 		os.Exit(1)
 	}
 
-	http.HandleFunc("/", mcGraphHandler)
+	mcRouter := initializeRoutes()
 
 	server := &http.Server{
 		// specify the address and port
 		Addr: ":8080",
-		// specify your HTTP handler
-		Handler: http.HandlerFunc(mcGraphHandler),
+		// specify the HTTP routers
+		Handler: mcRouter,
 		// set the maximum duration for reading the entire request, including the body
 		ReadTimeout: time.Minute,
 		// set the maximum duration before timing out writes of the response
