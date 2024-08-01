@@ -54,17 +54,16 @@ function validate_chatqna() {
    output=$(kubectl get pods -n $CHATQNA_NAMESPACE)
    echo $output
 
-  # Wait until the tgi pod is ready
-  TGI_POD_NAME=$(kubectl get pods --namespace=$CHATQNA_NAMESPACE | grep ^tgi-service | awk '{print $1}')
-  kubectl describe pod $TGI_POD_NAME -n $CHATQNA_NAMESPACE
-  kubectl wait --for=condition=ready pod/$TGI_POD_NAME --namespace=$CHATQNA_NAMESPACE --timeout=300s
-
-
    # deploy client pod for testing
    kubectl create deployment client-test -n $CHATQNA_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
-   # wait for client pod ready
-   wait_until_pod_ready "client-test" $CHATQNA_NAMESPACE "client-test"
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $CHATQNA_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
    # giving time to populating data
    sleep 90
 
@@ -108,12 +107,16 @@ function validate_codegen() {
    output=$(kubectl get pods -n $CODEGEN_NAMESPACE)
    echo $output
 
-
    # deploy client pod for testing
    kubectl create deployment client-test -n $CODEGEN_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
-   # wait for client pod ready
-   wait_until_pod_ready "client-test" $CODEGEN_NAMESPACE "client-test"
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $CODEGEN_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
    # giving time to populating data
    sleep 60
 
@@ -158,12 +161,16 @@ function validate_codetrans() {
    output=$(kubectl get pods -n $CODETRANS_NAMESPACE)
    echo $output
 
-
    # deploy client pod for testing
    kubectl create deployment client-test -n $CODETRANS_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
-   # wait for client pod ready
-   wait_until_pod_ready "client-test" $CODETRANS_NAMESPACE "client-test"
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $CODETRANS_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
    # giving time to populating data
    sleep 60
 
@@ -207,12 +214,16 @@ function validate_docsum() {
    output=$(kubectl get pods -n $DOCSUM_NAMESPACE)
    echo $output
 
-
    # deploy client pod for testing
    kubectl create deployment client-test -n $DOCSUM_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
-   # wait for client pod ready
-   wait_until_pod_ready "client-test" $DOCSUM_NAMESPACE "client-test"
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $DOCSUM_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
    # giving time to populating data
    sleep 60
 
