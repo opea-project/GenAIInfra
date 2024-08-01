@@ -1,20 +1,20 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-name: GMC E2e Tests on Xeon
+name: GMC Helm Installation Test on Xeon
 
 on:
   pull_request:
     branches: [main]
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
-      - microservices-connector/**
       - manifests/common/**
-      - "!microservices-connector/helm/**"
+      - microservices-connector/config/crd/bases/gmc.opea.io_gmconnectors.yaml
+      - microservices-connector/config/gmcrouter/gmc-router.yaml
+      - microservices-connector/helm/**
       - "!**.md"
       - "!**.txt"
       - "!**.png"
-      - .github/workflows/scripts/e2e/gmc_xeon_test.sh
   workflow_dispatch:
 
 # If there is a new commit, the previous jobs will be canceled
@@ -43,22 +43,28 @@ jobs:
 
       - name: Set variables
         run: |
-          echo "SYSTEM_NAMESPACE=opea-system" >> $GITHUB_ENV
+          echo "RELEASE_NAME=gmc$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          echo "SYSTEM_NAMESPACE=opea-system-helm" >> $GITHUB_ENV
           echo "APP_NAMESPACE=opea-app" >> $GITHUB_ENV
           echo "DOCKER_REGISTRY=${{ needs.image-build.outputs.image_repo }}" >> $GITHUB_ENV
           echo "VERSION=${{ needs.image-build.outputs.image_tag }}" >> $GITHUB_ENV
           echo "should_cleanup=false" >> $GITHUB_ENV
           echo "skip_validate=false" >> $GITHUB_ENV
           echo "KIND_MOUNT_DIR=/mnt/huggingface/hub" >> $GITHUB_ENV
+          echo "ROLLOUT_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
 
       - name: Install GMC
         run: |
           echo "should_cleanup=true" >> $GITHUB_ENV
-          .github/workflows/scripts/e2e/gmc_install.sh install_gmc
-          exit_status=$$?$$
-          if [ $$exit_status -ne 0 ]; then
-            echo "Failed to install modules"
+          ## IMPORTANT NOTICE: need to replace gmc images with {{env.DOCKER_REGISTRY}} and {{env.VERSION}}
+          cd microservices-connector
+          if ! helm install --create-namespace --namespace {{ env.SYSTEM_NAMESPACE}} --wait \
+              --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
+              $RELEASE_NAME helm ; then
+            echo "Failed to install GMC by helm"
             echo "skip_validate=true" >> $GITHUB_ENV
+            .github/workflows/scripts/e2e/chart_test.sh dump_pods_status {{ env.SYSTEM_NAMESPACE}}
+            exit 1
           fi
 
       - name: Run e2e tests
@@ -74,5 +80,5 @@ jobs:
         run: |
           if $should_cleanup; then
             .github/workflows/scripts/e2e/gmc_xeon_test.sh cleanup_apps
-            .github/workflows/scripts/e2e/gmc_install.sh cleanup_gmc
+            helm uninstall $RELEASE_NAME --namespace {{ env.SYSTEM_NAMESPACE}}
           fi
