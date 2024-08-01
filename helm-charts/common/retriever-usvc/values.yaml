@@ -8,6 +8,7 @@
 autodependency:
   enabled: false
 
+
 replicaCount: 1
 
 TEI_EMBEDDING_ENDPOINT: ""
