@@ -531,11 +531,14 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 					}
 				}
 			}
-			err = writer.Close()
-			if err != nil {
-				http.Error(w, "Failed to close writer", http.StatusInternalServerError)
-				return
-			}
+
+			defer func() {
+				err = writer.Close()
+				if err != nil {
+					http.Error(w, "Failed to close writer", http.StatusInternalServerError)
+					return
+				}
+			}()
 			req, err := http.NewRequest(r.Method, serviceURL, &buf)
 			if err != nil {
 				http.Error(w, "Failed to create new request", http.StatusInternalServerError)
