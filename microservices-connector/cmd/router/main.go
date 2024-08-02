@@ -537,13 +537,13 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 
-			defer func() {
-				err = writer.Close()
-				if err != nil {
-					http.Error(w, "Failed to close writer", http.StatusInternalServerError)
-					return
-				}
-			}()
+			// Must close the writer here before the request is sent
+			err = writer.Close()
+			if err != nil {
+				http.Error(w, "Failed to close writer", http.StatusInternalServerError)
+				return
+			}
+
 			req, err := http.NewRequest(r.Method, serviceURL, &buf)
 			if err != nil {
 				http.Error(w, "Failed to create new request", http.StatusInternalServerError)
@@ -586,9 +586,8 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 	if !isDataHandled {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
-		if _, err := w.Write(prepareErrorResponse(errors.New("failed to process request"),
-			"The dataprep endpoint is not available")); err != nil {
-			log.Error(err, "failed to write mcDataHandler response")
+		if _, err := w.Write([]byte("Message: None dataprep endpoint is available!")); err != nil {
+			log.Info("Message: ", "failed to write mcDataHandler response")
 		}
 	}
 }
