@@ -46,6 +46,8 @@ function cleanup_apps() {
 function validate_chatqna() {
    kubectl create ns $CHATQNA_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $CHATQNA_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
+   # workaround for issue #268
+   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
 
    # Wait until the router service is ready
