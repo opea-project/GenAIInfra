@@ -36,6 +36,10 @@ securityContext: {}
   #seccompProfile:
   #  type: RuntimeDefault
 
+# internal container port
+# conventional ui container port: 5173, conversational ui container port: 80
+containerPort: 80
+
 service:
   type: ClusterIP
   port: 5174
@@ -66,6 +70,9 @@ DATAPREP_SERVICE_ENDPOINT: ""
 
 # data preparation get file service URL, http://<service-name>:<port>
 DATAPREP_GET_FILE_ENDPOINT: ""
+
+# data preparation delete file service URL, http://<service-name>:<port>
+DATAPREP_DELETE_FILE_ENDPOINT: ""
 
 global:
   http_proxy: ""

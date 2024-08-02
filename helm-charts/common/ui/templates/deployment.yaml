@@ -4,14 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "conversational-ui.fullname" . }}
+  name: {{ include "ui.fullname" . }}
   labels:
-    {{- include "conversational-ui.labels" . | nindent 4 }}
+    {{- include "ui.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "conversational-ui.selectorLabels" . | nindent 6 }}
+      {{- include "ui.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "conversational-ui.labels" . | nindent 8 }}
+        {{- include "ui.labels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -31,7 +31,7 @@ spec:
         - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
-                name: {{ include "conversational-ui.fullname" . }}-config
+                name: {{ include "ui.fullname" . }}-config
             {{- if .Values.global.extraEnvConfig }}
             - configMapRef:
                 name: {{ .Values.global.extraEnvConfig }}
@@ -43,7 +43,7 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: ui
-              containerPort: 80
+              containerPort: {{ .Values.containerPort }}
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}

@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
-name: conversational-ui
-description: A Helm chart to the conversational UI for chatQnA workload
+name: ui
+description: A Helm chart to the UI for chatQnA workload
 type: application
 version: 0.8.0
 appVersion: "1.0.0"

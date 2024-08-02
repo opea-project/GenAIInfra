@@ -4,9 +4,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "conversational-ui.fullname" . }}
+  name: {{ include "ui.fullname" . }}
   labels:
-    {{- include "conversational-ui.labels" . | nindent 4 }}
+    {{- include "ui.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -15,4 +15,4 @@ spec:
       protocol: TCP
       name: ui
   selector:
-    {{- include "conversational-ui.selectorLabels" . | nindent 4 }}
+    {{- include "ui.selectorLabels" . | nindent 4 }}

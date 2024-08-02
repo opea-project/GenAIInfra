@@ -4,9 +4,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "conversational-ui.fullname" . }}-testpod"
+  name: "{{ include "ui.fullname" . }}-testpod"
   labels:
-    {{- include "conversational-ui.labels" . | nindent 4 }}
+    {{- include "ui.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
     #"helm.sh/hook-delete-policy": "hook-succeeded, hook-failure"
@@ -18,6 +18,6 @@ spec:
       command: ['sh', '-c']
       args:
         - |
-          curl http://{{ include "conversational-ui.fullname" . }}:{{ .Values.service.port }} -sS --fail-with-body \
+          curl http://{{ include "ui.fullname" . }}:{{ .Values.service.port }} -sS --fail-with-body \
           -X GET
   restartPolicy: Never
