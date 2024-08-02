@@ -8,13 +8,13 @@ on:
     branches: [main]
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
-      - manifests/common/**
       - microservices-connector/config/crd/bases/gmc.opea.io_gmconnectors.yaml
       - microservices-connector/config/gmcrouter/gmc-router.yaml
       - microservices-connector/helm/**
       - "!**.md"
       - "!**.txt"
       - "!**.png"
+      - .github/workflows/scripts/e2e/gmc_xeon_test.sh
   workflow_dispatch:
 
 # If there is a new commit, the previous jobs will be canceled
@@ -56,14 +56,34 @@ jobs:
       - name: Install GMC
         run: |
           echo "should_cleanup=true" >> $GITHUB_ENV
-          ## IMPORTANT NOTICE: need to replace gmc images with {{env.DOCKER_REGISTRY}} and {{env.VERSION}}
-          cd microservices-connector
-          if ! helm install --create-namespace --namespace {{ env.SYSTEM_NAMESPACE}} --wait \
+          USER_ID=$(whoami)
+          HFTOKEN=$(cat /home/$USER_ID/.cache/huggingface/token)
+          pushd microservices-connector
+          mkdir -p $(pwd)/config/manifests
+          cp -f -p $(dirname $(pwd))/manifests/common/*.yaml $(pwd)/config/manifests/
+          popd
+          pushd microservices-connector/helm
+          # replace image for gmc-router
+          sed -i "s|image:.*|image: ${DOCKER_REGISTRY}opea/gmcrouter:$VERSION|" gmc-router.yaml
+          # replace the pull policy "IfNotPresent" with "Always" for gmc-router
+          sed -i "s|imagePullPolicy:.*|imagePullPolicy: Always|" gmc-router.yaml
+          # replace image for GenAI component manifests
+          find manifests_common/ -type f -name "*.yaml" -exec sed -i "s|image: \"opea|image: \"${DOCKER_REGISTRY}opea|" {} \;
+          # replace the pull policy "IfNotPresent" with "Always" for GenAI component manifests
+          find manifests_common/ -type f -name "*.yaml" -exec sed -i "s|imagePullPolicy: IfNotPresent|imagePullPolicy: Always|" {} \;
+          # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
+          find manifests_common/ -type f -name "*.yaml" -exec sed -i "s|path: /mnt/opea-models|path: $KIND_MOUNT_DIR|" {} \;
+          # replace huggingface token
+          find manifests_common/ -type f -name '*.yaml' -exec sed -i "s#insert-your-huggingface-token-here#${HFTOKEN}#g" {} \;
+          popd
+          # Install GMC
+          if ! helm install --create-namespace --namespace ${{ env.SYSTEM_NAMESPACE }} --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
-              $RELEASE_NAME helm ; then
+              $RELEASE_NAME microservices-connector/helm \
+               --set image.tag=$VERSION --set image.repository=${DOCKER_REGISTRY}opea/gmcmanager; then
             echo "Failed to install GMC by helm"
             echo "skip_validate=true" >> $GITHUB_ENV
-            .github/workflows/scripts/e2e/chart_test.sh dump_pods_status {{ env.SYSTEM_NAMESPACE}}
+            .github/workflows/scripts/e2e/chart_test.sh dump_pods_status ${{ env.SYSTEM_NAMESPACE }}
             exit 1
           fi
 
@@ -80,5 +100,10 @@ jobs:
         run: |
           if $should_cleanup; then
             .github/workflows/scripts/e2e/gmc_xeon_test.sh cleanup_apps
-            helm uninstall $RELEASE_NAME --namespace {{ env.SYSTEM_NAMESPACE}}
+            helm uninstall $RELEASE_NAME --namespace ${{ env.SYSTEM_NAMESPACE }}
+            if kubectl get namespace ${{ env.SYSTEM_NAMESPACE }} > /dev/null 2>&1; then
+              echo "Deleting namespace: $SYSTEM_NAMESPACE"
+              kubectl delete namespace "$SYSTEM_NAMESPACE"
+            fi
+            kubectl delete crd gmconnectors.gmc.opea.io
           fi
