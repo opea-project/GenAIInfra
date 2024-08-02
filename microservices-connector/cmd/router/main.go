@@ -588,7 +588,7 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
 		if _, err := w.Write(prepareErrorResponse(errors.New("failed to process request"),
 			"The dataprep endpoint is not available")); err != nil {
-			log.Error(err, "failed to write mcGraphHandler response")
+			log.Error(err, "failed to write mcDataHandler response")
 		}
 	}
 }
