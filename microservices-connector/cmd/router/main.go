@@ -480,10 +480,15 @@ func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func mcDataHandler(w http.ResponseWriter, r *http.Request) {
+	var isDataHandled bool
+	serviceName := r.Header.Get("SERVICE_NAME")
 	defaultNode := mcGraph.Spec.Nodes[defaultNodeName]
 	for i := range defaultNode.Steps {
 		step := &defaultNode.Steps[i]
 		if DataPrep == step.StepName {
+			if serviceName != "" && serviceName != step.InternalService.ServiceName {
+				continue
+			}
 			log.Info("Starting execution of step", "stepName", step.StepName)
 			serviceURL := getServiceURLByStepTarget(step, mcGraph.Namespace)
 			log.Info("ServiceURL is", "serviceURL", serviceURL)
@@ -574,6 +579,16 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				log.Error(err, "failed to copy response body")
 			}
+			isDataHandled = true
+		}
+	}
+
+	if !isDataHandled {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(404)
+		if _, err := w.Write(prepareErrorResponse(errors.New("failed to process request"),
+			"The dataprep endpoint is not available")); err != nil {
+			log.Error(err, "failed to write mcGraphHandler response")
 		}
 	}
 }
