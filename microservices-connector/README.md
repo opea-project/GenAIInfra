@@ -154,3 +154,7 @@ make uninstall
 ```sh
 make undeploy
 ```
+
+### Deploy using helm chart
+
+Please refer to the [helm chart README](./helm/README.md) for deploying GMC using helm chart.

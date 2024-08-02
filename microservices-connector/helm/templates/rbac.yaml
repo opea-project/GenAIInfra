@@ -1,0 +1,89 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- if .Values.serviceAccount.create }}
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ include "gmc.serviceAccountName" . }}
+  labels:
+    {{- include "gmc.labels" . | nindent 4 }}
+  {{- with .Values.serviceAccount.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+automountServiceAccountToken: {{ .Values.serviceAccount.automount }}
+{{- end }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: {{ include "gmc.fullname" . }}-manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - services
+  - secrets
+  - configmaps
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - gmc.opea.io
+  resources:
+  - gmconnectors/status
+  verbs:
+  - get
+  - patch
+  - update
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  labels:
+    {{- include "gmc.labels" . | nindent 4 }}
+  name: {{ include "gmc.fullname" . }}-manager-rolebinding
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: {{ include "gmc.fullname" . }}-manager-role
+subjects:
+- kind: ServiceAccount
+  name: {{ include "gmc.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}

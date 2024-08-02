@@ -1,0 +1,13 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "gmc.fullname" . }}-config
+  labels:
+    {{- include "gmc.labels" . | nindent 4 }}
+data:
+{{ (.Files.Glob "manifests_common/*.yaml").AsConfig | indent 2 }}
+  gmc-router.yaml: |
+    {{- .Files.Get "gmc-router.yaml" | nindent 4 }}
