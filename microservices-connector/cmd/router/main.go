@@ -493,7 +493,10 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 			serviceURL := getServiceURLByStepTarget(step, mcGraph.Namespace)
 			log.Info("ServiceURL is", "serviceURL", serviceURL)
 			// Parse the multipart form in the request
-			err := r.ParseMultipartForm(64 << 20) // 64 MB is the default used by ParseMultipartForm
+			// err := r.ParseMultipartForm(64 << 20) // 64 MB is the default used by ParseMultipartForm
+
+			// Set no limit on multipart form size
+			err := r.ParseMultipartForm(0)
 			if err != nil {
 				http.Error(w, "Failed to parse multipart form", http.StatusBadRequest)
 				return
