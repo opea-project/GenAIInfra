@@ -589,7 +589,7 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 	if !isDataHandled {
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(404)
-		if _, err := w.Write([]byte("Message: None dataprep endpoint is available!")); err != nil {
+		if _, err := w.Write([]byte("\n Message: None dataprep endpoint is available! \n")); err != nil {
 			log.Info("Message: ", "failed to write mcDataHandler response")
 		}
 	}
@@ -597,7 +597,11 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 
 func handleMultipartError(writer *multipart.Writer, err error) {
 	// In case of an error, close the writer to clean up
-	writer.Close()
+	werr := writer.Close()
+	if werr != nil {
+		log.Error(werr, "Error during close writer")
+		return
+	}
 	// Handle the error as needed, such as logging or returning an error response
 	log.Error(err, "Error during multipart creation")
 }
