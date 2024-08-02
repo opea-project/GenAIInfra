@@ -506,6 +506,7 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 				for _, value := range values {
 					err := writer.WriteField(key, value)
 					if err != nil {
+						handleMultipartError(writer, err)
 						http.Error(w, "Failed to write form field", http.StatusInternalServerError)
 						return
 					}
@@ -516,6 +517,7 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 				for _, fileHeader := range fileHeaders {
 					file, err := fileHeader.Open()
 					if err != nil {
+						handleMultipartError(writer, err)
 						http.Error(w, "Failed to open file", http.StatusInternalServerError)
 						return
 					}
@@ -526,18 +528,19 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 					}()
 					part, err := writer.CreateFormFile(key, fileHeader.Filename)
 					if err != nil {
+						handleMultipartError(writer, err)
 						http.Error(w, "Failed to create form file", http.StatusInternalServerError)
 						return
 					}
 					_, err = io.Copy(part, file)
 					if err != nil {
+						handleMultipartError(writer, err)
 						http.Error(w, "Failed to copy file", http.StatusInternalServerError)
 						return
 					}
 				}
 			}
 
-			// Must close the writer here before the request is sent
 			err = writer.Close()
 			if err != nil {
 				http.Error(w, "Failed to close writer", http.StatusInternalServerError)
@@ -590,6 +593,13 @@ func mcDataHandler(w http.ResponseWriter, r *http.Request) {
 			log.Info("Message: ", "failed to write mcDataHandler response")
 		}
 	}
+}
+
+func handleMultipartError(writer *multipart.Writer, err error) {
+	// In case of an error, close the writer to clean up
+	writer.Close()
+	// Handle the error as needed, such as logging or returning an error response
+	log.Error(err, "Error during multipart creation")
 }
 
 func initializeRoutes() *http.ServeMux {
