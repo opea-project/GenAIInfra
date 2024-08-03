@@ -21,6 +21,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierr "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
@@ -64,6 +65,7 @@ const (
 	SpeechT5Gaudi            = "SpeechT5Gaudi"
 	Whisper                  = "Whisper"
 	WhisperGaudi             = "WhisperGaudi"
+	gmcFinalizer             = "gmcFinalizer"
 )
 
 var yamlDict = map[string]string{
@@ -96,10 +98,13 @@ type GMConnectorReconciler struct {
 }
 
 type RouterCfg struct {
-	NoProxy    string
-	HttpProxy  string
-	HttpsProxy string
-	GRAPH_JSON string
+	Namespace   string
+	SvcName     string
+	DplymntName string
+	NoProxy     string
+	HttpProxy   string
+	HttpsProxy  string
+	GRAPH_JSON  string
 }
 
 func lookupManifestDir(step string) string {
@@ -304,6 +309,25 @@ func getServiceURL(service *corev1.Service) string {
 	return ""
 }
 
+func containsString(slice []string, s string) bool {
+	for _, item := range slice {
+		if item == s {
+			return true
+		}
+	}
+	return false
+}
+
+func removeString(slice []string, s string) []string {
+	var result []string
+	for _, item := range slice {
+		if item != s {
+			result = append(result, item)
+		}
+	}
+	return result
+}
+
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors/finalizers,verbs=update
@@ -332,9 +356,51 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 
+	// Check if the GMConnector instance is marked to be deleted, which is
+	// indicated by the deletion timestamp being set.
+	if graph.GetDeletionTimestamp() != nil {
+		if len(graph.GetFinalizers()) != 0 {
+			// Run finalization logic for gmConnectorFinalizer. If the
+			// finalization logic fails, don't remove the finalizer so
+			// that we can retry during the next reconciliation.
+			if err := r.finalizeGMConnector(ctx, graph); err != nil {
+				return ctrl.Result{}, err
+			}
+		}
+
+		// Remove finalizer
+		graph.SetFinalizers(removeString(graph.GetFinalizers(), gmcFinalizer))
+		if err := r.Update(ctx, graph); err != nil {
+			return ctrl.Result{}, err
+		}
+		// Stop reconciliation as the item is being deleted
+		return ctrl.Result{}, nil
+	}
+
+	// Add finalizer for this CR if not already present
+	if !containsString(graph.GetFinalizers(), gmcFinalizer) {
+		graph.SetFinalizers(append(graph.GetFinalizers(), gmcFinalizer))
+		if err := r.Update(ctx, graph); err != nil {
+			return ctrl.Result{}, err
+		}
+		// Return and requeue after adding the finalizer
+		return ctrl.Result{Requeue: true}, nil
+	}
+
 	var totalService uint
 	var externalService uint
 	var successService uint
+	var updateExistGraph bool = false
+	var oldAnnotations map[string]string
+
+	if len(graph.Status.Annotations) == 0 {
+		graph.Status.Annotations = make(map[string]string)
+	} else {
+		updateExistGraph = true
+		//save the old annotations
+		oldAnnotations = graph.Status.Annotations
+		graph.Status.Annotations = make(map[string]string)
+	}
 
 	for nodeName, node := range graph.Spec.Nodes {
 		for i, step := range node.Steps {
@@ -353,16 +419,11 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				}
 				if len(objs) != 0 {
 					for _, obj := range objs {
-						if obj.GetKind() == Service {
-							service := &corev1.Service{}
-							err = scheme.Scheme.Convert(obj, service, nil)
-							if err != nil {
-								return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to convert service %s", obj.GetName())
-							}
-							graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = getServiceURL(service) + step.InternalService.Config["endpoint"]
-							fmt.Printf("the service URL is: %s\n", graph.Spec.Nodes[nodeName].Steps[i].ServiceURL)
-							successService += 1
+						success, err := recordResourceStatus(graph, &step, obj)
+						if err != nil {
+							return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Resource created with failure %s", step.StepName)
 						}
+						successService += success
 					}
 				}
 			} else {
@@ -377,16 +438,94 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	//to start a router service
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
+	totalService += 1
 	err := reconcileRouterService(ctx, r.Client, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
+	} else {
+		successService += 1
 	}
 
 	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
-	if err = r.Status().Update(context.TODO(), graph); err != nil {
+	if err = r.Status().Update(ctx, graph); err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
 	}
+
+	if updateExistGraph {
+		//check if the old annotations are still in the new graph
+		for k, _ := range oldAnnotations {
+			if _, ok := graph.Status.Annotations[k]; !ok {
+				//if not, remove the resource from k8s
+				kind := strings.Split(k, ":")[0]
+				name := strings.Split(k, ":")[1]
+				ns := strings.Split(k, ":")[2]
+				fmt.Printf("delete resource %s %s %s\n", kind, name, ns)
+				obj := &unstructured.Unstructured{}
+				obj.SetKind(kind)
+				obj.SetName(name)
+				obj.SetNamespace(ns)
+				err := r.Delete(ctx, obj)
+				if err != nil {
+					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to delete resource %s", name)
+				} else {
+					fmt.Printf("Success to delete %s: %s\n", kind, name)
+				}
+			}
+		}
+	}
+
 	return ctrl.Result{}, nil
+}
+
+// finalizeGMConnector contains the logic to clean up resources before the CR is deleted
+func (r *GMConnectorReconciler) finalizeGMConnector(ctx context.Context, graph *mcv1alpha3.GMConnector) error {
+	fmt.Println("delete resources")
+	graph.SetFinalizers([]string{})
+	return r.Update(ctx, graph)
+}
+
+func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *unstructured.Unstructured) (uint, error) {
+	// var statusStr string
+	var success uint = 0
+	// graph.SetFinalizers(append(graph.GetFinalizers(), fmt.Sprintf("%s-.-%s-.-%s", obj.GetKind(), obj.GetNamespace(), obj.GetName())))
+	// save the resource name into annotation for status update and resource management
+	graph.Status.Annotations[fmt.Sprintf("%s:%s:%s", obj.GetKind(), obj.GetName(), obj.GetNamespace())] = "n/a"
+	if obj.GetKind() == Service {
+		service := &corev1.Service{}
+		err := scheme.Scheme.Convert(obj, service, nil)
+		if err != nil {
+			return success, errors.Wrapf(err, "Failed to convert service %s", obj.GetName())
+		}
+
+		if step != nil {
+			url := getServiceURL(service) + step.InternalService.Config["endpoint"]
+			//set this for router
+			step.ServiceURL = url
+			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s", obj.GetKind(), obj.GetName(), obj.GetNamespace())] = url
+			fmt.Printf("the service URL is: %s\n", url)
+		} else {
+			url := getServiceURL(service)
+			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s", obj.GetKind(), obj.GetName(), obj.GetNamespace())] = url
+			fmt.Printf("the router URL is: %s\n", url)
+		}
+	}
+	if obj.GetKind() == Deployment {
+		deployment := &appsv1.Deployment{}
+		err := scheme.Scheme.Convert(obj, deployment, nil)
+		if err != nil {
+			return success, errors.Wrapf(err, "Failed to convert deployment %s", obj.GetName())
+		}
+		graph.Status.Annotations[fmt.Sprintf("%s:%s:%s", obj.GetKind(), obj.GetName(), obj.GetNamespace())] =
+			fmt.Sprintf("Status:%s\n\tReason:%s\n\tMessage%s", deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Status,
+				deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Reason,
+				deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Message)
+		// statusStr = deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Type
+		if deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Type == appsv1.DeploymentAvailable {
+			success += 1
+		}
+	}
+
+	return success, nil
 }
 
 func getTemplateBytes(resourceType string) ([]byte, error) {
@@ -402,25 +541,44 @@ func getTemplateBytes(resourceType string) ([]byte, error) {
 }
 
 func reconcileRouterService(ctx context.Context, client client.Client, graph *mcv1alpha3.GMConnector) error {
-	routerService := &corev1.Service{}
-	jsonBytes, err := json.Marshal(graph)
+	configForRouter := make(map[string]string)
+	for k, v := range graph.Spec.RouterConfig.Config {
+		configForRouter[k] = v
+	}
+	var routerNs string
+	var routerServiceName string
+	var routerDeploymentName string
+	jsonBytes, err := json.Marshal(graph.Spec)
 	if err != nil {
 		// handle error
 		return errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
 	}
 	jsonString := string(jsonBytes)
-	if graph.Spec.RouterConfig.Config == nil {
-		graph.Spec.RouterConfig.Config = make(map[string]string)
+	configForRouter["nodes"] = "'" + jsonString + "'"
+
+	if graph.Spec.RouterConfig.NameSpace != "" {
+		routerNs = graph.Spec.RouterConfig.NameSpace
+	} else {
+		routerNs = graph.Namespace
 	}
-	graph.Spec.RouterConfig.Config["nodes"] = "'" + jsonString + "'"
-	routerSvcName := graph.Spec.RouterConfig.ServiceName
+	configForRouter["namespace"] = routerNs
+
+	if graph.Spec.RouterConfig.ServiceName != "" {
+		routerServiceName = graph.Spec.RouterConfig.ServiceName
+		routerDeploymentName = graph.Spec.RouterConfig.ServiceName + dplymtSubfix
+	} else {
+		routerServiceName = DefaultRouterServiceName
+		routerDeploymentName = DefaultRouterServiceName + dplymtSubfix
+	}
+	configForRouter["svcName"] = routerServiceName
+	configForRouter["dplymntName"] = routerDeploymentName
 
 	templateBytes, err := getTemplateBytes(Router)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to get template bytes for %s", Router)
 	}
 	var resources []string
-	appliedCfg, err := applyRouterConfigToTemplates(Router, &graph.Spec.RouterConfig.Config, templateBytes)
+	appliedCfg, err := applyRouterConfigToTemplates(Router, &configForRouter, templateBytes)
 	if err != nil {
 		return fmt.Errorf("failed to apply user config: %v", err)
 	}
@@ -437,57 +595,20 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 			return fmt.Errorf("failed to decode YAML: %v", err)
 		}
 
-		if graph.Spec.RouterConfig.NameSpace != "" {
-			obj.SetNamespace(graph.Spec.RouterConfig.NameSpace)
-		} else {
-			obj.SetNamespace(graph.Namespace)
-		}
-
-		if routerSvcName != "" && routerSvcName != DefaultRouterServiceName {
-			if obj.GetKind() == Service {
-				service_obj := &corev1.Service{}
-				err = scheme.Scheme.Convert(obj, service_obj, nil)
-				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to router service %s: %v", routerSvcName, err)
-				}
-				service_obj.SetName(routerSvcName)
-				service_obj.Spec.Selector["app"] = routerSvcName
-				err = scheme.Scheme.Convert(service_obj, obj, nil)
-				if err != nil {
-					return fmt.Errorf("failed to convert router service %s to obj: %v", routerSvcName, err)
-				}
-			} else if obj.GetKind() == Deployment {
-				deployment_obj := &appsv1.Deployment{}
-				err = scheme.Scheme.Convert(obj, deployment_obj, nil)
-				if err != nil {
-					return fmt.Errorf("failed to convert unstructured to router deployment %s: %v", routerSvcName+dplymtSubfix, err)
-				}
-				deployment_obj.SetName(routerSvcName + dplymtSubfix)
-				// Set the labels if they're specified
-				deployment_obj.Spec.Selector.MatchLabels["app"] = routerSvcName
-				deployment_obj.Spec.Template.Labels["app"] = routerSvcName
-				err = scheme.Scheme.Convert(deployment_obj, obj, nil)
-				if err != nil {
-					return fmt.Errorf("failed to convert router deployment %s to obj: %v", routerSvcName+dplymtSubfix, err)
-				}
-			}
-		}
-
 		err = applyResourceToK8s(ctx, client, obj)
 		if err != nil {
 			return fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {
 			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
 		}
-		if obj.GetKind() == Service {
-			err = scheme.Scheme.Convert(obj, routerService, nil)
-			if err != nil {
-				return fmt.Errorf("failed to save router service: %v", err)
-			}
-			graph.Status.AccessURL = getServiceURL(routerService)
-			fmt.Printf("the router service URL is: %s\n", graph.Status.AccessURL)
+		// graph.SetFinalizers(append(graph.GetFinalizers(), fmt.Sprintf("%s-.-%s-.-%s", obj.GetKind(), obj.GetNamespace(), obj.GetName())))
+		// save the resource name into annotation for status update and resource management
+		_, err = recordResourceStatus(graph, nil, obj)
+		if err != nil {
+			return fmt.Errorf("resource created with failure %s: %v", obj.GetName(), err)
 		}
 	}
+
 	return nil
 }
 
@@ -495,10 +616,13 @@ func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFi
 	var userDefinedCfg RouterCfg
 	if step == "router" {
 		userDefinedCfg = RouterCfg{
-			NoProxy:    (*svcCfg)["no_proxy"],
-			HttpProxy:  (*svcCfg)["http_proxy"],
-			HttpsProxy: (*svcCfg)["https_proxy"],
-			GRAPH_JSON: (*svcCfg)["nodes"]}
+			Namespace:   (*svcCfg)["namespace"],
+			SvcName:     (*svcCfg)["svcName"],
+			DplymntName: (*svcCfg)["dplymntName"],
+			NoProxy:     (*svcCfg)["no_proxy"],
+			HttpProxy:   (*svcCfg)["http_proxy"],
+			HttpsProxy:  (*svcCfg)["https_proxy"],
+			GRAPH_JSON:  (*svcCfg)["nodes"]}
 		fmt.Printf("user config %v\n", userDefinedCfg)
 
 		tmpl, err := template.New("yamlTemplate").Parse(string(yamlFile))
@@ -611,6 +735,32 @@ func getServiceDetailsFromManifests(filePath string) (string, int, error) {
 	return "", 0, fmt.Errorf("service name or port not found")
 }
 
+func isMetadataChanged(oldObject, newObject *metav1.ObjectMeta) bool {
+	if oldObject == nil || newObject == nil {
+		fmt.Printf("Metadata changes detected, old/new object is nil\n")
+		return oldObject != newObject
+	}
+	// only care limited changes
+	if oldObject.Name != newObject.Name {
+		fmt.Printf("Metadata changes detected, Name changed from %s to %s\n", oldObject.Name, newObject.Name)
+		return true
+	}
+	if oldObject.Namespace != newObject.Namespace {
+		fmt.Printf("Metadata changes detected, Namespace changed from %s to %s\n", oldObject.Namespace, newObject.Namespace)
+		return true
+	}
+	if !reflect.DeepEqual(oldObject.Labels, newObject.Labels) {
+		fmt.Printf("Metadata changes detected, Labels changed from %v to %v\n", oldObject.Labels, newObject.Labels)
+		return true
+	}
+	if !reflect.DeepEqual(oldObject.DeletionTimestamp, newObject.DeletionTimestamp) {
+		fmt.Printf("Metadata changes detected, DeletionTimestamp changed from %v to %v\n", oldObject.DeletionTimestamp, newObject.DeletionTimestamp)
+		return true
+	}
+	// Add more fields as needed
+	return false
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Predicate to ignore updates to status subresource
@@ -625,14 +775,14 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			}
 
 			specChanged := !reflect.DeepEqual(oldObject.Spec, newObject.Spec)
-			metadataChanged := !reflect.DeepEqual(oldObject.ObjectMeta, newObject.ObjectMeta)
+			metadataChanged := isMetadataChanged(&(oldObject.ObjectMeta), &(newObject.ObjectMeta))
 
 			fmt.Printf("\nspec changed %t | meta changed: %t\n", specChanged, metadataChanged)
 
 			// Compare the old and new spec, ignore metadata, status changes
 			// metadata change: name, namespace, such change should create a new GMC
 			// status change: depoyment status
-			return specChanged
+			return specChanged || metadataChanged
 		},
 		// Other funcs like CreateFunc, DeleteFunc, GenericFunc can be left as default
 		// if you only want to customize the UpdateFunc behavior.
@@ -642,5 +792,7 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mcv1alpha3.GMConnector{}).
 		WithEventFilter(ignoreStatusUpdatePredicate). // Use the predicate here
+		Owns(&appsv1.Deployment{}).
+		Owns(&corev1.Service{}).
 		Complete(r)
 }
