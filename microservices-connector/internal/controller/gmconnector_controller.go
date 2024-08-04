@@ -186,26 +186,25 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 
 			// append the user defined ENVs
 			var newEnvVars []corev1.EnvVar
-			if svcCfg != nil {
-				for name, value := range *svcCfg {
-					if name == "endpoint" || name == "nodes" {
-						continue
-					}
-					if isDownStreamEndpointKey(name) {
-						ds := findDownStreamService(value, stepCfg, nodeCfg)
-						value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
-						// value = getDsEndpoint(platform, name, graphNs, ds)
-						if err != nil {
-							return nil, fmt.Errorf("failed to find downstream service endpoint %s-%s: %v", name, value, err)
-						}
-					}
-					itemEnvVar := corev1.EnvVar{
-						Name:  name,
-						Value: value,
-					}
-					newEnvVars = append(newEnvVars, itemEnvVar)
+			for name, value := range *svcCfg {
+				if name == "endpoint" || name == "nodes" {
+					continue
 				}
+				if isDownStreamEndpointKey(name) {
+					ds := findDownStreamService(value, stepCfg, nodeCfg)
+					value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
+					// value = getDsEndpoint(platform, name, graphNs, ds)
+					if err != nil {
+						return nil, fmt.Errorf("failed to find downstream service endpoint %s-%s: %v", name, value, err)
+					}
+				}
+				itemEnvVar := corev1.EnvVar{
+					Name:  name,
+					Value: value,
+				}
+				newEnvVars = append(newEnvVars, itemEnvVar)
 			}
+
 			if len(newEnvVars) > 0 {
 				for i := range deployment_obj.Spec.Template.Spec.Containers {
 					deployment_obj.Spec.Template.Spec.Containers[i].Env = append(
@@ -453,7 +452,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	if updateExistGraph {
 		//check if the old annotations are still in the new graph
-		for k, _ := range oldAnnotations {
+		for k := range oldAnnotations {
 			if _, ok := graph.Status.Annotations[k]; !ok {
 				//if not, remove the resource from k8s
 				kind := strings.Split(k, ":")[0]
@@ -479,9 +478,41 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 // finalizeGMConnector contains the logic to clean up resources before the CR is deleted
 func (r *GMConnectorReconciler) finalizeGMConnector(ctx context.Context, graph *mcv1alpha3.GMConnector) error {
-	fmt.Println("delete resources")
-	graph.SetFinalizers([]string{})
-	return r.Update(ctx, graph)
+	// for compatibility consideration, the old GMC didn't save annotation
+	// so skip this part let the old graph deleted by k8s
+	// or it will be stuck
+	if len(graph.Status.Annotations) == 0 {
+		fmt.Printf("skip resource deletion due to no record\n")
+		return nil
+	}
+	//check if the old annotations are still in the new graph
+	for k := range graph.Status.Annotations {
+		//if not, remove the resource from k8s
+		kind := strings.Split(k, ":")[0]
+		apiVersion := strings.Split(k, ":")[1]
+		name := strings.Split(k, ":")[2]
+		ns := strings.Split(k, ":")[3]
+		fmt.Printf("delete resource %s %s %s\n", kind, name, ns)
+		obj := &unstructured.Unstructured{}
+		obj.SetKind(kind)
+		obj.SetName(name)
+		obj.SetNamespace(ns)
+		obj.SetAPIVersion(apiVersion)
+
+		// // Fetch the resource to get its full metadata
+		// err := r.Get(ctx, client.ObjectKey{Name: name, Namespace: ns}, obj)
+		// if err != nil {
+		// 	return errors.Wrapf(err, "Failed to fetch resource %s %s %s\n", kind, name, ns)
+		// }
+
+		err := r.Delete(ctx, obj)
+		if err != nil {
+			return errors.Wrapf(err, "Failed to delete resource %s %s %s\n", kind, name, ns)
+		} else {
+			fmt.Printf("Success to delete %s %s %s\n", kind, name, ns)
+		}
+	}
+	return nil
 }
 
 func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *unstructured.Unstructured) (uint, error) {
@@ -489,7 +520,8 @@ func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, 
 	var success uint = 0
 	// graph.SetFinalizers(append(graph.GetFinalizers(), fmt.Sprintf("%s-.-%s-.-%s", obj.GetKind(), obj.GetNamespace(), obj.GetName())))
 	// save the resource name into annotation for status update and resource management
-	graph.Status.Annotations[fmt.Sprintf("%s:%s:%s", obj.GetKind(), obj.GetName(), obj.GetNamespace())] = "n/a"
+	graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = "provisioned"
+
 	if obj.GetKind() == Service {
 		service := &corev1.Service{}
 		err := scheme.Scheme.Convert(obj, service, nil)
@@ -501,11 +533,11 @@ func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, 
 			url := getServiceURL(service) + step.InternalService.Config["endpoint"]
 			//set this for router
 			step.ServiceURL = url
-			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s", obj.GetKind(), obj.GetName(), obj.GetNamespace())] = url
+			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = url
 			fmt.Printf("the service URL is: %s\n", url)
 		} else {
 			url := getServiceURL(service)
-			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s", obj.GetKind(), obj.GetName(), obj.GetNamespace())] = url
+			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = url
 			fmt.Printf("the router URL is: %s\n", url)
 		}
 	}
@@ -515,14 +547,17 @@ func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, 
 		if err != nil {
 			return success, errors.Wrapf(err, "Failed to convert deployment %s", obj.GetName())
 		}
-		graph.Status.Annotations[fmt.Sprintf("%s:%s:%s", obj.GetKind(), obj.GetName(), obj.GetNamespace())] =
-			fmt.Sprintf("Status:%s\n\tReason:%s\n\tMessage%s", deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Status,
-				deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Reason,
-				deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Message)
-		// statusStr = deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Type
-		if deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Type == appsv1.DeploymentAvailable {
-			success += 1
+		if len(deployment.Status.Conditions) > 0 {
+			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] =
+				fmt.Sprintf("Status:%s\n\tReason:%s\n\tMessage%s", deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Status,
+					deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Reason,
+					deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Message)
+			// statusStr = deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Type
+			if deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Type == appsv1.DeploymentAvailable {
+				success += 1
+			}
 		}
+
 	}
 
 	return success, nil
