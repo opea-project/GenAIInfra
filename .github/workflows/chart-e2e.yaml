@@ -4,7 +4,7 @@
 name: E2E test with helm charts
 
 on:
-  pull_request:
+  pull_request_target:
     branches: [main]
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
@@ -29,16 +29,19 @@ jobs:
       - name: Checkout out Repo
         uses: actions/checkout@v4
         with:
+          ref: "refs/pull/${{ github.event.number }}/merge"
           fetch-depth: 0
 
       - name: Get test matrix
         id: get-test-matrix
         run: |
-          e2e_charts=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | \
+          base_commit=${{ github.event.pull_request.base.sha }}
+          merged_commit=$(git log -1 --format='%H')
+          e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
           grep "^$CHARTS_DIR/" | \
           grep -vE 'README.md|common|*.sh' | \
           cut -d'/' -f2 | sort -u )
-          common_charts=$(git diff --name-only ${{ github.event.pull_request.base.sha }} ${{ github.event.pull_request.head.sha }} | \
+          common_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
           grep "^$CHARTS_DIR/common" | \
           grep -vE 'README.md|*.sh' | \
           cut -d'/' -f3 | sort -u )
@@ -79,7 +82,7 @@ jobs:
       - name: Checkout out Repo
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0
+          ref: "refs/pull/${{ github.event.number }}/merge"
 
       - name: Set variables
         run: |
@@ -96,7 +99,6 @@ jobs:
           else
             echo "CHART_FOLDER=$CHARTS_DIR/${{ matrix.example }}" >> $GITHUB_ENV
           fi
-
 
       - name: Initialize chart testing
         run: |
@@ -117,6 +119,9 @@ jobs:
 
       - name: Helm install
         id: install
+        env:
+          GOOGLE_CSE_ID: ${{ secrets.GOOGLE_CSE_ID }}
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: |
           set -xe
           echo "should_cleanup=true" >> $GITHUB_ENV
@@ -128,6 +133,8 @@ jobs:
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
               --set autodependency.enabled=true \
+              --set GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY}} \
+              --set GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID}} \
               --values ${{ env.CHART_FOLDER}}/${value_file} \
               $RELEASE_NAME ${{ env.CHART_FOLDER}} ; then
             echo "Failed to install chart ${{ matrix.example }}"
@@ -135,7 +142,6 @@ jobs:
             .github/workflows/scripts/e2e/chart_test.sh dump_pods_status $NAMESPACE
             exit 1
           fi
-          sleep 120
 
       - name: Validate e2e test
         if: always()

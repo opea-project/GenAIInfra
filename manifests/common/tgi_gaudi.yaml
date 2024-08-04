@@ -16,10 +16,7 @@ metadata:
 data:
   MODEL_ID: "Intel/neural-chat-7b-v3-3"
   PORT: "2080"
-  HUGGING_FACE_HUB_TOKEN: "insert-your-huggingface-token-here"
   HF_TOKEN: "insert-your-huggingface-token-here"
-  MAX_INPUT_TOKENS: "1024"
-  MAX_TOTAL_TOKENS: "4096"
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
@@ -93,6 +90,11 @@ spec:
             {}
           image: "ghcr.io/huggingface/tgi-gaudi:2.0.1"
           imagePullPolicy: IfNotPresent
+          args:
+            - --max-input-length
+            - "1024"
+            - --max-total-tokens
+            - "2048"
           volumeMounts:
             - mountPath: /data
               name: model-volume
@@ -102,6 +104,23 @@ spec:
             - name: http
               containerPort: 2080
               protocol: TCP
+          livenessProbe:
+            failureThreshold: 24
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: http
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: http
+          startupProbe:
+            failureThreshold: 120
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: http
           resources:
             limits:
               habana.ai/gaudi: 1

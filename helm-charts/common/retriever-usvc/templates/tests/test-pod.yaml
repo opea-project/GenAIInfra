@@ -15,12 +15,17 @@ spec:
     - name: curl
       #image: alpine/curl
       image: python:3.10.14
-      command: ['sh', '-c']
+      command: ['bash', '-c']
       args:
         - |
           your_embedding=$(python3 -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)");
-          curl http://{{ include "retriever-usvc.fullname" . }}:{{ .Values.service.port }}/v1/retrieval  -sS --fail-with-body \
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ include "retriever-usvc.fullname" . }}:{{ .Values.service.port }}/v1/retrieval  -sS --fail-with-body \
             -X POST \
             -d "{\"text\":\"What is the revenue of Nike in 2023?\",\"embedding\":${your_embedding}}" \
-            -H 'Content-Type: application/json'
+            -H 'Content-Type: application/json' && break;
+            sleep 10;
+          done;
+          if [ $i -gt $max_retry ]; then echo "retriever test failed."; exit 1; fi
   restartPolicy: Never

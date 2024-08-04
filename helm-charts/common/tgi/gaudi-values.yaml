@@ -5,56 +5,16 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-replicaCount: 1
-
-port: 2080
-
 image:
   repository: ghcr.io/huggingface/tgi-gaudi
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
   tag: "2.0.1"
 
-imagePullSecrets: []
-nameOverride: ""
-fullnameOverride: ""
-
-podAnnotations: {}
-
-podSecurityContext: {}
-  # fsGroup: 2000
-
-securityContext:
-  readOnlyRootFilesystem: true
-  allowPrivilegeEscalation: false
-  runAsNonRoot: true
-  runAsUser: 1000
-  capabilities:
-    drop:
-    - ALL
-  seccompProfile:
-    type: RuntimeDefault
-
-service:
-  type: ClusterIP
+extraArgs:
+  - "--max-input-length"
+  - "1024"
+  - "--max-total-tokens"
+  - "2048"
 
 resources:
   limits:
     habana.ai/gaudi: 1
-
-nodeSelector: {}
-
-tolerations: []
-
-affinity: {}
-
-LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
-
-global:
-  http_proxy: ""
-  https_proxy: ""
-  no_proxy: ""
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
-  # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt/opea-models

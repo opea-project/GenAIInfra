@@ -589,7 +589,8 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 		return errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
 	}
 	jsonString := string(jsonBytes)
-	configForRouter["nodes"] = "'" + jsonString + "'"
+	escapedString := strings.ReplaceAll(jsonString, "'", "\\'")
+	configForRouter["nodes"] = "'" + escapedString + "'"
 
 	if graph.Spec.RouterConfig.NameSpace != "" {
 		routerNs = graph.Spec.RouterConfig.NameSpace

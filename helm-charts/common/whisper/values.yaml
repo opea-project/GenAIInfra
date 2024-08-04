@@ -52,6 +52,27 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
+livenessProbe:
+  httpGet:
+    path: /v1/health
+    port: whisper
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 24
+readinessProbe:
+  httpGet:
+    path: /v1/health
+    port: whisper
+  initialDelaySeconds: 5
+  periodSeconds: 5
+startupProbe:
+  httpGet:
+    path: /v1/health
+    port: whisper
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 120
+
 nodeSelector: {}
 
 tolerations: []

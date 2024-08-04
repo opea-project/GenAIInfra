@@ -47,3 +47,25 @@ function get_gmc_controller_logs() {
     echo "Fetching logs for pod $pod_name in namespace $SYSTEM_NAMESPACE..."
     kubectl logs $pod_name -n $SYSTEM_NAMESPACE
 }
+
+
+function wait_until_all_pod_ready() {
+  namespace=$1
+  timeout=$2
+
+  echo "Wait for all pods in NS $namespace to be ready..."
+  pods=$(kubectl get pods -n $namespace --no-headers -o custom-columns=":metadata.name")
+  # Loop through each pod
+  echo "$pods" | while read -r line; do
+    pod_name=$line
+    kubectl wait --for=condition=Ready pod/${pod_name} -n $namespace --timeout=${timeout}
+    if [ $? -ne 0 ]; then
+      echo "Pod $pod_name is not ready after waiting for ${timeout}"
+      echo "Pod $pod_name status:"
+      kubectl describe pod $pod_name -n $namespace
+      echo "Pod $pod_name logs:"
+      kubectl logs $pod_name -n $namespace
+      exit 1
+    fi
+  done
+}
