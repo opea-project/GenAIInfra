@@ -455,25 +455,30 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		for k := range oldAnnotations {
 			if _, ok := graph.Status.Annotations[k]; !ok {
 				//if not, remove the resource from k8s
-				kind := strings.Split(k, ":")[0]
-				name := strings.Split(k, ":")[1]
-				ns := strings.Split(k, ":")[2]
-				fmt.Printf("delete resource %s %s %s\n", kind, name, ns)
-				obj := &unstructured.Unstructured{}
-				obj.SetKind(kind)
-				obj.SetName(name)
-				obj.SetNamespace(ns)
-				err := r.Delete(ctx, obj)
+				err := r.deleteRecordedResource(k, ctx)
 				if err != nil {
-					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to delete resource %s", name)
+					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to delete resource %s", k)
 				} else {
-					fmt.Printf("Success to delete %s: %s\n", kind, name)
+					fmt.Printf("Success to delete %s\n", k)
 				}
 			}
 		}
 	}
 
 	return ctrl.Result{}, nil
+}
+
+func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.Context) error {
+	kind := strings.Split(key, ":")[0]
+	apiVersion := strings.Split(key, ":")[1]
+	name := strings.Split(key, ":")[2]
+	ns := strings.Split(key, ":")[3]
+	obj := &unstructured.Unstructured{}
+	obj.SetKind(kind)
+	obj.SetName(name)
+	obj.SetNamespace(ns)
+	obj.SetAPIVersion(apiVersion)
+	return r.Delete(ctx, obj)
 }
 
 // finalizeGMConnector contains the logic to clean up resources before the CR is deleted
@@ -486,30 +491,13 @@ func (r *GMConnectorReconciler) finalizeGMConnector(ctx context.Context, graph *
 		return nil
 	}
 	//check if the old annotations are still in the new graph
+	//if not, remove the resource from k8s
 	for k := range graph.Status.Annotations {
-		//if not, remove the resource from k8s
-		kind := strings.Split(k, ":")[0]
-		apiVersion := strings.Split(k, ":")[1]
-		name := strings.Split(k, ":")[2]
-		ns := strings.Split(k, ":")[3]
-		fmt.Printf("delete resource %s %s %s\n", kind, name, ns)
-		obj := &unstructured.Unstructured{}
-		obj.SetKind(kind)
-		obj.SetName(name)
-		obj.SetNamespace(ns)
-		obj.SetAPIVersion(apiVersion)
-
-		// // Fetch the resource to get its full metadata
-		// err := r.Get(ctx, client.ObjectKey{Name: name, Namespace: ns}, obj)
-		// if err != nil {
-		// 	return errors.Wrapf(err, "Failed to fetch resource %s %s %s\n", kind, name, ns)
-		// }
-
-		err := r.Delete(ctx, obj)
+		err := r.deleteRecordedResource(k, ctx)
 		if err != nil {
-			return errors.Wrapf(err, "Failed to delete resource %s %s %s\n", kind, name, ns)
+			return errors.Wrapf(err, "Failed to delete resource %s\n", k)
 		} else {
-			fmt.Printf("Success to delete %s %s %s\n", kind, name, ns)
+			fmt.Printf("Success to delete %s\n", k)
 		}
 	}
 	return nil
@@ -538,6 +526,7 @@ func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, 
 		} else {
 			url := getServiceURL(service)
 			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = url
+			graph.Status.AccessURL = url
 			fmt.Printf("the router URL is: %s\n", url)
 		}
 	}
