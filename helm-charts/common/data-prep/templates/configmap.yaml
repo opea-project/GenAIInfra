@@ -10,15 +10,16 @@ metadata:
 data:
   {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
   TEI_ENDPOINT: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote}}
-  {{- else }}
+  {{- else if not .Values.EMBED_MODEL }}
   TEI_ENDPOINT: "http://{{ .Release.Name }}-tei"
   {{- end }}
+  EMBED_MODEL: {{ .Values.EMBED_MODEL | quote }}
   {{- if .Values.REDIS_URL }}
   REDIS_URL: {{ .Values.REDIS_URL | quote}}
   {{- else }}
   REDIS_URL: "redis://{{ .Release.Name }}-redis-vector-db:6379"
   {{- end }}
-  INDEX_NAME: "rag-redis"
+  INDEX_NAME: {{ .Values.INDEX_NAME | quote }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
   http_proxy: {{ .Values.global.http_proxy | quote }}

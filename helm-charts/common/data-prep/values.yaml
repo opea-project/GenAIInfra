@@ -38,8 +38,19 @@ securityContext:
 
 service:
   type: ClusterIP
+  # The following need to be modified after GenAIComps bug #282 is resolved.
+  # https://github.com/opea-project/GenAIComps/issues/282
+  ports:
   # The default port for data prep service is 6007
-  port: 6007
+  - port: 6007
+    targetPort: 6007
+    name: data-prep
+  - port: 6008
+    targetPort: 6008
+    name: data-prep-get
+  - port: 6009
+    targetPort: 6009
+    name: data-prep-delete
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -83,8 +94,12 @@ affinity: {}
 # text embedding inference service URL, e.g. http://<service-name>:<port>
 TEI_EMBEDDING_ENDPOINT: ""
 
+# local embedder's model
+EMBED_MODEL: ""
+
 # redis DB service URL, e.g. redis://<service-name>:<port>
 REDIS_URL: ""
+INDEX_NAME: "rag-redis"
 
 global:
   http_proxy: ""
