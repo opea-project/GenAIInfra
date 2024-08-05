@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -16,4 +19,3 @@ data:
   LLM_SERVICE_PORT: "3007"
   TTS_SERVICE_HOST_IP: tts-svc
   TTS_SERVICE_PORT: "3002"
-
