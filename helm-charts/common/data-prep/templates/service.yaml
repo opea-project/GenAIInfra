@@ -10,9 +10,11 @@ metadata:
 spec:
   type: {{ .Values.service.type }}
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: 6007
+    {{- range .Values.service.ports }}
+    - port: {{ .port }}
+      targetPort: {{ .targetPort }}
       protocol: TCP
-      name: data-prep
+      name: {{ .name }}
+    {{- end }}
   selector:
     {{- include "data-prep.selectorLabels" . | nindent 4 }}
