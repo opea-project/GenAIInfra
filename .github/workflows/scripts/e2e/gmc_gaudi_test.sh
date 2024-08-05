@@ -36,7 +36,7 @@ function validate_gmc() {
 
 function cleanup_apps() {
     echo "clean up microservice-connector"
-    namespaces=("$CHATQNA_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
+    namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         if kubectl get namespace $ns > /dev/null 2>&1; then
             echo "Deleting namespace: $ns"
