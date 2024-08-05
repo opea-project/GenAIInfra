@@ -11,7 +11,11 @@ autodependency:
 replicaCount: 1
 
 TEI_EMBEDDING_ENDPOINT: ""
+EMBED_MODEL: ""
+
 REDIS_URL: ""
+INDEX_NAME: "rag-redis"
+
 image:
   repository: opea/retriever-redis:latest
   pullPolicy: IfNotPresent

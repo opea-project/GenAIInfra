@@ -15,6 +15,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_EMBEDDING_ENDPOINT: "http://retriever-usvc-tei"
+  EMBED_MODEL: ""
   REDIS_URL: "redis://retriever-usvc-redis-vector-db:6379"
   INDEX_NAME: "rag-redis"
   EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
