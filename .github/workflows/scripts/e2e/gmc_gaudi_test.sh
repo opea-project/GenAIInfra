@@ -10,6 +10,7 @@ source ${DIR}/utils.sh
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
 CHATQNA_NAMESPACE="${APP_NAMESPACE}-chatqna"
+CHATQNA_DATAPREP_NAMESPACE="${APP_NAMESPACE}-chatqna-dataprep"
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
 DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
@@ -17,6 +18,9 @@ DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
 function validate_gmc() {
     echo "validate chat-qna"
     validate_chatqna
+
+    echo "validate chat-qna with dataprep"
+    validate_chatqna_with_dataprep
 
     echo "validate codegen"
     validate_codegen
@@ -88,6 +92,84 @@ function validate_chatqna() {
    if [ $status == false ]; then
        if [[ -f $LOG_PATH/curl_chatqna.log ]]; then
            cat $LOG_PATH/curl_chatqna.log
+       fi
+       echo "Response check failed, please check the logs in artifacts!"
+       exit 1
+   else
+       echo "Response check succeed!"
+   fi
+}
+
+function validate_chatqna_with_dataprep() {
+    kubectl create ns $CHATQNA_DATAPREP_NAMESPACE
+   sed -i "s|namespace: chatqa|namespace: $CHATQNA_DATAPREP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
+   # workaround for issue #268
+   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
+   kubectl apply -f $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
+
+   # Wait until the router service is ready
+   echo "Waiting for the chatqa router service to be ready..."
+   wait_until_pod_ready "chatqna router" $CHATQNA_DATAPREP_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $CHATQNA_DATAPREP_NAMESPACE)
+   echo $output
+
+   # deploy client pod for testing
+   kubectl create deployment client-test -n $CHATQNA_DATAPREP_NAMESPACE --image=python:3.8.13 -- sleep infinity
+
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $CHATQNA_DATAPREP_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
+   # giving time to populating data
+   sleep 90
+
+   kubectl get pods -n $CHATQNA_DATAPREP_NAMESPACE
+   # send request to chatqnA
+   export CLIENT_POD=$(kubectl get pod -n $CHATQNA_DATAPREP_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
+   echo "$CLIENT_POD"
+   accessUrl=$(kubectl get gmc -n $CHATQNA_DATAPREP_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+
+   kubectl exec "$CLIENT_POD" -n $CHATQNA_DATAPREP_NAMESPACE -- curl "$accessUrl/dataprep"  -X POST  -F 'link_list=["https://raw.githubusercontent.com/opea-project/GenAIInfra/main/microservices-connector/test/data/gaudi.txt"]' -H "Content-Type: multipart/form-data" > $LOG_PATH/curl_dataprep.log
+   exit_code=$?
+   if [ $exit_code -ne 0 ]; then
+       echo "dataprep failed, please check the logs in ${LOG_PATH}!"
+       exit 1
+   fi
+   echo "Checking response results, make sure the output is reasonable. "
+   local status=false
+   if [[ -f $LOG_PATH/curl_dataprep.log ]] && \
+   [[ $(grep -c "Data preparation succeeded" $LOG_PATH/curl_dataprep.log) != 0 ]]; then
+       status=true
+   fi
+   if [ $status == false ]; then
+       if [[ -f $LOG_PATH/curl_dataprep.log ]]; then
+           cat $LOG_PATH/curl_dataprep.log
+       fi
+       echo "Response check failed, please check the logs in artifacts!"
+       exit 1
+   else
+       echo "Response check succeed!"
+   fi
+
+   kubectl exec "$CLIENT_POD" -n $CHATQNA_DATAPREP_NAMESPACE -- curl $accessUrl  -X POST  -d '{"text":"What are the key features of Intel Gaudi?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json' > $LOG_PATH/curl_chatqna_dataprep.log
+   exit_code=$?
+   if [ $exit_code -ne 0 ]; then
+       echo "chatqna failed, please check the logs in ${LOG_PATH}!"
+       exit 1
+   fi
+
+   echo "Checking response results, make sure the output is reasonable. "
+   local status=false
+   if [[ -f $LOG_PATH/curl_chatqna_dataprep.log ]] && \
+   [[ $(grep -c "[DONE]" $LOG_PATH/curl_chatqna_dataprep.log) != 0 ]]; then
+       status=true
+   fi
+   if [ $status == false ]; then
+       if [[ -f $LOG_PATH/curl_chatqna_dataprep.log ]]; then
+           cat $LOG_PATH/curl_chatqna_dataprep.log
        fi
        echo "Response check failed, please check the logs in artifacts!"
        exit 1
