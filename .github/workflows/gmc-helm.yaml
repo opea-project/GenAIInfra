@@ -58,10 +58,6 @@ jobs:
           echo "should_cleanup=true" >> $GITHUB_ENV
           USER_ID=$(whoami)
           HFTOKEN=$(cat /home/$USER_ID/.cache/huggingface/token)
-          pushd microservices-connector
-          mkdir -p $(pwd)/config/manifests
-          cp -f -p $(dirname $(pwd))/manifests/common/*.yaml $(pwd)/config/manifests/
-          popd
           pushd microservices-connector/helm
           # replace image for gmc-router
           sed -i "s|image:.*|image: ${DOCKER_REGISTRY}opea/gmcrouter:$VERSION|" gmc-router.yaml
