@@ -116,7 +116,7 @@ func lookupManifestDir(step string) string {
 	}
 }
 
-func reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router) ([]*unstructured.Unstructured, error) {
+func reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router, graph *mcv1alpha3.GMConnector) ([]*unstructured.Unstructured, error) {
 	if stepCfg == nil || nodeCfg == nil {
 		return nil, errors.New("invalid svc config")
 	}
@@ -157,6 +157,15 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 		if ns != "" {
 			obj.SetNamespace(ns)
 		}
+
+		obj.SetOwnerReferences([]metav1.OwnerReference{
+			{
+				APIVersion: graph.APIVersion,
+				Kind:       graph.Kind,
+				Name:       graph.Name,
+				UID:        graph.UID,
+			},
+		})
 
 		// set the service name according to user defined value, and related selectors/labels
 		if obj.GetKind() == Service && svc != "" {
@@ -357,30 +366,30 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	// Check if the GMConnector instance is marked to be deleted, which is
 	// indicated by the deletion timestamp being set.
-	if graph.GetDeletionTimestamp() != nil {
-		if len(graph.GetFinalizers()) != 0 {
-			// Run finalization logic for gmConnectorFinalizer.
-			r.finalizeGMConnector(ctx, graph)
-		}
+	// if graph.GetDeletionTimestamp() != nil {
+	// 	if len(graph.GetFinalizers()) != 0 {
+	// 		// Run finalization logic for gmConnectorFinalizer.
+	// 		r.finalizeGMConnector(ctx, graph)
+	// 	}
 
-		// Remove finalizer
-		graph.SetFinalizers(removeString(graph.GetFinalizers(), gmcFinalizer))
-		if err := r.Update(ctx, graph); err != nil {
-			return ctrl.Result{}, err
-		}
-		// Stop reconciliation as the item is being deleted
-		return ctrl.Result{}, nil
-	}
+	// 	// Remove finalizer
+	// 	graph.SetFinalizers(removeString(graph.GetFinalizers(), gmcFinalizer))
+	// 	if err := r.Update(ctx, graph); err != nil {
+	// 		return ctrl.Result{}, err
+	// 	}
+	// 	// Stop reconciliation as the item is being deleted
+	// 	return ctrl.Result{}, nil
+	// }
 
-	// Add finalizer for this CR if not already present
-	if !containsString(graph.GetFinalizers(), gmcFinalizer) {
-		graph.SetFinalizers(append(graph.GetFinalizers(), gmcFinalizer))
-		if err := r.Update(ctx, graph); err != nil {
-			return ctrl.Result{}, err
-		}
-		// Return and requeue after adding the finalizer
-		return ctrl.Result{Requeue: true}, nil
-	}
+	// // Add finalizer for this CR if not already present
+	// if !containsString(graph.GetFinalizers(), gmcFinalizer) {
+	// 	graph.SetFinalizers(append(graph.GetFinalizers(), gmcFinalizer))
+	// 	if err := r.Update(ctx, graph); err != nil {
+	// 		return ctrl.Result{}, err
+	// 	}
+	// 	// Return and requeue after adding the finalizer
+	// 	return ctrl.Result{Requeue: true}, nil
+	// }
 
 	var totalService uint
 	var externalService uint
@@ -408,7 +417,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if step.Executor.ExternalService == "" {
 				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
-				objs, err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node)
+				objs, err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node, graph)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.StepName)
 				}
@@ -481,19 +490,19 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 }
 
 // finalizeGMConnector contains the logic to clean up resources before the CR is deleted
-func (r *GMConnectorReconciler) finalizeGMConnector(ctx context.Context, graph *mcv1alpha3.GMConnector) {
-	// for compatibility consideration, the old GMC didn't save annotation
-	// so skip this part let the old graph deleted by k8s
-	// or it will be stuck
-	if len(graph.Status.Annotations) == 0 {
-		fmt.Printf("skip resource deletion due to no record\n")
-	}
-	//check if the old annotations are still in the new graph
-	//if not, remove the resource from k8s
-	for k := range graph.Status.Annotations {
-		r.deleteRecordedResource(k, ctx)
-	}
-}
+// func (r *GMConnectorReconciler) finalizeGMConnector(ctx context.Context, graph *mcv1alpha3.GMConnector) {
+// 	// for compatibility consideration, the old GMC didn't save annotation
+// 	// so skip this part let the old graph deleted by k8s
+// 	// or it will be stuck
+// 	if len(graph.Status.Annotations) == 0 {
+// 		fmt.Printf("skip resource deletion due to no record\n")
+// 	}
+// 	//check if the old annotations are still in the new graph
+// 	//if not, remove the resource from k8s
+// 	for k := range graph.Status.Annotations {
+// 		r.deleteRecordedResource(k, ctx)
+// 	}
+// }
 
 func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *unstructured.Unstructured) (uint, error) {
 	// var statusStr string
@@ -611,7 +620,14 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 		if err != nil {
 			return fmt.Errorf("failed to decode YAML: %v", err)
 		}
-
+		obj.SetOwnerReferences([]metav1.OwnerReference{
+			{
+				APIVersion: graph.APIVersion,
+				Kind:       graph.Kind,
+				Name:       graph.Name,
+				UID:        graph.UID,
+			},
+		})
 		err = applyResourceToK8s(ctx, client, obj)
 		if err != nil {
 			return fmt.Errorf("failed to reconcile resource: %v", err)
