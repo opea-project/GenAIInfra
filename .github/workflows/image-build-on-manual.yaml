@@ -1,0 +1,41 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Build GMC latest images on manual event
+
+on:
+  workflow_dispatch:
+    inputs:
+      registry:
+        default: ""
+        description: "Registry to store images"
+        required: false
+        type: string
+      tag:
+        default: "latest"
+        description: "Tag to apply to images"
+        required: true
+        type: string
+      node:
+        default: "[docker-build-xeon, docker-build-gaudi]"
+        description: "Node to run the build on [docker-build-xeon, docker-build-gaudi]"
+        required: true
+        type: string
+
+concurrency:
+  group: ${{ github.workflow }}-on-manual
+  cancel-in-progress: true
+
+env:
+  GOSRC_DIR: "microservices-connector"
+
+jobs:
+  image-build:
+    strategy:
+      matrix:
+        platform: ${{ github.event.inputs.node }}
+    uses: ./.github/workflows/reuse-gmc-image-build.yaml
+    with:
+      image_repo: ${{ github.event.inputs.registry }}
+      image_tag: ${{ github.event.inputs.tag }}
+      runner_label: ${{ matrix.platform }}

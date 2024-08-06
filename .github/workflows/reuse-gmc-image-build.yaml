@@ -40,10 +40,17 @@ jobs:
 
       - name: Set variables
         id: set_variables
+        env:
+          imagerepo: ${{ inputs.image_repo }}
         run: |
-          echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
+          if [[ -z "$imagerepo" ]]; then
+            echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
+            echo "IMAGE_REPO=${OPEA_IMAGE_REPO}" >> $GITHUB_OUTPUT
+          else
+            echo "DOCKER_REGISTRY=${imagerepo}/opea" >> $GITHUB_ENV
+            echo "IMAGE_REPO=${imagerepo}/" >> $GITHUB_OUTPUT
+          fi
           echo "VERSION=${{ inputs.image_tag }}" >> $GITHUB_ENV
-          echo "IMAGE_REPO=${OPEA_IMAGE_REPO}" >> $GITHUB_OUTPUT
           echo "VERSION=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
 
       - name: Build image and push
