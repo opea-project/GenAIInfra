@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 CUR_DIR=$(cd $(dirname "$0") && pwd)
-OUTPUTDIR=${CUR_DIR}/common
+OUTPUTDIR=${CUR_DIR}/../microservices-connector/config/manifests
 
 #
 # generate_yaml <chart> <outputdir>
@@ -13,18 +13,18 @@ function generate_yaml {
   chart=$1
   outputdir=$2
 
-  helm template $chart ../helm-charts/common/$chart --skip-tests --values ../helm-charts/common/$chart/values.yaml --set global.extraEnvConfig=extra-env-config,noProbe=true > ${outputdir}/$chart.yaml
+  helm template $chart ./common/$chart --skip-tests --values ./common/$chart/values.yaml --set global.extraEnvConfig=extra-env-config,noProbe=true > ${outputdir}/$chart.yaml
 
-  for f in `ls ../helm-charts/common/$chart/*-values.yaml 2>/dev/null `; do
+  for f in `ls ./common/$chart/*-values.yaml 2>/dev/null `; do
     ext=$(basename $f | cut -d'-' -f1)
-    helm template $chart ../helm-charts/common/$chart --skip-tests --values ${f} --set global.extraEnvConfig=extra-env-config,noProbe=true  > ${outputdir}/${chart}_${ext}.yaml
+    helm template $chart ./common/$chart --skip-tests --values ${f} --set global.extraEnvConfig=extra-env-config,noProbe=true  > ${outputdir}/${chart}_${ext}.yaml
   done
 }
 
 mkdir -p $OUTPUTDIR
-${CUR_DIR}/../helm-charts/update_dependency.sh
+${CUR_DIR}/update_dependency.sh
 cd $CUR_DIR
-for chart in ${CUR_DIR}/../helm-charts/common/*
+for chart in ${CUR_DIR}/common/*
 do
 	chartname=`basename $chart`
 	echo "Update manifest for $chartname..."
@@ -33,4 +33,4 @@ done
 
 # we need special version of docsum-llm-uservice
 echo "Update manifest for docsum-llm-uservice..."
-helm template docsum ../helm-charts/common/llm-uservice --skip-tests --set global.extraEnvConfig=extra-env-config,noProbe=true,image.repository=opea/llm-docsum-tgi:latest > ${OUTPUTDIR}/docsum-llm-uservice.yaml
+helm template docsum ./common/llm-uservice --skip-tests --set global.extraEnvConfig=extra-env-config,noProbe=true,image.repository=opea/llm-docsum-tgi:latest > ${OUTPUTDIR}/docsum-llm-uservice.yaml
