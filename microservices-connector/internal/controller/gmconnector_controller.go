@@ -359,12 +359,8 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// indicated by the deletion timestamp being set.
 	if graph.GetDeletionTimestamp() != nil {
 		if len(graph.GetFinalizers()) != 0 {
-			// Run finalization logic for gmConnectorFinalizer. If the
-			// finalization logic fails, don't remove the finalizer so
-			// that we can retry during the next reconciliation.
-			if err := r.finalizeGMConnector(ctx, graph); err != nil {
-				return ctrl.Result{}, err
-			}
+			// Run finalization logic for gmConnectorFinalizer.
+			r.finalizeGMConnector(ctx, graph)
 		}
 
 		// Remove finalizer
@@ -455,12 +451,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		for k := range oldAnnotations {
 			if _, ok := graph.Status.Annotations[k]; !ok {
 				//if not, remove the resource from k8s
-				err := r.deleteRecordedResource(k, ctx)
-				if err != nil {
-					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to delete resource %s", k)
-				} else {
-					fmt.Printf("Success to delete %s\n", k)
-				}
+				r.deleteRecordedResource(k, ctx)
 			}
 		}
 	}
@@ -468,7 +459,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	return ctrl.Result{}, nil
 }
 
-func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.Context) error {
+func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.Context) {
 	kind := strings.Split(key, ":")[0]
 	apiVersion := strings.Split(key, ":")[1]
 	name := strings.Split(key, ":")[2]
@@ -478,29 +469,30 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 	obj.SetName(name)
 	obj.SetNamespace(ns)
 	obj.SetAPIVersion(apiVersion)
-	return r.Delete(ctx, obj)
+	err := r.Delete(ctx, obj)
+	// the resource may have been deleted by other means, i.e. user manually delete or delete namespace
+	// ignore the error if delete failed i.e resource not found
+	// since I don't want to block the process for not clearing the finalizer
+	if err != nil {
+		fmt.Printf("Failed to delete resource %s:%s:%s: %v\n", ns, kind, name, err)
+	} else {
+		fmt.Printf("Success to delete %s:%s:%s\n", ns, kind, name)
+	}
 }
 
 // finalizeGMConnector contains the logic to clean up resources before the CR is deleted
-func (r *GMConnectorReconciler) finalizeGMConnector(ctx context.Context, graph *mcv1alpha3.GMConnector) error {
+func (r *GMConnectorReconciler) finalizeGMConnector(ctx context.Context, graph *mcv1alpha3.GMConnector) {
 	// for compatibility consideration, the old GMC didn't save annotation
 	// so skip this part let the old graph deleted by k8s
 	// or it will be stuck
 	if len(graph.Status.Annotations) == 0 {
 		fmt.Printf("skip resource deletion due to no record\n")
-		return nil
 	}
 	//check if the old annotations are still in the new graph
 	//if not, remove the resource from k8s
 	for k := range graph.Status.Annotations {
-		err := r.deleteRecordedResource(k, ctx)
-		if err != nil {
-			return errors.Wrapf(err, "Failed to delete resource %s\n", k)
-		} else {
-			fmt.Printf("Success to delete %s\n", k)
-		}
+		r.deleteRecordedResource(k, ctx)
 	}
-	return nil
 }
 
 func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *unstructured.Unstructured) (uint, error) {
@@ -572,7 +564,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 	var routerNs string
 	var routerServiceName string
 	var routerDeploymentName string
-	jsonBytes, err := json.Marshal(graph.Spec)
+	jsonBytes, err := json.Marshal(graph)
 	if err != nil {
 		// handle error
 		return errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
