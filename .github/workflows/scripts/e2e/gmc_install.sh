@@ -32,16 +32,7 @@ function install_gmc() {
     kubectl get pods -n $SYSTEM_NAMESPACE
 }
 
-function copy_manifests() {
-    # Copy manifest into gmc
-    mkdir -p $(pwd)/config/manifests
-    cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
-}
-
 function init_gmc() {
-    # copy manifests
-    copy_manifests
-
     # replace tag with for the gmc-router and gmc-manager image
     sed -i "s|opea/\(.*\):latest|opea/\1:$VERSION|g" $(pwd)/config/gmcrouter/gmc-router.yaml
     sed -i "s|opea/\(.*\):latest|opea/\1:$VERSION|g" $(pwd)/config/manager/gmc-manager.yaml
