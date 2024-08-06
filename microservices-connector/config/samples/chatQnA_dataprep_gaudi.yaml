@@ -73,5 +73,5 @@ spec:
             endpoint: /v1/dataprep
             REDIS_URL: redis-vector-db
             INDEX_NAME: data-prep
-            TEI_ENDPOINT: tei-embedding-svc
+            TEI_ENDPOINT: tei-embedding-gaudi-svc
           isDownstreamService: true

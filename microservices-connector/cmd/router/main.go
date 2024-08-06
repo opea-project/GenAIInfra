@@ -50,6 +50,7 @@ const (
 	ServiceURL  = "serviceUrl"
 	ServiceNode = "node"
 	DataPrep    = "DataPrep"
+	Parameters  = "parameters"
 )
 
 type EnsembleStepOutput struct {
@@ -198,6 +199,40 @@ func executeStep(
 	return callService(step, serviceURL, input, headers)
 }
 
+func mergeRequests(initReq, respReq []byte) []byte {
+	var initReqData map[string]interface{}
+	var respReqData map[string]interface{}
+
+	if err := json.Unmarshal(initReq, &initReqData); err != nil {
+		log.Error(err, "Error unmarshaling initReqData:")
+		return nil
+	}
+
+	if err := json.Unmarshal(respReq, &respReqData); err != nil {
+		log.Error(err, "Error unmarshaling respReqData:")
+		return nil
+	}
+
+	if _, exists := initReqData[Parameters]; exists {
+		initReqData = initReqData[Parameters].(map[string]interface{})
+	}
+
+	// Merge initReq into respReq
+	for key, value := range initReqData {
+		/*if _, exists := respReqData[key]; !exists {
+			respReqData[key] = value
+		}*/
+		// overwrite the respReq by initial request
+		respReqData[key] = value
+	}
+	mergedBytes, err := json.Marshal(respReqData)
+	if err != nil {
+		log.Error(err, "Error marshaling merged data:")
+		return nil
+	}
+	return mergedBytes
+}
+
 func handleSwitchNode(
 	route *mcv1alpha3.Step,
 	graph mcv1alpha3.GMConnector,
@@ -252,9 +287,11 @@ func handleSwitchPipeline(nodeName string,
 		}
 		log.Info("Current Step Information", "Node Name", nodeName, "Step Index", index)
 		request := input
+		log.Info("Print Original Request Bytes", "Request Bytes", request)
 		if route.Data == "$response" && index > 0 {
-			request = responseBytes
+			request = mergeRequests(initInput, responseBytes)
 		}
+		log.Info("Print New Request Bytes", "Request Bytes", request)
 		if route.Condition == "" {
 			responseBytes, statusCode, err = handleSwitchNode(&route, graph, initInput, request, headers)
 			if err != nil {
@@ -366,9 +403,11 @@ func handleSequencePipeline(nodeName string,
 		}
 		log.Info("Starting execution of step", "type", stepType, "stepName", step.StepName)
 		request := input
+		log.Info("Print Original Request Bytes", "Request Bytes", request)
 		if step.Data == "$response" && i > 0 {
-			request = responseBytes
+			request = mergeRequests(initInput, responseBytes)
 		}
+		log.Info("Print New Request Bytes", "Request Bytes", request)
 		if step.Condition != "" {
 			if !gjson.ValidBytes(responseBytes) {
 				return nil, 500, fmt.Errorf("invalid response")
@@ -466,6 +505,10 @@ func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
 			if _, err := writer.Write(response[start:end]); err != nil {
 				log.Error(err, "failed to write mcGraphHandler response")
 				return
+			}
+
+			if err := writer.Flush(); err != nil {
+				log.Error(err, "error flushing writer when processing response")
 			}
 		}
 	}()
