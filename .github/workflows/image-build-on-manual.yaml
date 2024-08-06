@@ -8,7 +8,7 @@ on:
     inputs:
       registry:
         default: ""
-        description: "Registry to store images"
+        description: "Registry to store images, default is empty"
         required: false
         type: string
       tag:
@@ -16,9 +16,9 @@ on:
         description: "Tag to apply to images"
         required: true
         type: string
-      node:
-        default: "[docker-build-xeon, docker-build-gaudi]"
-        description: "Node to run the build on [docker-build-xeon, docker-build-gaudi]"
+      nodes:
+        default: "docker-build-xeon, docker-build-gaudi"
+        description: "List of nodes to run the build on"
         required: true
         type: string
 
@@ -26,16 +26,26 @@ concurrency:
   group: ${{ github.workflow }}-on-manual
   cancel-in-progress: true
 
-env:
-  GOSRC_DIR: "microservices-connector"
-
 jobs:
+  get-build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      nodes: ${{ steps.get-services.outputs.nodes }}
+    steps:
+      - name: Get test Services
+        id: get-services
+        run: |
+          set -x
+          node_list=($(echo ${{ github.event.inputs.nodes }} | tr ',' ' '))
+          nodes=$(printf '%s\n' "${node_list[@]}" | sort -u | jq -R '.' | jq -sc '.')
+          echo "nodes=$nodes" >> $GITHUB_OUTPUT
+
   image-build:
     strategy:
       matrix:
-        platform: ${{ github.event.inputs.node }}
+        node: ${{ fromJSON(needs.get-build-matrix.outputs.nodes) }}
     uses: ./.github/workflows/reuse-gmc-image-build.yaml
     with:
       image_repo: ${{ github.event.inputs.registry }}
       image_tag: ${{ github.event.inputs.tag }}
-      runner_label: ${{ matrix.platform }}
+      runner_label: ${{ matrix.node }}
