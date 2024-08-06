@@ -45,6 +45,12 @@ spec:
             - name: data-prep
               containerPort: 6007
               protocol: TCP
+            # The following need to be modified after GenAIComps bug #282 is resolved.
+            # https://github.com/opea-project/GenAIComps/issues/282
+            - containerPort: 6008
+              protocol: TCP
+            - containerPort: 6009
+              protocol: TCP
           volumeMounts:
             - mountPath: /tmp
               name: tmp
