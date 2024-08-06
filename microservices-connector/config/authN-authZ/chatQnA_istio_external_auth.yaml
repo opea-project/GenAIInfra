@@ -1,0 +1,37 @@
+apiVersion: v1
+data:
+  mesh: |-
+    accessLogFile: /dev/stdout
+    defaultConfig:
+      discoveryAddress: istiod.istio-system.svc:15012
+      proxyMetadata: {}
+      tracing:
+        zipkin:
+          address: localhost:9411
+    enablePrometheusMerge: true
+    enableTracing: false
+    outboundTrafficPolicy:
+      mode: ALLOW_ANY
+    trustDomain: cluster.local
+    extensionProviders:
+    - name: oauth2-proxy
+      envoyExtAuthzHttp:
+        service: oauth-proxy.oauth2-proxy.svc.cluster.local
+        port: 4180
+        timeout: 1.5s
+        includeRequestHeadersInCheck: ["authorization", "cookie"]
+        headersToUpstreamOnAllow: ["x-forwarded-access-token", "authorization", "path", "x-auth-request-user", "x-auth-request-email", "x-auth-request-access-token", "x-auth-request-groups"]
+        headersToDownstreamOnDeny: ["content-type", "set-cookie"]
+  meshNetworks: 'networks: {}'
+kind: ConfigMap
+metadata:
+  labels:
+    install.operator.istio.io/owning-resource: installed-state
+    install.operator.istio.io/owning-resource-namespace: istio-system
+    istio.io/rev: default
+    operator.istio.io/component: Pilot
+    operator.istio.io/managed: Reconcile
+    operator.istio.io/version: 1.22.2
+    release: istio
+  name: istio
+  namespace: istio-system
