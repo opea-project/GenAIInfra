@@ -1,0 +1,9 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: ui
+description: A Helm chart to the UI for chatQnA workload
+type: application
+version: 0.8.0
+appVersion: "1.0.0"
