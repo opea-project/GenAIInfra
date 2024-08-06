@@ -34,4 +34,4 @@ dependencies:
     version: 0.8.0
     repository: "file://../common/data-prep"
 version: 0.8.0
-appVersion: "1.0.0"
+appVersion: "v0.8"

@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: web-retriever-0.8.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_EMBEDDING_ENDPOINT: "http://web-retriever-tei"
@@ -35,7 +35,7 @@ metadata:
     helm.sh/chart: web-retriever-0.8.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -60,7 +60,7 @@ metadata:
     helm.sh/chart: web-retriever-0.8.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1

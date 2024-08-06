@@ -13,10 +13,10 @@ replicaCount: 1
 ASR_ENDPOINT: ""
 
 image:
-  repository: opea/asr:latest
+  repository: opea/asr
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: asr-0.8.0
     app.kubernetes.io/name: asr
     app.kubernetes.io/instance: asr
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 data:
   ASR_ENDPOINT: "http://asr-whisper:7066"
@@ -31,7 +31,7 @@ metadata:
     helm.sh/chart: asr-0.8.0
     app.kubernetes.io/name: asr
     app.kubernetes.io/instance: asr
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -56,7 +56,7 @@ metadata:
     helm.sh/chart: asr-0.8.0
     app.kubernetes.io/name: asr
     app.kubernetes.io/instance: asr
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1

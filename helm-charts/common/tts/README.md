@@ -44,8 +44,8 @@ curl http://localhost:9088/v1/audio/speech \
 
 ## Values
 
-| Key              | Type   | Default             | Description |
-| ---------------- | ------ | ------------------- | ----------- |
-| image.repository | string | `"opea/tts:latest"` |             |
-| service.port     | string | `"9088"`            |             |
-| TTS_ENDPOINT     | string | `""`                |             |
+| Key              | Type   | Default      | Description |
+| ---------------- | ------ | ------------ | ----------- |
+| image.repository | string | `"opea/tts"` |             |
+| service.port     | string | `"9088"`     |             |
+| TTS_ENDPOINT     | string | `""`         |             |

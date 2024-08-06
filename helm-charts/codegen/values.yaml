@@ -8,10 +8,10 @@
 replicaCount: 1
 
 image:
-  repository: opea/codegen:latest
+  repository: opea/codegen
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: ""
 
 port: 7778
 service:
@@ -29,12 +29,6 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-# To override values in subchart llm-uservice
-llm-uservice:
-  image:
-    repository: opea/llm-tgi:latest
-  service:
-    port: 9000
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: meta-llama/CodeLlama-7b-hf

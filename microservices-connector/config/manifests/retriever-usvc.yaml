@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: retriever-usvc-0.8.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_EMBEDDING_ENDPOINT: "http://retriever-usvc-tei"
@@ -39,7 +39,7 @@ metadata:
     helm.sh/chart: retriever-usvc-0.8.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -64,7 +64,7 @@ metadata:
     helm.sh/chart: retriever-usvc-0.8.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
