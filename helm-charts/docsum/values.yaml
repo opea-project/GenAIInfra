@@ -30,6 +30,12 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3

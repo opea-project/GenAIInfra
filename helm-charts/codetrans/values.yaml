@@ -30,6 +30,12 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: HuggingFaceH4/mistral-7b-grok
