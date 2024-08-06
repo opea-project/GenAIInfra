@@ -65,7 +65,7 @@ var _ = BeforeSuite(func() {
 	// 	"../../config/gmcrouter/gmc-router.yaml",
 	// }
 
-	templateDir := "../../../manifests/common"
+	templateDir := "../../config/manifests"
 
 	files := []string{
 		templateDir + "/tei.yaml",
