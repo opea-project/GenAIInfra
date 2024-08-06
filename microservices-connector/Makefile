@@ -1,6 +1,6 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
-
+#
 # Image URL to use all building/pushing image targets
 CTR_IMG ?= gmcmanager
 ROUTER_IMG ?= gmcrouter

@@ -5,7 +5,7 @@ name: Upgrade GMC system on push event
 
 on:
   push:
-    branches: ["main"]
+    branches: ["main","ci-onpush"]
     paths:
       - microservices-connector/**
       - manifests/common/**
