@@ -364,33 +364,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
 
-	// Check if the GMConnector instance is marked to be deleted, which is
-	// indicated by the deletion timestamp being set.
-	// if graph.GetDeletionTimestamp() != nil {
-	// 	if len(graph.GetFinalizers()) != 0 {
-	// 		// Run finalization logic for gmConnectorFinalizer.
-	// 		r.finalizeGMConnector(ctx, graph)
-	// 	}
-
-	// 	// Remove finalizer
-	// 	graph.SetFinalizers(removeString(graph.GetFinalizers(), gmcFinalizer))
-	// 	if err := r.Update(ctx, graph); err != nil {
-	// 		return ctrl.Result{}, err
-	// 	}
-	// 	// Stop reconciliation as the item is being deleted
-	// 	return ctrl.Result{}, nil
-	// }
-
-	// // Add finalizer for this CR if not already present
-	// if !containsString(graph.GetFinalizers(), gmcFinalizer) {
-	// 	graph.SetFinalizers(append(graph.GetFinalizers(), gmcFinalizer))
-	// 	if err := r.Update(ctx, graph); err != nil {
-	// 		return ctrl.Result{}, err
-	// 	}
-	// 	// Return and requeue after adding the finalizer
-	// 	return ctrl.Result{Requeue: true}, nil
-	// }
-
 	var totalService uint
 	var externalService uint
 	var successService uint
@@ -488,21 +461,6 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 		fmt.Printf("Success to delete %s:%s:%s\n", ns, kind, name)
 	}
 }
-
-// finalizeGMConnector contains the logic to clean up resources before the CR is deleted
-// func (r *GMConnectorReconciler) finalizeGMConnector(ctx context.Context, graph *mcv1alpha3.GMConnector) {
-// 	// for compatibility consideration, the old GMC didn't save annotation
-// 	// so skip this part let the old graph deleted by k8s
-// 	// or it will be stuck
-// 	if len(graph.Status.Annotations) == 0 {
-// 		fmt.Printf("skip resource deletion due to no record\n")
-// 	}
-// 	//check if the old annotations are still in the new graph
-// 	//if not, remove the resource from k8s
-// 	for k := range graph.Status.Annotations {
-// 		r.deleteRecordedResource(k, ctx)
-// 	}
-// }
 
 func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *unstructured.Unstructured) (uint, error) {
 	// var statusStr string
