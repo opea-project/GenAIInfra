@@ -199,38 +199,30 @@ func executeStep(
 	return callService(step, serviceURL, input, headers)
 }
 
-func mergeRequests(initReq, respReq []byte) []byte {
-	var initReqData map[string]interface{}
+func mergeRequests(respReq []byte, initReqData map[string]interface{}) []byte {
 	var respReqData map[string]interface{}
 
-	if err := json.Unmarshal(initReq, &initReqData); err != nil {
-		log.Error(err, "Error unmarshaling initReqData:")
-		return nil
-	}
-
-	if err := json.Unmarshal(respReq, &respReqData); err != nil {
-		log.Error(err, "Error unmarshaling respReqData:")
-		return nil
-	}
-
 	if _, exists := initReqData[Parameters]; exists {
-		initReqData = initReqData[Parameters].(map[string]interface{})
-	}
-
-	// Merge initReq into respReq
-	for key, value := range initReqData {
-		/*if _, exists := respReqData[key]; !exists {
+		if err := json.Unmarshal(respReq, &respReqData); err != nil {
+			log.Error(err, "Error unmarshaling respReqData:")
+			return nil
+		}
+		// Merge init request into respReq
+		for key, value := range initReqData[Parameters].(map[string]interface{}) {
+			/*if _, exists := respReqData[key]; !exists {
+				respReqData[key] = value
+			}*/
+			// overwrite the respReq by initial request
 			respReqData[key] = value
-		}*/
-		// overwrite the respReq by initial request
-		respReqData[key] = value
+		}
+		mergedBytes, err := json.Marshal(respReqData)
+		if err != nil {
+			log.Error(err, "Error marshaling merged data:")
+			return nil
+		}
+		return mergedBytes
 	}
-	mergedBytes, err := json.Marshal(respReqData)
-	if err != nil {
-		log.Error(err, "Error marshaling merged data:")
-		return nil
-	}
-	return mergedBytes
+	return respReq
 }
 
 func handleSwitchNode(
@@ -274,6 +266,13 @@ func handleSwitchPipeline(nodeName string,
 	var statusCode int
 	var responseBytes []byte
 	var err error
+
+	initReqData := make(map[string]interface{})
+	if err = json.Unmarshal(initInput, &initReqData); err != nil {
+		log.Error(err, "Error unmarshaling initReqData:")
+		return nil, 500, err
+	}
+
 	for index, route := range currentNode.Steps {
 		if route.InternalService.IsDownstreamService {
 			log.Info(
@@ -289,7 +288,7 @@ func handleSwitchPipeline(nodeName string,
 		request := input
 		log.Info("Print Original Request Bytes", "Request Bytes", request)
 		if route.Data == "$response" && index > 0 {
-			request = mergeRequests(initInput, responseBytes)
+			request = mergeRequests(responseBytes, initReqData)
 		}
 		log.Info("Print New Request Bytes", "Request Bytes", request)
 		if route.Condition == "" {
@@ -385,6 +384,12 @@ func handleSequencePipeline(nodeName string,
 	var statusCode int
 	var responseBytes []byte
 	var err error
+
+	initReqData := make(map[string]interface{})
+	if err = json.Unmarshal(initInput, &initReqData); err != nil {
+		log.Error(err, "Error unmarshaling initReqData:")
+		return nil, 500, err
+	}
 	for i := range currentNode.Steps {
 		step := &currentNode.Steps[i]
 		stepType := ServiceURL
@@ -405,7 +410,7 @@ func handleSequencePipeline(nodeName string,
 		request := input
 		log.Info("Print Original Request Bytes", "Request Bytes", request)
 		if step.Data == "$response" && i > 0 {
-			request = mergeRequests(initInput, responseBytes)
+			request = mergeRequests(responseBytes, initReqData)
 		}
 		log.Info("Print New Request Bytes", "Request Bytes", request)
 		if step.Condition != "" {
