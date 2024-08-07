@@ -18,5 +18,9 @@ data:
   EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
+  {{- if and (not .Values.TEI_EMBEDDING_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy) }}
+  no_proxy: "{{ .Release.Name }}-tei,{{ .Values.global.no_proxy }}"
+  {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
+  {{- end }}
   HF_HOME: "/tmp/.cache/huggingface"

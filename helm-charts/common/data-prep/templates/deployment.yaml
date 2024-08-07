@@ -39,11 +39,17 @@ spec:
             {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: data-prep
               containerPort: 6007
+              protocol: TCP
+            # The following need to be modified after GenAIComps bug #282 is resolved.
+            # https://github.com/opea-project/GenAIComps/issues/282
+            - containerPort: 6008
+              protocol: TCP
+            - containerPort: 6009
               protocol: TCP
           volumeMounts:
             - mountPath: /tmp

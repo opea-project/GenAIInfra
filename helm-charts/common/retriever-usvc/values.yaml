@@ -11,12 +11,16 @@ autodependency:
 replicaCount: 1
 
 TEI_EMBEDDING_ENDPOINT: ""
+EMBED_MODEL: ""
+
 REDIS_URL: ""
+INDEX_NAME: "rag-redis"
+
 image:
-  repository: opea/retriever-redis:latest
+  repository: opea/retriever-redis
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

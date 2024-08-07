@@ -12,10 +12,10 @@ replicaCount: 1
 
 TEI_RERANKING_ENDPOINT: ""
 image:
-  repository: opea/reranking-tei:latest
+  repository: opea/reranking-tei
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  #tag: "1.0"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

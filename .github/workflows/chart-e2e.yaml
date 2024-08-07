@@ -109,6 +109,8 @@ jobs:
           pushd helm-charts
           # insert a prefix before opea/.*, the prefix is OPEA_IMAGE_REPO
           find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
+          # set OPEA image tag to latest
+          find . -name '*values.yaml' -type f -exec sed -i 's#tag: ""#tag: latest#g' {} \;
           # set huggingface token
           find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#${HFTOKEN}#g" {} \;
           # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"

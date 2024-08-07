@@ -10,19 +10,24 @@ metadata:
 data:
   {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
   TEI_EMBEDDING_ENDPOINT: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote }}
-  {{- else }}
+  {{- else if not .Values.EMBED_MODEL }}
   TEI_EMBEDDING_ENDPOINT: "http://{{ .Release.Name }}-tei"
   {{- end }}
+  EMBED_MODEL: {{ .Values.EMBED_MODEL | quote }}
   {{- if .Values.REDIS_URL }}
   REDIS_URL: {{ .Values.REDIS_URL | quote}}
   {{- else }}
   REDIS_URL: "redis://{{ .Release.Name }}-redis-vector-db:6379"
   {{- end }}
-  INDEX_NAME: "rag-redis"
+  INDEX_NAME: {{ .Values.INDEX_NAME | quote }}
   EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
+  {{- if and (not .Values.REDIS_URL) (and (not .Values.TEI_EMBEDDING_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy)) }}
+  no_proxy: "{{ .Release.Name }}-tei,{{ .Release.Name }}-redis-vector-db,{{ .Values.global.no_proxy }}"
+  {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
+  {{- end }}
   LANGCHAIN_TRACING_V2: {{ .Values.global.LANGCHAIN_TRACING_V2 | quote }}
   LANGCHAIN_API_KEY: {{ .Values.global.LANGCHAIN_API_KEY | quote }}
   LANGCHAIN_PROJECT: "opea-retriever-service"

@@ -1,0 +1,23 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "ui.fullname" . }}-testpod"
+  labels:
+    {{- include "ui.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    #"helm.sh/hook-delete-policy": "hook-succeeded, hook-failure"
+spec:
+  containers:
+    - name: curl
+      image: alpine/curl
+      #image: python:3.10.14
+      command: ['sh', '-c']
+      args:
+        - |
+          curl http://{{ include "ui.fullname" . }}:{{ .Values.service.port }} -sS --fail-with-body \
+          -X GET
+  restartPolicy: Never

@@ -71,13 +71,6 @@ Make sure you have the proper permission to the registry if the above commands d
 kubectl apply -f config/crd/bases/gmc.opea.io_gmconnectors.yaml
 ```
 
-**Get related manifests for GenAI Components**
-
-```sh
-mkdir -p $(pwd)/config/manifests
-cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
-```
-
 **Copy GMC router manifest**
 
 ```sh

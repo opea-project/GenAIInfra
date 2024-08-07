@@ -1,0 +1,148 @@
+---
+# Source: data-prep/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: data-prep-config
+  labels:
+    helm.sh/chart: data-prep-0.8.0
+    app.kubernetes.io/name: data-prep
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/managed-by: Helm
+data:
+  TEI_ENDPOINT: "http://data-prep-tei"
+  EMBED_MODEL: ""
+  REDIS_URL: "redis://data-prep-redis-vector-db:6379"
+  INDEX_NAME: "rag-redis"
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_HOME: "/tmp/.cache/huggingface"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LANGCHAIN_TRACING_V2: "false"
+  LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
+  LANGCHAIN_PROJECT: "opea-dataprep-service"
+---
+# Source: data-prep/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-prep
+  labels:
+    helm.sh/chart: data-prep-0.8.0
+    app.kubernetes.io/name: data-prep
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6007
+      targetPort: 6007
+      protocol: TCP
+      name: data-prep
+    - port: 6008
+      targetPort: 6008
+      protocol: TCP
+      name: data-prep-get
+    - port: 6009
+      targetPort: 6009
+      protocol: TCP
+      name: data-prep-delete
+  selector:
+    app.kubernetes.io/name: data-prep
+    app.kubernetes.io/instance: data-prep
+---
+# Source: data-prep/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-prep
+  labels:
+    helm.sh/chart: data-prep-0.8.0
+    app.kubernetes.io/name: data-prep
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: data-prep
+      app.kubernetes.io/instance: data-prep
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: data-prep
+        app.kubernetes.io/instance: data-prep
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: data-prep
+          envFrom:
+            - configMapRef:
+                name: data-prep-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/dataprep-redis:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: data-prep
+              containerPort: 6007
+              protocol: TCP
+            # The following need to be modified after GenAIComps bug #282 is resolved.
+            # https://github.com/opea-project/GenAIComps/issues/282
+            - containerPort: 6008
+              protocol: TCP
+            - containerPort: 6009
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: v1/health_check
+              port: data-prep
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: data-prep
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: data-prep
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {}
+      volumes:
+        - name: tmp
+          emptyDir: {}

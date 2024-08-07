@@ -49,10 +49,10 @@ curl http://localhost:7077/v1/web_retrieval \
 
 ## Values
 
-| Key                    | Type   | Default                              | Description |
-| ---------------------- | ------ | ------------------------------------ | ----------- |
-| image.repository       | string | `"opea/web-retriever-chroma:latest"` |             |
-| service.port           | string | `"7077"`                             |             |
-| TEI_EMBEDDING_ENDPOINT | string | `""`                                 |             |
-| GOOGLE_API_KEY         | string | `""`                                 |             |
-| GOOGLE_CSE_ID          | string | `""`                                 |             |
+| Key                    | Type   | Default                       | Description |
+| ---------------------- | ------ | ----------------------------- | ----------- |
+| image.repository       | string | `"opea/web-retriever-chroma"` |             |
+| service.port           | string | `"7077"`                      |             |
+| TEI_EMBEDDING_ENDPOINT | string | `""`                          |             |
+| GOOGLE_API_KEY         | string | `""`                          |             |
+| GOOGLE_CSE_ID          | string | `""`                          |             |

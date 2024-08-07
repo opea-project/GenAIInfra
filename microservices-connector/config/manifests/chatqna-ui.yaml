@@ -1,0 +1,107 @@
+---
+# Source: ui/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chatqna-ui-config
+  labels:
+    helm.sh/chart: ui-0.8.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: chatqna-ui
+    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/managed-by: Helm
+data:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  BACKEND_SERVICE_ENDPOINT: ""
+  DATAPREP_SERVICE_ENDPOINT: ""
+  DATAPREP_GET_FILE_ENDPOINT: ""
+  CHAT_BASE_URL: ""
+  UPLOAD_FILE_BASE_URL: ""
+  GET_FILE: ""
+  DELETE_FILE: ""
+---
+# Source: ui/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: chatqna-ui
+  labels:
+    helm.sh/chart: ui-0.8.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: chatqna-ui
+    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5174
+      targetPort: ui
+      protocol: TCP
+      name: ui
+  selector:
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: chatqna-ui
+---
+# Source: ui/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chatqna-ui
+  labels:
+    helm.sh/chart: ui-0.8.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: chatqna-ui
+    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ui
+      app.kubernetes.io/instance: chatqna-ui
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: ui-0.8.0
+        app.kubernetes.io/name: ui
+        app.kubernetes.io/instance: chatqna-ui
+        app.kubernetes.io/version: "v0.8"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: ui
+          envFrom:
+            - configMapRef:
+                name: chatqna-ui-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            {}
+          image: "opea/chatqna-conversation-ui:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: ui
+              containerPort: 80
+              protocol: TCP
+          resources:
+            {}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
