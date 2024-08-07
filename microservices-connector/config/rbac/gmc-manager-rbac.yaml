@@ -76,11 +76,11 @@ rules:
   - get
   - patch
   - update
-- apiGroups: 
+- apiGroups:
   - admissionregistration.k8s.io
-  resources: 
+  resources:
   - validatingwebhookconfigurations
-  verbs: 
+  verbs:
   - create
   - get
   - update
