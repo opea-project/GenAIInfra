@@ -31,7 +31,7 @@ kubectl patch deployment -n chatqa router-server --patch '{
 
 ## Perform authentication and authorization via fake JWT tokens
 
-Here provides the case of authentication and authorization using fake JWT tokens. Fake JWT tokens are generated through a sample script provided by Istio community. 
+Here provides the case of authentication and authorization using fake JWT tokens. Fake JWT tokens are generated through a sample script provided by Istio community.
 
 In this example, we setup rules that only users with JWT token issued by "testing@secure.istio.io" and with claim "groups" equal to "group1" can access the chatQnA workload.
 
