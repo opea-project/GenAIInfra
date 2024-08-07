@@ -46,9 +46,9 @@ curl http://localhost:7000/v1/retrieval  \
 
 ## Values
 
-| Key                    | Type   | Default                       | Description |
-| ---------------------- | ------ | ----------------------------- | ----------- |
-| image.repository       | string | `"opea/retriever-tgi:latest"` |             |
-| service.port           | string | `"7000"`                      |             |
-| REDIS_URL              | string | `""`                          |             |
-| TEI_EMBEDDING_ENDPOINT | string | `""`                          |             |
+| Key                    | Type   | Default                | Description |
+| ---------------------- | ------ | ---------------------- | ----------- |
+| image.repository       | string | `"opea/retriever-tgi"` |             |
+| service.port           | string | `"7000"`               |             |
+| REDIS_URL              | string | `""`                   |             |
+| TEI_EMBEDDING_ENDPOINT | string | `""`                   |             |

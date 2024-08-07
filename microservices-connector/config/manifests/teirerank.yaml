@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: teirerank-0.8.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
-    app.kubernetes.io/version: "1.2"
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 data:
   MODEL_ID: "BAAI/bge-reranker-base"
@@ -35,7 +35,7 @@ metadata:
     helm.sh/chart: teirerank-0.8.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
-    app.kubernetes.io/version: "1.2"
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -60,7 +60,7 @@ metadata:
     helm.sh/chart: teirerank-0.8.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
-    app.kubernetes.io/version: "1.2"
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -86,8 +86,10 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.2"
+          image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
           imagePullPolicy: IfNotPresent
+          args:
+            - "--auto-truncate"
           volumeMounts:
             - mountPath: /data
               name: model-volume

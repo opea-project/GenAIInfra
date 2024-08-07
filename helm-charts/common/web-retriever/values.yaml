@@ -15,10 +15,10 @@ GOOGLE_API_KEY: ""
 GOOGLE_CSE_ID: ""
 
 image:
-  repository: opea/web-retriever-chroma:latest
+  repository: opea/web-retriever-chroma
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

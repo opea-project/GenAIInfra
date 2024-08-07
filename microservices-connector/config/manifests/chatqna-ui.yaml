@@ -6,12 +6,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: ui-config
+  name: chatqna-ui-config
   labels:
     helm.sh/chart: ui-0.8.0
     app.kubernetes.io/name: ui
-    app.kubernetes.io/instance: ui
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/instance: chatqna-ui
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 data:
   http_proxy: ""
@@ -32,12 +32,12 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: ui
+  name: chatqna-ui
   labels:
     helm.sh/chart: ui-0.8.0
     app.kubernetes.io/name: ui
-    app.kubernetes.io/instance: ui
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/instance: chatqna-ui
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -48,7 +48,7 @@ spec:
       name: ui
   selector:
     app.kubernetes.io/name: ui
-    app.kubernetes.io/instance: ui
+    app.kubernetes.io/instance: chatqna-ui
 ---
 # Source: ui/templates/deployment.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -57,26 +57,26 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: ui
+  name: chatqna-ui
   labels:
     helm.sh/chart: ui-0.8.0
     app.kubernetes.io/name: ui
-    app.kubernetes.io/instance: ui
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/instance: chatqna-ui
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: ui
-      app.kubernetes.io/instance: ui
+      app.kubernetes.io/instance: chatqna-ui
   template:
     metadata:
       labels:
         helm.sh/chart: ui-0.8.0
         app.kubernetes.io/name: ui
-        app.kubernetes.io/instance: ui
-        app.kubernetes.io/version: "1.0.0"
+        app.kubernetes.io/instance: chatqna-ui
+        app.kubernetes.io/version: "v0.8"
         app.kubernetes.io/managed-by: Helm
     spec:
       securityContext:
@@ -85,7 +85,7 @@ spec:
         - name: ui
           envFrom:
             - configMapRef:
-                name: ui-config
+                name: chatqna-ui-config
             - configMapRef:
                 name: extra-env-config
                 optional: true
