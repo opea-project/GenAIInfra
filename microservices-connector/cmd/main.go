@@ -28,9 +28,15 @@ import (
 	//+kubebuilder:scaffold:imports
 )
 
+const (
+	webhookServiceName      = "gmc-validating-webhook-service"
+	webhookServiceNamespace = "system"
+)
+
 var (
-	scheme   = runtime.NewScheme()
-	setupLog = ctrl.Log.WithName("setup")
+	scheme      = runtime.NewScheme()
+	setupLog    = ctrl.Log.WithName("setup")
+	webhookPort = webhook.DefaultPort
 )
 
 func init() {
@@ -79,8 +85,27 @@ func main() {
 		tlsOpts = append(tlsOpts, disableHTTP2)
 	}
 
+	pair, CABytes, err := controller.GenerateX509Cert(webhookServiceName, webhookServiceNamespace)
+	if err != nil {
+		setupLog.Error(err, "failed to generate x509 cert")
+		os.Exit(1)
+	}
+
+	if err = controller.CreateOrUpdateMutatingWebhookConfiguration(CABytes, int32(webhookPort), webhookServiceName, webhookServiceNamespace); err != nil {
+		setupLog.Error(err, "failed to create or update the validation webhook configuration")
+		os.Exit(1)
+	}
+
 	webhookServer := webhook.NewServer(webhook.Options{
-		TLSOpts: tlsOpts,
+		Port: webhookPort,
+		TLSOpts: []func(*tls.Config){
+			func(cfg *tls.Config) {
+				cfg.GetCertificate = func(_ *tls.ClientHelloInfo) (*tls.Certificate, error) {
+					return pair, nil
+				}
+				cfg.MinVersion = tls.VersionTLS12
+			},
+		},
 	})
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
@@ -108,6 +133,11 @@ func main() {
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
+	if err = (&mcv1alpha3.GMConnector{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create validating webhook", "webhook", "gmcValidator")
 		os.Exit(1)
 	}
 

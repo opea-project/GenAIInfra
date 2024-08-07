@@ -41,6 +41,9 @@ spec:
             - name: gmc
               containerPort: 8081
               protocol: TCP
+            - name: webhook
+              containerPort: 9443
+              protocol: TCP
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
