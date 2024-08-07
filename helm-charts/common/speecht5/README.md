@@ -25,7 +25,7 @@ curl http://localhost:1234/v1/tts \
 
 ## Values
 
-| Key              | Type   | Default                  | Description |
-| ---------------- | ------ | ------------------------ | ----------- |
-| image.repository | string | `"opea/speecht5:latest"` |             |
-| service.port     | string | `"7055"`                 |             |
+| Key              | Type   | Default           | Description |
+| ---------------- | ------ | ----------------- | ----------- |
+| image.repository | string | `"opea/speecht5"` |             |
+| service.port     | string | `"7055"`          |             |

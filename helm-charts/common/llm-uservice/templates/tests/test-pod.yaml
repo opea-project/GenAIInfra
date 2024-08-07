@@ -13,21 +13,26 @@ metadata:
 spec:
   containers:
     - name: curl
-      image: alpine/curl
-      #image: python:3.10.14
-      command: ['sh', '-c']
+      image: python:3.10.14
+      command: ['bash', '-c']
       args:
         - |
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
           {{- if contains "llm-docsum-tgi" .Values.image.repository }}
           # Try with docsum endpoint
             curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/docsum -sS --fail-with-body \
               -X POST \
               -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}' \
-              -H 'Content-Type: application/json'
+              -H 'Content-Type: application/json' && break;
           {{- else }}
             curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \
               -X POST \
               -d '{"query":"What is Deep Learning?","max_new_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
-              -H 'Content-Type: application/json'
+              -H 'Content-Type: application/json' && break;
           {{- end }}
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
   restartPolicy: Never

@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: tts-0.8.0
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 data:
   TTS_ENDPOINT: "http://tts-speecht5:7055"
@@ -31,7 +31,7 @@ metadata:
     helm.sh/chart: tts-0.8.0
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -56,7 +56,7 @@ metadata:
     helm.sh/chart: tts-0.8.0
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
-    app.kubernetes.io/version: "1.0.0"
+    app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1

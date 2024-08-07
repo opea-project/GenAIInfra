@@ -7,4 +7,4 @@ description: The Helm chart for deploying speecht5 as microservice
 type: application
 version: 0.8.0
 # The speecht5 microservice server version
-appVersion: "1.0.0"
+appVersion: "v0.8"
