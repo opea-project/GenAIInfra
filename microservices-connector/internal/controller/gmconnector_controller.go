@@ -317,25 +317,6 @@ func getServiceURL(service *corev1.Service) string {
 	return ""
 }
 
-func containsString(slice []string, s string) bool {
-	for _, item := range slice {
-		if item == s {
-			return true
-		}
-	}
-	return false
-}
-
-func removeString(slice []string, s string) []string {
-	var result []string
-	for _, item := range slice {
-		if item != s {
-			result = append(result, item)
-		}
-	}
-	return result
-}
-
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors/finalizers,verbs=update
@@ -396,11 +377,10 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				}
 				if len(objs) != 0 {
 					for _, obj := range objs {
-						success, err := recordResourceStatus(graph, &step, obj)
+						err := recordResource(graph, &step, obj)
 						if err != nil {
 							return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Resource created with failure %s", step.StepName)
 						}
-						successService += success
 					}
 				}
 			} else {
@@ -419,9 +399,9 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	err := reconcileRouterService(ctx, r.Client, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
-	} else {
-		successService += 1
 	}
+
+	successService, totalService = r.collectResourceStatus(&graph.Status.Annotations, ctx)
 
 	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
 	if err = r.Status().Update(ctx, graph); err != nil {
@@ -462,10 +442,47 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 	}
 }
 
-func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *unstructured.Unstructured) (uint, error) {
-	// var statusStr string
-	var success uint = 0
-	// graph.SetFinalizers(append(graph.GetFinalizers(), fmt.Sprintf("%s-.-%s-.-%s", obj.GetKind(), obj.GetNamespace(), obj.GetName())))
+func (r *GMConnectorReconciler) collectResourceStatus(resources *map[string]string, ctx context.Context) (uint, uint) {
+	var totalCnt uint = 0
+	var readyCnt uint = 0
+	for resName, _ := range *resources {
+		kind := strings.Split(resName, ":")[0]
+		name := strings.Split(resName, ":")[2]
+		ns := strings.Split(resName, ":")[3]
+
+		if kind == Deployment {
+			totalCnt += 1
+
+			deployment := &appsv1.Deployment{}
+			err := r.Get(ctx, client.ObjectKey{Namespace: ns, Name: name}, deployment)
+			if err != nil {
+				fmt.Printf("Collecting status: failed to get deployment %s: %v\n", name, err)
+				continue
+			}
+			var deploymentStatus strings.Builder
+			deploymentStatus.WriteString(fmt.Sprintf("Replicas: %d desired | %d updated | %d total | %d available | %d unavailable\n",
+				*deployment.Spec.Replicas,
+				deployment.Status.UpdatedReplicas,
+				deployment.Status.Replicas,
+				deployment.Status.AvailableReplicas,
+				deployment.Status.UnavailableReplicas))
+			deploymentStatus.WriteString("Conditions:\n")
+			for _, condition := range deployment.Status.Conditions {
+				deploymentStatus.WriteString(fmt.Sprintf("  Type: %s\n", condition.Type))
+				deploymentStatus.WriteString(fmt.Sprintf("  Status: %s\n", condition.Status))
+				deploymentStatus.WriteString(fmt.Sprintf("  Reason: %s\n", condition.Reason))
+				deploymentStatus.WriteString(fmt.Sprintf("  Message: %s\n", condition.Message))
+			}
+			(*resources)[resName] = deploymentStatus.String()
+			if deployment.Status.AvailableReplicas == *deployment.Spec.Replicas {
+				readyCnt += 1
+			}
+		}
+	}
+	return readyCnt, totalCnt
+}
+
+func recordResource(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *unstructured.Unstructured) error {
 	// save the resource name into annotation for status update and resource management
 	graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = "provisioned"
 
@@ -473,7 +490,7 @@ func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, 
 		service := &corev1.Service{}
 		err := scheme.Scheme.Convert(obj, service, nil)
 		if err != nil {
-			return success, errors.Wrapf(err, "Failed to convert service %s", obj.GetName())
+			return errors.Wrapf(err, "Failed to convert service %s", obj.GetName())
 		}
 
 		if step != nil {
@@ -489,26 +506,7 @@ func recordResourceStatus(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, 
 			fmt.Printf("the router URL is: %s\n", url)
 		}
 	}
-	if obj.GetKind() == Deployment {
-		deployment := &appsv1.Deployment{}
-		err := scheme.Scheme.Convert(obj, deployment, nil)
-		if err != nil {
-			return success, errors.Wrapf(err, "Failed to convert deployment %s", obj.GetName())
-		}
-		if len(deployment.Status.Conditions) > 0 {
-			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] =
-				fmt.Sprintf("Status:%s\n\tReason:%s\n\tMessage%s", deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Status,
-					deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Reason,
-					deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Message)
-			// statusStr = deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Type
-			if deployment.Status.Conditions[len(deployment.Status.Conditions)-1].Type == appsv1.DeploymentAvailable {
-				success += 1
-			}
-		}
-
-	}
-
-	return success, nil
+	return nil
 }
 
 func getTemplateBytes(resourceType string) ([]byte, error) {
@@ -592,9 +590,8 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 		} else {
 			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
 		}
-		// graph.SetFinalizers(append(graph.GetFinalizers(), fmt.Sprintf("%s-.-%s-.-%s", obj.GetKind(), obj.GetNamespace(), obj.GetName())))
 		// save the resource name into annotation for status update and resource management
-		_, err = recordResourceStatus(graph, nil, obj)
+		err = recordResource(graph, nil, obj)
 		if err != nil {
 			return fmt.Errorf("resource created with failure %s: %v", obj.GetName(), err)
 		}
