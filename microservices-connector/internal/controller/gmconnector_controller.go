@@ -395,7 +395,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	//to start a router service
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
-	totalService += 1
 	err := reconcileRouterService(ctx, r.Client, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
@@ -445,7 +444,7 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 func (r *GMConnectorReconciler) collectResourceStatus(resources *map[string]string, ctx context.Context) (uint, uint) {
 	var totalCnt uint = 0
 	var readyCnt uint = 0
-	for resName, _ := range *resources {
+	for resName := range *resources {
 		kind := strings.Split(resName, ":")[0]
 		name := strings.Split(resName, ":")[2]
 		ns := strings.Split(resName, ":")[3]
