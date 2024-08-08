@@ -43,10 +43,14 @@ var (
 	log             = logf.Log.WithName("GMCGraphRouter")
 	mcGraph         *mcv1alpha3.GMConnector
 	defaultNodeName = "root"
+	Prefix          = []byte("data: b'")
+	Suffix          = []byte("'\n\n")
+	DONE            = []byte("[DONE]")
+	Newline         = []byte("\n")
 )
 
 const (
-	BufferSize  = 16
+	BufferSize  = 1024
 	ServiceURL  = "serviceUrl"
 	ServiceNode = "node"
 	DataPrep    = "DataPrep"
@@ -558,10 +562,17 @@ func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
 				break
 			}
 
-			log.Info("[llm - chat_stream] chunk:", "Buffer", string(buffer[:n]))
+			sliceBF := buffer[:n]
+			if !bytes.HasPrefix(sliceBF, DONE) {
+				sliceBF = bytes.TrimPrefix(sliceBF, Prefix)
+				sliceBF = bytes.TrimSuffix(sliceBF, Suffix)
+			} else {
+				sliceBF = bytes.Join([][]byte{Newline, sliceBF}, nil)
+			}
 
+			log.Info("[llm - chat_stream] chunk:", "Buffer", string(sliceBF))
 			// Write the chunk to the ResponseWriter
-			if _, err := w.Write(buffer[:n]); err != nil {
+			if _, err := w.Write(sliceBF); err != nil {
 				log.Error(err, "failed to write to ResponseWriter")
 				return
 			}

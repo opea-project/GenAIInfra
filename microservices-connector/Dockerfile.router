@@ -6,6 +6,9 @@ FROM golang:1.21 AS builder
 ARG TARGETOS
 ARG TARGETARCH
 
+ENV HTTP_PROXY="child-prc.intel.com:913"
+ENV HTTPS_PROXY="child-prc.intel.com:913"
+
 WORKDIR /workspace
 # Copy the Go Modules manifests
 COPY go.mod go.mod
