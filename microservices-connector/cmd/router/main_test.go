@@ -116,7 +116,12 @@ func TestSimpleModelChainer(t *testing.T) {
 		return
 	}
 	var response map[string]interface{}
-	err = json.Unmarshal(res, &response)
+	responseBytes, rerr := io.ReadAll(res)
+	if rerr != nil {
+		t.Fatalf("Error while reading the response body: %v", rerr)
+		return
+	}
+	err = json.Unmarshal(responseBytes, &response)
 	if err != nil {
 		return
 	}
@@ -217,7 +222,12 @@ func TestSimpleServiceEnsemble(t *testing.T) {
 		return
 	}
 	var response map[string]interface{}
-	err = json.Unmarshal(res, &response)
+	responseBytes, rerr := io.ReadAll(res)
+	if rerr != nil {
+		t.Fatalf("Error while reading the response body")
+		return
+	}
+	err = json.Unmarshal(responseBytes, &response)
 	if err != nil {
 		return
 	}
@@ -452,7 +462,12 @@ func TestMCWithCondition(t *testing.T) {
 		return
 	}
 	var response map[string]interface{}
-	err = json.Unmarshal(res, &response)
+	responseBytes, rerr := io.ReadAll(res)
+	if rerr != nil {
+		t.Fatalf("Error while reading the response body")
+		return
+	}
+	err = json.Unmarshal(responseBytes, &response)
 	if err != nil {
 		return
 	}
@@ -536,7 +551,12 @@ func TestCallServiceWhenNoneHeadersToPropagateIsEmpty(t *testing.T) {
 		return
 	}
 	var response map[string]interface{}
-	err = json.Unmarshal(res, &response)
+	responseBytes, rerr := io.ReadAll(res)
+	if rerr != nil {
+		t.Fatalf("Error while reading the response body")
+		return
+	}
+	err = json.Unmarshal(responseBytes, &response)
 	if err != nil {
 		return
 	}
