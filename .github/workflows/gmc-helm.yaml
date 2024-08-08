@@ -102,4 +102,5 @@ jobs:
               kubectl delete namespace "$SYSTEM_NAMESPACE"
             fi
             kubectl delete crd gmconnectors.gmc.opea.io
+            kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io ${RELEASE_NAME}-controller  --ignore-not-found
           fi

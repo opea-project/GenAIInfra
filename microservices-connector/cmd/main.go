@@ -28,11 +28,6 @@ import (
 	//+kubebuilder:scaffold:imports
 )
 
-const (
-	webhookServiceName      = "gmc-validating-webhook-service"
-	webhookServiceNamespace = "system"
-)
-
 var (
 	scheme      = runtime.NewScheme()
 	setupLog    = ctrl.Log.WithName("setup")
@@ -85,13 +80,20 @@ func main() {
 		tlsOpts = append(tlsOpts, disableHTTP2)
 	}
 
+	webhookServiceName := controller.GetEnvWithDefault("SERVICE_NAME", "gmc-validating-webhook-service")
+	webhookServiceNamespace := controller.GetEnvWithDefault("NAMESPACE", "system")
+
 	pair, CABytes, err := controller.GenerateX509Cert(webhookServiceName, webhookServiceNamespace)
 	if err != nil {
 		setupLog.Error(err, "failed to generate x509 cert")
 		os.Exit(1)
 	}
 
-	if err = controller.CreateOrUpdateMutatingWebhookConfiguration(CABytes, int32(webhookPort), webhookServiceName, webhookServiceNamespace); err != nil {
+	if err = controller.CreateOrUpdateValidatingWebhookConfiguration(
+		CABytes,
+		int32(webhookPort),
+		webhookServiceName,
+		webhookServiceNamespace); err != nil {
 		setupLog.Error(err, "failed to create or update the validation webhook configuration")
 		os.Exit(1)
 	}

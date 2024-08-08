@@ -17,7 +17,7 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
+	ctrl "sigs.k8s.io/controller-runtime"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -33,10 +33,17 @@ var (
 	validatingPath = fmt.Sprintf("/validate-%s-%s-%s", strings.Replace(apiGroup, ".", "-", 2), apiVersion, resource)
 )
 
-func CreateOrUpdateMutatingWebhookConfiguration(caPEM *bytes.Buffer, port int32, webhookService, webhookNamespace string) error {
+func GetEnvWithDefault(key, defaultValue string) string {
+	value := os.Getenv(key)
+	if len(value) == 0 {
+		return defaultValue
+	}
+	return value
+}
+
+func CreateOrUpdateValidatingWebhookConfiguration(caPEM *bytes.Buffer, port int32, webhookService, webhookNamespace string) error {
 	// Initializing the kube client
-	kubeconfig := os.Getenv("KUBECONFIG")
-	config, err := clientcmd.BuildConfigFromFlags("", kubeconfig)
+	config, err := ctrl.GetConfig()
 	if err != nil {
 		return err
 	}
@@ -93,16 +100,14 @@ func CreateOrUpdateMutatingWebhookConfiguration(caPEM *bytes.Buffer, port int32,
 		return fmt.Errorf("failed to check the validatingWebhookConfiguration(%s): %v", webhookConfigName, err)
 	} else {
 		// there is an existing validatingWebhookConfiguration
-		old := foundWebhookConfig.Webhooks[0]
-		new := validatingWHConfig.Webhooks[0]
 		if len(foundWebhookConfig.Webhooks) != len(validatingWHConfig.Webhooks) ||
-			!(old.Name == new.Name &&
-				reflect.DeepEqual(old.AdmissionReviewVersions, new.AdmissionReviewVersions) &&
-				reflect.DeepEqual(old.SideEffects, new.SideEffects) &&
-				reflect.DeepEqual(old.FailurePolicy, new.FailurePolicy) &&
-				reflect.DeepEqual(old.Rules, new.Rules) &&
-				reflect.DeepEqual(old.ClientConfig.CABundle, new.ClientConfig.CABundle) &&
-				reflect.DeepEqual(old.ClientConfig.Service, new.ClientConfig.Service)) {
+			!(foundWebhookConfig.Webhooks[0].Name == validatingWHConfig.Webhooks[0].Name &&
+				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].AdmissionReviewVersions, validatingWHConfig.Webhooks[0].AdmissionReviewVersions) &&
+				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].SideEffects, validatingWHConfig.Webhooks[0].SideEffects) &&
+				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].FailurePolicy, validatingWHConfig.Webhooks[0].FailurePolicy) &&
+				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].Rules, validatingWHConfig.Webhooks[0].Rules) &&
+				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].ClientConfig.CABundle, validatingWHConfig.Webhooks[0].ClientConfig.CABundle) &&
+				reflect.DeepEqual(foundWebhookConfig.Webhooks[0].ClientConfig.Service, validatingWHConfig.Webhooks[0].ClientConfig.Service)) {
 			validatingWHConfig.ObjectMeta.ResourceVersion = foundWebhookConfig.ObjectMeta.ResourceVersion
 			if _, err := validatingWebhookConfigV1Client.ValidatingWebhookConfigurations().Update(context.TODO(), validatingWHConfig, metav1.UpdateOptions{}); err != nil {
 				return fmt.Errorf("failed to update the validatingWebhookConfiguration(%s): %v", webhookConfigName, err)

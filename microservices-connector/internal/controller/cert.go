@@ -18,7 +18,7 @@ import (
 	"time"
 )
 
-const org = "intel.com"
+const org = "opea.dev"
 
 // generateCert generate a self-signed CA for given organization
 // and sign certificate with the CA for given common name and dns names
