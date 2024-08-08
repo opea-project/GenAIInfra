@@ -15,4 +15,8 @@ data:
   {{- end }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
+  {{- if and (not .Values.ASR_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy) }}
+  no_proxy: "{{ .Release.Name }}-whisper,{{ .Values.global.no_proxy }}"
+  {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
+  {{- end }}

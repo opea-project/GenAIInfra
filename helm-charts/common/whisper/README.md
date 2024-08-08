@@ -26,7 +26,7 @@ curl http://localhost:1234/v1/asr \
 
 ## Values
 
-| Key              | Type   | Default                 | Description |
-| ---------------- | ------ | ----------------------- | ----------- |
-| image.repository | string | `"opea/whisper:latest"` |             |
-| service.port     | string | `"7066"`                |             |
+| Key              | Type   | Default          | Description |
+| ---------------- | ------ | ---------------- | ----------- |
+| image.repository | string | `"opea/whisper"` |             |
+| service.port     | string | `"7066"`         |             |

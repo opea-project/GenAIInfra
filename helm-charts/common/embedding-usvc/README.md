@@ -44,8 +44,8 @@ curl http://localhost:6000/v1/embeddings \
 
 ## Values
 
-| Key                    | Type   | Default                       | Description |
-| ---------------------- | ------ | ----------------------------- | ----------- |
-| image.repository       | string | `"opea/embedding-tei:latest"` |             |
-| service.port           | string | `"6000"`                      |             |
-| TEI_EMBEDDING_ENDPOINT | string | `""`                          |             |
+| Key                    | Type   | Default                | Description |
+| ---------------------- | ------ | ---------------------- | ----------- |
+| image.repository       | string | `"opea/embedding-tei"` |             |
+| service.port           | string | `"6000"`               |             |
+| TEI_EMBEDDING_ENDPOINT | string | `""`                   |             |

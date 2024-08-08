@@ -38,7 +38,7 @@ curl http://localhost:8888/v1/docsum \
 
 | Key                             | Type   | Default                       | Description                                                                                                                                                  |
 | ------------------------------- | ------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| image.repository                | string | `"opea/docsum:latest"`        |                                                                                                                                                              |
+| image.repository                | string | `"opea/docsum"`               |                                                                                                                                                              |
 | service.port                    | string | `"8888"`                      |                                                                                                                                                              |
 | global.HUGGINGFACEHUB_API_TOKEN | string | `""`                          | Your own Hugging Face API token                                                                                                                              |
 | global.modelUseHostPath         | string | `"/mnt/opea-models"`          | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |

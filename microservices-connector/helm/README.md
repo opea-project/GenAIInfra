@@ -14,14 +14,6 @@ This helm chart will install the following components of GMC:
 
 **NOTE: Because helm doesn't support updating/deleting CRD, you need to manually delete the CRD before upgrading the GMC helm chart.**
 
-**Get related manifests for GenAI Components**
-
-```sh
-cd GenAIInfra/microservices-connector
-mkdir -p $(pwd)/config/manifests
-cp $(dirname $(pwd))/manifests/common/*.yaml -p $(pwd)/config/manifests/
-```
-
 **NOTE:**
 Before installting the manifests, please replace your own huggingface tokens，Google API KEY and Google CSE ID in the manifests:
 
