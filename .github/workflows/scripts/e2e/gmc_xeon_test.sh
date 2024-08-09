@@ -215,7 +215,7 @@ function validate_chatqna_in_switch() {
    # send request to chatqnA
    export CLIENT_POD=$(kubectl get pod -n $CHATQNA_SWITCH_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
-   accessUrl=$(kubectl get gmc -n $CHATQNA_SWITCH_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+   accessUrl=$(kubectl get gmc -n $CHATQNA_SWITCH_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='switch')].status.accessUrl}")
 
    # test the chatqna with model condition: "model-id":"intel" and "embedding-model-id":"small"
    kubectl exec "$CLIENT_POD" -n $CHATQNA_SWITCH_NAMESPACE -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?", "model-id":"intel", "embedding-model-id":"small", "parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json' > $LOG_PATH/curl_chatqna_switch_intel.log
