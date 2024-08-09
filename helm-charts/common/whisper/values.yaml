@@ -10,10 +10,10 @@ replicaCount: 1
 ASR_MODEL_PATH: "openai/whisper-small"
 
 image:
-  repository: opea/whisper:latest
+  repository: opea/whisper
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""

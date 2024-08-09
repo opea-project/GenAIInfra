@@ -13,14 +13,19 @@ metadata:
 spec:
   containers:
     - name: curl
-      #image: alpine/curl
       image: python:3.10.14
-      command: ['sh', '-c']
+      command: ['bash', '-c']
       args:
         - |
           your_embedding=$(python -c "import random; embedding = [random.uniform(-1, 1) for _ in range(768)]; print(embedding)");
-          curl -sS --fail-with-body http://{{ include "web-retriever.fullname" . }}:{{ .Values.service.port }}/v1/web_retrieval \
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
+            curl -sS --fail-with-body http://{{ include "web-retriever.fullname" . }}:{{ .Values.service.port }}/v1/web_retrieval \
           -X POST \
           -d "{\"text\":\"What is OPEA?\",\"embedding\":${your_embedding}}" \
-                -H 'Content-Type: application/json'
+                -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
   restartPolicy: Never

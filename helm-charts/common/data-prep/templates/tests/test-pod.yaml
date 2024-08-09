@@ -13,22 +13,19 @@ metadata:
 spec:
   containers:
     - name: curl
-      #image: alpine/curl
       image: python:3.10.14
       command: ['bash', '-c']
       args:
         - |
           echo "test file" > /tmp/file1.txt;
-          {{- with index .Values.service.ports 0 }}
-          export port={{.port}};
-          {{- end }}
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
-            curl http://{{ include "data-prep.fullname" . }}:$port/v1/dataprep -sS --fail-with-body \
+            curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep -sS --fail-with-body \
             -X POST \
             -H "Content-Type: multipart/form-data" \
             -F "files=@/tmp/file1.txt" && break;
-            sleep 10;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
-          if [ $i -gt $max_retry ]; then echo "dataprep test failed."; exit 1; fi
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
   restartPolicy: Never

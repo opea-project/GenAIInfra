@@ -98,6 +98,9 @@ affinity: {}
 
 LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
+MAX_INPUT_LENGTH: ""
+MAX_TOTAL_TOKENS: ""
+
 global:
   http_proxy: ""
   https_proxy: ""

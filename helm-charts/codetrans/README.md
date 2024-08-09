@@ -38,7 +38,7 @@ curl http://localhost:7777/v1/codetrans \
 
 | Key                             | Type   | Default                           | Description                                                                                                                                                  |
 | ------------------------------- | ------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| image.repository                | string | `"opea/codetrans:latest"`         |                                                                                                                                                              |
+| image.repository                | string | `"opea/codetrans"`                |                                                                                                                                                              |
 | service.port                    | string | `"7777"`                          |                                                                                                                                                              |
 | global.HUGGINGFACEHUB_API_TOKEN | string | `""`                              | Your own Hugging Face API token                                                                                                                              |
 | global.modelUseHostPath         | string | `"/mnt/opea-models"`              | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |

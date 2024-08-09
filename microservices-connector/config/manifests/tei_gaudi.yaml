@@ -11,7 +11,7 @@ metadata:
     helm.sh/chart: tei-0.8.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
-    app.kubernetes.io/version: "1.2"
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 data:
   MODEL_ID: "BAAI/bge-base-en-v1.5"
@@ -36,7 +36,7 @@ metadata:
     helm.sh/chart: tei-0.8.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
-    app.kubernetes.io/version: "1.2"
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -61,7 +61,7 @@ metadata:
     helm.sh/chart: tei-0.8.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
-    app.kubernetes.io/version: "1.2"
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -89,6 +89,8 @@ spec:
             {}
           image: "ghcr.io/huggingface/tei-gaudi:synapse_1.16"
           imagePullPolicy: IfNotPresent
+          args:
+            - "--auto-truncate"
           volumeMounts:
             - mountPath: /data
               name: model-volume

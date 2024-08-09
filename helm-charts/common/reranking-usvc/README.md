@@ -44,8 +44,8 @@ curl http://localhost:8000/v1/reranking \
 
 ## Values
 
-| Key                    | Type   | Default                       | Description |
-| ---------------------- | ------ | ----------------------------- | ----------- |
-| image.repository       | string | `"opea/reranking-tgi:latest"` |             |
-| TEI_RERANKING_ENDPOINT | string | `""`                          |             |
-| service.port           | string | `"8000"`                      |             |
+| Key                    | Type   | Default                | Description |
+| ---------------------- | ------ | ---------------------- | ----------- |
+| image.repository       | string | `"opea/reranking-tgi"` |             |
+| TEI_RERANKING_ENDPOINT | string | `""`                   |             |
+| service.port           | string | `"8000"`               |             |

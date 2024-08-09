@@ -44,8 +44,8 @@ curl http://localhost:9099/v1/audio/transcriptions \
 
 ## Values
 
-| Key              | Type   | Default             | Description |
-| ---------------- | ------ | ------------------- | ----------- |
-| image.repository | string | `"opea/asr:latest"` |             |
-| service.port     | string | `"9099"`            |             |
-| ASR_ENDPOINT     | string | `""`                |             |
+| Key              | Type   | Default      | Description |
+| ---------------- | ------ | ------------ | ----------- |
+| image.repository | string | `"opea/asr"` |             |
+| service.port     | string | `"9099"`     |             |
+| ASR_ENDPOINT     | string | `""`         |             |

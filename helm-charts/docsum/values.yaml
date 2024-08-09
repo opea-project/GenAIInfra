@@ -9,10 +9,10 @@ replicaCount: 1
 LLM_SERVICE_HOST_IP: ""
 
 image:
-  repository: opea/docsum:latest
+  repository: opea/docsum
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: "1.0"
+  tag: ""
 
 port: 8888
 service:
@@ -30,16 +30,20 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
 # To override values in subchart llm-uservice
 llm-uservice:
   image:
-    repository: opea/llm-docsum-tgi:latest
-  service:
-    port: 9000
+    repository: opea/llm-docsum-tgi
+
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
-  # LLM_MODEL_ID: /data/OpenCodeInterpreter-DS-6.7B
 
 global:
   http_proxy: ""

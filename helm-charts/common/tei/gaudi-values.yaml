@@ -9,6 +9,9 @@ image:
   repository: ghcr.io/huggingface/tei-gaudi
   tag: synapse_1.16
 
+securityContext:
+  readOnlyRootFilesystem: false
+
 resources:
   limits:
     habana.ai/gaudi: 1

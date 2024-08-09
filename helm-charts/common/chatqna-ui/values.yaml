@@ -8,10 +8,10 @@
 replicaCount: 1
 
 image:
-  repository: opea/chatqna-conversation-ui:latest
+  repository: opea/chatqna-conversation-ui
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # tag: ""
+  tag: ""
 
 imagePullSecrets: []
 nameOverride: ""
