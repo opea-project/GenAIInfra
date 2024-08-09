@@ -187,7 +187,7 @@ function validate_chatqna_with_dataprep() {
 
 function validate_chatqna_in_switch() {
    kubectl create ns $CHATQNA_SWITCH_NAMESPACE
-   sed -i "s|namespace: chatqa|namespace: $CHATQNA_SWITCH_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_switch_xeon.yaml
+   sed -i "s|namespace: switch|namespace: $CHATQNA_SWITCH_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_switch_xeon.yaml
    # workaround for issue #268
    yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_switch_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_switch_xeon.yaml
