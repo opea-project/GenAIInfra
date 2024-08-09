@@ -33,3 +33,12 @@ rules:
   - get
   - patch
   - update
+- apiGroups:
+    - admissionregistration.k8s.io
+  resources:
+    - validatingwebhookconfigurations
+  verbs:
+    - create
+    - get
+    - update
+    - list
