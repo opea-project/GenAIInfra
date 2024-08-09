@@ -273,8 +273,8 @@ func handleSwitchPipeline(nodeName string,
 ) (io.ReadCloser, int, error) {
 	currentNode := graph.Spec.Nodes[nodeName]
 	var statusCode int
-	var responseBytes []byte
 	var responseBody io.ReadCloser
+	var responseBytes []byte
 	var err error
 
 	initReqData := make(map[string]interface{})
@@ -294,6 +294,14 @@ func handleSwitchPipeline(nodeName string,
 			)
 			continue
 		}
+
+		// make sure that the process goes to the correct step
+		if route.Condition != "" {
+			if !pickupRouteByCondition(initInput, route.Condition) {
+				continue
+			}
+		}
+
 		log.Info("Current Step Information", "Node Name", nodeName, "Step Index", index)
 		request := input
 		if responseBody != nil {
@@ -315,18 +323,9 @@ func handleSwitchPipeline(nodeName string,
 			request = mergeRequests(responseBytes, initReqData)
 		}
 		log.Info("Print New Request Bytes", "Request Bytes", request)
-		if route.Condition == "" {
-			responseBody, statusCode, err = handleSwitchNode(&route, graph, initInput, request, headers)
-			if err != nil {
-				return nil, statusCode, err
-			}
-		} else {
-			if pickupRouteByCondition(initInput, route.Condition) {
-				responseBody, statusCode, err = handleSwitchNode(&route, graph, initInput, request, headers)
-				if err != nil {
-					return nil, statusCode, err
-				}
-			}
+		responseBody, statusCode, err = handleSwitchNode(&route, graph, initInput, request, headers)
+		if err != nil {
+			return nil, statusCode, err
 		}
 	}
 	return responseBody, statusCode, err
@@ -562,21 +561,20 @@ func mcGraphHandler(w http.ResponseWriter, req *http.Request) {
 				break
 			}
 
-			sliceBF := buffer[:n]
+			/*sliceBF := buffer[:n]
 			if !bytes.HasPrefix(sliceBF, DONE) {
 				sliceBF = bytes.TrimPrefix(sliceBF, Prefix)
 				sliceBF = bytes.TrimSuffix(sliceBF, Suffix)
 			} else {
 				sliceBF = bytes.Join([][]byte{Newline, sliceBF}, nil)
 			}
+			log.Info("[llm - chat_stream] chunk:", "Buffer", string(sliceBF))*/
 
-			log.Info("[llm - chat_stream] chunk:", "Buffer", string(sliceBF))
 			// Write the chunk to the ResponseWriter
-			if _, err := w.Write(sliceBF); err != nil {
+			if _, err := w.Write(buffer[:n]); err != nil {
 				log.Error(err, "failed to write to ResponseWriter")
 				return
 			}
-
 			// Flush the data to the client immediately
 			if flusher, ok := w.(http.Flusher); ok {
 				flusher.Flush()
