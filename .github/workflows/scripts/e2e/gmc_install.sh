@@ -64,7 +64,7 @@ function cleanup_gmc() {
     if kubectl get namespace $SYSTEM_NAMESPACE > /dev/null 2>&1; then
         echo "Deleting namespace: $SYSTEM_NAMESPACE"
         kubectl delete namespace "$SYSTEM_NAMESPACE"
-        kubectl delete crd gmconnectors.gmc.opea.io
+        kubectl delete crd gmconnectors.gmc.opea.io || true
     else
         echo "Namespace $SYSTEM_NAMESPACE does not exist"
     fi

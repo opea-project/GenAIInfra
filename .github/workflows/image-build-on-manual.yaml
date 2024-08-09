@@ -41,6 +41,7 @@ jobs:
           echo "nodes=$nodes" >> $GITHUB_OUTPUT
 
   image-build:
+    needs: get-build-matrix
     strategy:
       matrix:
         node: ${{ fromJSON(needs.get-build-matrix.outputs.nodes) }}
