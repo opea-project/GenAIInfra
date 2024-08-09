@@ -8,6 +8,8 @@ tei:
   resources:
     limits:
       habana.ai/gaudi: 1
+  securityContext:
+    readOnlyRootFilesystem: false
 
 # To override values in subchart tgi
 tgi:
