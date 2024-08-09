@@ -158,10 +158,11 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 			obj.SetNamespace(ns)
 		}
 
+		// set the owner reference for auto deleting the resources when GMC is deleted
 		obj.SetOwnerReferences([]metav1.OwnerReference{
 			{
-				APIVersion: graph.APIVersion,
-				Kind:       graph.Kind,
+				APIVersion: graph.TypeMeta.APIVersion,
+				Kind:       graph.TypeMeta.Kind,
 				Name:       graph.Name,
 				UID:        graph.UID,
 			},
@@ -341,9 +342,17 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 		return reconcile.Result{}, err
 	}
-	// get the router config
+	// in case the typemeta is not set, in ut
+	// check if typemeta is empty
+	if reflect.DeepEqual(graph.TypeMeta, metav1.TypeMeta{}) {
+		graph.TypeMeta = metav1.TypeMeta{
+			APIVersion: "gmc.opea.io/v1alpha3",
+			Kind:       "GMConnector",
+		}
+	}
+
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
-	fmt.Println("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
+	fmt.Println("Reconciling kind ", graph.Kind, "apiVersion ", graph.APIVersion, " graph ", graph.Name)
 
 	var totalService uint
 	var externalService uint
@@ -636,7 +645,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, obj *unstructured.
 	// This might involve trying an Update and, if it fails because the object doesn't exist, falling back to Create.
 	// Retry updating the resource in case of transient errors.
 	timeout := time.After(1 * time.Minute)
-	tick := time.NewTicker(1 * time.Second)
+	tick := time.NewTicker(100 * time.Millisecond)
 	for {
 		select {
 		case <-ctx.Done():
