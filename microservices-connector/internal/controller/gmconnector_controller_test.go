@@ -8,6 +8,7 @@ package controller
 import (
 	"context"
 	"testing"
+	"time"
 
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
@@ -38,9 +39,15 @@ var _ = Describe("GMConnector Controller", func() {
 			err := k8sClient.Get(ctx, typeNamespacedName, gmconnector)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &mcv1alpha3.GMConnector{
+					TypeMeta: metav1.TypeMeta{
+						APIVersion: "gmc.opea.io/v1alpha3",
+						Kind:       "GMConnector",
+					},
+
 					ObjectMeta: metav1.ObjectMeta{
 						Name:      resourceName,
 						Namespace: "default",
+						UID:       "1f9a258c-b7d2-4bb3-9fac-ddf1b4369d24",
 					},
 					Spec: mcv1alpha3.GMConnectorSpec{
 						RouterConfig: mcv1alpha3.RouterConfig{
@@ -166,17 +173,23 @@ var _ = Describe("GMConnector Controller", func() {
 						},
 					},
 				}
-				Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+				// Expect(k8sClient.Create(ctx, resource)).To(Succeed())
+				Eventually(func() error {
+					return k8sClient.Create(ctx, resource)
+				}, 60*time.Second, 1*time.Second).Should(Succeed())
 			}
 		})
 
 		AfterEach(func() {
 			// TODO(user): Cleanup logic after each test, like removing the resource instance.
-			resource := &mcv1alpha3.GMConnector{}
-			err := k8sClient.Get(ctx, typeNamespacedName, resource)
-			Expect(err).NotTo(HaveOccurred())
+			Eventually(func() error {
+				resource := &mcv1alpha3.GMConnector{}
+				return k8sClient.Get(ctx, typeNamespacedName, resource)
+			}, 60*time.Second, 1*time.Second).Should(Succeed())
 
 			By("Cleanup the specific resource instance GMConnector")
+			resource := &mcv1alpha3.GMConnector{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, resource)).To(Succeed())
 			Expect(k8sClient.Delete(ctx, resource)).To(Succeed())
 		})
 		It("should successfully reconcile the resource", func() {

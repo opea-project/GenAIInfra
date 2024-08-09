@@ -5,7 +5,8 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: router-server
+  name: {{.DplymntName}}
+  namespace: {{.Namespace}}
 spec:
   replicas: 1
   selector:
@@ -37,7 +38,8 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: router-service
+  name: {{.SvcName}}
+  namespace: {{.Namespace}}
 spec:
   type: ClusterIP
   selector:
