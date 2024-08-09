@@ -45,10 +45,6 @@ spec:
             {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.extraArgs }}
-          args:
-            {{- toYaml .Values.extraArgs | nindent 12}}
-          {{- end }}
           volumeMounts:
             - mountPath: /data
               name: model-volume
