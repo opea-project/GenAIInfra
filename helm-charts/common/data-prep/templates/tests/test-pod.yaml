@@ -18,12 +18,9 @@ spec:
       args:
         - |
           echo "test file" > /tmp/file1.txt;
-          {{- with index .Values.service.ports 0 }}
-          export port={{.port}};
-          {{- end }}
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
-            curl http://{{ include "data-prep.fullname" . }}:$port/v1/dataprep -sS --fail-with-body \
+            curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep -sS --fail-with-body \
             -X POST \
             -H "Content-Type: multipart/form-data" \
             -F "files=@/tmp/file1.txt" && break;
