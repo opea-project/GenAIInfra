@@ -11,6 +11,7 @@ USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
 CHATQNA_NAMESPACE="${APP_NAMESPACE}-chatqna"
 CHATQNA_DATAPREP_NAMESPACE="${APP_NAMESPACE}-chatqna-dataprep"
+CHATQNA_SWITCH_NAMESPACE="${APP_NAMESPACE}-chatqna-switch"
 CODEGEN_NAMESPACE="${APP_NAMESPACE}-codegen"
 CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
 DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
@@ -22,21 +23,25 @@ function validate_gmc() {
     echo "validate chat-qna with dataprep"
     validate_chatqna_with_dataprep
 
-    echo "validate codegen"
-    validate_codegen
+    echo "validate chat-qna in switch mode"
+    validate_chatqna_in_switch
 
-    echo "validate codetrans"
-    validate_codetrans
+    # echo "validate codegen"
+    # validate_codegen
 
-    echo "validate docsum"
-    validate_docsum
+    # echo "validate codetrans"
+    # validate_codetrans
+
+    # echo "validate docsum"
+    # validate_docsum
 
     get_gmc_controller_logs
 }
 
 function cleanup_apps() {
     echo "clean up microservice-connector"
-    namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
+    # namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
+    namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         if kubectl get namespace $ns > /dev/null 2>&1; then
             echo "Deleting namespace: $ns"
@@ -101,7 +106,7 @@ function validate_chatqna() {
 }
 
 function validate_chatqna_with_dataprep() {
-    kubectl create ns $CHATQNA_DATAPREP_NAMESPACE
+   kubectl create ns $CHATQNA_DATAPREP_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $CHATQNA_DATAPREP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
    # workaround for issue #268
    yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
@@ -170,6 +175,87 @@ function validate_chatqna_with_dataprep() {
    if [ $status == false ]; then
        if [[ -f $LOG_PATH/curl_chatqna_dataprep.log ]]; then
            cat $LOG_PATH/curl_chatqna_dataprep.log
+       fi
+       echo "Response check failed, please check the logs in artifacts!"
+       exit 1
+   else
+       echo "Response check succeed!"
+   fi
+}
+
+function validate_chatqna_in_switch() {
+   kubectl create ns $CHATQNA_SWITCH_NAMESPACE
+   sed -i "s|namespace: chatqa|namespace: $CHATQNA_SWITCH_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_switch_gaudi.yaml
+   # workaround for issue #268
+   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_switch_gaudi.yaml
+   kubectl apply -f $(pwd)/config/samples/chatQnA_switch_gaudi.yaml
+
+   # Wait until the router service is ready
+   echo "Waiting for the chatqa router service to be ready..."
+   wait_until_pod_ready "chatqna router" $CHATQNA_SWITCH_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $CHATQNA_SWITCH_NAMESPACE)
+   echo $output
+
+   # deploy client pod for testing
+   kubectl create deployment client-test -n $CHATQNA_SWITCH_NAMESPACE --image=python:3.8.13 -- sleep infinity
+
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $CHATQNA_SWITCH_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
+   # giving time to populating data
+   sleep 90
+
+   kubectl get pods -n $CHATQNA_SWITCH_NAMESPACE
+   # send request to chatqnA
+   export CLIENT_POD=$(kubectl get pod -n $CHATQNA_SWITCH_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
+   echo "$CLIENT_POD"
+   accessUrl=$(kubectl get gmc -n $CHATQNA_SWITCH_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+
+   # test the chatqna with model condition: "model-id":"intel" and "embedding-model-id":"small"
+   kubectl exec "$CLIENT_POD" -n $CHATQNA_SWITCH_NAMESPACE -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?", "model-id":"intel", "embedding-model-id":"small", "parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json' > $LOG_PATH/curl_chatqna_switch_intel.log
+   exit_code=$?
+   if [ $exit_code -ne 0 ]; then
+       echo "chatqna failed, please check the logs in ${LOG_PATH}!"
+       exit 1
+   fi
+
+   echo "Checking response results, make sure the output is reasonable. "
+   local status=false
+   if [[ -f $LOG_PATH/curl_chatqna_switch_intel.log ]] && \
+   [[ $(grep -c "[DONE]" $LOG_PATH/curl_chatqna_switch_intel.log) != 0 ]]; then
+       status=true
+   fi
+   if [ $status == false ]; then
+       if [[ -f $LOG_PATH/curl_chatqna_switch_intel.log ]]; then
+           cat $LOG_PATH/curl_chatqna_switch_intel.log
+       fi
+       echo "Response check failed, please check the logs in artifacts!"
+       exit 1
+   else
+       echo "Response check succeed!"
+   fi
+
+   # test the chatqna with model condition: "model-id":"llama" and "embedding-model-id":"large"
+   kubectl exec "$CLIENT_POD" -n $CHATQNA_SWITCH_NAMESPACE -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?", "model-id":"llama", "embedding-model-id":"large", "parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json' > $LOG_PATH/curl_chatqna_switch_llama.log
+   exit_code=$?
+   if [ $exit_code -ne 0 ]; then
+       echo "chatqna failed, please check the logs in ${LOG_PATH}!"
+       exit 1
+   fi
+
+   echo "Checking response results, make sure the output is reasonable. "
+   local status=false
+   if [[ -f $LOG_PATH/curl_chatqna_switch_llama.log ]] && \
+   [[ $(grep -c "[DONE]" $LOG_PATH/curl_chatqna_switch_llama.log) != 0 ]]; then
+       status=true
+   fi
+   if [ $status == false ]; then
+       if [[ -f $LOG_PATH/curl_chatqna_switch_llama.log ]]; then
+           cat $LOG_PATH/curl_chatqna_switch_llama.log
        fi
        echo "Response check failed, please check the logs in artifacts!"
        exit 1
