@@ -28,6 +28,11 @@ import (
 	//+kubebuilder:scaffold:imports
 )
 
+const (
+	webhookServiceNameEnv      = "SERVICE_NAME"
+	webhookServiceNamespaceEnv = "NAMESPACE"
+)
+
 var (
 	scheme      = runtime.NewScheme()
 	setupLog    = ctrl.Log.WithName("setup")
@@ -80,8 +85,8 @@ func main() {
 		tlsOpts = append(tlsOpts, disableHTTP2)
 	}
 
-	webhookServiceName := controller.GetEnvWithDefault("SERVICE_NAME", "gmc-validating-webhook-service")
-	webhookServiceNamespace := controller.GetEnvWithDefault("NAMESPACE", "system")
+	webhookServiceName := controller.GetEnvWithDefault(webhookServiceNameEnv, "gmc-validating-webhook-service")
+	webhookServiceNamespace := controller.GetEnvWithDefault(webhookServiceNamespaceEnv, "system")
 
 	pair, CABytes, err := controller.GenerateX509Cert(webhookServiceName, webhookServiceNamespace)
 	if err != nil {
