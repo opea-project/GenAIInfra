@@ -15,9 +15,9 @@ spec:
     - key: request.auth.claims[preferred_username]
       values:
       - 'mary'
-    - key: request.auth.claims[aud]
+    - key: request.auth.claims[realm_access][roles]
       values:
-      - 'istio'
+      - 'user'
   selector:
     matchLabels:
       app: router-service
