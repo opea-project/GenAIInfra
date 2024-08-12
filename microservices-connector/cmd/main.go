@@ -94,7 +94,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	client, err := controller.GetClient()
+	if err != nil {
+		setupLog.Error(err, "unable to get client config")
+		os.Exit(1)
+	}
+
 	if err = controller.CreateOrUpdateValidatingWebhookConfiguration(
+		client,
 		CABytes,
 		int32(webhookPort),
 		webhookServiceName,

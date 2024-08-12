@@ -41,16 +41,20 @@ func GetEnvWithDefault(key, defaultValue string) string {
 	return value
 }
 
-func CreateOrUpdateValidatingWebhookConfiguration(caPEM *bytes.Buffer, port int32, webhookService, webhookNamespace string) error {
-	// Initializing the kube client
+// Initializing the kube client
+func GetClient() (kubernetes.Interface, error) {
 	config, err := ctrl.GetConfig()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	clientset, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return err
+		return nil, err
 	}
+	return clientset, nil
+}
+
+func CreateOrUpdateValidatingWebhookConfiguration(clientset kubernetes.Interface, caPEM *bytes.Buffer, port int32, webhookService, webhookNamespace string) error {
 	validatingWebhookConfigV1Client := clientset.AdmissionregistrationV1()
 
 	logw.Info("Creating or updating the validatingwebhookconfiguration", "webhook name", webhookConfigName)

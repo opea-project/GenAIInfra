@@ -20,16 +20,14 @@ import (
 
 const org = "opea.dev"
 
-// generateCert generate a self-signed CA for given organization
+// GenerateX509Cert generate a self-signed CA for given organization
 // and sign certificate with the CA for given common name and dns names
 // it resurns the CA in PEM format, certificate and private key in X509 format
 func GenerateX509Cert(webhookName string, webhookNamespace string) (*tls.Certificate, *bytes.Buffer, error) {
-	dnsNames := []string{
-		webhookName,
-		fmt.Sprintf("%s.%s", webhookName, webhookNamespace),
-		fmt.Sprintf("%s.%s.svc", webhookName, webhookNamespace),
+	dnsNames, commonName, err := composeDNSNames(webhookName, webhookNamespace)
+	if err != nil {
+		return nil, nil, err
 	}
-	commonName := fmt.Sprintf("%s.%s.svc", webhookName, webhookNamespace)
 	caPEM, certPEM, keyPEM, err := generateCert([]string{org}, dnsNames, commonName)
 	if err != nil {
 		return nil, nil, err
@@ -40,6 +38,19 @@ func GenerateX509Cert(webhookName string, webhookNamespace string) (*tls.Certifi
 	}
 
 	return &cert, caPEM, nil
+}
+
+func composeDNSNames(webhookName, webhookNamespace string) ([]string, string, error) {
+	if len(webhookName) == 0 || len(webhookNamespace) == 0 {
+		return nil, "", fmt.Errorf("webhook name or namespace is empty")
+	}
+	dnsNames := []string{
+		webhookName,
+		fmt.Sprintf("%s.%s", webhookName, webhookNamespace),
+		fmt.Sprintf("%s.%s.svc", webhookName, webhookNamespace),
+	}
+	commonName := fmt.Sprintf("%s.%s.svc", webhookName, webhookNamespace)
+	return dnsNames, commonName, nil
 }
 
 func generateCert(orgs, dnsNames []string, commonName string) (*bytes.Buffer, *bytes.Buffer, *bytes.Buffer, error) {
