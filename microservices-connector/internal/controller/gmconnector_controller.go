@@ -45,12 +45,14 @@ const (
 	TeiReranking             = "TeiReranking"
 	Tgi                      = "Tgi"
 	TgiGaudi                 = "TgiGaudi"
+	TgiNvidia                = "TgiNvidia"
 	Llm                      = "Llm"
 	DocSum                   = "DocSum"
 	Router                   = "router"
 	DataPrep                 = "DataPrep"
 	xeon                     = "xeon"
 	gaudi                    = "gaudi"
+	nvidia                   = "nvidia"
 	WebRetriever             = "WebRetriever"
 	yaml_dir                 = "/tmp/microservices/yamls/"
 	Service                  = "Service"
@@ -76,6 +78,7 @@ var yamlDict = map[string]string{
 	TeiReranking:      yaml_dir + "teirerank.yaml",
 	Tgi:               yaml_dir + "tgi.yaml",
 	TgiGaudi:          yaml_dir + "tgi_gaudi.yaml",
+	TgiNvidia:         yaml_dir + "tgi_nv.yaml",
 	Llm:               yaml_dir + "llm-uservice.yaml",
 	DocSum:            yaml_dir + "docsum-llm-uservice.yaml",
 	Router:            yaml_dir + "gmc-router.yaml",

@@ -14,6 +14,10 @@ A sample for chatQnA can be found at config/samples/chatQnA_xeon.yaml
 ```sh
 kubectl create ns chatqa
 kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
+# To use Gaudi devive
+#kubectl apply -f $(pwd)/config/samples/chatQnA_gaudi.yaml
+# To use Nvidia GPU
+#kubectl apply -f $(pwd)/config/samples/chatQnA_nv.yaml
 ```
 
 **GMC will reconcile chatQnA custom resource and get all related components/services ready**
@@ -39,7 +43,7 @@ kubectl create deployment client-test -n chatqa --image=python:3.8.13 -- sleep i
 **Access the pipeline using the above URL from the client pod**
 
 ```bash
-export CLIENT_POD=$(kubectl get pod  -l app=client-test -o jsonpath={.items..metadata.name})
+export CLIENT_POD=$(kubectl get pod -n chatqa  -l app=client-test -o jsonpath={.items..metadata.name})
 export accessUrl=$(kubectl get gmc -n chatqa -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
 kubectl exec "$CLIENT_POD" -n chatqa -- curl $accessUrl  -X POST  -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json'
 ```
