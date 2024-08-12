@@ -18,3 +18,9 @@ data:
   NUMBA_CACHE_DIR: "/tmp"
   TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
+  {{- if .Values.MAX_INPUT_LENGTH }}
+  MAX_INPUT_LENGTH: {{ .Values.MAX_INPUT_LENGTH | quote }}
+  {{- end }}
+  {{- if .Values.MAX_TOTAL_TOKENS }}
+  MAX_TOTAL_TOKENS: {{ .Values.MAX_TOTAL_TOKENS | quote }}
+  {{- end }}

@@ -84,4 +84,10 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
+
+  # Choose where to save your downloaded models
+  # modelUseHostPath: Host directory path, this is good for one node test.
+  # modelUsePV: PersistentVolumeClaim(PVC) name, which is suitable for multinode deployment
+  # comment out both will not have model cache directory and download the model from huggingface.
   modelUseHostPath: /mnt/opea-models
+  # modelUsePV: model-volume

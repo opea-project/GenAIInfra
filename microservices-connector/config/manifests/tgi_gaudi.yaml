@@ -24,6 +24,8 @@ data:
   NUMBA_CACHE_DIR: "/tmp"
   TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
+  MAX_INPUT_LENGTH: "1024"
+  MAX_TOTAL_TOKENS: "2048"
 ---
 # Source: tgi/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -90,11 +92,6 @@ spec:
             {}
           image: "ghcr.io/huggingface/tgi-gaudi:2.0.1"
           imagePullPolicy: IfNotPresent
-          args:
-            - --max-input-length
-            - "1024"
-            - --max-total-tokens
-            - "2048"
           volumeMounts:
             - mountPath: /data
               name: model-volume
