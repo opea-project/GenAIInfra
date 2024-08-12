@@ -386,7 +386,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 				}
 				if len(objs) != 0 {
 					for _, obj := range objs {
-						err := recordResource(graph, &step, obj)
+						err := recordResource(graph, nodeName, i, obj)
 						if err != nil {
 							return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Resource created with failure %s", step.StepName)
 						}
@@ -490,7 +490,7 @@ func (r *GMConnectorReconciler) collectResourceStatus(resources *map[string]stri
 	return readyCnt, totalCnt
 }
 
-func recordResource(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *unstructured.Unstructured) error {
+func recordResource(graph *mcv1alpha3.GMConnector, nodeName string, stepIdx int, obj *unstructured.Unstructured) error {
 	// save the resource name into annotation for status update and resource management
 	graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = "provisioned"
 
@@ -501,10 +501,10 @@ func recordResource(graph *mcv1alpha3.GMConnector, step *mcv1alpha3.Step, obj *u
 			return errors.Wrapf(err, "Failed to convert service %s", obj.GetName())
 		}
 
-		if step != nil {
-			url := getServiceURL(service) + step.InternalService.Config["endpoint"]
+		if len(graph.Spec.Nodes) != 0 && len(graph.Spec.Nodes[nodeName].Steps) != 0 {
+			url := getServiceURL(service) + graph.Spec.Nodes[nodeName].Steps[stepIdx].InternalService.Config["endpoint"]
 			//set this for router
-			step.ServiceURL = url
+			graph.Spec.Nodes[nodeName].Steps[stepIdx].ServiceURL = url
 			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = url
 			fmt.Printf("the service URL is: %s\n", url)
 		} else {
@@ -531,13 +531,14 @@ func getTemplateBytes(resourceType string) ([]byte, error) {
 
 func reconcileRouterService(ctx context.Context, client client.Client, graph *mcv1alpha3.GMConnector) error {
 	configForRouter := make(map[string]string)
-	for k, v := range graph.Spec.RouterConfig.Config {
-		configForRouter[k] = v
-	}
+
 	var routerNs string
 	var routerServiceName string
 	var routerDeploymentName string
-	jsonBytes, err := json.Marshal(graph)
+	var graphJson mcv1alpha3.GMConnector
+	graphJson.Spec = *graph.Spec.DeepCopy()
+
+	jsonBytes, err := json.Marshal(graphJson)
 	if err != nil {
 		// handle error
 		return errors.Wrapf(err, "Failed to Marshal routes for %s", graph.Spec.RouterConfig.Name)
@@ -599,7 +600,7 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
 		}
 		// save the resource name into annotation for status update and resource management
-		err = recordResource(graph, nil, obj)
+		err = recordResource(graph, "", 0, obj)
 		if err != nil {
 			return fmt.Errorf("resource created with failure %s: %v", obj.GetName(), err)
 		}
