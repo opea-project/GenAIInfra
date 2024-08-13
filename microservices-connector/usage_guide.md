@@ -14,7 +14,7 @@ A sample for chatQnA can be found at config/samples/chatQnA_xeon.yaml
 ```sh
 kubectl create ns chatqa
 kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
-# To use Gaudi devive
+# To use Gaudi device
 #kubectl apply -f $(pwd)/config/samples/chatQnA_gaudi.yaml
 # To use Nvidia GPU
 #kubectl apply -f $(pwd)/config/samples/chatQnA_nv.yaml
