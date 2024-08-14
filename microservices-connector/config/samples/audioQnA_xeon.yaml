@@ -42,7 +42,6 @@ spec:
           serviceName: tgi-svc
           config:
             endpoint: /generate
-            MODEL_ID: Intel/neural-chat-7b-v3-3
           isDownstreamService: true
       - name: Tts
         data: $response
