@@ -98,11 +98,18 @@ affinity: {}
 
 LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
+MAX_INPUT_LENGTH: ""
+MAX_TOTAL_TOKENS: ""
+
 global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
-  # comment out modeluseHostPath if you want to download the model from huggingface
+
+  # Choose where to save your downloaded models
+  # modelUseHostPath: Host directory path, this is good for one node test.
+  # modelUsePV: PersistentVolumeClaim(PVC) name, which is suitable for multinode deployment
+  # comment out both will not have model cache directory and download the model from huggingface.
   modelUseHostPath: /mnt/opea-models
+  # modelUsePV: model-volume

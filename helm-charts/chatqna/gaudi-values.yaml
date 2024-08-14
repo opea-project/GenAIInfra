@@ -8,6 +8,8 @@ tei:
   resources:
     limits:
       habana.ai/gaudi: 1
+  securityContext:
+    readOnlyRootFilesystem: false
 
 # To override values in subchart tgi
 tgi:
@@ -17,8 +19,5 @@ tgi:
   resources:
     limits:
       habana.ai/gaudi: 1
-  extraArgs:
-    - "--max-input-length"
-    - "1024"
-    - "--max-total-tokens"
-    - "2048"
+  MAX_INPUT_LENGTH: "1024"
+  MAX_TOTAL_TOKENS: "2048"
