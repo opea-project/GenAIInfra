@@ -16,3 +16,6 @@ data:
   NUMBA_CACHE_DIR: "/tmp"
   TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
+  {{- if .Values.global.HF_ENDPOINT }}
+  HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
+  {{- end }}

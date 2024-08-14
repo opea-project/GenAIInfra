@@ -14,4 +14,7 @@ data:
   https_proxy: {{ .Values.global.https_proxy | quote }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   HF_HOME: "/tmp/.cache/huggingface"
+  {{- if .Values.global.HF_ENDPOINT }}
+  HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
+  {{- end }}
   HUGGINGFACE_HUB_CACHE: "/data"
