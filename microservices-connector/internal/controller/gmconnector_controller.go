@@ -27,7 +27,9 @@ import (
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
@@ -116,7 +118,7 @@ func lookupManifestDir(step string) string {
 	}
 }
 
-func reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router, graph *mcv1alpha3.GMConnector) ([]*unstructured.Unstructured, error) {
+func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router, graph *mcv1alpha3.GMConnector) ([]*unstructured.Unstructured, error) {
 	if stepCfg == nil || nodeCfg == nil {
 		return nil, errors.New("invalid svc config")
 	}
@@ -157,16 +159,6 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 		if ns != "" {
 			obj.SetNamespace(ns)
 		}
-
-		// set the owner reference for auto deleting the resources when GMC is deleted
-		obj.SetOwnerReferences([]metav1.OwnerReference{
-			{
-				APIVersion: graph.TypeMeta.APIVersion,
-				Kind:       graph.TypeMeta.Kind,
-				Name:       graph.Name,
-				UID:        graph.UID,
-			},
-		})
 
 		// set the service name according to user defined value, and related selectors/labels
 		if obj.GetKind() == Service && svc != "" {
@@ -229,7 +221,7 @@ func reconcileResource(ctx context.Context, client client.Client, graphNs string
 			}
 		}
 
-		err = applyResourceToK8s(ctx, client, obj)
+		err = r.applyResourceToK8s(graph, ctx, client, obj)
 		if err != nil {
 			return nil, fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {
@@ -318,10 +310,11 @@ func getServiceURL(service *corev1.Service) string {
 	return ""
 }
 
-//+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors,verbs=get;list;watch;create;update;patch;delete
-//+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors/status,verbs=get;update;patch
-//+kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors/finalizers,verbs=update
-
+// +kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=gmc.opea.io,resources=gmconnectors/finalizers,verbs=update
+// +kubebuilder:rbac:groups=gmc.opea.io,resources=deployments,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=gmc.opea.io,resources=deployments/status,verbs=get
 // Reconcile is part of the main kubernetes reconciliation loop which aims to
 // move the current state of the cluster closer to the desired state.
 // the GMConnector object against the actual cluster state, and then
@@ -332,6 +325,7 @@ func getServiceURL(service *corev1.Service) string {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.3/pkg/reconcile
 func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
+	fmt.Println("-----------------Reconciling GMConnector", "namespace", req.Namespace, "name", req.Name, "-------------------------")
 
 	graph := &mcv1alpha3.GMConnector{}
 	if err := r.Get(ctx, req.NamespacedName, graph); err != nil {
@@ -342,7 +336,8 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		}
 		return reconcile.Result{}, err
 	}
-	// in case the typemeta is not set, in ut
+
+	// in case the type meta is not set, in ut
 	// check if typemeta is empty
 	if reflect.DeepEqual(graph.TypeMeta, metav1.TypeMeta{}) {
 		graph.TypeMeta = metav1.TypeMeta{
@@ -380,7 +375,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if step.Executor.ExternalService == "" {
 				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
-				objs, err := reconcileResource(ctx, r.Client, graph.Namespace, &step, &node, graph)
+				objs, err := r.reconcileResource(ctx, r.Client, graph.Namespace, &step, &node, graph)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.StepName)
 				}
@@ -404,7 +399,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	//to start a router service
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
-	err := reconcileRouterService(ctx, r.Client, graph)
+	err := r.reconcileRouterService(ctx, r.Client, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
@@ -425,7 +420,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			}
 		}
 	}
-
 	return ctrl.Result{}, nil
 }
 
@@ -529,7 +523,7 @@ func getTemplateBytes(resourceType string) ([]byte, error) {
 	return yamlBytes, nil
 }
 
-func reconcileRouterService(ctx context.Context, client client.Client, graph *mcv1alpha3.GMConnector) error {
+func (r *GMConnectorReconciler) reconcileRouterService(ctx context.Context, client client.Client, graph *mcv1alpha3.GMConnector) error {
 	configForRouter := make(map[string]string)
 
 	var routerNs string
@@ -585,15 +579,8 @@ func reconcileRouterService(ctx context.Context, client client.Client, graph *mc
 		if err != nil {
 			return fmt.Errorf("failed to decode YAML: %v", err)
 		}
-		obj.SetOwnerReferences([]metav1.OwnerReference{
-			{
-				APIVersion: graph.APIVersion,
-				Kind:       graph.Kind,
-				Name:       graph.Name,
-				UID:        graph.UID,
-			},
-		})
-		err = applyResourceToK8s(ctx, client, obj)
+
+		err = r.applyResourceToK8s(graph, ctx, client, obj)
 		if err != nil {
 			return fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {
@@ -641,7 +628,7 @@ func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFi
 
 }
 
-func applyResourceToK8s(ctx context.Context, c client.Client, obj *unstructured.Unstructured) error {
+func (r *GMConnectorReconciler) applyResourceToK8s(graph *mcv1alpha3.GMConnector, ctx context.Context, c client.Client, obj *unstructured.Unstructured) error {
 	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
 	// This might involve trying an Update and, if it fails because the object doesn't exist, falling back to Create.
 	// Retry updating the resource in case of transient errors.
@@ -654,6 +641,9 @@ func applyResourceToK8s(ctx context.Context, c client.Client, obj *unstructured.
 		case <-timeout:
 			return fmt.Errorf("timed out while trying to update or create resource")
 		case <-tick.C:
+			if err := controllerutil.SetControllerReference(graph, obj, r.Scheme); err != nil {
+				return fmt.Errorf("failed to set controller reference: %v", err)
+			}
 			// Get the latest version of the object
 			latest := &unstructured.Unstructured{}
 			latest.SetGroupVersionKind(obj.GroupVersionKind())
@@ -675,7 +665,7 @@ func applyResourceToK8s(ctx context.Context, c client.Client, obj *unstructured.
 				obj.SetResourceVersion(latest.GetResourceVersion()) // Ensure we're updating the latest version
 				err = c.Update(ctx, obj, &client.UpdateOptions{})
 				if err != nil {
-					fmt.Printf("\nupdate object err: %v", err)
+					fmt.Printf("update object err: %v\n", err)
 					continue
 				}
 			}
@@ -774,7 +764,7 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			specChanged := !reflect.DeepEqual(oldObject.Spec, newObject.Spec)
 			metadataChanged := isMetadataChanged(&(oldObject.ObjectMeta), &(newObject.ObjectMeta))
 
-			fmt.Printf("\nspec changed %t | meta changed: %t\n", specChanged, metadataChanged)
+			fmt.Printf("\n| spec changed %t | meta changed: %t |\n", specChanged, metadataChanged)
 
 			// Compare the old and new spec, ignore metadata, status changes
 			// metadata change: name, namespace, such change should create a new GMC
@@ -785,11 +775,59 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		// if you only want to customize the UpdateFunc behavior.
 	}
 
+	// Predicate to only trigger on status changes for Deployment
+	deploymentStatusChangePredicate := predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			oldDeployment, ok1 := e.ObjectOld.(*appsv1.Deployment)
+			newDeployment, ok2 := e.ObjectNew.(*appsv1.Deployment)
+			if !ok1 || !ok2 {
+				// Not the correct type, allow the event through
+				fmt.Printf("| status missing |\n")
+				return true
+			}
+
+			oldStatus := corev1.ConditionUnknown
+			newStatus := corev1.ConditionUnknown
+			if !reflect.DeepEqual(oldDeployment.Status, newDeployment.Status) {
+				if newDeployment.Status.Conditions != nil {
+					for _, condition := range newDeployment.Status.Conditions {
+						if condition.Type == appsv1.DeploymentAvailable {
+							newStatus = condition.Status
+						}
+					}
+				}
+				if oldDeployment.Status.Conditions != nil {
+					for _, condition := range oldDeployment.Status.Conditions {
+						if condition.Type == appsv1.DeploymentAvailable {
+							oldStatus = condition.Status
+						}
+					}
+				}
+				// Only trigger if the status has changed from true to false|unknown or vice versa
+				if (oldStatus == corev1.ConditionTrue && oldStatus != newStatus) ||
+					(newStatus == corev1.ConditionTrue && oldStatus != newStatus) {
+					{
+						fmt.Printf("| %s:%s: status changed from : %v to %v|\n",
+							newDeployment.Namespace, newDeployment.Name,
+							oldStatus, newStatus)
+						return true
+					}
+				}
+			}
+			return false
+		},
+		//ignore create and delete events, otherwise it will trigger the nested reconcile which is meaningless
+		CreateFunc: func(e event.CreateEvent) bool {
+			return false
+		}, DeleteFunc: func(e event.DeleteEvent) bool {
+			return false
+		},
+	}
+
 	// Setup the watch with the predicate to filter events
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mcv1alpha3.GMConnector{}).
-		WithEventFilter(ignoreStatusUpdatePredicate). // Use the predicate here
-		Owns(&appsv1.Deployment{}).
-		Owns(&corev1.Service{}).
+		WithEventFilter(ignoreStatusUpdatePredicate).                                        // Use the predicate here
+		Owns(&appsv1.Deployment{}, builder.WithPredicates(deploymentStatusChangePredicate)). // Use the predicate here for Deployment
 		Complete(r)
 }
