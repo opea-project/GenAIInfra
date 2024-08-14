@@ -45,7 +45,7 @@ jobs:
     strategy:
       matrix:
         node: ${{ fromJSON(needs.get-build-matrix.outputs.nodes) }}
-    uses: ./.github/workflows/reuse-gmc-image-build.yaml
+    uses: ./.github/workflows/_gmc-image-build.yaml
     with:
       image_repo: ${{ github.event.inputs.registry }}
       image_tag: ${{ github.event.inputs.tag }}
