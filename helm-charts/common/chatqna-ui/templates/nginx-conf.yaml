@@ -1,0 +1,39 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ui.fullname" . }}-nginx-conf
+  labels:
+    {{- include "ui.labels" . | nindent 4 }}
+data:
+  default.conf: |-
+    server {
+      listen 80;
+
+      gzip on;
+      gzip_proxied any;
+      gzip_comp_level 6;
+      gzip_buffers 16 8k;
+      gzip_http_version 1.1;
+      gzip_types font/woff2 text/css application/javascript application/json application/font-woff application/font-tff image/gif image/png image/svg+xml application/octet-stream;
+
+      location / {
+        root /usr/share/nginx/html;
+        index index.html index.htm;
+        try_files $uri $uri/ /index.html =404;
+
+        location ~* \.(gif|jpe?g|png|webp|ico|svg|css|js|mp4|woff2)$ {
+            expires 1d;
+        }
+      }
+
+      location {{ .Values.BACKEND_SERVICE_ENDPOINT }} {
+        proxy_pass {{ .Values.backend.scheme }}://{{ .Release.Name }}-{{ .Values.backend.name }}:{{ .Values.backend.port }}/;
+      }
+
+      location {{ .Values.DATAPREP_SERVICE_ENDPOINT }} {
+        proxy_pass {{ .Values.dataprep.scheme }}://{{ .Release.Name }}-{{ .Values.dataprep.name }}:{{ .Values.dataprep.port }}/;
+      }
+    }

@@ -50,9 +50,15 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+            - mountPath: /etc/nginx/conf.d
+              name: nginx-configuration
       volumes:
         - name: tmp
           emptyDir: {}
+        - name: nginx-configuration
+          configMap:
+            name: {{ include "ui.fullname" . }}-nginx-conf
+            optional: false
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

@@ -62,11 +62,21 @@ tolerations: []
 
 affinity: {}
 
+backend:
+  scheme: http
+  name: chatqna
+  port: 8888
+
+dataprep:
+  scheme: http
+  name: data-prep
+  port: 6007
+
 # chatQnA Mega service URL, e.g. http://<service-name>:<port>
-BACKEND_SERVICE_ENDPOINT: ""
+BACKEND_SERVICE_ENDPOINT: "/chatqna/"
 
 # data preparation service URL, http://<service-name>:<port>
-DATAPREP_SERVICE_ENDPOINT: ""
+DATAPREP_SERVICE_ENDPOINT: "/chatqna-data-prep/"
 
 # data preparation get file service URL, http://<service-name>:<port>
 DATAPREP_GET_FILE_ENDPOINT: ""
