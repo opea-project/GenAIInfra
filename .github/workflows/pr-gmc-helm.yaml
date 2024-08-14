@@ -27,7 +27,7 @@ env:
 
 jobs:
   image-build:
-    uses: ./.github/workflows/reuse-gmc-image-build.yaml
+    uses: ./.github/workflows/_gmc-image-build.yaml
     with:
       image_tag: ${{ github.event.pull_request.head.sha }}
       runner_label: 'docker-build-xeon'
