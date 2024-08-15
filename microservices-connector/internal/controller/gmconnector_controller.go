@@ -356,9 +356,13 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			err := r.Get(ctx, client.ObjectKey{Namespace: req.Namespace, Name: req.Name}, deployment)
 			if err == nil {
 				return r.handleStatusUpdate(ctx, deployment)
+			} else {
+				fmt.Printf("resource %s not found or deleted, %v, ignore\n", req.Name, err)
+				return ctrl.Result{}, nil
 			}
+		} else {
+			return reconcile.Result{}, errors.Wrapf(err, "Failed to get GMConnector %s", req.Name)
 		}
-		return reconcile.Result{}, err
 	}
 
 	// in case the type meta is not set, in ut
@@ -896,12 +900,6 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		},
 	}
 
-	// Setup the watch with the predicate to filter events
-	// return ctrl.NewControllerManagedBy(mgr).
-	// 	For(&mcv1alpha3.GMConnector{}).
-	// 	WithEventFilter(ignoreStatusUpdatePredicate).                                        // Use the predicate here
-	// 	Owns(&appsv1.Deployment{}, builder.WithPredicates(deploymentStatusChangePredicate)). // Use the predicate here for Deployment
-	// 	Complete(r)
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&mcv1alpha3.GMConnector{}, builder.WithPredicates(ignoreStatusUpdatePredicate)).
 		Watches(
