@@ -21,23 +21,23 @@ Before installting the manifests, please replace your own huggingface tokens，G
 export YOUR_HF_TOKEN=<your hugging facetoken>
 export YOUR_GOOGLE_API_KEY=<your google api key>
 export YOUR_GOOGLE_CSE_ID=<your google cse id>
-find helm/manifests_common/ -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$YOUR_HF_TOKEN#g" {} \;
-find helm/manifests_common/ -name '*.yaml' -type f -exec sed -i "s#GOOGLE_API_KEY:.*#GOOGLE_API_KEY: "$YOUR_GOOGLE_API_KEY"#g" {} \;
-find helm/manifests_common/ -name '*.yaml' -type f -exec sed -i "s#GOOGLE_CSE_ID:.*#GOOGLE_CSE_ID: "$YOUR_GOOGLE_CSE_ID"#g" {} \;
+find manifests_common/ -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$YOUR_HF_TOKEN#g" {} \;
+find manifests_common/ -name '*.yaml' -type f -exec sed -i "s#GOOGLE_API_KEY:.*#GOOGLE_API_KEY: "$YOUR_GOOGLE_API_KEY"#g" {} \;
+find manifests_common/ -name '*.yaml' -type f -exec sed -i "s#GOOGLE_CSE_ID:.*#GOOGLE_CSE_ID: "$YOUR_GOOGLE_CSE_ID"#g" {} \;
 ```
 
 if you have pre-defined directory to save the models on you cluster hosts, please set the path to the manifests
 
 ```sh
 export MOUNT_DIR=<your model path>
-find helm/manifests_common/ -name '*.yaml' -type f -exec sed -i "s#path: /mnt/opea-models#path: $MOUNT_DIR#g" {} \;
+find manifests_common/ -name '*.yaml' -type f -exec sed -i "s#path: /mnt/opea-models#path: $MOUNT_DIR#g" {} \;
 ```
 
 **NOTE:**
 GMC manager, GenAI components and GMC router manifests are deployed in any namespace. Here we use `system` as an examep:
 
 ```console
-helm install -n system --create-namespace gmc helm
+helm install -n system --create-namespace gmc .
 ```
 
 ## Check the installation result
