@@ -151,7 +151,7 @@ func validateNames(nodes map[string]Router, fldPath *field.Path) field.ErrorList
 
 			// check node name has been defined in the spec
 			if !nodeNameExists(step.NodeName, nodeNames) {
-				errs = append(errs, field.Invalid(fldPath.Child(name).Child("nodeName"), step, fmt.Sprintf("node name: %v in step %v does not exist", step.NodeName, name)))
+				errs = append(errs, field.Invalid(fldPath.Child(name).Child("nodeName"), step, fmt.Sprintf("node name: %v in step %v does not exist", step.NodeName, step.StepName)))
 			}
 
 			// check service name uniqueness

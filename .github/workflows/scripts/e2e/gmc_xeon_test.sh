@@ -35,7 +35,52 @@ function validate_gmc() {
     # echo "validate docsum"
     # validate_docsum
 
+    echo "validate webhook"
+    validate_webhook
+
     get_gmc_controller_logs
+}
+
+function validate_webhook() {
+    # validate root node existence
+    yq ".spec.nodes.node123 = .spec.nodes.root | del(.spec.nodes.root)" config/samples/chatQnA_xeon.yaml > /tmp/webhook-case1.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case1.yaml 2>&1)
+    if ! (echo $output | grep -q "a root node is required"); then
+        echo "Root node existence validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # StepName validation
+    yq '(.spec.nodes.root.steps[] | select ( .name == "Llm")).name = "xyz"' config/samples/codegen_xeon.yaml > /tmp/webhook-case2.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case2.yaml 2>&1)
+    if ! (echo $output | grep -q "invalid step name"); then
+        echo "Step name validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+
+    # nodeName existence
+    yq '(.spec.nodes.root.steps[] | select ( .name == "Embedding")).nodeName = "node123"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case3.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case3.yaml 2>&1)
+    if ! (echo $output | grep -q "node name: node123 in step Embedding does not exist"); then
+        echo "nodeName existence validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # serviceName uniqueness
+    yq '(.spec.nodes.node1.steps[] | select ( .name == "Embedding")).internalService.serviceName = "tei-embedding-svc-bge15"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case4.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case4.yaml 2>&1)
+    if ! (echo $output | grep -q "service name: tei-embedding-svc-bge15 in node node1 already exists"); then
+        echo "serviceName uniqueness validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # clean up cases
+    rm -f /tmp/webhook-case*.yaml
 }
 
 function cleanup_apps() {
