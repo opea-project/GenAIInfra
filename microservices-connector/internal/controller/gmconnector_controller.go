@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -25,12 +26,14 @@ import (
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/serializer/yaml"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
@@ -218,6 +221,21 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, client cl
 				}
 			}
 
+			// // although apply a same config to k8s is fine, but we don't want to do it
+			// // because
+			// // 1. re-apply the same config to k8s will cause a new replica created and the pod restart for retriever or data-prep
+			// // 2. we might have configured the selector label in deployment, re-apply it could cause error in k8s
+			// var existingDeployment appsv1.Deployment
+			// err := client.Get(ctx, types.NamespacedName{Namespace: deployment_obj.Namespace, Name: deployment_obj.Name}, &existingDeployment)
+			// if err == nil {
+			// 	if reflect.DeepEqual(deployment_obj.Spec, existingDeployment.Spec) {
+			// 		fmt.Printf("Deployment %s already exists with the same spec, skipping reconciliation\n", deployment_obj.GetName())
+			// 		continue
+			// 	} else {
+			// 		fmt.Printf("Deployment %s need to update\n ~~~ %v \n ^^^ %v", deployment_obj.GetName(), deployment_obj.Spec, existingDeployment.Spec)
+			// 	}
+			// }
+
 			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 			if err != nil {
 				return nil, fmt.Errorf("failed to convert deployment %s to obj: %v", deployment_obj.GetName(), err)
@@ -328,14 +346,17 @@ func getServiceURL(service *corev1.Service) string {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.3/pkg/reconcile
 func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
 	_ = log.FromContext(ctx)
-	fmt.Println("-----------------Reconciling GMConnector", "namespace", req.Namespace, "name", req.Name, "-------------------------")
+	fmt.Println("-----------------Reconciling GMConnector", req, "-------------------------")
 
 	graph := &mcv1alpha3.GMConnector{}
 	if err := r.Get(ctx, req.NamespacedName, graph); err != nil {
 		if apierr.IsNotFound(err) {
-			// Object not found, return.  Created objects are automatically garbage collected.
-			// For additional cleanup logic use finalizers.
-			return reconcile.Result{}, nil
+			// Object not found, could be deployments
+			deployment := &appsv1.Deployment{}
+			err := r.Get(ctx, client.ObjectKey{Namespace: req.Namespace, Name: req.Name}, deployment)
+			if err == nil {
+				return r.handleStatusUpdate(ctx, deployment)
+			}
 		}
 		return reconcile.Result{}, err
 	}
@@ -354,7 +375,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 
 	var totalService uint
 	var externalService uint
-	var successService uint
 	var updateExistGraph bool = false
 	var oldAnnotations map[string]string
 
@@ -407,11 +427,9 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
 
-	successService, totalService = r.collectResourceStatus(&graph.Status.Annotations, ctx)
-
-	graph.Status.Status = fmt.Sprintf("%d/%d/%d", successService, externalService, totalService)
-	if err = r.Status().Update(ctx, graph); err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
+	err = r.collectResourceStatus(graph, ctx, int(externalService))
+	if err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to collect service status")
 	}
 
 	if updateExistGraph {
@@ -420,6 +438,30 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if _, ok := graph.Status.Annotations[k]; !ok {
 				//if not, remove the resource from k8s
 				r.deleteRecordedResource(k, ctx)
+			}
+		}
+	}
+	return ctrl.Result{}, nil
+}
+
+func (r *GMConnectorReconciler) handleStatusUpdate(ctx context.Context, deployment *appsv1.Deployment) (ctrl.Result, error) {
+	for _, owner := range deployment.OwnerReferences {
+		if owner.Kind == "GMConnector" {
+			// Get the GMConnector object
+			graph := &mcv1alpha3.GMConnector{}
+			err := r.Get(ctx, types.NamespacedName{Namespace: deployment.Namespace, Name: owner.Name}, graph)
+			if err == nil {
+				externalResourceCntStr := strings.Split(graph.Status.Status, "/")[1]
+				externalResourceCnt, err := strconv.Atoi(externalResourceCntStr)
+				if err != nil {
+					fmt.Println("Error converting externalResourceCnt to int:", err)
+					return reconcile.Result{}, err
+				}
+				ue := r.collectResourceStatus(graph, ctx, externalResourceCnt)
+				if ue != nil {
+					fmt.Printf("failed to get graph before update status %s %v\n", graph.Name, err)
+					return reconcile.Result{}, err
+				}
 			}
 		}
 	}
@@ -447,10 +489,10 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 	}
 }
 
-func (r *GMConnectorReconciler) collectResourceStatus(resources *map[string]string, ctx context.Context) (uint, uint) {
+func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnector, ctx context.Context, externalServiceCnt int) error {
 	var totalCnt uint = 0
 	var readyCnt uint = 0
-	for resName := range *resources {
+	for resName := range graph.Status.Annotations {
 		kind := strings.Split(resName, ":")[0]
 		name := strings.Split(resName, ":")[2]
 		ns := strings.Split(resName, ":")[3]
@@ -478,13 +520,28 @@ func (r *GMConnectorReconciler) collectResourceStatus(resources *map[string]stri
 				deploymentStatus.WriteString(fmt.Sprintf("  Reason: %s\n", condition.Reason))
 				deploymentStatus.WriteString(fmt.Sprintf("  Message: %s\n", condition.Message))
 			}
-			(*resources)[resName] = deploymentStatus.String()
+			graph.Status.Annotations[resName] = deploymentStatus.String()
 			if deployment.Status.AvailableReplicas == *deployment.Spec.Replicas {
 				readyCnt += 1
 			}
 		}
 	}
-	return readyCnt, totalCnt
+
+	graph.Status.Status = fmt.Sprintf("%d/%d/%d", readyCnt, externalServiceCnt, totalCnt)
+
+	//update the revision in case it has changed
+	var latestGraph mcv1alpha3.GMConnector
+	err := r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Namespace, Name: graph.Name}, &latestGraph)
+	if err != nil {
+		return errors.Wrapf(err, "failed to get graph %s before update status :", graph.Name)
+	}
+	graph.SetResourceVersion(latestGraph.GetResourceVersion())
+
+	if err = r.Status().Update(ctx, graph); err != nil {
+		return errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
+	}
+
+	return nil
 }
 
 func recordResource(graph *mcv1alpha3.GMConnector, nodeName string, stepIdx int, obj *unstructured.Unstructured) error {
@@ -789,6 +846,18 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 				return true
 			}
 
+			if len(newDeployment.OwnerReferences) == 0 {
+				// fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
+				return false
+			} else {
+				for _, owner := range newDeployment.OwnerReferences {
+					if owner.Kind == "GMConnector" {
+						// fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
+						break
+					}
+				}
+			}
+
 			oldStatus := corev1.ConditionUnknown
 			newStatus := corev1.ConditionUnknown
 			if !reflect.DeepEqual(oldDeployment.Status, newDeployment.Status) {
@@ -828,9 +897,17 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	// Setup the watch with the predicate to filter events
+	// return ctrl.NewControllerManagedBy(mgr).
+	// 	For(&mcv1alpha3.GMConnector{}).
+	// 	WithEventFilter(ignoreStatusUpdatePredicate).                                        // Use the predicate here
+	// 	Owns(&appsv1.Deployment{}, builder.WithPredicates(deploymentStatusChangePredicate)). // Use the predicate here for Deployment
+	// 	Complete(r)
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&mcv1alpha3.GMConnector{}).
-		WithEventFilter(ignoreStatusUpdatePredicate).                                        // Use the predicate here
-		Owns(&appsv1.Deployment{}, builder.WithPredicates(deploymentStatusChangePredicate)). // Use the predicate here for Deployment
+		For(&mcv1alpha3.GMConnector{}, builder.WithPredicates(ignoreStatusUpdatePredicate)).
+		Watches(
+			&appsv1.Deployment{},
+			&handler.EnqueueRequestForObject{},
+			builder.WithPredicates(deploymentStatusChangePredicate),
+		).
 		Complete(r)
 }
