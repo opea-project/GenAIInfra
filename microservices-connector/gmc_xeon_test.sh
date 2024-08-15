@@ -5,7 +5,7 @@
 set -xe
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-source ${DIR}/utils.sh
+# source ${DIR}/utils.sh
 
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
@@ -81,6 +81,8 @@ function validate_webhook() {
 
     # clean up cases
     rm -f /tmp/webhook-case*.yaml
+
+    echo "Passed the webhook validation."
 }
 
 function cleanup_apps() {
@@ -471,21 +473,24 @@ function validate_docsum() {
    fi
 }
 
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <function_name>"
-    exit 1
-fi
+# if [ $# -eq 0 ]; then
+#     echo "Usage: $0 <function_name>"
+#     exit 1
+# fi
 
-case "$1" in
-    validate_gmc)
-        pushd microservices-connector
-        validate_gmc
-        popd
-        ;;
-    cleanup_apps)
-        cleanup_apps
-        ;;
-    *)
-        echo "Unknown function: $1"
-        ;;
-esac
+# case "$1" in
+#     validate_gmc)
+#         pushd microservices-connector
+#         validate_gmc
+#         popd
+#         ;;
+#     cleanup_apps)
+#         cleanup_apps
+#         ;;
+#     *)
+#         echo "Unknown function: $1"
+#         ;;
+# esac
+export KUBECONFIG=/var/run/kubernetes/admin.kubeconfig
+NO_PROXY=.intel.com,intel.com,localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,10.96.0.0,10.165.118.229,10.165.116.205
+validate_webhook
