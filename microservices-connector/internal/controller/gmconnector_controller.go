@@ -72,7 +72,6 @@ const (
 	SpeechT5Gaudi            = "SpeechT5Gaudi"
 	Whisper                  = "Whisper"
 	WhisperGaudi             = "WhisperGaudi"
-	gmcFinalizer             = "gmcFinalizer"
 )
 
 var yamlDict = map[string]string{
@@ -220,21 +219,6 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, client cl
 						newEnvVars...)
 				}
 			}
-
-			// // although apply a same config to k8s is fine, but we don't want to do it
-			// // because
-			// // 1. re-apply the same config to k8s will cause a new replica created and the pod restart for retriever or data-prep
-			// // 2. we might have configured the selector label in deployment, re-apply it could cause error in k8s
-			// var existingDeployment appsv1.Deployment
-			// err := client.Get(ctx, types.NamespacedName{Namespace: deployment_obj.Namespace, Name: deployment_obj.Name}, &existingDeployment)
-			// if err == nil {
-			// 	if reflect.DeepEqual(deployment_obj.Spec, existingDeployment.Spec) {
-			// 		fmt.Printf("Deployment %s already exists with the same spec, skipping reconciliation\n", deployment_obj.GetName())
-			// 		continue
-			// 	} else {
-			// 		fmt.Printf("Deployment %s need to update\n ~~~ %v \n ^^^ %v", deployment_obj.GetName(), deployment_obj.Spec, existingDeployment.Spec)
-			// 	}
-			// }
 
 			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 			if err != nil {
@@ -426,7 +410,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	//to start a router service
 	//in case the graph changes, we need to apply the changes to router service
 	//so we need to apply the router config every time
-	err := r.reconcileRouterService(ctx, r.Client, graph)
+	err := r.reconcileRouterService(ctx, graph)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
@@ -587,7 +571,7 @@ func getTemplateBytes(resourceType string) ([]byte, error) {
 	return yamlBytes, nil
 }
 
-func (r *GMConnectorReconciler) reconcileRouterService(ctx context.Context, client client.Client, graph *mcv1alpha3.GMConnector) error {
+func (r *GMConnectorReconciler) reconcileRouterService(ctx context.Context, graph *mcv1alpha3.GMConnector) error {
 	configForRouter := make(map[string]string)
 
 	var routerNs string
@@ -644,7 +628,7 @@ func (r *GMConnectorReconciler) reconcileRouterService(ctx context.Context, clie
 			return fmt.Errorf("failed to decode YAML: %v", err)
 		}
 
-		err = r.applyResourceToK8s(graph, ctx, client, obj)
+		err = r.applyResourceToK8s(graph, ctx, r.Client, obj)
 		if err != nil {
 			return fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {

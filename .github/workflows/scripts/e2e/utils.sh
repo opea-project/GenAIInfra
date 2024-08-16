@@ -69,3 +69,51 @@ function wait_until_all_pod_ready() {
     fi
   done
 }
+
+function check_gmc_status() {
+  namespace=$1
+  gmc_name=$2
+  expected_ready_pods=$3
+  expected_external_pods=$4
+  expected_total_pods=$5
+  expected_total_records=3*$3-1
+
+  if $expected_ready_pods + $expected_external_pods != $expected_total_pods then
+    return 1
+  fi
+
+  gmc_status=$(kubectl get gmc -n $1namespace -o jsonpath='{.items[?(@.metadata.name=='$gmc_name')].status.status}')
+  echo $gmc_status
+  if $gmc_status == "$expected_ready_pods/$expected_external_pods/$expected_total_pods" then
+    return 0
+  else
+    return 1
+  fi
+  annotation=$(kubectl get gmc -n $1 -o json | jq '.items[?(@.metadata.name=='$gmc_name')].status.annotations | length')
+  echo $annotation
+  if $annotation == $expected_total_records then
+    return 0
+  else
+    return 1
+  fi
+}
+
+function check_resource_cleared() {
+  namespace=$1
+
+  actual_count=$(kubectl get all -n $namespace --no-headers | wc -l)
+  if [ $actual_count -eq 0 ]; then
+    return 0
+  else
+    #check every line of kubectl get all status is Terminating
+    remaining=$(kubectl get all -n $namespace --no-headers)
+    echo $remaining
+    status=$(echo $remaining | awk '{print $3}')
+    for i in $status; do
+      if [ $i != "Terminating" ]; then
+        return 1
+      fi
+    done
+    return 0
+  fi
+}
