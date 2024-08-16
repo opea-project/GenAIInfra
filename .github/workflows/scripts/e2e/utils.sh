@@ -76,7 +76,7 @@ function check_gmc_status() {
   expected_ready_pods=$3
   expected_external_pods=$4
   expected_total_pods=$5
-  
+
   # pods*3 is because 1 pod has 1 configmap + 1 deployment + 1 service
   # minus 1 is because router and redis don't have the configmap
   expected_total_records=$((3* $3 - 2))

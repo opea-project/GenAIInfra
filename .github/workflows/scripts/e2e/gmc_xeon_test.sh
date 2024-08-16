@@ -74,7 +74,6 @@ function validate_webhook() {
         exit 1
     fi
 
-
     # nodeName existence
     yq '(.spec.nodes.root.steps[] | select ( .name == "Embedding")).nodeName = "node123"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case3.yaml
     sed -i "s|namespace: switch|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case3.yaml
