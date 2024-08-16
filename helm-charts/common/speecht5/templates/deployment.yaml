@@ -70,7 +70,10 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: model-volume
-          {{- if .Values.global.modelUseHostPath }}
+          {{- if .Values.global.modelUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
+          {{- else if .Values.global.modelUseHostPath }}
           hostPath:
             path: {{ .Values.global.modelUseHostPath }}
             type: Directory

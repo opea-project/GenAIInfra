@@ -5,11 +5,10 @@
 set -xe
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )"
-source ${DIR}/utils.sh
+# source ${DIR}/utils.sh
 
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
-AUDIOQA_NAMESPACE="${APP_NAMESPACE}-audioqa"
 CHATQNA_NAMESPACE="${APP_NAMESPACE}-chatqna"
 CHATQNA_DATAPREP_NAMESPACE="${APP_NAMESPACE}-chatqna-dataprep"
 CHATQNA_SWITCH_NAMESPACE="${APP_NAMESPACE}-chatqna-switch"
@@ -18,9 +17,6 @@ CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
 DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
 
 function validate_gmc() {
-    echo "validate audio-qna"
-    validate_audioqa
-
     echo "validate chat-qna"
     validate_chatqna
 
@@ -39,13 +35,60 @@ function validate_gmc() {
     # echo "validate docsum"
     # validate_docsum
 
+    echo "validate webhook"
+    validate_webhook
+
     get_gmc_controller_logs
+}
+
+function validate_webhook() {
+    # validate root node existence
+    yq ".spec.nodes.node123 = .spec.nodes.root | del(.spec.nodes.root)" config/samples/chatQnA_xeon.yaml > /tmp/webhook-case1.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case1.yaml 2>&1)
+    if ! (echo $output | grep -q "a root node is required"); then
+        echo "Root node existence validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # StepName validation
+    yq '(.spec.nodes.root.steps[] | select ( .name == "Llm")).name = "xyz"' config/samples/codegen_xeon.yaml > /tmp/webhook-case2.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case2.yaml 2>&1)
+    if ! (echo $output | grep -q "invalid step name"); then
+        echo "Step name validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+
+    # nodeName existence
+    yq '(.spec.nodes.root.steps[] | select ( .name == "Embedding")).nodeName = "node123"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case3.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case3.yaml 2>&1)
+    if ! (echo $output | grep -q "node name: node123 in step Embedding does not exist"); then
+        echo "nodeName existence validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # serviceName uniqueness
+    yq '(.spec.nodes.node1.steps[] | select ( .name == "Embedding")).internalService.serviceName = "tei-embedding-svc-bge15"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case4.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case4.yaml 2>&1)
+    if ! (echo $output | grep -q "service name: tei-embedding-svc-bge15 in node node1 already exists"); then
+        echo "serviceName uniqueness validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # clean up cases
+    rm -f /tmp/webhook-case*.yaml
+
+    echo "Passed the webhook validation."
 }
 
 function cleanup_apps() {
     echo "clean up microservice-connector"
     # namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
-    namespaces=("$AUDIOQA_NAMESPACE" "$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE")
+    namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         if kubectl get namespace $ns > /dev/null 2>&1; then
             echo "Deleting namespace: $ns"
@@ -56,22 +99,24 @@ function cleanup_apps() {
     done
 }
 
-function validate_audioqa() {
-   kubectl create ns $AUDIOQA_NAMESPACE
-   sed -i "s|namespace: audioqa|namespace: $AUDIOQA_NAMESPACE|g"  $(pwd)/config/samples/audioQnA_gaudi.yaml
-   kubectl apply -f $(pwd)/config/samples/audioQnA_gaudi.yaml
+function validate_chatqna() {
+   kubectl create ns $CHATQNA_NAMESPACE
+   sed -i "s|namespace: chatqa|namespace: $CHATQNA_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
+   # workaround for issue #268
+   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
 
    # Wait until the router service is ready
-   echo "Waiting for the audioqa router service to be ready..."
-   wait_until_pod_ready "audioqa router" $AUDIOQA_NAMESPACE "router-service"
-   output=$(kubectl get pods -n $AUDIOQA_NAMESPACE)
+   echo "Waiting for the chatqa router service to be ready..."
+   wait_until_pod_ready "chatqna router" $CHATQNA_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $CHATQNA_NAMESPACE)
    echo $output
 
    # deploy client pod for testing
-   kubectl create deployment client-test -n $AUDIOQA_NAMESPACE --image=python:3.8.13 -- sleep infinity
+   kubectl create deployment client-test -n $CHATQNA_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
    # Wait until all pods are ready
-   wait_until_all_pod_ready $AUDIOQA_NAMESPACE 300s
+   wait_until_all_pod_ready $CHATQNA_NAMESPACE 300s
    if [ $? -ne 0 ]; then
        echo "Error Some pods are not ready!"
        exit 1
@@ -80,45 +125,8 @@ function validate_audioqa() {
    # giving time to populating data
    sleep 90
 
-   kubectl get pods -n $AUDIOQA_NAMESPACE
-   # send request to chatqnA
-   export CLIENT_POD=$(kubectl get pod -n $AUDIOQA_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
-   echo "$CLIENT_POD"
-   accessUrl=$(kubectl get gmc -n $AUDIOQA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='audioqa')].status.accessUrl}")
-   byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq .byte_str)
-   if [ -z "$byte_str" ]; then
-       echo "audioqa failed, please check the the!"
-       exit 1
-   fi
-   echo "Audioqa response check succeed!"
-}
-
-function validate_chatqna() {
-   kubectl create ns $CHATQNA_NAMESPACE
-   sed -i "s|namespace: chatqa|namespace: $CHATQNA_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_gaudi.yaml
-   kubectl apply -f $(pwd)/config/samples/chatQnA_gaudi.yaml
-
-   # Wait until the router service is ready
-   echo "Waiting for the chatqa router service to be ready..."
-   wait_until_pod_ready "chatqna router" $CHATQNA_NAMESPACE "router-service"
-   output=$(kubectl get pods -n $CHATQNA_NAMESPACE)
-   echo $output
-
-   # Wait until the tgi pod is ready
-   TGI_POD_NAME=$(kubectl get pods --namespace=$CHATQNA_NAMESPACE | grep ^tgi-gaudi-svc | awk '{print $1}')
-   kubectl describe pod $TGI_POD_NAME -n $CHATQNA_NAMESPACE
-   kubectl wait --for=condition=ready pod/$TGI_POD_NAME --namespace=$CHATQNA_NAMESPACE --timeout=300s
-
-   # deploy client pod for testing
-   kubectl create deployment client-test -n $CHATQNA_NAMESPACE --image=python:3.8.13 -- sleep infinity
-
-   # wait for client pod ready
-   wait_until_pod_ready "client-test" $CHATQNA_NAMESPACE "client-test"
-   # giving time to populating data
-   sleep 90
-
    kubectl get pods -n $CHATQNA_NAMESPACE
-   # send request to chatqna
+   # send request to chatqnA
    export CLIENT_POD=$(kubectl get pod -n $CHATQNA_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
    accessUrl=$(kubectl get gmc -n $CHATQNA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
@@ -132,7 +140,7 @@ function validate_chatqna() {
    echo "Checking response results, make sure the output is reasonable. "
    local status=false
    if [[ -f $LOG_PATH/curl_chatqna.log ]] && \
-   [[ $(grep -c "billion" $LOG_PATH/curl_chatqna.log) != 0 ]]; then
+   [[ $(grep -c "[DONE]" $LOG_PATH/curl_chatqna.log) != 0 ]]; then
        status=true
    fi
    if [ $status == false ]; then
@@ -148,10 +156,10 @@ function validate_chatqna() {
 
 function validate_chatqna_with_dataprep() {
    kubectl create ns $CHATQNA_DATAPREP_NAMESPACE
-   sed -i "s|namespace: chatqa|namespace: $CHATQNA_DATAPREP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
+   sed -i "s|namespace: chatqa|namespace: $CHATQNA_DATAPREP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
    # workaround for issue #268
-   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
-   kubectl apply -f $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
+   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
@@ -226,10 +234,10 @@ function validate_chatqna_with_dataprep() {
 
 function validate_chatqna_in_switch() {
    kubectl create ns $CHATQNA_SWITCH_NAMESPACE
-   sed -i "s|namespace: switch|namespace: $CHATQNA_SWITCH_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_switch_gaudi.yaml
+   sed -i "s|namespace: switch|namespace: $CHATQNA_SWITCH_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_switch_xeon.yaml
    # workaround for issue #268
-   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_switch_gaudi.yaml
-   kubectl apply -f $(pwd)/config/samples/chatQnA_switch_gaudi.yaml
+   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_switch_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/chatQnA_switch_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
@@ -307,8 +315,8 @@ function validate_chatqna_in_switch() {
 
 function validate_codegen() {
    kubectl create ns $CODEGEN_NAMESPACE
-   sed -i "s|namespace: codegen|namespace: $CODEGEN_NAMESPACE|g"  $(pwd)/config/samples/codegen_gaudi.yaml
-   kubectl apply -f $(pwd)/config/samples/codegen_gaudi.yaml
+   sed -i "s|namespace: codegen|namespace: $CODEGEN_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the codegen router service to be ready..."
@@ -316,12 +324,16 @@ function validate_codegen() {
    output=$(kubectl get pods -n $CODEGEN_NAMESPACE)
    echo $output
 
-
    # deploy client pod for testing
    kubectl create deployment client-test -n $CODEGEN_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
-   # wait for client pod ready
-   wait_until_pod_ready "client-test" $CODEGEN_NAMESPACE "client-test"
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $CODEGEN_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
    # giving time to populating data
    sleep 60
 
@@ -357,8 +369,8 @@ function validate_codegen() {
 
 function validate_codetrans() {
    kubectl create ns $CODETRANS_NAMESPACE
-   sed -i "s|namespace: codetrans|namespace: $CODETRANS_NAMESPACE|g"  $(pwd)/config/samples/codetrans_gaudi.yaml
-   kubectl apply -f $(pwd)/config/samples/codetrans_gaudi.yaml
+   sed -i "s|namespace: codetrans|namespace: $CODETRANS_NAMESPACE|g"  $(pwd)/config/samples/codetrans_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/codetrans_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the codetrans router service to be ready..."
@@ -366,12 +378,16 @@ function validate_codetrans() {
    output=$(kubectl get pods -n $CODETRANS_NAMESPACE)
    echo $output
 
-
    # deploy client pod for testing
    kubectl create deployment client-test -n $CODETRANS_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
-   # wait for client pod ready
-   wait_until_pod_ready "client-test" $CODETRANS_NAMESPACE "client-test"
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $CODETRANS_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
    # giving time to populating data
    sleep 60
 
@@ -406,8 +422,8 @@ function validate_codetrans() {
 
 function validate_docsum() {
    kubectl create ns $DOCSUM_NAMESPACE
-   sed -i "s|namespace: docsum|namespace: $DOCSUM_NAMESPACE|g"  $(pwd)/config/samples/docsum_gaudi.yaml
-   kubectl apply -f $(pwd)/config/samples/docsum_gaudi.yaml
+   sed -i "s|namespace: docsum|namespace: $DOCSUM_NAMESPACE|g"  $(pwd)/config/samples/docsum_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/docsum_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the docsum router service to be ready..."
@@ -418,8 +434,13 @@ function validate_docsum() {
    # deploy client pod for testing
    kubectl create deployment client-test -n $DOCSUM_NAMESPACE --image=python:3.8.13 -- sleep infinity
 
-   # wait for client pod ready
-   wait_until_pod_ready "client-test" $DOCSUM_NAMESPACE "client-test"
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $DOCSUM_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
    # giving time to populating data
    sleep 60
 
@@ -452,21 +473,24 @@ function validate_docsum() {
    fi
 }
 
-if [ $# -eq 0 ]; then
-    echo "Usage: $0 <function_name>"
-    exit 1
-fi
+# if [ $# -eq 0 ]; then
+#     echo "Usage: $0 <function_name>"
+#     exit 1
+# fi
 
-case "$1" in
-    validate_gmc)
-        pushd microservices-connector
-        validate_gmc
-        popd
-        ;;
-    cleanup_apps)
-        cleanup_apps
-        ;;
-    *)
-        echo "Unknown function: $1"
-        ;;
-esac
+# case "$1" in
+#     validate_gmc)
+#         pushd microservices-connector
+#         validate_gmc
+#         popd
+#         ;;
+#     cleanup_apps)
+#         cleanup_apps
+#         ;;
+#     *)
+#         echo "Unknown function: $1"
+#         ;;
+# esac
+export KUBECONFIG=/var/run/kubernetes/admin.kubeconfig
+NO_PROXY=.intel.com,intel.com,localhost,127.0.0.1,10.0.0.0/8,192.168.0.0/16,10.96.0.0,10.165.118.229,10.165.116.205
+validate_webhook

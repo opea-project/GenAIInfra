@@ -52,6 +52,8 @@ Once you have deployed GMC in your Kubernetes cluster, you can deploy any of the
 
 To deploy GenAIExamples to Kubernetes using helm charts, you need [Helm](https://helm.sh/docs/intro/install/) installed on your machine.
 
+For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts)
+
 Clone the GenAIInfra repository and change into the `helm-charts` directory:
 
 ```shell
