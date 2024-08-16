@@ -78,23 +78,23 @@ function check_gmc_status() {
   expected_total_pods=$5
   
   # pods*3 is because 1 pod has 1 configmap + 1 deployment + 1 service
-  # minus 1 is because router don't have the configmap
-  expected_total_records= $((3* $3 - 1))
+  # minus 1 is because router and redis don't have the configmap
+  expected_total_records=$((3* $3 - 2))
 
-  if [$expected_ready_pods + $expected_external_pods != $expected_total_pods]; then
+  if [ $((expected_ready_pods + expected_external_pods)) -ne $expected_total_pods ]; then
     return 1
   fi
 
-  gmc_status=$(kubectl get gmc -n $namespace -o jsonpath='{.items[?(@.metadata.name=='$gmc_name')].status.status}')
+  gmc_status=$(kubectl get gmc -n $namespace -o jsonpath="{.items[?(@.metadata.name=='$gmc_name')].status.status}")
   echo $gmc_status
-  if [$gmc_status == "$expected_ready_pods/$expected_external_pods/$expected_total_pods"]; then
+  if [[ "$gmc_status" == "$expected_ready_pods/$expected_external_pods/$expected_total_pods" ]]; then
     return 0
   else
     return 1
   fi
-  annotation=$(kubectl get gmc -n $namespace -o json | jq '.items[?(@.metadata.name=='$gmc_name')].status.annotations | length')
+  annotation=$(kubectl get gmc -n $namespace -o json | jq ".items[] | select(.metadata.name==\"$gmc_name\") | .status.annotations | length")
   echo $annotation
-  if [$annotation == $expected_total_records]; then
+  if [ $annotation -eq $expected_total_records ]; then
     return 0
   else
     return 1
@@ -109,11 +109,11 @@ function check_resource_cleared() {
     return 0
   else
     #check every line of kubectl get all status is Terminating
-    remaining=$(kubectl get all -n $namespace --no-headers)
+    remaining=$(kubectl get pods -n $namespace --no-headers)
     echo $remaining
     status=$(echo $remaining | awk '{print $3}')
     for i in $status; do
-      if [ $i != "Terminating" ]; then
+      if [[ "$i" != "Terminating" ]]; then
         return 1
       fi
     done

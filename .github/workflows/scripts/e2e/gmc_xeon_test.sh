@@ -108,7 +108,7 @@ function validate_audioqa() {
    fi
    echo "Audioqa response check succeed!"
 
-   kubectl delete gmc $CHATQNA_NAMESPACE 'audioqa'
+   kubectl delete gmc -n $CHATQNA_NAMESPACE 'audioqa'
    echo "sleep 10s for cleanning up"
    sleep 10
    check_resource_cleared $CHATQNA_NAMESPACE
@@ -178,7 +178,8 @@ function validate_chatqna() {
        echo "Response check succeed!"
    fi
 
-   kubectl delete gmc $CHATQNA_NAMESPACE 'chatqa'
+   kubectl delete deployment client-test -n $CHATQNA_NAMESPACE 
+   kubectl delete gmc -n $CHATQNA_NAMESPACE 'chatqa'
    echo "sleep 10s for cleanning up"
    sleep 10
    check_resource_cleared $CHATQNA_NAMESPACE
@@ -270,7 +271,8 @@ function validate_chatqna_with_dataprep() {
        echo "Response check succeed!"
    fi
 
-   kubectl delete gmc $CHATQNA_NAMESPACE 'chatqa'
+   kubectl delete deployment client-test -n $CHATQNA_DATAPREP_NAMESPACE
+   kubectl delete gmc -n $CHATQNA_NAMESPACE 'chatqa'
    echo "sleep 10s for cleanning up"
    sleep 10
    check_resource_cleared $CHATQNA_NAMESPACE
@@ -366,7 +368,8 @@ function validate_chatqna_in_switch() {
        echo "Response check succeed!"
    fi
 
-   kubectl delete gmc $CHATQNA_NAMESPACE 'switch'
+   kubectl delete deployment client-test -n $CHATQNA_SWITCH_NAMESPACE
+   kubectl delete gmc -n $CHATQNA_NAMESPACE 'switch'
    echo "sleep 10s for cleanning up"
    sleep 10
    check_resource_cleared $CHATQNA_NAMESPACE
@@ -375,9 +378,15 @@ function validate_chatqna_in_switch() {
 
 function validate_modify_config() {
     kubectl create ns $MODIFY_STEP_NAMESPACE
-    sed -i "s|namespace: changegraph|namespace: $MODIFY_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
+    sed -i "s|namespace: codegen|namespace: $MODIFY_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
     kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
     
+    # Wait until the router service is ready
+    echo "Waiting for the router service to be ready..."
+    wait_until_pod_ready "router" $MODIFY_STEP_NAMESPACE "router-service"
+    output=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE)
+    echo $output
+
     # Wait until all pods are ready
     wait_until_all_pod_ready $MODIFY_STEP_NAMESPACE 300s
     if [ $? -ne 0 ]; then
@@ -387,7 +396,7 @@ function validate_modify_config() {
     
 
     pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $MODIFY_STEP_NAMESPACE 'switch' $pods_count 0 3
+    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -398,13 +407,13 @@ function validate_modify_config() {
     kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
 
     pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $MODIFY_STEP_NAMESPACE 'switch' $pods_count 0 3
+    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
     fi
 
-   kubectl delete gmc $MODIFY_STEP_NAMESPACE 'switch'
+   kubectl delete gmc -n $MODIFY_STEP_NAMESPACE 'codegen'
    echo "sleep 10s for cleanning up"
    sleep 10
    check_resource_cleared $MODIFY_STEP_NAMESPACE
@@ -412,9 +421,15 @@ function validate_modify_config() {
 
 function validate_remove_step() {
     kubectl create ns $DELETE_STEP_NAMESPACE
-    sed -i "s|namespace: changegraph|namespace: $DELETE_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
+    sed -i "s|namespace: codegen|namespace: $DELETE_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
     kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
-    
+
+    # Wait until the router service is ready
+    echo "Waiting for the router service to be ready..."
+    wait_until_pod_ready "router" $DELETE_STEP_NAMESPACE "router-service"
+    output=$(kubectl get pods -n $DELETE_STEP_NAMESPACE)
+    echo $output
+
     # Wait until all pods are ready
     wait_until_all_pod_ready $DELETE_STEP_NAMESPACE 300s
     if [ $? -ne 0 ]; then
@@ -424,7 +439,7 @@ function validate_remove_step() {
     
 
     pods_count=$(kubectl get pods -n $DELETE_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $DELETE_STEP_NAMESPACE 'switch' $pods_count 0 3
+    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $pods_count 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -442,13 +457,13 @@ function validate_remove_step() {
     fi
 
     pods_count=$(kubectl get pods -n $DELETE_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $DELETE_STEP_NAMESPACE 'switch' $pods_count 0 2
+    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $pods_count 0 2
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
     fi
    
-   kubectl delete gmc $DELETE_STEP_NAMESPACE 'switch'
+   kubectl delete gmc -n $DELETE_STEP_NAMESPACE 'switch'
    echo "sleep 10s for cleanning up"
    sleep 10
    check_resource_cleared $DELETE_STEP_NAMESPACE
