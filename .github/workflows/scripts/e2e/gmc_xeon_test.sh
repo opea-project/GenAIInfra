@@ -9,6 +9,7 @@ source ${DIR}/utils.sh
 
 USER_ID=$(whoami)
 LOG_PATH=/home/$(whoami)/logs
+AUDIOQA_NAMESPACE="${APP_NAMESPACE}-audioqa"
 CHATQNA_NAMESPACE="${APP_NAMESPACE}-chatqna"
 CHATQNA_DATAPREP_NAMESPACE="${APP_NAMESPACE}-chatqna-dataprep"
 CHATQNA_SWITCH_NAMESPACE="${APP_NAMESPACE}-chatqna-switch"
@@ -17,6 +18,9 @@ CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
 DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
 
 function validate_gmc() {
+    echo "validate audio-qna"
+    validate_audioqa
+
     echo "validate chat-qna"
     validate_chatqna
 
@@ -41,7 +45,7 @@ function validate_gmc() {
 function cleanup_apps() {
     echo "clean up microservice-connector"
     # namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
-    namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE")
+    namespaces=("$AUDIOQA_NAMESPACE" "$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         if kubectl get namespace $ns > /dev/null 2>&1; then
             echo "Deleting namespace: $ns"
@@ -50,6 +54,43 @@ function cleanup_apps() {
             echo "Namespace $ns does not exist"
         fi
     done
+}
+
+function validate_audioqa() {
+   kubectl create ns $AUDIOQA_NAMESPACE
+   sed -i "s|namespace: audioqa|namespace: $AUDIOQA_NAMESPACE|g"  $(pwd)/config/samples/audioQnA_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/audioQnA_xeon.yaml
+
+   # Wait until the router service is ready
+   echo "Waiting for the audioqa router service to be ready..."
+   wait_until_pod_ready "audioqa router" $AUDIOQA_NAMESPACE "router-service"
+   output=$(kubectl get pods -n $AUDIOQA_NAMESPACE)
+   echo $output
+
+   # deploy client pod for testing
+   kubectl create deployment client-test -n $AUDIOQA_NAMESPACE --image=python:3.8.13 -- sleep infinity
+
+   # Wait until all pods are ready
+   wait_until_all_pod_ready $AUDIOQA_NAMESPACE 300s
+   if [ $? -ne 0 ]; then
+       echo "Error Some pods are not ready!"
+       exit 1
+   fi
+
+   # giving time to populating data
+   sleep 90
+
+   kubectl get pods -n $AUDIOQA_NAMESPACE
+   # send request to chatqnA
+   export CLIENT_POD=$(kubectl get pod -n $AUDIOQA_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
+   echo "$CLIENT_POD"
+   accessUrl=$(kubectl get gmc -n $AUDIOQA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='audioqa')].status.accessUrl}")
+   byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq .byte_str)
+   if [ -z "$byte_str" ]; then
+       echo "audioqa failed, please check the the!"
+       exit 1
+   fi
+   echo "Audioqa response check succeed!"
 }
 
 function validate_chatqna() {
