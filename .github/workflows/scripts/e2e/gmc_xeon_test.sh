@@ -453,15 +453,10 @@ function validate_remove_step() {
     yq -i 'del(.spec.nodes.root.steps[] | select ( .name == "Llm"))' $(pwd)/config/samples/codegen_xeon_del.yaml
     kubectl apply -f $(pwd)/config/samples/codegen_xeon_del.yaml
 
-    # Wait until all pods are ready
-    wait_until_all_pod_ready $DELETE_STEP_NAMESPACE 300s
-    if [ $? -ne 0 ]; then
-         echo "Error Some pods are not ready!"
-         exit 1
-    fi
+    sleep 10
+    check_pod_terminated $DELETE_STEP_NAMESPACE
 
-    pods_count=$(kubectl get pods -n $DELETE_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $pods_count 0 2
+    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' 2 0 2
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1

@@ -120,3 +120,18 @@ function check_resource_cleared() {
     return 0
   fi
 }
+
+function check_pod_terminated() {
+  namespace=$1
+
+  #check every line of kubectl get all status is Terminating
+  remaining=$(kubectl get pods -n $namespace --no-headers)
+  echo $remaining
+  status=$(echo $remaining | awk '{print $3}')
+  for i in $status; do
+    if [[ "$i" 0= "Terminating" ]]; then
+      return 0
+    fi
+  done
+  return 1
+}

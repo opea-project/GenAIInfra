@@ -520,10 +520,11 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 	//update the revision in case it has changed
 	var latestGraph mcv1alpha3.GMConnector
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Namespace, Name: graph.Name}, &latestGraph)
-	if err != nil {
-		return errors.Wrapf(err, "failed to get graph %s before update status :", graph.Name)
+	if err != nil && apierr.IsNotFound(err) {
+		fmt.Printf("failed to get graph %s before update status : %s", graph.Name, err)
+	} else {
+		graph.SetResourceVersion(latestGraph.GetResourceVersion())
 	}
-	graph.SetResourceVersion(latestGraph.GetResourceVersion())
 
 	if err = r.Status().Update(ctx, graph); err != nil {
 		return errors.Wrapf(err, "Failed to Update CR status to %s", graph.Status.Status)
