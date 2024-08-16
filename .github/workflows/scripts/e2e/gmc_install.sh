@@ -65,6 +65,7 @@ function cleanup_gmc() {
         echo "Deleting namespace: $SYSTEM_NAMESPACE"
         kubectl delete namespace "$SYSTEM_NAMESPACE"
         kubectl delete crd gmconnectors.gmc.opea.io || true
+        kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io validating-webhook-configuration  --ignore-not-found
     else
         echo "Namespace $SYSTEM_NAMESPACE does not exist"
     fi

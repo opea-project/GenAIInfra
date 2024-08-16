@@ -81,3 +81,6 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+service:
+  type: ClusterIP
