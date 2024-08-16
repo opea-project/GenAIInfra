@@ -4,12 +4,12 @@
 apiVersion: security.istio.io/v1
 kind: RequestAuthentication
 metadata:
-  name: jwt-keycloak
+  name: oauth2-keycloak-auth
+  namespace: istio-system
 spec:
   jwtRules:
   - issuer: http://${KEYCLOAK_ADDR}/realms/${REALM}
     jwksUri: http://${KEYCLOAK_ADDR}/realms/${REALM}/protocol/openid-connect/certs
-    outputPayloadToHeader: jwt-parsed
   selector:
     matchLabels:
-      app: router-service
+      istio: ingressgateway
