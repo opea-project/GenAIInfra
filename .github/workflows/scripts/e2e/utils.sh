@@ -129,7 +129,7 @@ function check_pod_terminated() {
   echo $remaining
   status=$(echo $remaining | awk '{print $3}')
   for i in $status; do
-    if [[ "$i" 0= "Terminating" ]]; then
+    if [[ "$i" == "Terminating" ]]; then
       return 0
     fi
   done

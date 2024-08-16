@@ -464,7 +464,7 @@ function validate_remove_step() {
 
    #revert the codegen yaml
    sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_del.yaml
-   kubectl delete gmc -n $DELETE_STEP_NAMESPACE 'switch'
+   kubectl delete gmc -n $DELETE_STEP_NAMESPACE 'codegen'
    echo "sleep 10s for cleanning up"
    sleep 10
    check_resource_cleared $DELETE_STEP_NAMESPACE
