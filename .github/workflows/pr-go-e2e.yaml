@@ -32,46 +32,9 @@ jobs:
       runner_label: 'docker-build-xeon'
 
   go-e2e:
-    runs-on: kind-xeon
-    needs: image-build
-    steps:
-      - name: Checkout out Repo
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Set variables
-        run: |
-          echo "SYSTEM_NAMESPACE=opea-system" >> $GITHUB_ENV
-          echo "APP_NAMESPACE=opea-app" >> $GITHUB_ENV
-          echo "DOCKER_REGISTRY=${{ needs.image-build.outputs.image_repo }}" >> $GITHUB_ENV
-          echo "VERSION=${{ needs.image-build.outputs.image_tag }}" >> $GITHUB_ENV
-          echo "should_cleanup=false" >> $GITHUB_ENV
-          echo "skip_validate=false" >> $GITHUB_ENV
-          echo "KIND_MOUNT_DIR=/mnt/huggingface/hub" >> $GITHUB_ENV
-
-      - name: Install GMC
-        run: |
-          echo "should_cleanup=true" >> $GITHUB_ENV
-          .github/workflows/scripts/e2e/gmc_install.sh install_gmc
-          exit_status=$$?$$
-          if [ $$exit_status -ne 0 ]; then
-            echo "Failed to install modules"
-            echo "skip_validate=true" >> $GITHUB_ENV
-          fi
-
-      - name: Run e2e tests
-        run: |
-          if $skip_validate; then
-            echo "Skip validate"
-          else
-            .github/workflows/scripts/e2e/gmc_xeon_test.sh validate_gmc
-          fi
-
-      - name: Cleanup modules
-        if: always()
-        run: |
-          if $should_cleanup; then
-            .github/workflows/scripts/e2e/gmc_xeon_test.sh cleanup_apps
-            .github/workflows/scripts/e2e/gmc_install.sh cleanup_gmc
-          fi
+    needs: [image-build]
+    uses: ./.github/workflows/_gmc-e2e.yaml
+    with:
+      repo: ${{ needs.image-build.outputs.image_repo }}
+      tag: ${{ needs.image-build.outputs.image_tag }}
+    secrets: inherit
