@@ -18,7 +18,7 @@ CODETRANS_NAMESPACE="${APP_NAMESPACE}-codetrans"
 DOCSUM_NAMESPACE="${APP_NAMESPACE}-docsum"
 DELETE_STEP_NAMESPACE="${APP_NAMESPACE}-delstep"
 MODIFY_STEP_NAMESPACE="${APP_NAMESPACE}-modstep"
-
+WEBHOOK_NAMESPACE="${APP_NAMESPACE}-webhook"
 
 function validate_gmc() {
     echo "validate audio-qna"
@@ -46,13 +46,63 @@ function validate_gmc() {
     # echo "validate docsum"
     # validate_docsum
 
+    echo "validate webhook"
+    validate_webhook
+
     get_gmc_controller_logs
+}
+
+function validate_webhook() {
+    kubectl create ns $WEBHOOK_NAMESPACE || echo "namespace $WEBHOOK_NAMESPACE is created."
+    # validate root node existence
+    yq ".spec.nodes.node123 = .spec.nodes.root | del(.spec.nodes.root)" config/samples/chatQnA_xeon.yaml > /tmp/webhook-case1.yaml
+    sed -i "s|namespace: chatqa|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case1.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case1.yaml 2>&1)
+    if ! (echo $output | grep -q "a root node is required"); then
+        echo "Root node existence validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # StepName validation
+    yq '(.spec.nodes.root.steps[] | select ( .name == "Llm")).name = "xyz"' config/samples/chatQnA_gaudi.yaml > /tmp/webhook-case2.yaml
+    sed -i "s|namespace: chatqa|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case2.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case2.yaml 2>&1)
+    if ! (echo $output | grep -q "invalid step name"); then
+        echo "Step name validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+
+    # nodeName existence
+    yq '(.spec.nodes.root.steps[] | select ( .name == "Embedding")).nodeName = "node123"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case3.yaml
+    sed -i "s|namespace: switch|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case3.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case3.yaml 2>&1)
+    if ! (echo $output | grep -q "node name: node123 in step Embedding does not exist"); then
+        echo "nodeName existence validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # serviceName uniqueness
+    yq '(.spec.nodes.node1.steps[] | select ( .name == "Embedding")).internalService.serviceName = "tei-embedding-svc-bge15"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case4.yaml
+    sed -i "s|namespace: switch|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case4.yaml
+    output=$(! kubectl apply -f /tmp/webhook-case4.yaml 2>&1)
+    if ! (echo $output | grep -q "service name: tei-embedding-svc-bge15 in node node1 already exists"); then
+        echo "serviceName uniqueness validation error message is not found!"
+        echo $output
+        exit 1
+    fi
+
+    # clean up cases
+    rm -f /tmp/webhook-case*.yaml
 }
 
 function cleanup_apps() {
     echo "clean up microservice-connector"
     # namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
-    namespaces=("$AUDIOQA_NAMESPACE" "$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE")
+    namespaces=("$AUDIOQA_NAMESPACE" "$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$WEBHOOK_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         if kubectl get namespace $ns > /dev/null 2>&1; then
             echo "Deleting namespace: $ns"
