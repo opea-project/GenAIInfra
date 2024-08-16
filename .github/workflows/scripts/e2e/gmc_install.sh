@@ -47,6 +47,12 @@ function init_gmc() {
     sed -i "s|namespace: system|namespace: $SYSTEM_NAMESPACE|g"  $(pwd)/config/rbac/gmc-manager-rbac.yaml
     sed -i "s|name: system|name: $SYSTEM_NAMESPACE|g" $(pwd)/config/rbac/gmc-manager-rbac.yaml
 
+    # if SET_VERSION=true then replace latest with VERSION
+    if [ -n "$SET_VERSION" ]; then
+        # replace the repository "image: opea/*:latest" with "image: ${IMAGE_REPO}opea/"
+        find . -name '*.yaml' -type f -exec sed -i "s#image: opea/\(.*\):latest#image: opea/\1:$VERSION#g" {} \;
+        find . -name '*.yaml' -type f -exec sed -i "s#image: \"opea/\(.*\):latest#image: \"opea/\1:$VERSION#g" {} \;
+    fi
     # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
     # find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/models#path: $MOUNT_DIR#g" {} \;
     find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/opea-models#path: $MOUNT_DIR#g" {} \;
@@ -65,6 +71,7 @@ function cleanup_gmc() {
         echo "Deleting namespace: $SYSTEM_NAMESPACE"
         kubectl delete namespace "$SYSTEM_NAMESPACE"
         kubectl delete crd gmconnectors.gmc.opea.io || true
+        kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io validating-webhook-configuration  --ignore-not-found
     else
         echo "Namespace $SYSTEM_NAMESPACE does not exist"
     fi
