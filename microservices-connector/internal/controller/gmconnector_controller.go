@@ -415,11 +415,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
 
-	graph.Status.Status = fmt.Sprintf("%d/%d/%d", 0, externalService, 0)
-	if err = r.Status().Update(ctx, graph); err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to write service status")
-	}
-
 	if updateExistGraph {
 		//check if the old annotations are still in the new graph
 		for k := range oldAnnotations {
@@ -429,6 +424,13 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			}
 		}
 	}
+
+	graph.Status.Status = fmt.Sprintf("%d/%d/%d", 0, externalService, 0)
+	err = r.collectResourceStatus(graph, ctx)
+	if err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to collect service status")
+	}
+
 	return ctrl.Result{}, nil
 }
 
