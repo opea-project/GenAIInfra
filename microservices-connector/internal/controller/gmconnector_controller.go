@@ -123,7 +123,7 @@ func lookupManifestDir(step string) string {
 	}
 }
 
-func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, client client.Client, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router, graph *mcv1alpha3.GMConnector) ([]*unstructured.Unstructured, error) {
+func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router, graph *mcv1alpha3.GMConnector) ([]*unstructured.Unstructured, error) {
 	if stepCfg == nil || nodeCfg == nil {
 		return nil, errors.New("invalid svc config")
 	}
@@ -386,7 +386,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if step.Executor.ExternalService == "" {
 				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
 
-				objs, err := r.reconcileResource(ctx, r.Client, graph.Namespace, &step, &node, graph)
+				objs, err := r.reconcileResource(ctx, graph.Namespace, &step, &node, graph)
 				if err != nil {
 					return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile service for %s", step.StepName)
 				}
