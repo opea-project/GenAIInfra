@@ -226,7 +226,7 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, client cl
 			}
 		}
 
-		err = r.applyResourceToK8s(graph, ctx, client, obj)
+		err = r.applyResourceToK8s(graph, ctx, obj)
 		if err != nil {
 			return nil, fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {
@@ -628,7 +628,7 @@ func (r *GMConnectorReconciler) reconcileRouterService(ctx context.Context, grap
 			return fmt.Errorf("failed to decode YAML: %v", err)
 		}
 
-		err = r.applyResourceToK8s(graph, ctx, r.Client, obj)
+		err = r.applyResourceToK8s(graph, ctx, obj)
 		if err != nil {
 			return fmt.Errorf("failed to reconcile resource: %v", err)
 		} else {
@@ -676,7 +676,7 @@ func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFi
 
 }
 
-func (r *GMConnectorReconciler) applyResourceToK8s(graph *mcv1alpha3.GMConnector, ctx context.Context, c client.Client, obj *unstructured.Unstructured) error {
+func (r *GMConnectorReconciler) applyResourceToK8s(graph *mcv1alpha3.GMConnector, ctx context.Context, obj *unstructured.Unstructured) error {
 	// Prepare the object for an update, assuming it already exists. If it doesn't, you'll need to handle that case.
 	// This might involve trying an Update and, if it fails because the object doesn't exist, falling back to Create.
 	// Retry updating the resource in case of transient errors.
@@ -695,11 +695,11 @@ func (r *GMConnectorReconciler) applyResourceToK8s(graph *mcv1alpha3.GMConnector
 			// Get the latest version of the object
 			latest := &unstructured.Unstructured{}
 			latest.SetGroupVersionKind(obj.GroupVersionKind())
-			err := c.Get(ctx, client.ObjectKeyFromObject(obj), latest)
+			err := r.Client.Get(ctx, client.ObjectKeyFromObject(obj), latest)
 			if err != nil {
 				if apierr.IsNotFound(err) {
 					// If the object doesn't exist, create it
-					err = c.Create(ctx, obj, &client.CreateOptions{})
+					err = r.Client.Create(ctx, obj, &client.CreateOptions{})
 					if err != nil {
 						return fmt.Errorf("failed to create resource: %v", err)
 					}
@@ -711,7 +711,7 @@ func (r *GMConnectorReconciler) applyResourceToK8s(graph *mcv1alpha3.GMConnector
 			} else {
 				// If the object does exist, update it
 				obj.SetResourceVersion(latest.GetResourceVersion()) // Ensure we're updating the latest version
-				err = c.Update(ctx, obj, &client.UpdateOptions{})
+				err = r.Client.Update(ctx, obj, &client.UpdateOptions{})
 				if err != nil {
 					fmt.Printf("update object err: %v\n", err)
 					continue
