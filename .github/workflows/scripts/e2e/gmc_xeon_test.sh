@@ -428,9 +428,9 @@ function validate_chatqna_in_switch() {
 function validate_modify_config() {
     kubectl create ns $MODIFY_STEP_NAMESPACE
     cp $(pwd)/config/samples/codegen_xeon.yaml $(pwd)/config/samples/codegen_xeon_mod.yaml
-    sed -i "s|namespace: codegen|namespace: $MODIFY_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon_mod.yaml
+    sed -i "s|namespace: codegen|namespace: $MODIFY_STEP_NAMESPACE|g" $(pwd)/config/samples/codegen_xeon_mod.yaml
     kubectl apply -f $(pwd)/config/samples/codegen_xeon_mod.yaml
-    
+
     # Wait until the router service is ready
     echo "Waiting for the router service to be ready..."
     wait_until_pod_ready "router" $MODIFY_STEP_NAMESPACE "router-service"
@@ -443,7 +443,6 @@ function validate_modify_config() {
          echo "Error Some pods are not ready!"
          exit 1
     fi
-    
 
     pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
     check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
