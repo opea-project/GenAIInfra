@@ -85,7 +85,9 @@ function validate_audioqa() {
    fi
 
     pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $pods_count-1 0 7
+    # expected_ready_pods, expected_external_pods, expected_total_pods
+    # pods_count-1 is to exclude the client pod in this namespace
+    check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $((pods_count-1)) 0 7
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -136,7 +138,10 @@ function validate_chatqna() {
    fi
 
     pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $pods_count-1 0 9
+
+    # expected_ready_pods, expected_external_pods, expected_total_pods
+    # pods_count-1 is to exclude the client pod in this namespace
+    check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $((pods_count-1)) 0 9
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -203,7 +208,9 @@ function validate_chatqna_with_dataprep() {
    fi
 
     pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $pods_count-1 0 10
+    # expected_ready_pods, expected_external_pods, expected_total_pods
+    # pods_count-1 is to exclude the client pod in this namespace
+    check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $((pods_count-1)) 0 10
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -293,7 +300,9 @@ function validate_chatqna_in_switch() {
    fi
 
     pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $CHATQNA_NAMESPACE 'switch' $pods_count-1 0 17
+    # expected_ready_pods, expected_external_pods, expected_total_pods
+    # pods_count-1 is to exclude the client pod in this namespace
+    check_gmc_status $CHATQNA_NAMESPACE 'switch' $((pods_count-1)) 0 17
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
