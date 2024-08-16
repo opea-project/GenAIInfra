@@ -378,8 +378,9 @@ function validate_chatqna_in_switch() {
 
 function validate_modify_config() {
     kubectl create ns $MODIFY_STEP_NAMESPACE
-    sed -i "s|namespace: codegen|namespace: $MODIFY_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
-    kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
+    cp $(pwd)/config/samples/codegen_xeon.yaml $(pwd)/config/samples/codegen_xeon_mod.yaml
+    sed -i "s|namespace: codegen|namespace: $MODIFY_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon_mod.yaml
+    kubectl apply -f $(pwd)/config/samples/codegen_xeon_mod.yaml
     
     # Wait until the router service is ready
     echo "Waiting for the router service to be ready..."
@@ -402,9 +403,9 @@ function validate_modify_config() {
        exit 1
     fi
 
-    #change the model id of the step named "Tgi" in the codegen_xeon.yaml
-    yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/codegen_xeon.yaml
-    kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
+    #change the model id of the step named "Tgi" in the codegen_xeon_mod.yaml
+    yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/codegen_xeon_mod.yaml
+    kubectl apply -f $(pwd)/config/samples/codegen_xeon_mod.yaml
 
     pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
     check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
@@ -413,6 +414,8 @@ function validate_modify_config() {
        exit 1
     fi
 
+   #revert the codegen yaml
+   sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_mod.yaml
    kubectl delete gmc -n $MODIFY_STEP_NAMESPACE 'codegen'
    echo "sleep 10s for cleanning up"
    sleep 10
@@ -421,8 +424,9 @@ function validate_modify_config() {
 
 function validate_remove_step() {
     kubectl create ns $DELETE_STEP_NAMESPACE
-    sed -i "s|namespace: codegen|namespace: $DELETE_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
-    kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
+    cp $(pwd)/config/samples/codegen_xeon.yaml $(pwd)/config/samples/codegen_xeon_del.yaml
+    sed -i "s|namespace: codegen|namespace: $DELETE_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon_del.yaml
+    kubectl apply -f $(pwd)/config/samples/codegen_xeon_del.yaml
 
     # Wait until the router service is ready
     echo "Waiting for the router service to be ready..."
@@ -446,8 +450,8 @@ function validate_remove_step() {
     fi
 
     # remove the step named "llm" in the codegen_xeon.yaml
-    yq -i 'del(.spec.nodes.root.steps[] | select ( .name == "llm"))' $(pwd)/config/samples/codegen_xeon.yaml
-    kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
+    yq -i 'del(.spec.nodes.root.steps[] | select ( .name == "Llm"))' $(pwd)/config/samples/codegen_xeon_del.yaml
+    kubectl apply -f $(pwd)/config/samples/codegen_xeon_del.yaml
 
     # Wait until all pods are ready
     wait_until_all_pod_ready $DELETE_STEP_NAMESPACE 300s
@@ -462,7 +466,9 @@ function validate_remove_step() {
        echo "GMC status is not as expected"
        exit 1
     fi
-   
+
+   #revert the codegen yaml
+   sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_del.yaml
    kubectl delete gmc -n $DELETE_STEP_NAMESPACE 'switch'
    echo "sleep 10s for cleanning up"
    sleep 10

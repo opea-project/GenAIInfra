@@ -12,7 +12,6 @@ import (
 	"fmt"
 	"os"
 	"reflect"
-	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -415,10 +414,10 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
 
-	err = r.collectResourceStatus(graph, ctx, int(externalService))
-	if err != nil {
-		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to collect service status")
-	}
+	// err = r.collectResourceStatus(graph, ctx, int(externalService))
+	// if err != nil {
+	// 	return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to collect service status")
+	// }
 
 	if updateExistGraph {
 		//check if the old annotations are still in the new graph
@@ -439,13 +438,7 @@ func (r *GMConnectorReconciler) handleStatusUpdate(ctx context.Context, deployme
 			graph := &mcv1alpha3.GMConnector{}
 			err := r.Get(ctx, types.NamespacedName{Namespace: deployment.Namespace, Name: owner.Name}, graph)
 			if err == nil {
-				externalResourceCntStr := strings.Split(graph.Status.Status, "/")[1]
-				externalResourceCnt, err := strconv.Atoi(externalResourceCntStr)
-				if err != nil {
-					fmt.Println("Error converting externalResourceCnt to int:", err)
-					return reconcile.Result{}, err
-				}
-				ue := r.collectResourceStatus(graph, ctx, externalResourceCnt)
+				ue := r.collectResourceStatus(graph, ctx)
 				if ue != nil {
 					fmt.Printf("failed to get graph before update status %s %v\n", graph.Name, err)
 					return reconcile.Result{}, err
@@ -477,7 +470,7 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 	}
 }
 
-func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnector, ctx context.Context, externalServiceCnt int) error {
+func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnector, ctx context.Context) error {
 	var totalCnt uint = 0
 	var readyCnt uint = 0
 	for resName := range graph.Status.Annotations {
@@ -515,7 +508,7 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 		}
 	}
 
-	graph.Status.Status = fmt.Sprintf("%d/%d/%d", readyCnt, externalServiceCnt, totalCnt)
+	graph.Status.Status = fmt.Sprintf("%d/%d/%d", readyCnt, 0, totalCnt)
 
 	//update the revision in case it has changed
 	var latestGraph mcv1alpha3.GMConnector
