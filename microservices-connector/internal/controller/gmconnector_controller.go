@@ -12,6 +12,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"strconv"
 	"strings"
 	"text/template"
 	"time"
@@ -414,10 +415,10 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to reconcile router service")
 	}
 
-	// err = r.collectResourceStatus(graph, ctx, int(externalService))
-	// if err != nil {
-	// 	return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to collect service status")
-	// }
+	graph.Status.Status = fmt.Sprintf("%d/%d/%d", 0, externalService, 0)
+	if err = r.Status().Update(ctx, graph); err != nil {
+		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to write service status")
+	}
 
 	if updateExistGraph {
 		//check if the old annotations are still in the new graph
@@ -507,12 +508,16 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 			}
 		}
 	}
-
-	graph.Status.Status = fmt.Sprintf("%d/%d/%d", readyCnt, 0, totalCnt)
+	externalResourceCntStr := strings.Split(graph.Status.Status, "/")[1]
+	externalResourceCnt, err := strconv.Atoi(externalResourceCntStr)
+	if err != nil {
+		return errors.Wrapf(err, "Error converting externalResourceCnt to int")
+	}
+	graph.Status.Status = fmt.Sprintf("%d/%d/%d", readyCnt, externalResourceCnt, totalCnt)
 
 	//update the revision in case it has changed
 	var latestGraph mcv1alpha3.GMConnector
-	err := r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Namespace, Name: graph.Name}, &latestGraph)
+	err = r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Namespace, Name: graph.Name}, &latestGraph)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get graph %s before update status :", graph.Name)
 	}
