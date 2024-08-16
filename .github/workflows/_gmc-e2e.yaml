@@ -1,0 +1,69 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: GMC E2e Test For Call
+on:
+  workflow_call:
+    inputs:
+      tag:
+        default: "latest"
+        description: "Tag to apply to images, default is latest"
+        required: false
+        type: string
+      repo:
+        description: "Repo to apply to images, default is empty string"
+        required: false
+        type: string
+
+jobs:
+  go-e2e:
+    runs-on: kind-xeon
+    steps:
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set variables
+        env:
+          imagerepo: ${{ inputs.repo }}
+          imagetag: ${{ inputs.tag }}
+        run: |
+          if [[ -z "$imagerepo" ]]; then
+            echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}" >> $GITHUB_ENV
+          else
+            echo "DOCKER_REGISTRY=${imagerepo}" >> $GITHUB_ENV
+          fi
+          echo "DOCKER_REGISTRY=$DOCKER_REGISTRY" >> $GITHUB_ENV
+          echo "VERSION=$imagetag" >> $GITHUB_ENV
+          echo "SYSTEM_NAMESPACE=opea-system" >> $GITHUB_ENV
+          echo "APP_NAMESPACE=opea-app" >> $GITHUB_ENV
+          echo "should_cleanup=false" >> $GITHUB_ENV
+          echo "skip_validate=false" >> $GITHUB_ENV
+          echo "KIND_MOUNT_DIR=/mnt/huggingface/hub" >> $GITHUB_ENV
+
+      - name: Install GMC
+        run: |
+          echo "should_cleanup=true" >> $GITHUB_ENV
+          .github/workflows/scripts/e2e/gmc_install.sh install_gmc
+          exit_status=$$?$$
+          if [ $$exit_status -ne 0 ]; then
+            echo "Failed to install modules"
+            echo "skip_validate=true" >> $GITHUB_ENV
+          fi
+
+      - name: Run e2e tests
+        run: |
+          if $skip_validate; then
+            echo "Skip validate"
+          else
+            .github/workflows/scripts/e2e/gmc_xeon_test.sh validate_gmc
+          fi
+
+      - name: Cleanup modules
+        if: always()
+        run: |
+          if $should_cleanup; then
+            .github/workflows/scripts/e2e/gmc_xeon_test.sh cleanup_apps
+            .github/workflows/scripts/e2e/gmc_install.sh cleanup_gmc
+          fi
