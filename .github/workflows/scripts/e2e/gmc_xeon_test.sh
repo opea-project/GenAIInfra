@@ -136,7 +136,7 @@ function validate_audioqa() {
     pods_count=$(kubectl get pods -n $AUDIOQA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
-    check_gmc_status $AUDIOQA_NAMESPACE 'chatqa' $((pods_count-1)) 0 7
+    check_gmc_status $AUDIOQA_NAMESPACE 'audioqa' $((pods_count-1)) 0 7
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -158,7 +158,7 @@ function validate_audioqa() {
    echo "Audioqa response check succeed!"
 
    kubectl delete gmc -n $CHATQNA_NAMESPACE 'audioqa'
-   echo "sleep 10s for cleanning up"
+   echo "sleep 10s for cleaning up"
    sleep 10
    check_resource_cleared $CHATQNA_NAMESPACE
 }
@@ -229,7 +229,7 @@ function validate_chatqna() {
 
    kubectl delete deployment client-test -n $CHATQNA_NAMESPACE 
    kubectl delete gmc -n $CHATQNA_NAMESPACE 'chatqa'
-   echo "sleep 10s for cleanning up"
+   echo "sleep 10s for cleaning up"
    sleep 10
    check_resource_cleared $CHATQNA_NAMESPACE
 }
@@ -322,7 +322,7 @@ function validate_chatqna_with_dataprep() {
 
    kubectl delete deployment client-test -n $CHATQNA_DATAPREP_NAMESPACE
    kubectl delete gmc -n $CHATQNA_NAMESPACE 'chatqa'
-   echo "sleep 10s for cleanning up"
+   echo "sleep 10s for cleaning up"
    sleep 10
    check_resource_cleared $CHATQNA_NAMESPACE
 }
@@ -419,7 +419,7 @@ function validate_chatqna_in_switch() {
 
    kubectl delete deployment client-test -n $CHATQNA_SWITCH_NAMESPACE
    kubectl delete gmc -n $CHATQNA_NAMESPACE 'switch'
-   echo "sleep 10s for cleanning up"
+   echo "sleep 10s for cleaning up"
    sleep 10
    check_resource_cleared $CHATQNA_NAMESPACE
 }
@@ -465,7 +465,7 @@ function validate_modify_config() {
    #revert the codegen yaml
    sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_mod.yaml
    kubectl delete gmc -n $MODIFY_STEP_NAMESPACE 'codegen'
-   echo "sleep 10s for cleanning up"
+   echo "sleep 10s for cleaning up"
    sleep 10
    check_resource_cleared $MODIFY_STEP_NAMESPACE
 }
@@ -513,7 +513,7 @@ function validate_remove_step() {
    #revert the codegen yaml
    sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_del.yaml
    kubectl delete gmc -n $DELETE_STEP_NAMESPACE 'codegen'
-   echo "sleep 10s for cleanning up"
+   echo "sleep 10s for cleaning up"
    sleep 10
    check_resource_cleared $DELETE_STEP_NAMESPACE
 }
