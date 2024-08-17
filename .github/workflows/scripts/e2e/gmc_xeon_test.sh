@@ -133,10 +133,10 @@ function validate_audioqa() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $AUDIOQA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
-    check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $((pods_count-1)) 0 7
+    check_gmc_status $AUDIOQA_NAMESPACE 'chatqa' $((pods_count-1)) 0 7
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
