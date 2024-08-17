@@ -101,7 +101,7 @@ function validate_webhook() {
 function cleanup_apps() {
     echo "clean up microservice-connector"
     # namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
-    namespaces=("$AUDIOQA_NAMESPACE" "$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$WEBHOOK_NAMESPACE")
+    namespaces=("$AUDIOQA_NAMESPACE" "$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$WEBHOOK_NAMESPACE" "$MODIFY_STEP_NAMESPACE" "$DELETE_STEP_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         if kubectl get namespace $ns > /dev/null 2>&1; then
             echo "Deleting namespace: $ns"
@@ -150,17 +150,17 @@ function validate_audioqa() {
    export CLIENT_POD=$(kubectl get pod -n $AUDIOQA_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
    accessUrl=$(kubectl get gmc -n $AUDIOQA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='audioqa')].status.accessUrl}")
-   byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq .byte_str)
+   byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq .byte_str > dev/null)
    if [ -z "$byte_str" ]; then
        echo "audioqa failed, please check the the!"
        exit 1
    fi
    echo "Audioqa response check succeed!"
 
-   kubectl delete gmc -n $CHATQNA_NAMESPACE 'audioqa'
+   kubectl delete gmc -n $AUDIOQA_NAMESPACE 'audioqa'
    echo "sleep 10s for cleaning up"
    sleep 10
-   check_resource_cleared $CHATQNA_NAMESPACE
+   check_resource_cleared $AUDIOQA_NAMESPACE
 }
 
 function validate_chatqna() {
@@ -227,7 +227,7 @@ function validate_chatqna() {
        echo "Response check succeed!"
    fi
 
-   kubectl delete deployment client-test -n $CHATQNA_NAMESPACE 
+   kubectl delete deployment client-test -n $CHATQNA_NAMESPACE
    kubectl delete gmc -n $CHATQNA_NAMESPACE 'chatqa'
    echo "sleep 10s for cleaning up"
    sleep 10
@@ -257,10 +257,10 @@ function validate_chatqna_with_dataprep() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $CHATQNA_DATAPREP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
-    check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $((pods_count-1)) 0 10
+    check_gmc_status $CHATQNA_DATAPREP_NAMESPACE 'chatqa' $((pods_count-1)) 0 10
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -321,10 +321,10 @@ function validate_chatqna_with_dataprep() {
    fi
 
    kubectl delete deployment client-test -n $CHATQNA_DATAPREP_NAMESPACE
-   kubectl delete gmc -n $CHATQNA_NAMESPACE 'chatqa'
+   kubectl delete gmc -n $CHATQNA_DATAPREP_NAMESPACE 'chatqa'
    echo "sleep 10s for cleaning up"
    sleep 10
-   check_resource_cleared $CHATQNA_NAMESPACE
+   check_resource_cleared $CHATQNA_DATAPREP_NAMESPACE
 }
 
 function validate_chatqna_in_switch() {
@@ -350,10 +350,10 @@ function validate_chatqna_in_switch() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $CHATQNA_DATAPREP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
-    check_gmc_status $CHATQNA_NAMESPACE 'switch' $((pods_count-1)) 0 17
+    check_gmc_status $CHATQNA_DATAPREP_NAMESPACE 'switch' $((pods_count-1)) 0 17
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -418,10 +418,10 @@ function validate_chatqna_in_switch() {
    fi
 
    kubectl delete deployment client-test -n $CHATQNA_SWITCH_NAMESPACE
-   kubectl delete gmc -n $CHATQNA_NAMESPACE 'switch'
+   kubectl delete gmc -n $CHATQNA_DATAPREP_NAMESPACE 'switch'
    echo "sleep 10s for cleaning up"
    sleep 10
-   check_resource_cleared $CHATQNA_NAMESPACE
+   check_resource_cleared $CHATQNA_DATAPREP_NAMESPACE
 }
 
 
