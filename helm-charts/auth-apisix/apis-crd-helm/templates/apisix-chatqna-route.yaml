@@ -1,0 +1,33 @@
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: chatqna-authenticated-endpoints
+  namespace: {{ .Values.chatqna.namespace }}
+spec:
+  http:
+  - name: chatqna-query
+    match:
+      hosts:
+      - {{ .Values.chatqna.hostname }}
+      paths:
+      - {{ .Values.chatqna.query_api.path }}
+    backends:
+    - serviceName: {{ .Values.chatqna.query_api.backend_service }}
+      servicePort: {{ .Values.chatqna.query_api.service_port }}
+    plugins:
+    - name: openid-connect
+      enable: true
+      config:
+        client_id: {{ .Values.oidc.client_id }}
+        client_secret: {{ .Values.oidc.client_secret }}
+        discovery: {{ .Values.oidc.discovery }}
+        introspection_endpoint: {{ .Values.oidc.introspection_endpoint }}
+        introspection_endpoint_auth_method: client_secret_basic
+        scope: openid profile email
+        bearer_only: true
+        realm: myrealm
+    - name: proxy-rewrite
+      enable: true
+      config:
+        uri: {{ .Values.chatqna.query_api.service_path }}
+

@@ -1,0 +1,17 @@
+# Identity provider OIDC config
+oidc:
+  realm: <your realm name>
+  client_id: <your oidc client id>
+  client_secret: <your oidc client secret>
+  discovery: <your oidc discovery endpoint>
+  introspection_endpoint: <your oidc introspection endpoint>
+
+# APISIX chatqna api config
+chatqna:
+  namespace: <namespace in which your chatqna service is running>
+  hostname: <hostname for external access>
+  query_api: 
+    path: /chatqna-oidc  # This is the path that will be published in apisix and this should be used by UI to access the chatqna service
+    backend_service: <kubernetes service name to access chatqna megaservice or gmc without .<namespace>.svc.cluster.local>
+    service_port: <port on which chatqna mega service or gmc is running>
+    service_path: <path to access chatqna mega service or gmc backend>
