@@ -24,6 +24,7 @@ data:
   NUMBA_CACHE_DIR: "/tmp"
   TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
+  CUDA_GRAPHS: "0"
 ---
 # Source: tgi/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -88,7 +89,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "ghcr.io/huggingface/text-generation-inference:2.1.0"
+          image: "ghcr.io/huggingface/text-generation-inference:latest-intel-cpu"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /data
