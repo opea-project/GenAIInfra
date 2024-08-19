@@ -16,7 +16,7 @@ data:
     # Client config
     client_id="${CLIENT}"
     client_secret="${CLIENT_SECRET}"
-    cookie_secret="ZzBkN000Wm0pQkVkKUhzMk5YPntQRUw_ME1oMTZZTy0="
+    cookie_secret="${COOKIE_SECRET}"
     cookie_secure="false"
     allowed_groups=["/user"]
     allowed_roles=["${CLIENT}:user"]
