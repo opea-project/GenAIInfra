@@ -12,3 +12,5 @@ image:
 resources:
   limits:
     nvidia.com/gpu: 1
+
+CUDA_GRAPHS: ""
