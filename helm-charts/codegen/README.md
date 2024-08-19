@@ -43,10 +43,8 @@ curl http://localhost:7778/v1/codegen \
 
 ## Values
 
-| Key                             | Type   | Default                        | Description                                                                                                                                                                                                                       |
-| ------------------------------- | ------ | ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| image.repository                | string | `"opea/codegen"`               |                                                                                                                                                                                                                                   |
-| service.port                    | string | `"7778"`                       |                                                                                                                                                                                                                                   |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                           | Your own Hugging Face API token                                                                                                                                                                                                   |
-| global.modelUseHostPath         | string | `"/mnt/opea-models"`           | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to empty/null will force it to download models every time. |
-| tgi.LLM_MODEL_ID                | string | `"meta-llama/CodeLlama-7b-hf"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                                                                                                          |
+| Key              | Type   | Default                        | Description                                                              |
+| ---------------- | ------ | ------------------------------ | ------------------------------------------------------------------------ |
+| image.repository | string | `"opea/codegen"`               |                                                                          |
+| service.port     | string | `"7778"`                       |                                                                          |
+| tgi.LLM_MODEL_ID | string | `"meta-llama/CodeLlama-7b-hf"` | Models id from https://huggingface.co/, or predownloaded model directory |

@@ -36,10 +36,8 @@ curl http://localhost:7777/v1/codetrans \
 
 ## Values
 
-| Key                             | Type   | Default                           | Description                                                                                                                                                  |
-| ------------------------------- | ------ | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| image.repository                | string | `"opea/codetrans"`                |                                                                                                                                                              |
-| service.port                    | string | `"7777"`                          |                                                                                                                                                              |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                              | Your own Hugging Face API token                                                                                                                              |
-| global.modelUseHostPath         | string | `"/mnt/opea-models"`              | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
-| tgi.LLM_MODEL_ID                | string | `"HuggingFaceH4/mistral-7b-grok"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                                     |
+| Key              | Type   | Default                           | Description                                                              |
+| ---------------- | ------ | --------------------------------- | ------------------------------------------------------------------------ |
+| image.repository | string | `"opea/codetrans"`                |                                                                          |
+| service.port     | string | `"7777"`                          |                                                                          |
+| tgi.LLM_MODEL_ID | string | `"HuggingFaceH4/mistral-7b-grok"` | Models id from https://huggingface.co/, or predownloaded model directory |
