@@ -81,7 +81,6 @@ kubectl port-forward svc/ui --address 0.0.0.0 5174:5174
 
 Access `http://localhost:5174` to play with the ChatQnA workload through UI.
 
-
 ## Values
 
 | Key                             | Type   | Default                       | Description                                                                                                                                                                                                                       |
