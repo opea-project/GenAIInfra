@@ -27,3 +27,6 @@ data:
   {{- if .Values.MAX_TOTAL_TOKENS }}
   MAX_TOTAL_TOKENS: {{ .Values.MAX_TOTAL_TOKENS | quote }}
   {{- end }}
+  {{- if .Values.CUDA_GRAPHS }}
+  CUDA_GRAPHS: {{ .Values.CUDA_GRAPHS | quote }}
+  {{- end }}
