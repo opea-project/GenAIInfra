@@ -240,7 +240,12 @@ Next, we will install the oauth2-proxy and configure the OIDC information.
 # then deploy oauth2-proxy
 export REALM=<YOUR_REALM_NAME>
 export CLIENT=<YOUR_CLIENT_NAME>
-envsubst < $(pwd)/config/authN-authZ/oauth2_install.yaml | kubectl -n chatqa apply -f -
+export CLIENT_SECRET=<YOUR_CLIENT_SECRET>
+# generate cookie secret
+# Using bash here. More methods found here:
+# https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#generating-a-cookie-secret
+export COOKIE_SECRET=$(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo)
+envsubst < $(pwd)/config/authN-authZ/oauth2_install.yaml | kubectl apply -f -
 ```
 
 **Expose the pipeline endpoint through Istio Ingressgateway and install chatQnA UI**
@@ -253,8 +258,8 @@ kubectl apply -f $(pwd)/config/authN-authZ/chatQnA_router_gateway_oauth.yaml
 # build chatqna UI image
 git clone https://github.com/opea-project/GenAIExamples.git
 cd GenAIExamples/ChatQnA/docker/ui/
-export BACKEND_SERVICE_ENDPOINT="http://${INGRESS_HOST}:${INGRESS_PORT}/"
-export DATAPREP_SERVICE_ENDPOINT="http://${INGRESS_HOST}:${INGRESS_PORT}/dataprep"
+export BACKEND_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/"
+export DATAPREP_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/dataprep"
 docker build --no-cache -t opea/chatqna-conversation-ui:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg BACKEND_SERVICE_ENDPOINT=$BACKEND_SERVICE_ENDPOINT --build-arg DATAPREP_SERVICE_ENDPOINT=$DATAPREP_SERVICE_ENDPOINT -f ./docker/Dockerfile.react .
 # inject image to containerd repo
 docker save -o ui.tar opea/chatqna-conversation-ui:latest
@@ -277,8 +282,8 @@ kubectl apply -f $(pwd)/config/authN-authZ/chatQnA_istio_external_auth.yaml
 # use 'sudo apt-get install gettext-base' to install envsubst if it does not exist on your machine
 # apply the authentication and authorization rule
 # these files will restrict user access with valid token (with valid group and role)
-envsubst < $(pwd)/config/authN-authZ/chatQnA_authN_oauth.yaml | kubectl -n chatqa apply -f -
-envsubst < $(pwd)/config/authN-authZ/chatQnA_authZ_oauth.yaml | kubectl -n chatqa apply -f -
+envsubst < $(pwd)/config/authN-authZ/chatQnA_authN_oauth.yaml | kubectl apply -f -
+envsubst < $(pwd)/config/authN-authZ/chatQnA_authZ_oauth.yaml | kubectl apply -f -
 ```
 
 **Validate authentication and authorization with UI service**
