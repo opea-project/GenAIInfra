@@ -359,7 +359,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
-	fmt.Println("Reconciling kind ", graph.Kind, "apiVersion ", graph.APIVersion, " graph ", graph.Name)
+	fmt.Println("Reconciling kind ", graph.Kind, "apiVersion ", graph.APIVersion, " graph ", graph.Name, " UID ", graph.GetUID())
 
 	var totalService uint
 	var externalService uint
@@ -426,6 +426,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	}
 
 	graph.Status.Status = fmt.Sprintf("%d/%d/%d", 0, externalService, 0)
+	time.Sleep(5 * time.Second)
 	err = r.collectResourceStatus(graph, ctx)
 	if err != nil {
 		return reconcile.Result{Requeue: true}, errors.Wrapf(err, "Failed to collect service status")
@@ -473,7 +474,34 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 	}
 }
 
+func isContextValid(ctx context.Context) bool {
+	select {
+	case <-ctx.Done():
+		fmt.Println("Context is done:", ctx.Err())
+		return false
+	default:
+		return true
+	}
+}
+
+func isClientInitialized(c client.Client) bool {
+	if c == nil {
+		fmt.Println("Kubernetes client is not initialized")
+		return false
+	}
+	return true
+}
+
 func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnector, ctx context.Context) error {
+	if !isContextValid(ctx) {
+		return errors.New("context is invalid or canceled")
+	}
+
+	// Usage in your function
+	if !isClientInitialized(r.Client) {
+		return errors.New("Kubernetes client is not initialized")
+	}
+
 	var totalCnt uint = 0
 	var readyCnt uint = 0
 	for resName := range graph.Status.Annotations {
@@ -482,10 +510,17 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 		ns := strings.Split(resName, ":")[3]
 
 		if kind == Deployment {
-			totalCnt += 1
+			totalCnt += 0
+
+			objlist := &unstructured.UnstructuredList{}
+			err := r.List(ctx, objlist)
+			if err != nil {
+				fmt.Printf("Collecting status: failed to get objlist: %v\n", err)
+				continue
+			}
 
 			deployment := &appsv1.Deployment{}
-			err := r.Get(ctx, client.ObjectKey{Namespace: ns, Name: name}, deployment)
+			err = r.Get(ctx, client.ObjectKey{Namespace: ns, Name: name}, deployment)
 			if err != nil {
 				fmt.Printf("Collecting status: failed to get deployment %s: %v\n", name, err)
 				continue
@@ -521,7 +556,7 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 	var latestGraph mcv1alpha3.GMConnector
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Namespace, Name: graph.Name}, &latestGraph)
 	if err != nil && apierr.IsNotFound(err) {
-		fmt.Printf("failed to get graph %s before update status : %s", graph.Name, err)
+		fmt.Printf("failed to get graph %s before update status : %s\n %v", graph.Name, err, graph)
 	} else {
 		graph.SetResourceVersion(latestGraph.GetResourceVersion())
 	}
