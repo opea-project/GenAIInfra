@@ -150,7 +150,7 @@ function validate_audioqa() {
    export CLIENT_POD=$(kubectl get pod -n $AUDIOQA_NAMESPACE -l app=client-test -o jsonpath={.items..metadata.name})
    echo "$CLIENT_POD"
    accessUrl=$(kubectl get gmc -n $AUDIOQA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='audioqa')].status.accessUrl}")
-   byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq .byte_str)
+   byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq -r .byte_str > /dev/null)
    if [ -z "$byte_str" ]; then
        echo "audioqa failed, please check the the!"
        exit 1
@@ -187,7 +187,6 @@ function validate_chatqna() {
    fi
 
     pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $((pods_count-1)) 0 9
@@ -359,7 +358,6 @@ function validate_chatqna_in_switch() {
        exit 1
     fi
 
-
    # giving time to populating data
    sleep 90
 
@@ -454,6 +452,8 @@ function validate_modify_config() {
     #change the model id of the step named "Tgi" in the codegen_xeon_mod.yaml
     yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/codegen_xeon_mod.yaml
     kubectl apply -f $(pwd)/config/samples/codegen_xeon_mod.yaml
+    #you are supposed to see an error, it's a known issue, but it does not affect the tests
+    #https://github.com/opea-project/GenAIInfra/issues/314
 
     pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
     check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
@@ -510,7 +510,7 @@ function validate_remove_step() {
     fi
 
    #revert the codegen yaml
-   sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_del.yaml
+   sed -i "s|namespace: $DELETE_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_del.yaml
    kubectl delete gmc -n $DELETE_STEP_NAMESPACE 'codegen'
    echo "sleep 10s for cleaning up"
    sleep 10
