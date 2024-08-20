@@ -101,7 +101,7 @@ function validate_webhook() {
 function cleanup_apps() {
     echo "clean up microservice-connector"
     # namespaces=("$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$CODEGEN_NAMESPACE" "$CODETRANS_NAMESPACE" "$DOCSUM_NAMESPACE")
-    namespaces=("$AUDIOQA_NAMESPACE" "$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE")
+    namespaces=("$AUDIOQA_NAMESPACE" "$CHATQNA_NAMESPACE" "$CHATQNA_DATAPREP_NAMESPACE" "$CHATQNA_SWITCH_NAMESPACE" "$WEBHOOK_NAMESPACE" "$MODIFY_STEP_NAMESPACE" "$DELETE_STEP_NAMESPACE")
     for ns in "${namespaces[@]}"; do
         if kubectl get namespace $ns > /dev/null 2>&1; then
             echo "Deleting namespace: $ns"
