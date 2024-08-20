@@ -11,9 +11,8 @@ data:
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
-  BACKEND_SERVICE_ENDPOINT: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
-  DATAPREP_SERVICE_ENDPOINT: {{ .Values.DATAPREP_SERVICE_ENDPOINT | quote }}
-  DATAPREP_GET_FILE_ENDPOINT: {{ .Values.DATAPREP_GET_FILE_ENDPOINT | quote }}
+  APP_BACKEND_SERVICE_ENDPOINT: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  APP_DATA_PREP_SERVICE_URL: {{ .Values.DATAPREP_SERVICE_ENDPOINT | quote }}
   CHAT_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   UPLOAD_FILE_BASE_URL: {{ .Values.DATAPREP_SERVICE_ENDPOINT | quote }}
   GET_FILE: {{ .Values.DATAPREP_GET_FILE_ENDPOINT | quote }}
