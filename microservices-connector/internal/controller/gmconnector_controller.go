@@ -482,7 +482,7 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 		ns := strings.Split(resName, ":")[3]
 
 		if kind == Deployment {
-			totalCnt += 0
+			totalCnt += 1
 
 			deployment := &appsv1.Deployment{}
 			err := r.Get(ctx, client.ObjectKey{Namespace: ns, Name: name}, deployment)
