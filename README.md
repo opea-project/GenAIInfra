@@ -13,8 +13,7 @@ The GenAIInfra repository is organized under four main directories, which includ
 | `kubernetes-addons`       | Deploy Kubernetes add-ons for OPEA.                                                                                                                                                                                                                                                                                                                                                |
 | `manifests`               | Manifests for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes and on Docker Compose.                                                                                                                                                                                                                                                         |
 | `scripts`                 | Scripts for testing, tools to facilitate OPEA deployment, and etc.                                                                                                                                                                                                                                                                                                                 |
-| `mlops platform`          | MLOps platform to enable enterprise AI at scale.                                                                                                                                                                                                                                                                                                                                  |
-
+| `mlops platform`          | MLOps platform to enable enterprise AI at scale.                                                                                                                                                                                                                                                                                                                                   |
 
 ## Prerequisite
 
@@ -98,7 +97,7 @@ kubectl apply -f ./DocSum/manifests/
 
 ## AI workstations with Data Science Stack
 
-Data science stack (DSS) is a ready-to-run environment for machine learning and data science. It’s built on open-source tooling (including MicroK8s, JupyterLab and MLflow) and usable on any Ubuntu/Snap-enabled workstation. 
+Data science stack (DSS) is a ready-to-run environment for machine learning and data science. It’s built on open-source tooling (including MicroK8s, JupyterLab and MLflow) and usable on any Ubuntu/Snap-enabled workstation.
 
 DSS provides a Command Line Interface (CLI) for managing containerised ML environments images such as PyTorch or TensorFlow, on top of MicroK8s.
 
