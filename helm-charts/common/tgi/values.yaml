@@ -13,7 +13,7 @@ image:
   repository: ghcr.io/huggingface/text-generation-inference
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "2.1.0"
+  tag: "latest-intel-cpu"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -100,6 +100,7 @@ LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 MAX_INPUT_LENGTH: ""
 MAX_TOTAL_TOKENS: ""
+CUDA_GRAPHS: "0"
 
 global:
   http_proxy: ""
