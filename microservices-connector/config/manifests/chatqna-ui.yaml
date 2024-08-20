@@ -1,5 +1,5 @@
 ---
-# Source: ui/templates/configmap.yaml
+# Source: chatqna-ui/templates/configmap.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
@@ -8,8 +8,8 @@ kind: ConfigMap
 metadata:
   name: chatqna-ui-config
   labels:
-    helm.sh/chart: ui-0.8.0
-    app.kubernetes.io/name: ui
+    helm.sh/chart: chatqna-ui-0.8.0
+    app.kubernetes.io/name: chatqna-ui
     app.kubernetes.io/instance: chatqna-ui
     app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
@@ -17,15 +17,14 @@ data:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  BACKEND_SERVICE_ENDPOINT: ""
-  DATAPREP_SERVICE_ENDPOINT: ""
-  DATAPREP_GET_FILE_ENDPOINT: ""
+  APP_BACKEND_SERVICE_ENDPOINT: ""
+  APP_DATA_PREP_SERVICE_URL: ""
   CHAT_BASE_URL: ""
   UPLOAD_FILE_BASE_URL: ""
   GET_FILE: ""
   DELETE_FILE: ""
 ---
-# Source: ui/templates/service.yaml
+# Source: chatqna-ui/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
@@ -34,8 +33,8 @@ kind: Service
 metadata:
   name: chatqna-ui
   labels:
-    helm.sh/chart: ui-0.8.0
-    app.kubernetes.io/name: ui
+    helm.sh/chart: chatqna-ui-0.8.0
+    app.kubernetes.io/name: chatqna-ui
     app.kubernetes.io/instance: chatqna-ui
     app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
@@ -47,10 +46,10 @@ spec:
       protocol: TCP
       name: ui
   selector:
-    app.kubernetes.io/name: ui
+    app.kubernetes.io/name: chatqna-ui
     app.kubernetes.io/instance: chatqna-ui
 ---
-# Source: ui/templates/deployment.yaml
+# Source: chatqna-ui/templates/deployment.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
@@ -59,8 +58,8 @@ kind: Deployment
 metadata:
   name: chatqna-ui
   labels:
-    helm.sh/chart: ui-0.8.0
-    app.kubernetes.io/name: ui
+    helm.sh/chart: chatqna-ui-0.8.0
+    app.kubernetes.io/name: chatqna-ui
     app.kubernetes.io/instance: chatqna-ui
     app.kubernetes.io/version: "v0.8"
     app.kubernetes.io/managed-by: Helm
@@ -68,13 +67,13 @@ spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: ui
+      app.kubernetes.io/name: chatqna-ui
       app.kubernetes.io/instance: chatqna-ui
   template:
     metadata:
       labels:
-        helm.sh/chart: ui-0.8.0
-        app.kubernetes.io/name: ui
+        helm.sh/chart: chatqna-ui-0.8.0
+        app.kubernetes.io/name: chatqna-ui
         app.kubernetes.io/instance: chatqna-ui
         app.kubernetes.io/version: "v0.8"
         app.kubernetes.io/managed-by: Helm
@@ -82,7 +81,7 @@ spec:
       securityContext:
         {}
       containers:
-        - name: ui
+        - name: chatqna-ui
           envFrom:
             - configMapRef:
                 name: chatqna-ui-config
