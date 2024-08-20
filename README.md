@@ -13,6 +13,7 @@ The GenAIInfra repository is organized under four main directories, which includ
 | `kubernetes-addons`       | Deploy Kubernetes add-ons for OPEA.                                                                                                                                                                                                                                                                                                                                                |
 | `manifests`               | Manifests for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes and on Docker Compose.                                                                                                                                                                                                                                                         |
 | `scripts`                 | Scripts for testing, tools to facilitate OPEA deployment, and etc.                                                                                                                                                                                                                                                                                                                 |
+| `mlops platform`                 | MLOps platform to enbable enterprise AI at scale.                                           |
 
 ## Prerequisite
 
@@ -25,6 +26,14 @@ Please follow [Kubernetes official setup guide](https://kubernetes.io/docs/setup
 There are different methods to setup Kubernetes production cluster, such as [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/), [kubespray](https://kubespray.io/), and [more](https://kubernetes.io/docs/setup/production-environment/tools/).
 
 NOTE: We recommend to use containerd when choosing the container runtime during Kubernetes setup. Docker engine is also verified on Ubuntu 22.04 and above.
+
+### Setup MLOps platform 
+
+[Charmed Kubeflow](https://charmed-kubeflow.io/) is an open source MLOps platform that enables organisations to run AI at scale. It is a cloud native applications, used to develop ML models, automate workloads, optimise models and serve them to the edge.
+
+In order to deploy Kubeflow on your infrastructure, follow the [tutorial](https://charmed-kubeflow.io/docs/get-started-with-charmed-kubeflow).
+
+Read more from [a guide to MLOps](https://ubuntu.com/engage/mlops-guide).
 
 ### (Optional) To run GenAIInfra on [Intel Gaudi](https://habana.ai/products/) product:
 
