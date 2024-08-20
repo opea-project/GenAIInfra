@@ -150,10 +150,10 @@ func main() {
 		os.Exit(1)
 	}
 
-	// if err = (&mcv1alpha3.GMConnector{}).SetupWebhookWithManager(mgr); err != nil {
-	// 	setupLog.Error(err, "unable to create validating webhook", "webhook", "gmcValidator")
-	// 	os.Exit(1)
-	// }
+	if err = (&mcv1alpha3.GMConnector{}).SetupWebhookWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create validating webhook", "webhook", "gmcValidator")
+		os.Exit(1)
+	}
 
 	if err = (&controller.GMConnectorReconciler{
 		Client: mgr.GetClient(),
