@@ -34,6 +34,35 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 
 1. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
 
+## HorizontalPodAutoscaler (HPA) support
+
+`horizontalPodAutoscaler` option enables HPA scaling for the TGI and TEI inferencing deployments:
+https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+
+Autoscaling is based on custom application metrics provided through [Prometheus](https://prometheus.io/).
+
+### Pre-conditions
+
+If cluster does not run [Prometheus operator](https://github.com/prometheus-operator/kube-prometheus)
+yet, it SHOULD be be installed before enabling HPA, e.g. by using:
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+
+### Gotchas
+
+Why HPA is opt-in:
+
+- Enabling chart `horizontalPodAutoscaler` option will _overwrite_ cluster's current
+  `PrometheusAdapter` configuration with its own custom metrics configuration.
+  Take copy of the existing one before install, if that matters:
+  `kubectl -n monitoring get cm/adapter-config -o yaml > adapter-config.yaml`
+- `PrometheusAdapter` needs to be restarted after install, for it to read the new configuration:
+  `ns=monitoring; kubectl -n $ns delete $(kubectl -n $ns get pod --selector app.kubernetes.io/name=prometheus-adapter -o name)`
+- By default Prometheus adds [k8s RBAC rules](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/prometheus-roleBindingSpecificNamespaces.yaml)
+  for accessing metrics from `default`, `kube-system` and `monitoring` namespaces. If Helm is
+  asked to install OPEA services to some other namespace, those rules need to be updated accordingly
+- Provided HPA rules are examples for Xeon, for efficient scaling they need to be fine-tuned for given setup
+  (underlying HW, used models, OPEA version etc)
+
 ## Verify
 
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
@@ -83,8 +112,9 @@ Access `http://localhost:5174` to play with the ChatQnA workload through UI.
 
 ## Values
 
-| Key              | Type   | Default                       | Description                                                              |
-| ---------------- | ------ | ----------------------------- | ------------------------------------------------------------------------ |
-| image.repository | string | `"opea/chatqna"`              |                                                                          |
-| service.port     | string | `"8888"`                      |                                                                          |
-| tgi.LLM_MODEL_ID | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory |
+| Key                                    | Type   | Default                       | Description                                                                                                                                                                                                                             |
+| -------------------------------------- | ------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| image.repository                       | string | `"opea/chatqna"`              |                                                                                                                                                                                                                                         |
+| service.port                           | string | `"8888"`                      |                                                                                                                                                                                                                                         |
+| tgi.LLM_MODEL_ID                       | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                                                                                                                |
+| global.horizontalPodAutoscaler.enabled | bop;   | false                         | HPA autoscaling for the TGI and TEI service deployments based on metrics they provide. See #pre-conditions and #gotchas before enabling!  (If one doesn't want one of them to be scaled, given service `maxReplicas` can be set to `1`) |
