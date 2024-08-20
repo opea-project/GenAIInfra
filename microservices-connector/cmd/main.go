@@ -85,42 +85,42 @@ func main() {
 		tlsOpts = append(tlsOpts, disableHTTP2)
 	}
 
-	// webhookServiceName := controller.GetEnvWithDefault(webhookServiceNameEnv, "gmc-validating-webhook-service")
-	// webhookServiceNamespace := controller.GetEnvWithDefault(webhookServiceNamespaceEnv, "system")
+	webhookServiceName := controller.GetEnvWithDefault(webhookServiceNameEnv, "gmc-validating-webhook-service")
+	webhookServiceNamespace := controller.GetEnvWithDefault(webhookServiceNamespaceEnv, "system")
 
-	// pair, CABytes, err := controller.GenerateX509Cert(webhookServiceName, webhookServiceNamespace)
-	// if err != nil {
-	// 	setupLog.Error(err, "failed to generate x509 cert")
-	// 	os.Exit(1)
-	// }
+	pair, CABytes, err := controller.GenerateX509Cert(webhookServiceName, webhookServiceNamespace)
+	if err != nil {
+		setupLog.Error(err, "failed to generate x509 cert")
+		os.Exit(1)
+	}
 
-	// client, err := controller.GetClient()
-	// if err != nil {
-	// 	setupLog.Error(err, "unable to get client config")
-	// 	os.Exit(1)
-	// }
+	client, err := controller.GetClient()
+	if err != nil {
+		setupLog.Error(err, "unable to get client config")
+		os.Exit(1)
+	}
 
-	// if err = controller.CreateOrUpdateValidatingWebhookConfiguration(
-	// 	client,
-	// 	CABytes,
-	// 	int32(webhookPort),
-	// 	webhookServiceName,
-	// 	webhookServiceNamespace); err != nil {
-	// 	setupLog.Error(err, "failed to create or update the validation webhook configuration")
-	// 	os.Exit(1)
-	// }
+	if err = controller.CreateOrUpdateValidatingWebhookConfiguration(
+		client,
+		CABytes,
+		int32(webhookPort),
+		webhookServiceName,
+		webhookServiceNamespace); err != nil {
+		setupLog.Error(err, "failed to create or update the validation webhook configuration")
+		os.Exit(1)
+	}
 
-	// webhookServer := webhook.NewServer(webhook.Options{
-	// 	Port: webhookPort,
-	// 	TLSOpts: []func(*tls.Config){
-	// 		func(cfg *tls.Config) {
-	// 			cfg.GetCertificate = func(_ *tls.ClientHelloInfo) (*tls.Certificate, error) {
-	// 				return pair, nil
-	// 			}
-	// 			cfg.MinVersion = tls.VersionTLS12
-	// 		},
-	// 	},
-	// })
+	webhookServer := webhook.NewServer(webhook.Options{
+		Port: webhookPort,
+		TLSOpts: []func(*tls.Config){
+			func(cfg *tls.Config) {
+				cfg.GetCertificate = func(_ *tls.ClientHelloInfo) (*tls.Certificate, error) {
+					return pair, nil
+				}
+				cfg.MinVersion = tls.VersionTLS12
+			},
+		},
+	})
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
 		Scheme: scheme,
@@ -129,7 +129,7 @@ func main() {
 			SecureServing: secureMetrics,
 			TLSOpts:       tlsOpts,
 		},
-		// WebhookServer:          webhookServer,
+		WebhookServer:          webhookServer,
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "6aba56f0.opea.io",
