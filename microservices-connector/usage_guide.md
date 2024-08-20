@@ -276,4 +276,4 @@ No resources found in chatqa namespace.
 
 ## Use GMC and Istio to compose an OPEA Pipeline with authentication and authorization enabled
 
-The critical steps of authentication and authorization are vital to maintaining the integrity and safety of our GenAI workload. Please check the [readme](config/authN-authZ/README.md) file for more details.
+The critical steps of authentication and authorization are vital to maintaining the integrity and safety of our GenAI workload. Please check the [readme](../authN-authZ/README.md) file for more details.
