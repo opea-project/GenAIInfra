@@ -1,0 +1,15 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: security.istio.io/v1
+kind: RequestAuthentication
+metadata:
+  name: jwt-keycloak
+spec:
+  jwtRules:
+  - issuer: http://${KEYCLOAK_ADDR}/realms/${REALM}
+    jwksUri: http://${KEYCLOAK_ADDR}/realms/${REALM}/protocol/openid-connect/certs
+    outputPayloadToHeader: jwt-parsed
+  selector:
+    matchLabels:
+      app: chatqna
