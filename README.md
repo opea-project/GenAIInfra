@@ -15,6 +15,7 @@ The GenAIInfra repository is organized under four main directories, which includ
 | `scripts`                 | Scripts for testing, tools to facilitate OPEA deployment, and etc.                                                                                                                                                                                                                                                                                                                 |
 | `mlops platform`          | MLOps platform to enable enterprise AI at scale.                                                                                                                                                                                                                                                                                                                                  |
 
+
 ## Prerequisite
 
 GenAIInfra uses Kubernetes as the cloud native infrastructure. Please follow the steps below to prepare the Kubernetes environment.
@@ -94,6 +95,18 @@ Select the example workflow you want to deploy, deploy the example (e.g. DocSum)
 ```shell
 kubectl apply -f ./DocSum/manifests/
 ```
+
+## AI workstations with Data Science Stack
+
+Data science stack (DSS) is a ready-to-run environment for machine learning and data science. It’s built on open-source tooling (including MicroK8s, JupyterLab and MLflow) and usable on any Ubuntu/Snap-enabled workstation. 
+
+DSS provides a Command Line Interface (CLI) for managing containerised ML environments images such as PyTorch or TensorFlow, on top of MicroK8s.
+
+Get your ML environment up & running in less than 10 minutes, so you can easily evaluate your projects locally following the [tutorial](https://documentation.ubuntu.com/data-science-stack/en/latest/).
+
+### Use snaps to get your ML environment
+
+DSS is packaged as a snap, being native to Ubuntu. To read more the snap, [follow the link](https://snapcraft.io/data-science-stack).
 
 ## Additional Content
 
