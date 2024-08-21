@@ -92,3 +92,4 @@ global:
   no_proxy: ""
   LANGCHAIN_TRACING_V2: false
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"

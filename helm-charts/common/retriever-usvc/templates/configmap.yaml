@@ -32,3 +32,4 @@ data:
   LANGCHAIN_API_KEY: {{ .Values.global.LANGCHAIN_API_KEY | quote }}
   LANGCHAIN_PROJECT: "opea-retriever-service"
   HF_HOME: "/tmp/.cache/huggingface"
+  HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}

@@ -120,5 +120,5 @@ spec:
             serviceName: tgi-service-llama
             config:
               endpoint: /generate
-              MODEL_ID: bigscience/bloom-560m
+              MODEL_ID: HuggingFaceH4/mistral-7b-grok
             isDownstreamService: true
