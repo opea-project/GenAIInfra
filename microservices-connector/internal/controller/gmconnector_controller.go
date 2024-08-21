@@ -521,7 +521,7 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 	var latestGraph mcv1alpha3.GMConnector
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Namespace, Name: graph.Name}, &latestGraph)
 	if err != nil && apierr.IsNotFound(err) {
-		fmt.Printf("failed to get graph %s before update status : %s", graph.Name, err)
+		fmt.Printf("failed to get graph %s before update status : %s\n", graph.Name, err)
 	} else {
 		graph.SetResourceVersion(latestGraph.GetResourceVersion())
 	}
