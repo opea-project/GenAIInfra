@@ -4,16 +4,17 @@
 name: Upgrade GMC system on push event
 
 on:
-  push:
-    branches: ["main"]
-    paths:
-      - microservices-connector/**
-      - "!microservices-connector/helm/**"
-      - "!**.md"
-      - "!**.txt"
-      - "!**.png"
-      - "!.**"
-      - .github/workflows/gmc-on-push.yaml
+  # push:
+  #   branches: ["main"]
+  #   paths:
+  #     - microservices-connector/**
+  #     - "!microservices-connector/helm/**"
+  #     - "!**.md"
+  #     - "!**.txt"
+  #     - "!**.png"
+  #     - "!.**"
+  #     - .github/workflows/gmc-on-push.yaml
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}-on-push
