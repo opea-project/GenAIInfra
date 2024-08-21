@@ -34,6 +34,7 @@ var (
 		"TeiReranking",
 		"Tgi",
 		"TgiGaudi",
+		"TgiNvidia",
 		"Llm",
 		"DocSum",
 		"Router",
@@ -110,12 +111,16 @@ func (r *GMConnector) checkfields() field.ErrorList {
 	return allErrs
 }
 
-func checkStepName(s Step, fldRoot *field.Path, nodeName string) *field.Error {
+func checkStepName(s Step, idx int, fldRoot *field.Path, nodeName string) *field.Error {
 	if len(s.StepName) == 0 {
-		return field.Invalid(fldRoot.Child(nodeName).Child("stepName"), s, fmt.Sprintf("the step name for node %v cannot be empty", nodeName))
+		return field.Invalid(fldRoot.Child(nodeName).Child(fmt.Sprintf("steps[%d]", idx)).Child("name"),
+			s,
+			fmt.Sprintf("the step name for node %v cannot be empty", nodeName))
 	}
 	if !slices.Contains(stepNames, s.StepName) {
-		return field.Invalid(fldRoot.Child(nodeName).Child("stepName"), s, fmt.Sprintf("invalid step name: %s for node %v", s.StepName, nodeName))
+		return field.Invalid(fldRoot.Child(nodeName).Child(fmt.Sprintf("steps[%d]", idx)).Child("name"),
+			s,
+			fmt.Sprintf("invalid step name: %s for node %v", s.StepName, nodeName))
 	}
 	return nil
 }
@@ -143,20 +148,22 @@ func validateNames(nodes map[string]Router, fldPath *field.Path) field.ErrorList
 	var errs field.ErrorList
 
 	for name, router := range nodes {
-		for _, step := range router.Steps {
+		for idx, step := range router.Steps {
 			// validate step name
-			if err := checkStepName(step, fldPath, name); err != nil {
+			if err := checkStepName(step, idx, fldPath, name); err != nil {
 				errs = append(errs, err)
 			}
 
 			// check node name has been defined in the spec
 			if !nodeNameExists(step.NodeName, nodeNames) {
-				errs = append(errs, field.Invalid(fldPath.Child(name).Child("nodeName"), step, fmt.Sprintf("node name: %v in step %v does not exist", step.NodeName, step.StepName)))
+				errs = append(errs, field.Invalid(fldPath.Child(name).Child(fmt.Sprintf("steps[%d]", idx)).Child("nodeName"),
+					step,
+					fmt.Sprintf("node name: %v in step %v does not exist", step.NodeName, step.StepName)))
 			}
 
 			// check service name uniqueness
 			if len(step.InternalService.ServiceName) != 0 && slices.Contains(serviceNames, step.InternalService.ServiceName) {
-				errs = append(errs, field.Invalid(fldPath.Child(name).Child("internalService").Child("serviceName"),
+				errs = append(errs, field.Invalid(fldPath.Child(name).Child(fmt.Sprintf("steps[%d]", idx)).Child("internalService").Child("serviceName"),
 					step,
 					fmt.Sprintf("service name: %v in node %v already exists", step.InternalService.ServiceName, name)))
 			} else {

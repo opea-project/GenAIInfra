@@ -119,7 +119,7 @@ func Test_checkStepName(t *testing.T) {
 				nodeName: testNode,
 			},
 			want: field.Invalid(
-				field.NewPath("spec").Child("nodes").Child("test-node").Child("stepName"),
+				field.NewPath("spec").Child("nodes").Child(testNode).Child("steps[0]").Child("name"),
 				Step{},
 				fmt.Sprintf("the step name for node %v cannot be empty", testNode),
 			),
@@ -135,7 +135,7 @@ func Test_checkStepName(t *testing.T) {
 				nodeName: testNode,
 			},
 			want: field.Invalid(
-				field.NewPath("spec").Child("nodes").Child("test-node").Child("stepName"),
+				field.NewPath("spec").Child("nodes").Child(testNode).Child("steps[0]").Child("name"),
 				Step{
 					StepName: "invalid",
 					Executor: Executor{},
@@ -158,7 +158,7 @@ func Test_checkStepName(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := checkStepName(tt.args.s, tt.args.fldRoot, tt.args.nodeName); !reflect.DeepEqual(got, tt.want) {
+			if got := checkStepName(tt.args.s, 0, tt.args.fldRoot, tt.args.nodeName); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("checkStepName() = %v, want %v", got, tt.want)
 			}
 		})
@@ -323,7 +323,7 @@ func Test_validateNames(t *testing.T) {
 				fldPath: field.NewPath("spec").Child("nodes"),
 			},
 			want: append(errs, field.Invalid(
-				field.NewPath("spec").Child("nodes").Child("root").Child("internalService").Child("serviceName"),
+				field.NewPath("spec").Child("nodes").Child("root").Child("steps[1]").Child("internalService").Child("serviceName"),
 				Step{
 					StepName: "Embedding",
 					Executor: Executor{
