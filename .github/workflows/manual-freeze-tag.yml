@@ -42,7 +42,7 @@ jobs:
         run: |
           git config --global user.name "NeuralChatBot"
           git config --global user.email "grp_neural_chat_bot@intel.com"
-          git remote set-url origin https://NeuralChatBot:"${{ secrets.ACTION_TOKEN }}"@github.com/opea-project/GenAIExamples.git
+          git remote set-url origin https://NeuralChatBot:"${{ secrets.ACTION_TOKEN }}"@github.com/opea-project/GenAIInfra.git
 
       - name: Run script
         env:
