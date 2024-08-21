@@ -1,0 +1,68 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: GenAIInfra Helm CD workflow on manual event
+on:
+  workflow_dispatch:
+    inputs:
+      workloads:
+        default: ""
+        required: true
+        type: string
+        description: "workloads to test, empty for testing all helm charts"
+      tag:
+        default: "latest"
+        description: "Tag to apply to images"
+        required: true
+        type: string
+      infra_branch:
+        default: true
+        description: 'Build test required images for Examples'
+        required: false
+        type: string
+      nodes:
+        default: "xeon,gaudi"
+        required: true
+        type: string
+
+env:
+  CHARTS_DIR: "helm-charts"
+
+jobs:
+  get-build-matrix:
+    runs-on: ubuntu-latest
+    outputs:
+      services: ${{ steps.get-services.outputs.services }}
+      nodes: ${{ steps.get-services.outputs.nodes }}
+    steps:
+      - name: Get test Services
+        id: get-services
+        run: |
+          set -x
+          if [[ -z "${{ inputs.workloads }}" ]]; then
+            subfolders=$(find "$CHARTS_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "common" -exec basename {} \; | sed 's/^/"/; s/$/"/' | paste -sd, -)
+            common_subfolders=$(find "$CHARTS_DIR/common" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sed 's|^|"common/|; s/$/"/' | paste -sd, -)
+            services="[$subfolders,$common_subfolders]"
+            echo "services=$services" >> $GITHUB_OUTPUT
+          else
+            service_list=($(echo ${{ github.event.inputs.workloads }} | tr ',' ' '))
+            services=$(printf '%s\n' "${service_list[@]}" | sort -u | jq -R '.' | jq -sc '.')
+            echo "services=$services" >> $GITHUB_OUTPUT
+          fi
+          node_list=($(echo ${{ github.event.inputs.nodes }} | tr ',' ' '))
+          nodes=$(printf '%s\n' "${node_list[@]}" | sort -u | jq -R '.' | jq -sc '.')
+          echo "nodes=$nodes" >> $GITHUB_OUTPUT
+
+  gmc-release:
+    needs: get-build-matrix
+    strategy:
+      matrix:
+        workload: ${{ fromJSON(needs.get-build-matrix.outputs.services) }}
+        node: ${{ fromJSON(needs.get-build-matrix.outputs.nodes) }}
+    uses: ./.github/workflows/_helm-e2e.yaml
+    with:
+      tag: ${{ inputs.tag }}
+      workload: ${{ matrix.workload }}
+      hardware: ${{ matrix.node }}
+      opea_branch: ${{ inputs.infra_branch }}
+    secrets: inherit
