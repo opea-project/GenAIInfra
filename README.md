@@ -40,6 +40,8 @@ NOTE: Please make sure you configure the appropriate container runtime based on 
 
 4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Orchestration/Gaudi_Kubernetes/Device_Plugin_for_Kubernetes.html).
 
+Alternatively, Intel provides a base operator to manage the Gaudi software stack. Please refer to [this file](kubernetes-addons/Intel-Gaudi-Base-Operator/README.md) for details.
+
 ## Usages
 
 ### Use GenAI Microservices Connector (GMC) to deploy and adjust GenAIExamples
