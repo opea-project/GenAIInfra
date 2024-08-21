@@ -7,7 +7,7 @@ on:
     inputs:
       workloads:
         default: ""
-        required: true
+        required: false
         type: string
         description: "workloads to test, empty for testing all helm charts"
       tag:
@@ -16,7 +16,7 @@ on:
         required: true
         type: string
       infra_branch:
-        default: true
+        default: latest
         description: 'Build test required images for Examples'
         required: false
         type: string
@@ -35,6 +35,11 @@ jobs:
       services: ${{ steps.get-services.outputs.services }}
       nodes: ${{ steps.get-services.outputs.nodes }}
     steps:
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       - name: Get test Services
         id: get-services
         run: |
