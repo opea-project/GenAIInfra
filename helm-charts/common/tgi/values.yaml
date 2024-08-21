@@ -13,7 +13,7 @@ image:
   repository: ghcr.io/huggingface/text-generation-inference
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest-intel-cpu"
+  tag: "2.2.0"
 
 imagePullSecrets: []
 nameOverride: ""
