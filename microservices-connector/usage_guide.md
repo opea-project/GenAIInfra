@@ -34,7 +34,7 @@ NAME     URL                                                      READY     AGE
 chatqa   http://router-service.chatqa.svc.cluster.local:8080      10/0/10     3m
 ```
 
-the `READY 10/0/10` means there are 10 resources deployed by the GMC and 10 are ready, the 0 means there are no external services used, all the resources are managed by GMC inside the clusters.`
+the `READY 10/0/10` means there are 10(the 2nd 10) services deployed by the GMC and 10(the 1st 10) are ready, so the 10 of 10 means the pipeline is all set. the 0 in the middle means there are no external services used, all the resources are managed by GMC inside the clusters.`
 
 you can get the resources via `kubectl` commands
 
@@ -53,7 +53,7 @@ tei-reranking-svc-deployment-54c5dd5795-b6wcb   1/1     Running   0          2m4
 tgi-service-m-deployment-5ff67f4db7-b7ztj       1/1     Running   0          2m41s
 ```
 
-you can also get the detailed information of these resource by checking the pipeline's status, this will list all the configmap, deployment and service and their status as below:[]()
+you can also get the detailed information of these resource by checking the pipeline's status, this will list all the configmap, deployment and service and their status as below:
 
 ```
 $ kubectl get gmc -n chatqa chatqa -o json | jq '.status.annotations' | yq -P
@@ -261,7 +261,7 @@ But please be noted, **you have to make sure** the step is eligible to be delete
 
 ## Use GMC to delete the chatQnA Pipeline
 
-you can delete all the resources by deleting the pipeline
+you can delete all the resources by deleting the gmc custom resource
 
 ```
 $ kubectl delete gmc -n chatqa chatqa
