@@ -101,12 +101,12 @@ Data science stack (DSS) is a ready-to-run environment for machine learning and 
 
 DSS provides a Command Line Interface (CLI) for managing containerised ML environments images such as PyTorch or TensorFlow, on top of MicroK8s.
 
-Get your ML environment up & running in less than 10 minutes, so you can easily evaluate your projects locally following the [tutorial](https://documentation.ubuntu.com/data-science-stack/en/latest/).  The product architecture is also [available](https://documentation.ubuntu.com/data-science-stack/en/latest/explanation/dss-arch/) for further reference.
-
+Get your ML environment up & running in less than 10 minutes, so you can easily evaluate your projects locally following the [tutorial](https://documentation.ubuntu.com/data-science-stack/en/latest/). The product architecture is also [available](https://documentation.ubuntu.com/data-science-stack/en/latest/explanation/dss-arch/) for further reference.
 
 ### Use snaps to get your ML environment
 
 DSS is packaged as a snap, being native to Ubuntu. To read more the snap, [follow the link](https://snapcraft.io/data-science-stack).
+
 ## Additional Content
 
 - [Code of Conduct](https://github.com/opea-project/docs/tree/main/community/CODE_OF_CONDUCT.md)
