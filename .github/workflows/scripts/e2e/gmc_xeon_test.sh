@@ -167,7 +167,7 @@ function validate_chatqna() {
    kubectl create ns $CHATQNA_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $CHATQNA_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
    # workaround for issue #268
-   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_xeon.yaml
+   #yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
 
    # Wait until the router service is ready
@@ -238,7 +238,7 @@ function validate_chatqna_with_dataprep() {
    kubectl create ns $CHATQNA_DATAPREP_NAMESPACE
    sed -i "s|namespace: chatqa|namespace: $CHATQNA_DATAPREP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
    # workaround for issue #268
-   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
+   #yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
 
    # Wait until the router service is ready
@@ -331,7 +331,7 @@ function validate_chatqna_in_switch() {
    kubectl create ns $CHATQNA_SWITCH_NAMESPACE
    sed -i "s|namespace: switch|namespace: $CHATQNA_SWITCH_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_switch_xeon.yaml
    # workaround for issue #268
-   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_switch_xeon.yaml
+   #yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_switch_xeon.yaml
    kubectl apply -f $(pwd)/config/samples/chatQnA_switch_xeon.yaml
 
    # Wait until the router service is ready
@@ -452,7 +452,7 @@ function validate_modify_config() {
     fi
 
     #change the model id of the step named "Tgi" in the codegen_xeon_mod.yaml
-    yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/codegen_xeon_mod.yaml
+    yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "HuggingFaceH4/mistral-7b-grok"' $(pwd)/config/samples/codegen_xeon_mod.yaml
     kubectl apply -f $(pwd)/config/samples/codegen_xeon_mod.yaml
 
     pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)

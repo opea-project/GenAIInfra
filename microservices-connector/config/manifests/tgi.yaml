@@ -89,7 +89,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "ghcr.io/huggingface/text-generation-inference:latest-intel-cpu"
+          image: "ghcr.io/huggingface/text-generation-inference:2.2.0"
           imagePullPolicy: IfNotPresent
           volumeMounts:
             - mountPath: /data
