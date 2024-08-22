@@ -1,0 +1,106 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: GMC Helm Installation Test on Xeon
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
+    paths:
+      - microservices-connector/config/crd/bases/gmc.opea.io_gmconnectors.yaml
+      - microservices-connector/config/gmcrouter/gmc-router.yaml
+      - microservices-connector/helm/**
+      - "!**.md"
+      - "!**.txt"
+      - "!**.png"
+      - .github/workflows/scripts/e2e/gmc_xeon_test.sh
+  workflow_dispatch:
+
+# If there is a new commit, the previous jobs will be canceled
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-xeon
+  cancel-in-progress: true
+
+env:
+  GOSRC_DIR: "microservices-connector"
+
+jobs:
+  image-build:
+    uses: ./.github/workflows/_gmc-image-build.yaml
+    with:
+      image_tag: ${{ github.event.pull_request.head.sha }}
+      runner_label: 'docker-build-xeon'
+
+  go-e2e:
+    runs-on: kind-xeon
+    needs: image-build
+    steps:
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set variables
+        run: |
+          echo "RELEASE_NAME=gmc$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          echo "SYSTEM_NAMESPACE=opea-system-helm" >> $GITHUB_ENV
+          echo "APP_NAMESPACE=opea-app" >> $GITHUB_ENV
+          echo "DOCKER_REGISTRY=${{ needs.image-build.outputs.image_repo }}" >> $GITHUB_ENV
+          echo "VERSION=${{ needs.image-build.outputs.image_tag }}" >> $GITHUB_ENV
+          echo "should_cleanup=false" >> $GITHUB_ENV
+          echo "skip_validate=false" >> $GITHUB_ENV
+          echo "KIND_MOUNT_DIR=/mnt/huggingface/hub" >> $GITHUB_ENV
+          echo "ROLLOUT_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
+
+      - name: Install GMC
+        run: |
+          echo "should_cleanup=true" >> $GITHUB_ENV
+          USER_ID=$(whoami)
+          HFTOKEN=$(cat /home/$USER_ID/.cache/huggingface/token)
+          pushd microservices-connector/helm
+          # replace image for gmc-router
+          sed -i "s|image:.*|image: ${DOCKER_REGISTRY}opea/gmcrouter:$VERSION|" gmc-router.yaml
+          # replace the pull policy "IfNotPresent" with "Always" for gmc-router
+          sed -i "s|imagePullPolicy:.*|imagePullPolicy: Always|" gmc-router.yaml
+          # replace image for GenAI component manifests
+          find manifests_common/ -type f -name "*.yaml" -exec sed -i "s|image: \"opea|image: \"${DOCKER_REGISTRY}opea|" {} \;
+          # replace the pull policy "IfNotPresent" with "Always" for GenAI component manifests
+          find manifests_common/ -type f -name "*.yaml" -exec sed -i "s|imagePullPolicy: IfNotPresent|imagePullPolicy: Always|" {} \;
+          # replace the mount dir "path: /mnt/model" with "path: $CHART_MOUNT"
+          find manifests_common/ -type f -name "*.yaml" -exec sed -i "s|path: /mnt/opea-models|path: $KIND_MOUNT_DIR|" {} \;
+          # replace huggingface token
+          find manifests_common/ -type f -name '*.yaml' -exec sed -i "s#insert-your-huggingface-token-here#${HFTOKEN}#g" {} \;
+          popd
+          # Install GMC
+          if ! helm install --create-namespace --namespace ${{ env.SYSTEM_NAMESPACE }} --wait \
+              --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
+              $RELEASE_NAME microservices-connector/helm \
+               --set image.tag=$VERSION --set image.repository=${DOCKER_REGISTRY}opea/gmcmanager; then
+            echo "Failed to install GMC by helm"
+            echo "skip_validate=true" >> $GITHUB_ENV
+            .github/workflows/scripts/e2e/chart_test.sh dump_pods_status ${{ env.SYSTEM_NAMESPACE }}
+            exit 1
+          fi
+
+      - name: Run e2e tests
+        run: |
+          if $skip_validate; then
+            echo "Skip validate"
+          else
+            .github/workflows/scripts/e2e/gmc_xeon_test.sh validate_gmc
+          fi
+
+      - name: Cleanup modules
+        if: always()
+        run: |
+          if $should_cleanup; then
+            .github/workflows/scripts/e2e/gmc_xeon_test.sh cleanup_apps
+            helm uninstall $RELEASE_NAME --namespace ${{ env.SYSTEM_NAMESPACE }}
+            if kubectl get namespace ${{ env.SYSTEM_NAMESPACE }} > /dev/null 2>&1; then
+              echo "Deleting namespace: $SYSTEM_NAMESPACE"
+              kubectl delete namespace "$SYSTEM_NAMESPACE"
+            fi
+            kubectl delete crd gmconnectors.gmc.opea.io
+            kubectl delete validatingwebhookconfigurations.admissionregistration.k8s.io ${RELEASE_NAME}-controller  --ignore-not-found
+          fi

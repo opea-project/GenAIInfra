@@ -1,0 +1,4 @@
+**/bin/
+*.out
+**/Chart.lock
+**/charts/*.tgz

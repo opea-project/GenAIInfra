@@ -1,0 +1,40 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: GMC E2e Tests on Xeon
+
+on:
+  pull_request:
+    branches: [main]
+    types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
+    paths:
+      - microservices-connector/**
+      - "!microservices-connector/helm/**"
+      - "!**.md"
+      - "!**.txt"
+      - "!**.png"
+      - .github/workflows/scripts/e2e/gmc_xeon_test.sh
+  workflow_dispatch:
+
+# If there is a new commit, the previous jobs will be canceled
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}-xeon
+  cancel-in-progress: true
+
+env:
+  GOSRC_DIR: "microservices-connector"
+
+jobs:
+  image-build:
+    uses: ./.github/workflows/_gmc-image-build.yaml
+    with:
+      image_tag: ${{ github.event.pull_request.head.sha }}
+      runner_label: 'docker-build-xeon'
+
+  go-e2e:
+    needs: [image-build]
+    uses: ./.github/workflows/_gmc-e2e.yaml
+    with:
+      repo: ${{ needs.image-build.outputs.image_repo }}
+      tag: ${{ needs.image-build.outputs.image_tag }}
+    secrets: inherit
