@@ -37,7 +37,7 @@ If cluster does not run [Prometheus operator](https://github.com/prometheus-oper
 yet, it SHOULD be be installed before enabling HPA, e.g. by using:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
 
-`horizontalPodAutoscaler` enabled in top level Helm chart depending on this component  (e.g. `chatqna`),
+`horizontalPodAutoscaler` enabled in top level Helm chart depending on this component (e.g. `chatqna`),
 so that relevant custom metric queries are configured for PrometheusAdapter.
 
 ### Gotchas
