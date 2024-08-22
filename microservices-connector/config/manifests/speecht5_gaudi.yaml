@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: speecht5-config
   labels:
-    helm.sh/chart: speecht5-0.8.0
+    helm.sh/chart: speecht5-0.9.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 data:
   EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
@@ -31,10 +31,10 @@ kind: Service
 metadata:
   name: speecht5
   labels:
-    helm.sh/chart: speecht5-0.8.0
+    helm.sh/chart: speecht5-0.9.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -56,10 +56,10 @@ kind: Deployment
 metadata:
   name: speecht5
   labels:
-    helm.sh/chart: speecht5-0.8.0
+    helm.sh/chart: speecht5-0.9.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -85,7 +85,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/speecht5-gaudi:latest"
+          image: "opea/speecht5-gaudi:v0.9"
           imagePullPolicy: IfNotPresent
           ports:
             - name: speecht5

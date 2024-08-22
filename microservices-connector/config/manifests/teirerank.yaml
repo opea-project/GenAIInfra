@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: teirerank-config
   labels:
-    helm.sh/chart: teirerank-0.8.0
+    helm.sh/chart: teirerank-0.9.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-0.8.0
+    helm.sh/chart: teirerank-0.9.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -57,7 +57,7 @@ kind: Deployment
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-0.8.0
+    helm.sh/chart: teirerank-0.9.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"

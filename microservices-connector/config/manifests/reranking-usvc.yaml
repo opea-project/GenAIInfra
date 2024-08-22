@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: reranking-usvc-config
   labels:
-    helm.sh/chart: reranking-usvc-0.8.0
+    helm.sh/chart: reranking-usvc-0.9.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_RERANKING_ENDPOINT: "http://reranking-usvc-teirerank"
@@ -31,10 +31,10 @@ kind: Service
 metadata:
   name: reranking-usvc
   labels:
-    helm.sh/chart: reranking-usvc-0.8.0
+    helm.sh/chart: reranking-usvc-0.9.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -56,10 +56,10 @@ kind: Deployment
 metadata:
   name: reranking-usvc
   labels:
-    helm.sh/chart: reranking-usvc-0.8.0
+    helm.sh/chart: reranking-usvc-0.9.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -93,7 +93,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/reranking-tei:latest"
+          image: "opea/reranking-tei:v0.9"
           imagePullPolicy: IfNotPresent
           ports:
             - name: reranking-usvc
