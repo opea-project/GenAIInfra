@@ -12,7 +12,7 @@ on:
         type: string
       build:
         default: true
-        description: 'Build test required images for Examples'
+        description: 'Build test required images for GMC'
         required: false
         type: boolean
       scan:

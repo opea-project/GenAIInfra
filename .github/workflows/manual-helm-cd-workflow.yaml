@@ -17,7 +17,7 @@ on:
         type: string
       infra_branch:
         default: latest
-        description: 'Build test required images for Examples'
+        description: 'Branch to be tested'
         required: false
         type: string
       nodes:
