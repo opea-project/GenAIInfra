@@ -26,7 +26,7 @@ AI application examples you can run directly on Xeon and Gaudi. You can also ref
 | ------------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | [codegen](./codegen)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/CodeGen)       | An example of copilot designed for code generation in Visual Studio Code.                       |
 | [codetrans](./codetrans) | [Code Translation](https://github.com/opea-project/GenAIExamples/tree/main/CodeTrans)    | An example of programming language code translation.                                            |
-| [chatqna](./chatqna)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA)       | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
+| [chatqna](./chatqna)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
 | [docsum](./docsum)       | [Document Summarization](https://github.com/opea-project/GenAIExamples/tree/main/DocSum) | An example of document summarization.                                                           |
 
 ### Components
@@ -142,11 +142,14 @@ export OPEA_IMAGE_REPO=192.168.0.100:5000/
 find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
 ```
 
-## Helm Charts repository
+## Helm Charts repository (Experimental)
 
-TBD
+https://opea-project.github.io/GenAIInfra
 
 ## Generate manifests from Helm Charts
 
 Some users may want to use kubernetes manifests(yaml files) for workload deployment, we do not maintain manifests itself, and will generate them using `helm template`.  
-See update_manifests.yaml for how the manifests are generated.
+See update_genaiexamples.sh for how the manifests are generated for supported GenAIExamples.  
+See update_manifests.sh for how the manifests are generated for supported GenAIComps.  
+Please note that the above scripts have hardcoded settings to reduce user configuration effort.  
+They are not supposed to be directly used by users.
