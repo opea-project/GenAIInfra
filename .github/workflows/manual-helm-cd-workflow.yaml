@@ -12,18 +12,14 @@ on:
         description: "workloads to test, empty for testing all helm charts"
       tag:
         default: "latest"
-        description: "Tag to apply to images"
+        description: "Image tag to be tested"
         required: true
-        type: string
-      infra_branch:
-        default: latest
-        description: 'Build test required images for Examples'
-        required: false
         type: string
       nodes:
         default: "xeon,gaudi"
         required: true
         type: string
+        description: 'Hardwares used to run tests'
 
 env:
   CHARTS_DIR: "helm-charts"
@@ -58,7 +54,7 @@ jobs:
           nodes=$(printf '%s\n' "${node_list[@]}" | sort -u | jq -R '.' | jq -sc '.')
           echo "nodes=$nodes" >> $GITHUB_OUTPUT
 
-  gmc-release:
+  helm-release:
     needs: get-build-matrix
     strategy:
       matrix:
@@ -69,5 +65,4 @@ jobs:
       tag: ${{ inputs.tag }}
       workload: ${{ matrix.workload }}
       hardware: ${{ matrix.node }}
-      opea_branch: ${{ inputs.infra_branch }}
     secrets: inherit
