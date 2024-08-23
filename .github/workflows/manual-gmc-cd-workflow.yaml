@@ -12,29 +12,14 @@ on:
         type: string
       build:
         default: true
-        description: 'Build test required images for GMC'
-        required: false
-        type: boolean
-      scan:
-        default: true
-        description: 'Scan all images with Trivy'
+        description: 'Whether to build test required images for GMC'
         required: false
         type: boolean
       test_gmc:
         default: true
-        description: 'Test GMC on Xeon KIND'
+        description: 'Whether to test GMC in KIND on Xeon'
         required: false
         type: boolean
-      publish:
-        default: false
-        description: 'Publish images to docker hub'
-        required: false
-        type: boolean
-      publish_tags:
-        default: "latest,v0.9"
-        description: 'Tag list apply to publish images'
-        required: false
-        type: string
 
 permissions: read-all
 jobs:
@@ -43,8 +28,5 @@ jobs:
     with:
       tag: ${{ inputs.tag }}
       build: ${{ fromJSON(inputs.build) }}
-      scan: ${{ fromJSON(inputs.scan) }}
       test_gmc: ${{ fromJSON(inputs.test_gmc) }}
-      publish: ${{ fromJSON(inputs.publish) }}
-      publish_tags: ${{ fromJSON(inputs.publish_tags) }}
     secrets: inherit
