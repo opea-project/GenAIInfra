@@ -8,7 +8,10 @@ metadata:
   labels:
     {{- include "teirerank.labels" . | nindent 4 }}
 spec:
+  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
+  {{- if not .Values.global.horizontalPodAutoscaler.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "teirerank.selectorLabels" . | nindent 6 }}
@@ -101,4 +104,8 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.global.horizontalPodAutoscaler.enabled }}
+      # extra time to finish processing buffered requests before HPA forcibly terminates pod
+      terminationGracePeriodSeconds: 60
       {{- end }}

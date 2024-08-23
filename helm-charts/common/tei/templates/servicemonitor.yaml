@@ -1,0 +1,17 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- if .Values.global.horizontalPodAutoscaler.enabled }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "tei.fullname" . }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "tei.selectorLabels" . | nindent 6 }}
+  endpoints:
+  - interval: 4s
+    port: tei
+    scheme: http
+{{- end }}
