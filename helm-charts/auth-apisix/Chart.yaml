@@ -1,5 +1,0 @@
-apiVersion: v2
-name: auth-apisix-crds
-description: A Helm chart for publishing secure OPEA app APIs
-version: 0.1.0
-
