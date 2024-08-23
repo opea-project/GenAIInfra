@@ -33,9 +33,24 @@ jobs:
       image_repo: ${{ steps.set_variables.outputs.IMAGE_REPO }}
       version: ${{ steps.set_variables.outputs.VERSION }}
     steps:
+      - name: Clean Up Working Directory
+        run: sudo rm -rf ${{github.workspace}}/*
+
+      - name: Get checkout ref
+        id: get-checkout-ref
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
+            CHECKOUT_REF=refs/pull/${{ github.event.number }}/merge
+          else
+            CHECKOUT_REF=${{ github.ref }}
+          fi
+          echo "CHECKOUT_REF=${CHECKOUT_REF}" >> $GITHUB_OUTPUT
+          echo "checkout ref ${CHECKOUT_REF}"
+
       - name: Checkout out Repo
         uses: actions/checkout@v4
         with:
+          ref: ${{ steps.get-checkout-ref.outputs.CHECKOUT_REF }}
           fetch-depth: 0
 
       - name: Set variables
