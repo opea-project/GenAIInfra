@@ -88,6 +88,8 @@ EMBED_MODEL: ""
 # redis DB service URL, e.g. redis://<service-name>:<port>
 REDIS_URL: ""
 INDEX_NAME: "rag-redis"
+KEY_INDEX_NAME: "file-keys"
+SEARCH_BATCH_SIZE: 10
 
 global:
   http_proxy: ""

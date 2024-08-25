@@ -18,6 +18,8 @@ data:
   EMBED_MODEL: ""
   REDIS_URL: "redis://data-prep-redis-vector-db:6379"
   INDEX_NAME: "rag-redis"
+  KEY_INDEX_NAME: "file-keys"
+  SEARCH_BATCH_SIZE: "10"
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   HF_HOME: "/tmp/.cache/huggingface"
   http_proxy: ""
