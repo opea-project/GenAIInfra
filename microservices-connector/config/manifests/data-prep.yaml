@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: data-prep-config
   labels:
-    helm.sh/chart: data-prep-0.8.0
+    helm.sh/chart: data-prep-0.9.0
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_ENDPOINT: "http://data-prep-tei"
@@ -36,10 +36,10 @@ kind: Service
 metadata:
   name: data-prep
   labels:
-    helm.sh/chart: data-prep-0.8.0
+    helm.sh/chart: data-prep-0.9.0
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -61,10 +61,10 @@ kind: Deployment
 metadata:
   name: data-prep
   labels:
-    helm.sh/chart: data-prep-0.8.0
+    helm.sh/chart: data-prep-0.9.0
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1

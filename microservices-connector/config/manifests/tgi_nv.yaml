@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: tgi-config
   labels:
-    helm.sh/chart: tgi-0.8.0
+    helm.sh/chart: tgi-0.9.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -34,7 +34,7 @@ kind: Service
 metadata:
   name: tgi
   labels:
-    helm.sh/chart: tgi-0.8.0
+    helm.sh/chart: tgi-0.9.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -59,12 +59,13 @@ kind: Deployment
 metadata:
   name: tgi
   labels:
-    helm.sh/chart: tgi-0.8.0
+    helm.sh/chart: tgi-0.9.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
+  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
   replicas: 1
   selector:
     matchLabels:
@@ -126,3 +127,16 @@ spec:
             type: Directory
         - name: tmp
           emptyDir: {}
+---
+# Source: tgi/templates/horizontalPorAutoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: tgi/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+# Dashboard for the exposed TGI metrics:
+# - https://grafana.com/grafana/dashboards/19831-text-generation-inference-dashboard/
+# Metric descriptions:
+# - https://github.com/huggingface/text-generation-inference/discussions/1127#discussioncomment-7240527
