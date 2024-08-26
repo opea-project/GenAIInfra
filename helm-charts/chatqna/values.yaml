@@ -48,3 +48,11 @@ global:
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
+
+  # Enabling HorizontalPodAutoscaler (HPA) will:
+  # - Overwrite existing PrometheusAdapter "adapter-config" configMap with ChatQnA specific custom metric queries
+  #   for embedding, reranking, tgi services
+  # Upstream default configMap:
+  #  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
+  horizontalPodAutoscaler:
+    enabled: false
