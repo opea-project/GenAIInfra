@@ -13,9 +13,8 @@ helm repo add opea https://opea-project.github.io/GenAIInfra
 
 You can then run `helm search repo opea` to see the charts.
 
-
 If you had already added this repo earlier, run `helm repo update` to retrieve
-the latest versions of the packages.  You can then run `helm search repo
+the latest versions of the packages. You can then run `helm search repo
 opea` to see the charts.
 
 To install the <chart-name> chart:
