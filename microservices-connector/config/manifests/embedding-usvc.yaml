@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: embedding-usvc-config
   labels:
-    helm.sh/chart: embedding-usvc-0.8.0
+    helm.sh/chart: embedding-usvc-0.9.0
     app.kubernetes.io/name: embedding-usvc
     app.kubernetes.io/instance: embedding-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_EMBEDDING_ENDPOINT: "http://embedding-usvc-tei"
@@ -31,10 +31,10 @@ kind: Service
 metadata:
   name: embedding-usvc
   labels:
-    helm.sh/chart: embedding-usvc-0.8.0
+    helm.sh/chart: embedding-usvc-0.9.0
     app.kubernetes.io/name: embedding-usvc
     app.kubernetes.io/instance: embedding-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -56,10 +56,10 @@ kind: Deployment
 metadata:
   name: embedding-usvc
   labels:
-    helm.sh/chart: embedding-usvc-0.8.0
+    helm.sh/chart: embedding-usvc-0.9.0
     app.kubernetes.io/name: embedding-usvc
     app.kubernetes.io/instance: embedding-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
