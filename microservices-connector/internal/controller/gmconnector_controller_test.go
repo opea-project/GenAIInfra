@@ -194,17 +194,11 @@ var _ = Describe("GMConnector Controller", func() {
 				Client: k8sClient,
 				Scheme: k8sClient.Scheme(),
 			}
-
 			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
 				NamespacedName: typeNamespacedName,
 			})
 
 			Expect(err).NotTo(HaveOccurred())
-			embedDp := &appsv1.Deployment{}
-			embedDpMeta := types.NamespacedName{
-				Name:      "embedding-service-deployment",
-				Namespace: "default",
-			}
 			Expect(k8sClient.Get(ctx, types.NamespacedName{
 				Name:      "embedding-service",
 				Namespace: "default",
@@ -213,7 +207,7 @@ var _ = Describe("GMConnector Controller", func() {
 			Expect(k8sClient.Get(ctx, types.NamespacedName{
 				Name:      "embedding-service-deployment",
 				Namespace: "default",
-			}, embedDp)).To(Succeed())
+			}, &appsv1.Deployment{})).To(Succeed())
 
 			Expect(k8sClient.Get(ctx, types.NamespacedName{
 				Name:      "embedding-usvc-config",
@@ -335,6 +329,145 @@ var _ = Describe("GMConnector Controller", func() {
 			Expect(pipeline.Status.Status).To(Equal("0/0/9"))
 			Expect(len(pipeline.Status.Annotations)).To(Equal(25))
 
+			// embedDp := &appsv1.Deployment{}
+			// embedDpMeta := types.NamespacedName{
+			// 	Name:      "embedding-service-deployment",
+			// 	Namespace: "default",
+			// }
+			// embedDp.Status.AvailableReplicas = int32(1)
+			// embedDp.Status.Replicas = embedDp.Status.AvailableReplicas
+			// embedDp.Status.ReadyReplicas = embedDp.Status.AvailableReplicas
+			// Expect(*embedDp.Spec.Replicas).To(Equal(int32(1)))
+			// Expect(embedDp.OwnerReferences[0].Name).To(Equal(resourceName))
+			// Expect(embedDp.OwnerReferences[0].Kind).To(Equal("GMConnector"))
+			// err = k8sClient.Status().Update(ctx, embedDp)
+			// Expect(err).NotTo(HaveOccurred())
+			// embedDp2 := &appsv1.Deployment{}
+			// Expect(k8sClient.Get(ctx, types.NamespacedName{
+			// 	Name:      "embedding-service-deployment",
+			// 	Namespace: "default",
+			// }, embedDp2)).To(Succeed())
+			// Expect(embedDp2.Status.AvailableReplicas).To(Equal(int32(1)))
+			// _, err = controllerReconciler.Reconcile(ctx, reconcile.Request{
+			// 	NamespacedName: embedDpMeta,
+			// })
+			// Expect(err).NotTo(HaveOccurred())
+			// pipeline = &mcv1alpha3.GMConnector{}
+			// Expect(k8sClient.Get(ctx, typeNamespacedName, pipeline)).To(Succeed())
+			// Expect(pipeline.Status.Status).To(Equal("1/0/9"))
+
+			// // update the resources
+			// resource := &mcv1alpha3.GMConnector{}
+			// Expect(k8sClient.Get(ctx, typeNamespacedName, resource)).To(Succeed())
+			// resource.Spec = mcv1alpha3.GMConnectorSpec{
+			// 	RouterConfig: mcv1alpha3.RouterConfig{
+			// 		Name:        "router",
+			// 		ServiceName: "router-service",
+			// 		Config: map[string]string{
+			// 			"endpoint": "/",
+			// 		},
+			// 	},
+			// 	Nodes: map[string]mcv1alpha3.Router{
+			// 		"root": {
+			// 			RouterType: "Sequence",
+			// 			Steps: []mcv1alpha3.Step{
+			// 				{
+			// 					StepName: TeiEmbeddingGaudi,
+			// 					Executor: mcv1alpha3.Executor{
+			// 						InternalService: mcv1alpha3.GMCTarget{
+			// 							NameSpace:   "default",
+			// 							ServiceName: "tei-embedding-service",
+			// 							Config: map[string]string{
+			// 								"endpoint": "/v1/tei-embeddings",
+			// 								"MODEL_ID": "somemodel",
+			// 							},
+			// 							IsDownstreamService: true,
+			// 						},
+			// 					},
+			// 				},
+			// 				{
+			// 					StepName: DataPrep,
+			// 					Executor: mcv1alpha3.Executor{
+			// 						InternalService: mcv1alpha3.GMCTarget{
+			// 							NameSpace:   "default",
+			// 							ServiceName: "dataprep-service",
+			// 							Config: map[string]string{
+			// 								"endpoint": "/v1/vec",
+			// 							},
+			// 							IsDownstreamService: true,
+			// 						},
+			// 					},
+			// 				},
+			// 				{
+			// 					StepName: WebRetriever,
+			// 					Executor: mcv1alpha3.Executor{
+			// 						InternalService: mcv1alpha3.GMCTarget{
+			// 							NameSpace:   "default",
+			// 							ServiceName: "webretriever-service",
+			// 							Config: map[string]string{
+			// 								"endpoint":               "/v1/retrv",
+			// 								"REDIS_URL":              "vector-service",
+			// 								"TEI_EMBEDDING_ENDPOINT": "tei-embedding-service",
+			// 							},
+			// 						},
+			// 					},
+			// 				},
+			// 				{
+			// 					StepName: TgiGaudi,
+			// 					Executor: mcv1alpha3.Executor{
+			// 						InternalService: mcv1alpha3.GMCTarget{
+			// 							NameSpace:   "default",
+			// 							ServiceName: "tgiguadi-service-name",
+			// 							Config: map[string]string{
+			// 								"endpoint": "/generate",
+			// 							},
+			// 							IsDownstreamService: true,
+			// 						},
+			// 					},
+			// 				},
+			// 				{
+			// 					StepName: Llm,
+			// 					Executor: mcv1alpha3.Executor{
+			// 						InternalService: mcv1alpha3.GMCTarget{
+			// 							NameSpace:   "default",
+			// 							ServiceName: "llm-service",
+			// 							Config: map[string]string{
+			// 								"endpoint":         "/v1/llm",
+			// 								"TGI_LLM_ENDPOINT": "tgi-service-name",
+			// 							},
+			// 						},
+			// 					},
+			// 				},
+			// 			},
+			// 		},
+			// 	},
+			// }
+
+			// Expect(k8sClient.Update(ctx, resource)).To(Succeed())
+			// // _, err = controllerReconciler.Reconcile(ctx, reconcile.Request{
+			// // 	NamespacedName: typeNamespacedName,
+			// // })
+
+			// // Expect(err).NotTo(HaveOccurred())
+
+		})
+
+		It("should successfully reconcile the deployment for status update", func() {
+			controllerReconciler := &GMConnectorReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+			}
+			By("Reconciling the existed resource")
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+			embedDp := &appsv1.Deployment{}
+			embedDpMeta := types.NamespacedName{
+				Name:      "embedding-service-deployment",
+				Namespace: "default",
+			}
+			Expect(k8sClient.Get(ctx, embedDpMeta, embedDp)).To(Succeed())
 			embedDp.Status.AvailableReplicas = int32(1)
 			embedDp.Status.Replicas = embedDp.Status.AvailableReplicas
 			embedDp.Status.ReadyReplicas = embedDp.Status.AvailableReplicas
@@ -353,86 +486,90 @@ var _ = Describe("GMConnector Controller", func() {
 				NamespacedName: embedDpMeta,
 			})
 			Expect(err).NotTo(HaveOccurred())
+			pipeline := &mcv1alpha3.GMConnector{}
 			Expect(k8sClient.Get(ctx, typeNamespacedName, pipeline)).To(Succeed())
 			Expect(pipeline.Status.Status).To(Equal("1/0/9"))
-			// update the resources
-			resource := &mcv1alpha3.GMConnector{}
-			Expect(k8sClient.Get(ctx, typeNamespacedName, resource)).To(Succeed())
-			resource.Spec = mcv1alpha3.GMConnectorSpec{
-				RouterConfig: mcv1alpha3.RouterConfig{
-					Name:        "router",
-					ServiceName: "router-service",
-					Config: map[string]string{
-						"endpoint": "/",
+		})
+
+		It("should successfully reconcile the deployment for removing step", func() {
+			controllerReconciler := &GMConnectorReconciler{
+				Client: k8sClient,
+				Scheme: k8sClient.Scheme(),
+			}
+			By("Reconciling the existed resource")
+			_, err := controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			err = k8sClient.Get(ctx, typeNamespacedName, gmconnector)
+			Expect(err).NotTo(HaveOccurred())
+
+			resource := &mcv1alpha3.GMConnector{
+				TypeMeta:   gmconnector.TypeMeta,
+				ObjectMeta: gmconnector.ObjectMeta,
+				Spec: mcv1alpha3.GMConnectorSpec{
+					RouterConfig: mcv1alpha3.RouterConfig{
+						Name:        "router",
+						ServiceName: "router-service",
+						Config: map[string]string{
+							"endpoint": "/",
+						},
 					},
-				},
-				Nodes: map[string]mcv1alpha3.Router{
-					"root": {
-						RouterType: "Sequence",
-						Steps: []mcv1alpha3.Step{
-							{
-								StepName: TeiEmbeddingGaudi,
-								Executor: mcv1alpha3.Executor{
-									InternalService: mcv1alpha3.GMCTarget{
-										NameSpace:   "default",
-										ServiceName: "tei-embedding-service",
-										Config: map[string]string{
-											"endpoint": "/v1/tei-embeddings",
-											"MODEL_ID": "somemodel",
-										},
-										IsDownstreamService: true,
-									},
-								},
-							},
-							{
-								StepName: DataPrep,
-								Executor: mcv1alpha3.Executor{
-									InternalService: mcv1alpha3.GMCTarget{
-										NameSpace:   "default",
-										ServiceName: "dataprep-service",
-										Config: map[string]string{
-											"endpoint": "/v1/vec",
-										},
-										IsDownstreamService: true,
-									},
-								},
-							},
-							{
-								StepName: WebRetriever,
-								Executor: mcv1alpha3.Executor{
-									InternalService: mcv1alpha3.GMCTarget{
-										NameSpace:   "default",
-										ServiceName: "webretriever-service",
-										Config: map[string]string{
-											"endpoint":               "/v1/retrv",
-											"REDIS_URL":              "vector-service",
-											"TEI_EMBEDDING_ENDPOINT": "tei-embedding-service",
+					Nodes: map[string]mcv1alpha3.Router{
+						"root": {
+							RouterType: "Sequence",
+							Steps: []mcv1alpha3.Step{
+								{
+									StepName: TeiEmbedding,
+									Executor: mcv1alpha3.Executor{
+										InternalService: mcv1alpha3.GMCTarget{
+											NameSpace:   "default",
+											ServiceName: "tei-embedding-service",
+											Config: map[string]string{
+												"endpoint": "/v1/tei-embeddings",
+												"MODEL_ID": "somemodel",
+											},
+											IsDownstreamService: true,
 										},
 									},
 								},
-							},
-							{
-								StepName: TgiGaudi,
-								Executor: mcv1alpha3.Executor{
-									InternalService: mcv1alpha3.GMCTarget{
-										NameSpace:   "default",
-										ServiceName: "tgiguadi-service-name",
-										Config: map[string]string{
-											"endpoint": "/generate",
+								{
+									StepName: VectorDB,
+									Executor: mcv1alpha3.Executor{
+										InternalService: mcv1alpha3.GMCTarget{
+											NameSpace:   "default",
+											ServiceName: "vector-service",
+											Config: map[string]string{
+												"endpoint": "/v1/vec",
+											},
+											IsDownstreamService: true,
 										},
-										IsDownstreamService: true,
 									},
 								},
-							},
-							{
-								StepName: Llm,
-								Executor: mcv1alpha3.Executor{
-									InternalService: mcv1alpha3.GMCTarget{
-										NameSpace:   "default",
-										ServiceName: "llm-service",
-										Config: map[string]string{
-											"endpoint":         "/v1/llm",
-											"TGI_LLM_ENDPOINT": "tgi-service-name",
+								{
+									StepName: TeiReranking,
+									Executor: mcv1alpha3.Executor{
+										InternalService: mcv1alpha3.GMCTarget{
+											NameSpace:   "default",
+											ServiceName: "tei-reranking-svc",
+											Config: map[string]string{
+												"endpoint": "/rernk",
+											},
+											IsDownstreamService: true,
+										},
+									},
+								},
+								{
+									StepName: Tgi,
+									Executor: mcv1alpha3.Executor{
+										InternalService: mcv1alpha3.GMCTarget{
+											NameSpace:   "default",
+											ServiceName: "tgi-service-name",
+											Config: map[string]string{
+												"endpoint": "/generate",
+											},
+											IsDownstreamService: true,
 										},
 									},
 								},
@@ -441,13 +578,141 @@ var _ = Describe("GMConnector Controller", func() {
 					},
 				},
 			}
+			Expect(k8sClient.Update(ctx, resource)).To(Succeed())
+			_, err = controllerReconciler.Reconcile(ctx, reconcile.Request{
+				NamespacedName: typeNamespacedName,
+			})
+			Expect(err).NotTo(HaveOccurred())
 
-			// Expect(k8sClient.Update(ctx, resource)).To(Succeed())
-			// _, err = controllerReconciler.Reconcile(ctx, reconcile.Request{
-			// 	NamespacedName: typeNamespacedName,
-			// })
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "embedding-service",
+				Namespace: "default",
+			}, &corev1.Service{})).NotTo(Succeed())
 
-			// Expect(err).NotTo(HaveOccurred())
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "embedding-service-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "embedding-usvc-config",
+				Namespace: "default",
+			}, &corev1.ConfigMap{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "tei-embedding-service",
+				Namespace: "default",
+			}, &corev1.Service{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "tei-embedding-service-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "tei-config",
+				Namespace: "default",
+			}, &corev1.ConfigMap{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "vector-service",
+				Namespace: "default",
+			}, &corev1.Service{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "vector-service-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "retriever-service",
+				Namespace: "default",
+			}, &corev1.Service{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "retriever-service-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "retriever-usvc-config",
+				Namespace: "default",
+			}, &corev1.ConfigMap{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "rerank-service",
+				Namespace: "default",
+			}, &corev1.Service{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "rerank-service-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "reranking-usvc-config",
+				Namespace: "default",
+			}, &corev1.ConfigMap{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "tei-reranking-svc",
+				Namespace: "default",
+			}, &corev1.Service{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "tei-reranking-svc-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "teirerank-config",
+				Namespace: "default",
+			}, &corev1.ConfigMap{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "tgi-service-name",
+				Namespace: "default",
+			}, &corev1.Service{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "tgi-service-name-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "tgi-config",
+				Namespace: "default",
+			}, &corev1.ConfigMap{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "llm-service",
+				Namespace: "default",
+			}, &corev1.Service{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "llm-service-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "llm-uservice-config",
+				Namespace: "default",
+			}, &corev1.ConfigMap{})).NotTo(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "router-service",
+				Namespace: "default",
+			}, &corev1.Service{})).To(Succeed())
+
+			Expect(k8sClient.Get(ctx, types.NamespacedName{
+				Name:      "router-service-deployment",
+				Namespace: "default",
+			}, &appsv1.Deployment{})).To(Succeed())
+
+			pipeline := &mcv1alpha3.GMConnector{}
+			Expect(k8sClient.Get(ctx, typeNamespacedName, pipeline)).To(Succeed())
+			Expect(pipeline.Status.Status).To(Equal("0/0/5"))
+			Expect(len(pipeline.Status.Annotations)).To(Equal(13))
 		})
 	})
 })
