@@ -15,10 +15,6 @@ on:
         default: "latest"
         required: false
         type: string
-      opea_branch:
-        default: "main"
-        required: false
-        type: string
       hardware:
         default: "xeon"
         required: true
@@ -100,7 +96,6 @@ jobs:
         run: |
           set -xe
           echo "should_cleanup=true" >> $GITHUB_ENV
-          helm-charts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER }}
           value_file="values.yaml"
           if [ "${{ inputs.hardware }}" == "gaudi" ]; then
             value_file="gaudi-values.yaml"
@@ -111,6 +106,7 @@ jobs:
             echo "should_cleanup=false" >> $GITHUB_ENV
             exit 0
           fi
+          helm-charts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER }}
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
               --set autodependency.enabled=true \

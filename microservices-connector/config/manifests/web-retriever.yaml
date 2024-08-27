@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: web-retriever-config
   labels:
-    helm.sh/chart: web-retriever-0.8.0
+    helm.sh/chart: web-retriever-0.9.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_EMBEDDING_ENDPOINT: "http://web-retriever-tei"
@@ -32,10 +32,10 @@ kind: Service
 metadata:
   name: web-retriever
   labels:
-    helm.sh/chart: web-retriever-0.8.0
+    helm.sh/chart: web-retriever-0.9.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -57,10 +57,10 @@ kind: Deployment
 metadata:
   name: web-retriever
   labels:
-    helm.sh/chart: web-retriever-0.8.0
+    helm.sh/chart: web-retriever-0.9.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1

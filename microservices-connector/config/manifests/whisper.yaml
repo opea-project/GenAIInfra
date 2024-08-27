@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: whisper-config
   labels:
-    helm.sh/chart: whisper-0.8.0
+    helm.sh/chart: whisper-0.9.0
     app.kubernetes.io/name: whisper
     app.kubernetes.io/instance: whisper
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 data:
   EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
@@ -31,10 +31,10 @@ kind: Service
 metadata:
   name: whisper
   labels:
-    helm.sh/chart: whisper-0.8.0
+    helm.sh/chart: whisper-0.9.0
     app.kubernetes.io/name: whisper
     app.kubernetes.io/instance: whisper
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -56,10 +56,10 @@ kind: Deployment
 metadata:
   name: whisper
   labels:
-    helm.sh/chart: whisper-0.8.0
+    helm.sh/chart: whisper-0.9.0
     app.kubernetes.io/name: whisper
     app.kubernetes.io/instance: whisper
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v0.9"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
