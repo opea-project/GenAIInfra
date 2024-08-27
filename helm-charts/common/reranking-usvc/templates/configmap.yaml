@@ -11,7 +11,7 @@ data:
   {{- if .Values.TEI_RERANKING_ENDPOINT }}
   TEI_RERANKING_ENDPOINT: {{ .Values.TEI_RERANKING_ENDPOINT | quote }}
   {{- else }}
-  TEI_RERANKING_ENDPOINT: "http://{{ .Release.Name }}-teirerank"
+  TEI_RERANKING_ENDPOINT: "http://{{ .Release.Name }}-teirerank.{{ .Release.Namespace }}"
   {{- end }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}

@@ -11,7 +11,7 @@ data:
   {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
   TEI_EMBEDDING_ENDPOINT: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote }}
   {{- else if not .Values.EMBED_MODEL }}
-  TEI_EMBEDDING_ENDPOINT: "http://{{ .Release.Name }}-tei"
+  TEI_EMBEDDING_ENDPOINT: "http://{{ .Release.Name }}-tei.{{ .Release.Namespace }}"
   {{- end }}
   EMBED_MODEL: {{ .Values.EMBED_MODEL | quote }}
   {{- if .Values.REDIS_URL }}

@@ -11,7 +11,7 @@ data:
   {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
   TEI_EMBEDDING_ENDPOINT: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote }}
   {{- else }}
-  TEI_EMBEDDING_ENDPOINT: "http://{{ .Release.Name }}-tei"
+  TEI_EMBEDDING_ENDPOINT: "http://{{ .Release.Name }}-tei.{{ .Release.Namespace }}"
   {{- end }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}

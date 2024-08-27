@@ -11,7 +11,7 @@ data:
   {{- if .Values.TGI_LLM_ENDPOINT }}
   TGI_LLM_ENDPOINT: {{ .Values.TGI_LLM_ENDPOINT | quote}}
   {{- else }}
-  TGI_LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
+  TGI_LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi.{{ .Release.Namespace }}"
   {{- end }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
