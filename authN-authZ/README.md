@@ -4,6 +4,6 @@ Access to enterprise AI workloads requires robust authentication and authorizati
 
 Here we provide different options for user to implement authentication and authorization according to their needs:
 
-## Istio based implementation for cloud native environments ##
+## Istio based implementation for cloud native environments
 
 Utilize Istio, a well-known and widely adopted cloud-native tool, to enhance authentication and authorization processes. This ensures secure, efficient, and reliable enterprise operations by managing access controls effectively. This solution can integrate directly with OIDC providers like Keycloak or utilize an authentication proxy such as oauth2-proxy, enhancing its flexibility and scalability. We provide support for both helm chart and GMC based GenAI workload deployment to handle the authentication and authorization with either strict or flexible policies, adapting to various security requirements and operational needs. Please refer the documentation [here](./auth-istio/README.md) for more information.
