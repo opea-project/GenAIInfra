@@ -2,7 +2,6 @@ load(
     "@envoy//bazel:envoy_build_system.bzl",
     "envoy_cc_binary",
 )
-load("@rules_pkg//:pkg.bzl", "pkg_tar")
 
 exports_files(["LICENSE"])
 
@@ -25,13 +24,4 @@ envoy_cc_binary(
     deps = ISTIO_EXTENSIONS + OPEA_EXTENSIONS + [
         "@envoy//source/exe:envoy_main_entry_lib",
     ],
-)
-
-pkg_tar(
-    name = "envoy_tar",
-    srcs = [":envoy"],
-    extension = "tar.gz",
-    mode = "0755",
-    package_dir = "/usr/local/bin/",
-    tags = ["manual"],
 )
