@@ -1,0 +1,15 @@
+ARG BUILD_TAG=75238004b0fcfd8a7f71d380d7a774dda5c39622
+
+FROM envoyproxy/envoy-build-ubuntu:${BUILD_TAG}
+
+# Install OpenVINO.
+ARG OPENVINO_VERSION=2024.0 \
+    OPENVINO_FULL_VERSION=2024.0.0.14509 \
+    OPENVINO_SHA=34caeefd078
+RUN wget https://storage.openvinotoolkit.org/repositories/openvino/packages/${OPENVINO_VERSION}/linux/l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64.tgz && \
+    tar -xf l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64.tgz && \
+    rm l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64.tgz
+RUN cp -r l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64/runtime/include/openvino /usr/include/openvino && \
+    cp -r l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64/runtime/lib/intel64/* /usr/lib && \
+    ln -s /usr/lib/libopenvino_ir_frontend.so.2400 /usr/lib/libopenvino_ir_frontend.so && \
+    rm -r l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64

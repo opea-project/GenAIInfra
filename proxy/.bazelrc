@@ -10,3 +10,10 @@ build --define wasm=v8
 
 # Build Proxy-WASM plugins as native extensions.
 build --copt -DNULL_PLUGIN
+
+# Build with Docker.
+build:docker --action_env='PATH=/opt/llvm/bin:/opt/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin' --host_action_env='PATH=/opt/llvm/bin:/opt/llvm/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/snap/bin'
+build:docker --action_env='LLVM_CONFIG=/opt/llvm/bin/llvm-config' --host_action_env='LLVM_CONFIG=/opt/llvm/bin/llvm-config'
+build:docker --repo_env='LLVM_CONFIG=/opt/llvm/bin/llvm-config'
+build:docker --linkopt='-L/opt/llvm/lib'
+build:docker --linkopt='-Wl,-rpath,/opt/llvm/lib'
