@@ -55,7 +55,7 @@ For more details, please refer to [GMC installation](https://github.com/opea-pro
 
 Please refer to [Usage guide for GMC](https://github.com/opea-project/GenAIInfra/blob/main/microservices-connector/usage_guide.md) for more details.
 
-Here provides a simple script to use GMC to compose ChatQnA pipeline.
+Here provides a simple script `./gmc-chatqna-pipeline.sh` to use GMC to compose ChatQnA pipeline.
 
 #### 3. Test ChatQnA service
 
