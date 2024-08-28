@@ -1,5 +1,8 @@
 #! /bin/bash
 
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 BUILD_TAG=${BUILD_TAG:-75238004b0fcfd8a7f71d380d7a774dda5c39622}
 
 # Build build image.
