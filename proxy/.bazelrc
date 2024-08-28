@@ -1,0 +1,12 @@
+# Keep envoy.bazelrc up-to-date by run:
+# curl -sSL https://raw.githubusercontent.com/istio/proxy/master/.bazelrc > envoy.bazelrc
+import %workspace%/envoy.bazelrc
+
+# Build with Clang by default.
+build --config=clang
+
+# Build with embedded V8-based WebAssembly runtime.
+build --define wasm=v8
+
+# Build Proxy-WASM plugins as native extensions.
+build --copt -DNULL_PLUGIN

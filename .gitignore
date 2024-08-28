@@ -2,3 +2,4 @@
 *.out
 **/Chart.lock
 **/charts/*.tgz
+bazel-*
