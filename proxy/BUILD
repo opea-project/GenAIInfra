@@ -14,7 +14,10 @@ ISTIO_EXTENSIONS = [
     "@proxy//source/extensions/filters/network/metadata_exchange:config_lib",
 ]
 
-OPEA_EXTENSIONS = []
+OPEA_EXTENSIONS = [
+    "@envoy//contrib/hyperscan/matching/input_matchers/source:config",
+    "@envoy//contrib/hyperscan/regex_engines/source:config",
+]
 
 envoy_cc_binary(
     name = "envoy",
