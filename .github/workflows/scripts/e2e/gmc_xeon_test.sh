@@ -460,7 +460,6 @@ function validate_modify_config() {
          exit 1
     fi
 
-    pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
     check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
