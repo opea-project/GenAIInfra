@@ -120,5 +120,5 @@ spec:
             serviceName: tgi-gaudi-service-llama
             config:
               endpoint: /generate
-              MODEL_ID: openlm-research/open_llama_3b
+              MODEL_ID: meta-llama/CodeLlama-7b-hf
             isDownstreamService: true

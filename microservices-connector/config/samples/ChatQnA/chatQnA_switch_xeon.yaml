@@ -120,5 +120,5 @@ spec:
             serviceName: tgi-service-llama
             config:
               endpoint: /generate
-              MODEL_ID: HuggingFaceH4/mistral-7b-grok
+              MODEL_ID: meta-llama/CodeLlama-7b-hf
             isDownstreamService: true
