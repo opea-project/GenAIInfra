@@ -5,11 +5,20 @@ FROM envoyproxy/envoy-build-ubuntu:${BUILD_TAG}
 # Install OpenVINO.
 ARG OPENVINO_VERSION=2024.0 \
     OPENVINO_FULL_VERSION=2024.0.0.14509 \
-    OPENVINO_SHA=34caeefd078
+    OPENVINO_SHA=34caeefd078 \
+    OPENVINO_LIB_VERSION=2400
 RUN wget https://storage.openvinotoolkit.org/repositories/openvino/packages/${OPENVINO_VERSION}/linux/l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64.tgz && \
     tar -xf l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64.tgz && \
-    rm l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64.tgz
-RUN cp -r l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64/runtime/include/openvino /usr/include/openvino && \
+    rm l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64.tgz && \
+    cp -r l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64/runtime/include/openvino /usr/include/openvino && \
     cp -r l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64/runtime/lib/intel64/* /usr/lib && \
-    ln -s /usr/lib/libopenvino_ir_frontend.so.2400 /usr/lib/libopenvino_ir_frontend.so && \
     rm -r l_openvino_toolkit_ubuntu22_${OPENVINO_FULL_VERSION}.${OPENVINO_SHA}_x86_64
+RUN ln -s /usr/lib/libopenvino_ir_frontend.so.${OPENVINO_LIB_VERSION} /usr/lib/libopenvino_ir_frontend.so
+
+# Install OpenVINO Tokenizers.
+ARG OPENVINO_TOKENIZERS_VERSION=0.0
+RUN wget https://storage.openvinotoolkit.org/repositories/openvino_tokenizers/packages/${OPENVINO_VERSION}.${OPENVINO_TOKENIZERS_VERSION}/openvino_tokenizers_ubuntu22_${OPENVINO_VERSION}.${OPENVINO_TOKENIZERS_VERSION}_x86_64.tgz && \
+    tar -xf openvino_tokenizers_ubuntu22_${OPENVINO_VERSION}.${OPENVINO_TOKENIZERS_VERSION}_x86_64.tgz && \
+    rm openvino_tokenizers_ubuntu22_${OPENVINO_VERSION}.${OPENVINO_TOKENIZERS_VERSION}_x86_64.tgz && \
+    cp openvino_tokenizers_ubuntu22_${OPENVINO_VERSION}.${OPENVINO_TOKENIZERS_VERSION}_x86_64/* /usr/lib && \
+    rm -r openvino_tokenizers_ubuntu22_${OPENVINO_VERSION}.${OPENVINO_TOKENIZERS_VERSION}_x86_64
