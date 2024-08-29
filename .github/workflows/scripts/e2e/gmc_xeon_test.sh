@@ -152,7 +152,7 @@ function validate_audioqa() {
    accessUrl=$(kubectl get gmc -n $AUDIOQA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='audioqa')].status.accessUrl}")
    byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq .byte_str)
    if [ -z "$byte_str" ]; then
-       echo "audioqa failed, please check the the!"
+       echo "audioqa failed!"
        exit 1
    fi
    echo "Audioqa response check succeed!"
