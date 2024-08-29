@@ -2,17 +2,29 @@ workspace(name = "dev_opea_proxy")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-# 1.23.0.
-PROXY_SHA = "165f7597596f5b4de7025bb635a7b59d1c3fe27e"
-PROXY_SHA256 = "ac44db76cd00442c0485f5ce99d69ae1044f33ea62c2dccb8e72c26bcf03b4e3"
-PROXY_ORG = "istio"
-PROXY_REPO = "proxy"
+# Update Istio and Envoy by:
+#   1. Determine SHA256 `wget https://github.com/istio/proxy/archive/$COMMIT.tar.gz && sha256sum $COMMIT.tar.gz`.
+#   2. Update .bazelversion, envoy.bazelrc, BUILD and tools/build.sh if needed.
+#
+# Istio 1.23.0.
+ISTIO_SHA = "165f7597596f5b4de7025bb635a7b59d1c3fe27e"
+ISTIO_SHA256 = "ac44db76cd00442c0485f5ce99d69ae1044f33ea62c2dccb8e72c26bcf03b4e3"
+ISTIO_ORG = "istio"
+ISTIO_REPO = "proxy"
 
 http_archive(
-    name = "proxy",
-    sha256 = PROXY_SHA256,
-    strip_prefix = PROXY_REPO + "-" + PROXY_SHA,
-    url = "https://github.com/" + PROXY_ORG + "/" + PROXY_REPO + "/archive/" + PROXY_SHA + ".tar.gz",
+    name = "istio",
+    sha256 = ISTIO_SHA256,
+    strip_prefix = ISTIO_REPO + "-" + ISTIO_SHA,
+    url = "https://github.com/" + ISTIO_ORG + "/" + ISTIO_REPO + "/archive/" + ISTIO_SHA + ".tar.gz",
+)
+
+# TODO(zhxie): remove external repository fetch since it is the same repository as Istio.
+http_archive(
+    name = "envoy_build_config",
+    sha256 = ISTIO_SHA256,
+    strip_prefix = ISTIO_REPO + "-" + ISTIO_SHA + "/bazel/extension_config",
+    url = "https://github.com/" + ISTIO_ORG + "/" + ISTIO_REPO + "/archive/" + ISTIO_SHA + ".tar.gz",
 )
 
 ENVOY_SHA = "97d97011f522006a816f8fe340c8a6f23d0dd712"
@@ -28,14 +40,6 @@ http_archive(
 )
 
 load("@envoy//bazel:api_binding.bzl", "envoy_api_binding")
-
-http_archive(
-    name = "envoy_build_config",
-    sha256 = PROXY_SHA256,
-    strip_prefix = PROXY_REPO + "-" + PROXY_SHA + "/bazel/extension_config",
-    # add_prefix = "bazel/extension_config",
-    url = "https://github.com/" + PROXY_ORG + "/" + PROXY_REPO + "/archive/" + PROXY_SHA + ".tar.gz",
-)
 
 envoy_api_binding()
 

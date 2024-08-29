@@ -6,11 +6,11 @@ load(
 exports_files(["LICENSE"])
 
 ISTIO_EXTENSIONS = [
-    "@proxy//source/extensions/common/workload_discovery:api_lib",  # Experimental: WIP
-    "@proxy//source/extensions/filters/http/alpn:config_lib",
-    "@proxy//source/extensions/filters/http/istio_stats",
-    "@proxy//source/extensions/filters/http/peer_metadata:filter_lib",
-    "@proxy//source/extensions/filters/network/metadata_exchange:config_lib",
+    "@istio//source/extensions/common/workload_discovery:api_lib",  # Experimental: WIP
+    "@istio//source/extensions/filters/http/alpn:config_lib",
+    "@istio//source/extensions/filters/http/istio_stats",
+    "@istio//source/extensions/filters/http/peer_metadata:filter_lib",
+    "@istio//source/extensions/filters/network/metadata_exchange:config_lib",
 ]
 
 OPEA_EXTENSIONS = [
