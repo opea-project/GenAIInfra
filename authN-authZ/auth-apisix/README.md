@@ -61,6 +61,7 @@ helm install auth-apisix-crds . --namespace auth-apisix
 ## Usage
 
 The published APIs in apisix gateway are accessible through auth-apisix-gateway kubernetes service. By default, it is a NodePort service and can be accessed as:
+
 ```sh
 export NODE_PORT=$(kubectl get --namespace auth-apisix -o jsonpath="{.spec.ports[0].nodePort}" services auth-apisix-gateway)
 export NODE_IP=$(kubectl get nodes --namespace auth-apisix -o jsonpath="{.items[0].status.addresses[0].address}")
@@ -70,6 +71,7 @@ export accessUrl=http://$NODE_IP:$NODE_PORT/<your published endpoint uri>
 
 
 ```
+
 </br>
 Apisix helm chart provides configs to change the service type to other options like LoadBalancer (apisix.service.type) and externalTrafficPolicy to 'local'(apisix.service.externalTrafficPolicy). These can be added in values_apisix_gw.yaml </br></br>
 While accessing the published APIs, the HTTP Authorization header of the request should contain the Access token provided by Identity provider as 'Bearer \<Access Token\>' </br></br>
@@ -100,7 +102,6 @@ curl -X POST $accessUrl -d '{"text":"What is the revenue of Nike in 2023?","para
 
 ```
 
-
 ## Uninstall
 
 ```sh
@@ -108,7 +109,7 @@ curl -X POST $accessUrl -d '{"text":"What is the revenue of Nike in 2023?","para
 helm uninstall auth-apisix-crds --namespace auth-apisix
 helm uninstall auth-apisix --namespace auth-apisix
 ```
+
 The crds installed by apisix won't be deleted by helm uninstall. Need to manually delete those crds </br>
 All APISIX specific crds can be obtained by 'kubectl get crds | grep apisix' </br>
 Each crd can be manually deleted by 'kubectl delete crd/\<crd name\>' </br>
-
