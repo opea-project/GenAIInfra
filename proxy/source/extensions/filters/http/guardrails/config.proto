@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package envoy.extensions.filters.http.guardrails.v3;
+
+option java_package = "io.envoyproxy.envoy.extensions.filters.http.guardrails.v3";
+option java_outer_classname = "GuardrailsProto";
+option java_multiple_files = true;
+option go_package = "github.com/envoyproxy/go-control-plane/envoy/extensions/filters/http/guardrails/v3;guardrailsv3";
+
+message Guardrails {
+  enum Source {
+    REQUEST = 0;
+
+    RESPONSE = 1;
+  }
+
+  enum Action {
+    ALLOW = 0;
+
+    DENY = 1;
+  }
+
+  string model_path = 1;
+
+  double threshold = 2;
+
+  Source source = 3;
+
+  Action action = 4;
+}

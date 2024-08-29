@@ -14,6 +14,7 @@ ISTIO_EXTENSIONS = [
 ]
 
 OPEA_EXTENSIONS = [
+    "//source/extensions/filters/http/guardrails:config",
     "@envoy//contrib/hyperscan/matching/input_matchers/source:config",
     "@envoy//contrib/hyperscan/regex_engines/source:config",
 ]
