@@ -4,25 +4,23 @@ This document outlines the deployment process for a ChatQnA application utilizin
 
 The ChatQnA Service leverages a Kubernetes operator called genai-microservices-connector(GMC). GMC supports connecting microservices to create pipelines based on the specification in the pipeline yaml file in addition to allowing the user to dynamically control which model is used in a service such as an LLM or embedder. The underlying pipeline language also supports using external services that may be running in public or private cloud elsewhere.
 
-Install GMC  in your Kubernetes cluster, if you have not already done so, by following the steps in Section "Getting Started" at [GMC Install](https://github.com/opea-project/GenAIInfra/tree/main/microservices-connector). Soon as we publish images to Docker Hub, at which point no builds will be required, simplifying install.
-
+Install GMC in your Kubernetes cluster, if you have not already done so, by following the steps in Section "Getting Started" at [GMC Install](https://github.com/opea-project/GenAIInfra/tree/main/microservices-connector). Soon as we publish images to Docker Hub, at which point no builds will be required, simplifying install.
 
 The ChatQnA application is defined as a Custom Resource (CR) file that the above GMC operator acts upon. It first checks if the microservices listed in the CR yaml file are running, if not starts them and then proceeds to connect them. When the ChatQnA RAG pipeline is ready, the service endpoint details are returned, letting you use the application. Should you use "kubectl get pods" commands you will see all the component microservices, in particular `embedding`, `retriever`, `rerank`, and `llm`.
-
 
 ## Using prebuilt images
 
 The ChatQnA uses the below prebuilt images if you choose a Xeon deployment
 
-- embedding:             opea/embedding-tei:latest
-- retriever:             opea/retriever-redis:latest
-- reranking:             opea/reranking-tei:latest
-- llm:                   opea/llm-tgi:latest
-- dataprep-redis:        opea/dataprep-redis:latest
-- tei_xeon_service:      ghcr.io/huggingface/text-embeddings-inference:cpu-1.5
+- embedding: opea/embedding-tei:latest
+- retriever: opea/retriever-redis:latest
+- reranking: opea/reranking-tei:latest
+- llm: opea/llm-tgi:latest
+- dataprep-redis: opea/dataprep-redis:latest
+- tei_xeon_service: ghcr.io/huggingface/text-embeddings-inference:cpu-1.5
 - tei_embedding_service: ghcr.io/huggingface/text-embeddings-inference:cpu-1.5
-- tgi-service:           ghcr.io/huggingface/text-generation-inference:sha-e4201f4-intel-cpu
-- redis-vector-db:       redis/redis-stack:7.2.0-v9
+- tgi-service: ghcr.io/huggingface/text-generation-inference:sha-e4201f4-intel-cpu
+- redis-vector-db: redis/redis-stack:7.2.0-v9
 
 Should you desire to use the Gaudi accelerator, two alternate images are used for the embedding and llm services.
 For Gaudi:
@@ -37,16 +35,16 @@ For Gaudi:
 
 There are 3 use cases for ChatQnA example:
 
-- General ChatQnA with preset RAG data 
+- General ChatQnA with preset RAG data
 - ChatQnA with data preparation which supports that the user can upload RAG data online via dataprep microservice
 - ChatQnA supports multiple LLM models which can be switched in runtime
 
-
 ### General ChatQnA with preset RAG data
 
-This involves deploying the ChatQnA custom resource. You can use `chatQnA_xeon.yaml` or if you have a Gaudi cluster, you could use `chatQnA_gaudi.yaml`. 
+This involves deploying the ChatQnA custom resource. You can use `chatQnA_xeon.yaml` or if you have a Gaudi cluster, you could use `chatQnA_gaudi.yaml`.
 
 1. Create namespace and deploy application
+
    ```sh
    kubectl create ns chatqa
    kubectl apply -f $(pwd)/chatQnA_xeon.yaml
@@ -85,7 +83,6 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_xeon.y
    Should you, for instance, want to change the LLM model you are using in the ChatQnA pipeline, just edit the custom resource file.
    For example, to use Llama-2-7b-chat-hf make the following edit:
 
-
    ```yaml
    - name: Tgi
      internalService:
@@ -95,6 +92,7 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_xeon.y
    ```
 
 7. Apply the change
+
    ```
    kubectl apply -f $(pwd)/chatQnA_xeon.yaml
    ```
@@ -115,12 +113,12 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_xeon.y
 
 You can remove your ChatQnA pipeline by executing standard Kubernetes kubectl commands to remove a custom resource. Verify it was removed by executing kubectl get pods in the chatqa namespace.
 
-
 ### ChatQnA with data preparation
 
-This involves deploying the ChatQnA custom resource. You can use `chatQnA_dataprep_xeon.yaml` or if you have a Gaudi cluster, you could use `chatQnA_dataprep_gaudi.yaml`. 
+This involves deploying the ChatQnA custom resource. You can use `chatQnA_dataprep_xeon.yaml` or if you have a Gaudi cluster, you could use `chatQnA_dataprep_gaudi.yaml`.
 
 1. Create namespace and deploy application
+
    ```sh
    kubectl create ns chatqa
    kubectl apply -f $(pwd)/chatQnA_dataprep_xeon.yaml
@@ -168,12 +166,12 @@ Comparing with `General ChatQnA with preset RAG data`, there should be `10` micr
 
 You can remove your ChatQnA pipeline by executing standard Kubernetes kubectl commands to remove a custom resource. Verify it was removed by executing kubectl get pods in the chatqa namespace.
 
-
 ### ChatQnA supports multiple LLM models
 
 This involves deploying the ChatQnA custom resource. You can use `chatQnA_switch_xeon.yaml` or if you have a Gaudi cluster, you could use `chatQnA_switch_gaudi.yaml`. Moreover, this use case contains 2 LLM models: `Intel/neural-chat-7b-v3-3` and `meta-llama/CodeLlama-7b-hf`.
 
 1. Create namespace and deploy application
+
    ```sh
    kubectl create ns switch
    kubectl apply -f $(pwd)/chatQnA_switch_xeon.yaml
