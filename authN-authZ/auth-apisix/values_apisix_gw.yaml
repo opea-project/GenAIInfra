@@ -1,0 +1,18 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# APISIX Helm chart configs
+version: 2.8.1
+enabled: true
+ingress-controller:
+  enabled: true
+  config:
+    apisix:
+      serviceName: auth-apisix-admin
+      serviceNamespace: auth-apisix
+etcd:
+  replicaCount: 1
+  persistence:
+    enabled: false
+dashboard:
+  enabled: false
