@@ -1,6 +1,6 @@
 # OPEA Pipeline Proxy
 
-OPEA Pipeline Proxy is a replacement of the default Istio proxy with additional features designed specically for OPEA RAG pipelines.
+OPEA Pipeline Proxy is a replacement of the default Istio proxy with additional features designed specifically for OPEA RAG pipelines.
 
 ## Features
 
