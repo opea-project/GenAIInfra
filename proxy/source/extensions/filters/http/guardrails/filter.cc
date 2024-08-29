@@ -1,9 +1,28 @@
 #include "source/extensions/filters/http/guardrails/filter.h"
 
+#include "source/common/json/json_loader.h"
+
 namespace Envoy {
 namespace Extensions {
 namespace HttpFilters {
 namespace Guardrails {
+
+namespace {
+std::string getText(const std::string& buffer) {
+  absl::StatusOr<Json::ObjectSharedPtr> loader = Json::Factory::loadFromStringNoThrow(buffer);
+  if (!loader.ok()) {
+    return "";
+  }
+
+  absl::StatusOr<Envoy::Json::ValueType> value_or_error;
+  value_or_error = loader.value()->getValue("text");
+  if (!value_or_error.ok() || !absl::holds_alternative<std::string>(value_or_error.value())) {
+    return "";
+  }
+
+  return absl::get<std::string>(value_or_error.value());
+}
+} // namespace
 
 void Filter::onDestroy() {}
 
@@ -22,7 +41,8 @@ Http::FilterDataStatus Filter::decodeData(Buffer::Instance& data, bool end_strea
   if (end_stream) {
     decoder_callbacks_->addDecodedData(data, true);
 
-    bool matched = session_->classify(decoder_callbacks_->decodingBuffer()->toString());
+    std::string content = decoder_callbacks_->decodingBuffer()->toString();
+    bool matched = session_->classify(getText(content));
     if ((config_->action() == Action::Allow && matched) ||
         (config_->action() == Action::Deny && !matched)) {
       return Http::FilterDataStatus::Continue;
@@ -63,7 +83,8 @@ Http::FilterDataStatus Filter::encodeData(Buffer::Instance& data, bool end_strea
   if (end_stream) {
     encoder_callbacks_->addEncodedData(data, true);
 
-    bool matched = session_->classify(encoder_callbacks_->encodingBuffer()->toString());
+    std::string content = encoder_callbacks_->encodingBuffer()->toString();
+    bool matched = session_->classify(getText(content));
     if ((config_->action() == Action::Allow && matched) ||
         (config_->action() == Action::Deny && !matched)) {
       return Http::FilterDataStatus::Continue;

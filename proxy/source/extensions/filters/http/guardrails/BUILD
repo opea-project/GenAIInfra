@@ -16,6 +16,7 @@ envoy_cc_library(
         "//source/extensions/filters/http/guardrails/openvino:config",
         "@envoy//envoy/server:filter_config_interface",
         "@envoy//source/common/buffer:buffer_lib",
+        "@envoy//source/common/json:json_loader_lib",
     ],
 )
 
