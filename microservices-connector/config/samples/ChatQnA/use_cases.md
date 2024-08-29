@@ -63,7 +63,7 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_xeon.y
    ```sh
    kubectl get gmconnectors.gmc.opea.io -n chatqa
    NAME     URL                                                      READY     AGE
-   chatqa   http://router-service.chatqa.svc.cluster.local:8080      8/0/8     3m
+   chatqa   http://router-service.chatqa.svc.cluster.local:8080      9/0/9     3m
    ```
 
 4. Deploy a client pod to test the application
@@ -137,7 +137,7 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_datapr
    ```sh
    kubectl get gmconnectors.gmc.opea.io -n chatqa
    NAME     URL                                                      READY     AGE
-   chatqa   http://router-service.chatqa.svc.cluster.local:8080      9/0/9     3m
+   chatqa   http://router-service.chatqa.svc.cluster.local:8080      10/0/10    3m
    ```
 
 > [NOTE]
@@ -190,7 +190,7 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_switch
    ```sh
    kubectl get gmconnectors.gmc.opea.io -n switch
    NAME     URL                                                   READY     AGE
-   switch   http://router-service.switch.svc.cluster.local:8080   14/0/14   83s
+   switch   http://router-service.switch.svc.cluster.local:8080   15/0/15   83s
    ```
 
 > [NOTE]
