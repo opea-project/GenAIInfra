@@ -108,7 +108,7 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_xeon.y
 9. Access the updated pipeline using the same URL from above using the client pod
 
    ```sh
-   kubectl exec "$CLIENT_POD" -n chatqa -- curl -s --no-buffer $accessUrl -X POST -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json'
+   kubectl exec "$CLIENT_POD" -n chatqa -- curl -s --no-buffer $accessUrl -X POST -d '{"text":"What are the key features of Intel Gaudi?","parameters":{"max_new_tokens":17, "do_sample": true}}' -H 'Content-Type: application/json'
    ```
 
 > [NOTE]
@@ -142,7 +142,7 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_datapr
 
 > [NOTE]
 
-Comparing with `General ChatQnA with preset RAG data`, there should be `9` microservices, the extra one is the microservice of `dataprep`.
+Comparing with `General ChatQnA with preset RAG data`, there should be `10` microservices, the extra one is the microservice of `dataprep`.
 
 4. Deploy a client pod to test the application
 
@@ -195,7 +195,7 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_switch
 
 > [NOTE]
 
-Comparing with `General ChatQnA with preset RAG data`, there should be `14` microservices, the extra are the microservices for different embedding models and LLM models.
+Comparing with `General ChatQnA with preset RAG data`, there should be `15` microservices, the extra are the microservices for different embedding models and LLM models.
 
 4. Deploy a client pod to test the application
 
