@@ -472,9 +472,9 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 	// ignore the error if delete failed i.e resource not found
 	// since I don't want to block the process for not clearing the finalizer
 	if err != nil {
-		_log.Info("Failed to delete resource", "ns", ns, "kind", kind, "name", name, "error", err)
+		_log.Info("Failed to delete resource", "namespace", ns, "kind", kind, "name", name, "error", err)
 	} else {
-		_log.Info("Success to delete resource", ns, "kind", kind, "name", name)
+		_log.Info("Success to delete resource", "namespace", ns, "kind", kind, "name", name)
 	}
 }
 
