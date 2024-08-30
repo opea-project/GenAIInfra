@@ -20,6 +20,18 @@ tools/build.sh
 BUILD_IMAGE=1 tools/build.sh
 ```
 
-## Deployments
+## Deployment
 
-WIP
+Before deploying OPEA Pipeline Proxy, you have to install Istio. Please follow the steps [here](https://istio.io/latest/docs/setup/install/istioctl/) for Istio installation.
+
+During the installation, you have to assign the OPEA Pipeline Proxy to deploy instead of the default one delivered by Istio.
+
+```sh
+istioctl install --set hub=docker.io/opea --set components.pilot.hub=docker.io/istio
+```
+
+You can also use the annotation [here](https://istio.io/latest/docs/reference/config/annotations/#SidecarProxyImage) to inject OPEA Pipeline Proxy as sidecars.
+
+## Tasks
+
+- [Guardrails](./deployments/guardrails/README.md)
