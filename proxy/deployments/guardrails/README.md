@@ -26,12 +26,12 @@ spec:
   selector:
     istio: ingressgateway
   servers:
-  - hosts:
-    - chatqna-service.com
-    port:
-      name: http
-      number: 80
-      protocol: HTTP
+    - hosts:
+        - chatqna-service.com
+      port:
+        name: http
+        number: 80
+        protocol: HTTP
 ```
 
 ```yaml
@@ -42,18 +42,18 @@ metadata:
   namespace: istio-system
 spec:
   gateways:
-  - istio-system/chatqna-gateway
+    - istio-system/chatqna-gateway
   hosts:
-  - chatqna-service.com
+    - chatqna-service.com
   http:
-  - match:
-    - uri:
-        prefix: /
-    route:
-    - destination:
-        host: router-service.chatqa.svc.cluster.local
-        port:
-          number: 8080
+    - match:
+        - uri:
+            prefix: /
+      route:
+        - destination:
+            host: router-service.chatqa.svc.cluster.local
+            port:
+              number: 8080
 ```
 
 ### Preparing the model used in Guardrails
@@ -95,18 +95,18 @@ kubectl -n istio-system create configmap model --from-file=combined.bin=model.bi
 
 ```yaml
 ingressGateways:
-- name: istio-ingressgateway
-  enabled: true
-  k8s:
-    volumes:
-    - name: model
-      volumeSource:
-        configMap:
-          name: model
-    volumeMounts:
-    - name: model
-      mountPath: /model
-      readOnly: true
+  - name: istio-ingressgateway
+    enabled: true
+    k8s:
+      volumes:
+        - name: model
+          volumeSource:
+            configMap:
+              name: model
+      volumeMounts:
+        - name: model
+          mountPath: /model
+          readOnly: true
 ```
 
 ```yaml
@@ -120,25 +120,25 @@ spec:
     labels:
       istio: ingressgateway
   configPatches:
-  - applyTo: HTTP_FILTER
-    match:
-      context: GATEWAY
-      listener:
-        portNumber: 8080
-        filterChain:
-          filter:
-            name: envoy.filters.network.http_connection_manager
-            subFilter:
-              name: envoy.filters.http.router
-    patch:
-      operation: INSERT_BEFORE
-      value:
-        name: envoy.filters.http.guardrails
-        typed_config:
-          "@type": type.googleapis.com/envoy.extensions.filters.http.guardrails.v3.Guardrails
-          model_path: /model/combined.xml
-          source: REQUEST
-          action: ALLOW
+    - applyTo: HTTP_FILTER
+      match:
+        context: GATEWAY
+        listener:
+          portNumber: 8080
+          filterChain:
+            filter:
+              name: envoy.filters.network.http_connection_manager
+              subFilter:
+                name: envoy.filters.http.router
+      patch:
+        operation: INSERT_BEFORE
+        value:
+          name: envoy.filters.http.guardrails
+          typed_config:
+            "@type": type.googleapis.com/envoy.extensions.filters.http.guardrails.v3.Guardrails
+            model_path: /model/combined.xml
+            source: REQUEST
+            action: ALLOW
 ```
 
 ### Validating the result
