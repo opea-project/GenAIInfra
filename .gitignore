@@ -2,4 +2,6 @@
 *.out
 **/Chart.lock
 **/charts/*.tgz
+
 bazel-*
+compile_commands.json

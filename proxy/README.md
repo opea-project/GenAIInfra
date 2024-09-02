@@ -42,3 +42,11 @@ istioctl install --set hub=docker.io/opea --set components.pilot.hub=docker.io/i
 ```
 
 You can also use the annotation [here](https://istio.io/latest/docs/reference/config/annotations/#SidecarProxyImage) to inject OPEA Pipeline Proxy as sidecars.
+
+## Development
+
+You can generate the [JSON Compilation Database](https://clang.llvm.org/docs/JSONCompilationDatabase.html) for Visual Studio Code with [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension and other compatible tools.
+
+```sh
+$(bazel info output_base)/external/envoy/tools/gen_compilation_database.py --vscode //source/...
+```
