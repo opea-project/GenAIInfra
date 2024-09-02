@@ -6,7 +6,17 @@ Guardrails in OPEA Pipeline Proxy supports both rule-based detection and AI-powe
 
 ## Architecture
 
-WIP
+```mermaid
+flowchart LR
+    subgraph Filter[HTTP Filter]
+        direction BT
+        Guardrails <--> OpenVINO
+    end
+    Model --> Filter
+    Re(Request / Response) --> Filter
+    Filter --> Continue(Continue)
+    Filter --> Stop(Stop)
+```
 
 ## Deployment
 
