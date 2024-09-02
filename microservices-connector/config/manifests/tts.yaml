@@ -18,6 +18,7 @@ data:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
+  LOGFLAG: ""
 ---
 # Source: tts/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation

@@ -21,6 +21,7 @@ data:
   LANGCHAIN_TRACING_V2: "false"
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
   LANGCHAIN_PROJECT: "opea-reranking-service"
+  LOGFLAG: ""
 ---
 # Source: reranking-usvc/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation

@@ -23,3 +23,4 @@ data:
   LANGCHAIN_TRACING_V2: {{ .Values.global.LANGCHAIN_TRACING_V2 | quote }}
   LANGCHAIN_API_KEY: {{ .Values.global.LANGCHAIN_API_KEY | quote }}
   LANGCHAIN_PROJECT: "opea-reranking-service"
+  LOGFLAG: {{ .Values.LOGFLAG | quote }}
