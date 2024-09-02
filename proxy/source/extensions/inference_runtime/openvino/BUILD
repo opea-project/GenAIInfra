@@ -18,6 +18,7 @@ envoy_cc_library(
         "-lopenvino_ir_frontend",
     ],
     deps = [
+        "//source/extensions/common/inference:inference_runtime_interface",
         "@envoy//envoy/thread_local:thread_local_interface",
     ],
 )

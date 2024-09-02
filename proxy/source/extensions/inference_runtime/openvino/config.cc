@@ -1,9 +1,8 @@
-#include "source/extensions/filters/http/guardrails/openvino/config.h"
+#include "source/extensions/inference_runtime/openvino/config.h"
 
 namespace Envoy {
 namespace Extensions {
-namespace HttpFilters {
-namespace Guardrails {
+namespace InferenceRuntime {
 namespace OpenVino {
 
 CompiledModelThreadLocal::CompiledModelThreadLocal(ov::Core core,
@@ -13,25 +12,8 @@ CompiledModelThreadLocal::CompiledModelThreadLocal(ov::Core core,
                 { throw EnvoyException(fmt::format("Failed to compile model: {}", e.what())); });
 }
 
-Session::Session(Runtime* runtime) : runtime_(runtime) {}
-
-bool Session::classify(const std::string& input) {
-  ov::InferRequest request = runtime_->compiledModel().create_infer_request();
-  std::string& i = const_cast<std::string&>(input);
-  ov::Tensor tensor(ov::element::string, ov::Shape{1}, &i);
-  request.set_input_tensor(tensor);
-
-  request.start_async();
-  request.wait();
-
-  ov::Tensor output = request.get_output_tensor();
-  const float* result = output.data<const float>();
-  ENVOY_LOG(debug, "Inference output: {}", *result);
-
-  return *result > runtime_->threshold();
-}
-
-Runtime::Runtime(const std::string& model_path, double threshold, ThreadLocal::SlotAllocator& tls)
+InferenceRuntime::InferenceRuntime(const std::string& model_path, double threshold,
+                                   ThreadLocal::SlotAllocator& tls)
     : threshold_(threshold),
       tls_(ThreadLocal::TypedSlot<CompiledModelThreadLocal>::makeUnique(tls)) {
   // Add OpenVINO Tokenizers extension.
@@ -49,10 +31,29 @@ Runtime::Runtime(const std::string& model_path, double threshold, ThreadLocal::S
   });
 }
 
-SessionPtr Runtime::createSession() { return std::make_unique<Session>(this); }
+Common::Inference::InferenceSessionPtr InferenceRuntime::createInferenceSession() {
+  return std::make_unique<InferenceSession>(this);
+}
+
+InferenceSession::InferenceSession(InferenceRuntime* runtime) : runtime_(runtime) {}
+
+bool InferenceSession::classify(const std::string& input) {
+  ov::InferRequest request = runtime_->compiledModel().create_infer_request();
+  std::string& i = const_cast<std::string&>(input);
+  ov::Tensor tensor(ov::element::string, ov::Shape{1}, &i);
+  request.set_input_tensor(tensor);
+
+  request.start_async();
+  request.wait();
+
+  ov::Tensor output = request.get_output_tensor();
+  const float* result = output.data<const float>();
+  ENVOY_LOG(debug, "Inference output: {}", *result);
+
+  return *result > runtime_->threshold();
+}
 
 } // namespace OpenVino
-} // namespace Guardrails
-} // namespace HttpFilters
+} // namespace InferenceRuntime
 } // namespace Extensions
 } // namespace Envoy

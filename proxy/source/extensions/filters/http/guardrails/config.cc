@@ -1,5 +1,6 @@
 #include "source/extensions/filters/http/guardrails/config.h"
 
+#include "source/extensions/common/inference/utility.h"
 #include "source/extensions/filters/http/guardrails/filter.h"
 
 namespace Envoy {
@@ -13,7 +14,7 @@ FilterConfigFactory::createFilterFactoryFromProto(const Protobuf::Message& confi
                                                   Server::Configuration::FactoryContext& context) {
   return createFilterFactory(
       dynamic_cast<const envoy::extensions::filters::http::guardrails::v3::Guardrails&>(config),
-      context.serverFactoryContext().threadLocal());
+      context);
 }
 
 ProtobufTypes::MessagePtr FilterConfigFactory::createEmptyConfigProto() {
@@ -23,9 +24,10 @@ ProtobufTypes::MessagePtr FilterConfigFactory::createEmptyConfigProto() {
 
 Http::FilterFactoryCb FilterConfigFactory::createFilterFactory(
     const envoy::extensions::filters::http::guardrails::v3::Guardrails& proto_config,
-    ThreadLocal::SlotAllocator& tls) {
-  OpenVino::RuntimePtr runtime =
-      std::make_unique<OpenVino::Runtime>(proto_config.model_path(), proto_config.threshold(), tls);
+    Server::Configuration::FactoryContext& context) {
+  Extensions::Common::Inference::InferenceRuntimePtr runtime =
+      Extensions::Common::Inference::createInferenceRuntime(proto_config.model_path(),
+                                                            proto_config.threshold(), context);
   Source source;
   switch (proto_config.source()) {
   case envoy::extensions::filters::http::guardrails::v3::Guardrails::REQUEST:

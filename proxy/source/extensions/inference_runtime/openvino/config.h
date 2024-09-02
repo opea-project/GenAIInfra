@@ -2,12 +2,13 @@
 
 #include "envoy/thread_local/thread_local.h"
 
+#include "source/extensions/common/inference/inference_runtime.h"
+
 #include "openvino/openvino.hpp"
 
 namespace Envoy {
 namespace Extensions {
-namespace HttpFilters {
-namespace Guardrails {
+namespace InferenceRuntime {
 namespace OpenVino {
 
 struct CompiledModelThreadLocal : public ThreadLocal::ThreadLocalObject {
@@ -18,25 +19,12 @@ struct CompiledModelThreadLocal : public ThreadLocal::ThreadLocalObject {
 
 using CompiledModelThreadLocalPtr = std::unique_ptr<CompiledModelThreadLocal>;
 
-class Runtime;
-
-class Session : Logger::Loggable<Logger::Id::http> {
+class InferenceRuntime : public Common::Inference::InferenceRuntime {
 public:
-  Session(Runtime* runtime);
+  InferenceRuntime(const std::string& model_path, double threshold,
+                   ThreadLocal::SlotAllocator& tls);
 
-  bool classify(const std::string& input);
-
-protected:
-  Runtime* runtime_;
-};
-
-using SessionPtr = std::unique_ptr<Session>;
-
-class Runtime {
-public:
-  Runtime(const std::string& model_path, double threshold, ThreadLocal::SlotAllocator& tls);
-
-  SessionPtr createSession();
+  Common::Inference::InferenceSessionPtr createInferenceSession() override;
   double threshold() const { return threshold_; }
   ov::CompiledModel& compiledModel() { return tls_->get()->compiled_model_; }
 
@@ -47,10 +35,18 @@ protected:
   ThreadLocal::TypedSlotPtr<CompiledModelThreadLocal> tls_;
 };
 
-using RuntimePtr = std::unique_ptr<Runtime>;
+class InferenceSession : public Common::Inference::InferenceSession,
+                         Logger::Loggable<Logger::Id::http> {
+public:
+  InferenceSession(InferenceRuntime* runtime);
+
+  bool classify(const std::string& input) override;
+
+protected:
+  InferenceRuntime* runtime_;
+};
 
 } // namespace OpenVino
-} // namespace Guardrails
-} // namespace HttpFilters
+} // namespace InferenceRuntime
 } // namespace Extensions
 } // namespace Envoy

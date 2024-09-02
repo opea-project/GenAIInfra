@@ -5,7 +5,7 @@
 #include "envoy/http/filter.h"
 
 #include "source/common/buffer/buffer_impl.h"
-#include "source/extensions/filters/http/guardrails/openvino/config.h"
+#include "source/extensions/common/inference/inference_runtime.h"
 
 namespace Envoy {
 namespace Extensions {
@@ -18,15 +18,18 @@ enum class Action { Allow, Deny };
 
 class FilterConfig {
 public:
-  FilterConfig(OpenVino::RuntimePtr runtime, Source source, Action action)
+  FilterConfig(Extensions::Common::Inference::InferenceRuntimePtr runtime, Source source,
+               Action action)
       : runtime_(std::move(runtime)), source_(source), action_(action) {}
 
-  OpenVino::SessionPtr createSession() const { return runtime_->createSession(); }
+  Extensions::Common::Inference::InferenceSessionPtr createInferenceSession() const {
+    return runtime_->createInferenceSession();
+  }
   Source source() const { return source_; }
   Action action() const { return action_; }
 
 protected:
-  OpenVino::RuntimePtr runtime_;
+  Extensions::Common::Inference::InferenceRuntimePtr runtime_;
   Source source_;
   Action action_;
 };
@@ -36,7 +39,7 @@ using FilterConfigSharedPtr = std::shared_ptr<FilterConfig>;
 class Filter : public Http::StreamFilter, Logger::Loggable<Logger::Id::filter> {
 public:
   Filter(std::shared_ptr<FilterConfig> config)
-      : config_(config), session_(config_->createSession()) {}
+      : config_(config), session_(config_->createInferenceSession()) {}
 
   // Http::StreamFilterBase
   void onDestroy() override;
@@ -59,7 +62,7 @@ public:
 
 protected:
   std::shared_ptr<FilterConfig> config_;
-  OpenVino::SessionPtr session_;
+  Extensions::Common::Inference::InferenceSessionPtr session_;
   Http::StreamDecoderFilterCallbacks* decoder_callbacks_{};
   Http::StreamEncoderFilterCallbacks* encoder_callbacks_{};
 };

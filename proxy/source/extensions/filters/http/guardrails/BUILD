@@ -13,7 +13,7 @@ envoy_cc_library(
     hdrs = ["filter.h"],
     repository = "@envoy",
     deps = [
-        "//source/extensions/filters/http/guardrails/openvino:config",
+        "//source/extensions/common/inference:utility_lib",
         "@envoy//envoy/server:filter_config_interface",
         "@envoy//source/common/buffer:buffer_lib",
         "@envoy//source/common/json:json_loader_lib",

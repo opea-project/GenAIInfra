@@ -19,7 +19,7 @@ public:
 private:
   Http::FilterFactoryCb
   createFilterFactory(const envoy::extensions::filters::http::guardrails::v3::Guardrails& config_pb,
-                      ThreadLocal::SlotAllocator& tls);
+                      Server::Configuration::FactoryContext& context);
 };
 
 } // namespace Guardrails
