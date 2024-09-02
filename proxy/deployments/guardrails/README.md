@@ -69,21 +69,21 @@ spec:
       enabled: true
       hub: docker.io/istio
     ingressGateways:
-    - name: istio-ingressgateway
-      enabled: true
-      k8s:
-        volumes:
-        - name: model
-          volumeSource:
-            configMap:
-              name: model
-        volumeMounts:
-        - name: model
-          mountPath: /model
-          readOnly: true
+      - name: istio-ingressgateway
+        enabled: true
+        k8s:
+          volumes:
+            - name: model
+              volumeSource:
+                configMap:
+                  name: model
+          volumeMounts:
+            - name: model
+              mountPath: /model
+              readOnly: true
     egressGateways:
-    - name: istio-egressgateway
-      enabled: false
+      - name: istio-egressgateway
+        enabled: false
 
   values:
     defaultRevision: ""
