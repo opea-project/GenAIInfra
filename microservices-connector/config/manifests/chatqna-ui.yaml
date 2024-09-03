@@ -14,15 +14,12 @@ metadata:
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
-  http_proxy: ""
-  https_proxy: ""
-  no_proxy: ""
-  APP_BACKEND_SERVICE_ENDPOINT: ""
-  APP_DATA_PREP_SERVICE_URL: ""
-  CHAT_BASE_URL: ""
-  UPLOAD_FILE_BASE_URL: ""
-  GET_FILE: ""
-  DELETE_FILE: ""
+  APP_BACKEND_SERVICE_ENDPOINT: "/v1/chatqna"
+  APP_DATA_PREP_SERVICE_URL: "/v1/dataprep"
+  CHAT_BASE_URL: "/v1/chatqna"
+  UPLOAD_FILE_BASE_URL: "/v1/dataprep"
+  GET_FILE: "/v1/dataprep/get_file"
+  DELETE_FILE: "/v1/dataprep/delete_file"
 ---
 # Source: chatqna-ui/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation

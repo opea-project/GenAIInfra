@@ -42,5 +42,8 @@ dependencies:
   - name: data-prep
     version: 1.0.0
     repository: "file://../common/data-prep"
+  - name: chatqna-ui
+    version: 1.0.0
+    repository: "file://../common/chatqna-ui"
 version: 1.0.0
 appVersion: "v1.0"
