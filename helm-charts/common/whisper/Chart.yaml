@@ -5,6 +5,6 @@ apiVersion: v2
 name: whisper
 description: The Helm chart for deploying whisper as microservice
 type: application
-version: 0.9.0
+version: 1.0.0
 # The whisper microservice server version
-appVersion: "v0.9"
+appVersion: "v1.0"
