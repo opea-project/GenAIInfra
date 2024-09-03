@@ -1,0 +1,46 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: opea/chatqna-guardrails
+  tag: "latest"
+
+# guardrails related config
+guardrails-usvc:
+  enabled: true
+  SAFETY_GUARD_ENDPOINT: "http://{{ .Release.Name }}-tgi-guardrails"
+  SAFETY_GUARD_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
+
+# gaudi related config
+tei:
+  image:
+    repository: ghcr.io/huggingface/tei-gaudi
+    tag: synapse_1.16
+  resources:
+    limits:
+      habana.ai/gaudi: 1
+  securityContext:
+    readOnlyRootFilesystem: false
+
+tgi:
+  image:
+    repository: ghcr.io/huggingface/tgi-gaudi
+    tag: "2.0.1"
+  resources:
+    limits:
+      habana.ai/gaudi: 1
+  MAX_INPUT_LENGTH: "1024"
+  MAX_TOTAL_TOKENS: "2048"
+  CUDA_GRAPHS: ""
+
+tgi-guardrails:
+  LLM_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
+  image:
+    repository: ghcr.io/huggingface/tgi-gaudi
+    tag: "2.0.1"
+  resources:
+    limits:
+      habana.ai/gaudi: 1
+  MAX_INPUT_LENGTH: "1024"
+  MAX_TOTAL_TOKENS: "2048"
+  CUDA_GRAPHS: ""
