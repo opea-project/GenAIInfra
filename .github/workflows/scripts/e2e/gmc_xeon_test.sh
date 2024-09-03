@@ -21,6 +21,7 @@ MODIFY_STEP_NAMESPACE="${APP_NAMESPACE}-modstep"
 WEBHOOK_NAMESPACE="${APP_NAMESPACE}-webhook"
 
 function validate_gmc() {
+    mkdir -p ${LOG_PATH}
     echo "validate audio-qna"
     validate_audioqa
 
@@ -152,7 +153,7 @@ function validate_audioqa() {
    accessUrl=$(kubectl get gmc -n $AUDIOQA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='audioqa')].status.accessUrl}")
    byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq .byte_str)
    if [ -z "$byte_str" ]; then
-       echo "audioqa failed, please check the the!"
+       echo "audioqa failed!"
        exit 1
    fi
    echo "Audioqa response check succeed!"
@@ -452,10 +453,14 @@ function validate_modify_config() {
     #change the model id of the step named "Tgi" in the codegen_xeon_mod.yaml
     yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "HuggingFaceH4/mistral-7b-grok"' $(pwd)/config/samples/CodeGen/codegen_xeon_mod.yaml
     kubectl apply -f $(pwd)/config/samples/CodeGen/codegen_xeon_mod.yaml
-    #you are supposed to see an error, it's a known issue, but it does not affect the tests
-    #https://github.com/opea-project/GenAIInfra/issues/314
 
-    pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    # Wait until all pods are ready
+    wait_until_all_pod_ready $MODIFY_STEP_NAMESPACE 300s
+    if [ $? -ne 0 ]; then
+         echo "Error Some pods are not ready!"
+         exit 1
+    fi
+
     check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"

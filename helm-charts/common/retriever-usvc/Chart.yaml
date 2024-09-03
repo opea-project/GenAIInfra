@@ -5,15 +5,15 @@ apiVersion: v2
 name: retriever-usvc
 description: The Helm chart for deploying retriever as microservice
 type: application
-version: 0.9.0
+version: 1.0.0
 # The retriever microservice server version
-appVersion: "v0.9"
+appVersion: "v1.0"
 dependencies:
   - name: tei
-    version: 0.9.0
+    version: 1.0.0
     repository: file://../tei
     condition: autodependency.enabled
   - name: redis-vector-db
-    version: 0.9.0
+    version: 1.0.0
     repository: file://../redis-vector-db
     condition: autodependency.enabled
