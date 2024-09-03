@@ -30,7 +30,7 @@ build:
 		--rm \
 		-v /tmp/proxy-docker-build:/root/.cache \
 		-v $(shell pwd):/source \
-		opea/$(BUILD_IMG):$(BUILD_TAG) \
+		$(DOCKER_REGISTRY)/$(BUILD_IMG):$(BUILD_TAG) \
 		"/bin/bash" "-c" "cd /source && export PATH=/opt/llvm/bin:$$PATH && BAZEL_ARG=\"--config=docker\" make"
 
 .PHONY: test
@@ -39,7 +39,7 @@ test:
 		--rm \
 		-v /tmp/proxy-docker-build:/root/.cache \
 		-v $(shell pwd):/source \
-		opea/$(BUILD_IMG):$(BUILD_TAG) \
+		$(DOCKER_REGISTRY)/$(BUILD_IMG):$(BUILD_TAG) \
 		"/bin/bash" "-c" "cd /source && export PATH=/opt/llvm/bin:$$PATH && BAZEL_ARG=\"--config=docker\" make test"
 
 endif
