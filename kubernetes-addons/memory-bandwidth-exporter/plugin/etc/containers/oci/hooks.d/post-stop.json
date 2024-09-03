@@ -1,0 +1,10 @@
+{
+    "version": "1.0.0",
+    "hook": {
+        "path": "/usr/local/sbin/post-stop.sh"
+    },
+    "when": {
+        "always": true
+    },
+    "stages": ["poststop"]
+}

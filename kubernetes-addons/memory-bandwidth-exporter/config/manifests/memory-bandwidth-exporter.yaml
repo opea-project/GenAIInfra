@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: memory-bandwidth-exporter
+  namespace: system
+spec:
+  selector:
+    matchLabels:
+      app: memory-bandwidth-exporter
+  template:
+    metadata:
+      labels:
+        app: memory-bandwidth-exporter
+    spec:
+      containers:
+      - name: memory-bandwidth-exporter
+        image: MBE_IMG
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        - name: NAMESPACE_WHITELIST
+          value: "calico-apiserver,calico-system,kube-system,tigera-operator"
+        volumeMounts:
+        - name: hooks
+          mountPath: /etc/containers/oci/hooks.d/
+          readOnly: true
+        - name: usr
+          mountPath: /usr/
+          readOnly: true
+        - name: resctrl
+          mountPath: /sys/fs/resctrl/
+        - name: nri
+          mountPath: /var/run/nri/
+          readOnly: true
+        securityContext:
+          privileged: true
+        ports:
+        - containerPort: 9100
+          name: http
+      volumes:
+      - name: hooks
+        hostPath:
+          path: /etc/containers/oci/hooks.d/
+      - name: usr
+        hostPath:
+          path: /usr/
+      - name: resctrl
+        hostPath:
+          path: /sys/fs/resctrl/
+      - name: nri
+        hostPath:
+          path: /var/run/nri/
+      hostPID: true

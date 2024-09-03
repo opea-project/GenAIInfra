@@ -1,0 +1,10 @@
+{
+    "version": "1.0.0",
+    "hook": {
+        "path": "/usr/local/sbin/create-runtime.sh"
+    },
+    "when": {
+        "always": true
+    },
+    "stages": ["createRuntime"]
+}
