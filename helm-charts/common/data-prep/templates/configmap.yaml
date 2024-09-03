@@ -20,6 +20,8 @@ data:
   REDIS_URL: "redis://{{ .Release.Name }}-redis-vector-db:6379"
   {{- end }}
   INDEX_NAME: {{ .Values.INDEX_NAME | quote }}
+  KEY_INDEX_NAME: {{ .Values.KEY_INDEX_NAME | quote }}
+  SEARCH_BATCH_SIZE: {{ .Values.SEARCH_BATCH_SIZE | quote }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.global.HF_ENDPOINT }}
