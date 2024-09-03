@@ -49,7 +49,7 @@ horizontalPodAutoscaler:
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   horizontalPodAutoscaler:
-    maxReplicas: 6
+    maxReplicas: 4
     enabled: false
 teirerank:
   horizontalPodAutoscaler:
