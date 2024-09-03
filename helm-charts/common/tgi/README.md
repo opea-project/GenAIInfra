@@ -13,7 +13,7 @@ export MODELNAME="bigscience/bloom-560m"
 export HFTOKEN="insert-your-huggingface-token-here"
 helm install tgi tgi --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 # To deploy on Gaudi enabled kubernetes cluster
-# helm install tgi tgi --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values gaudi-values.yaml
+# helm install tgi tgi --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values Intel/gaudi-values.yaml
 ```
 
 By default, the tgi service will downloading the "bigscience/bloom-560m" which is about 1.1GB.

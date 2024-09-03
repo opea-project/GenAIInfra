@@ -32,7 +32,7 @@ function generate_yaml {
 
   helm dependency update $chart
   helm template $chart $chart --skip-tests $extraparams -f $chart/values.yaml       > $outputdir/xeon/${chart}.yaml
-  helm template $chart $chart --skip-tests $extraparams -f $chart/gaudi-values.yaml > $outputdir/gaudi/${chart}.yaml
+  helm template $chart $chart --skip-tests $extraparams -f $chart/Intel/gaudi-values.yaml > $outputdir/gaudi/${chart}.yaml
 
 }
 

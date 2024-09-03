@@ -17,7 +17,7 @@ export MODELDIR="/mnt/opea-models"
 export MODELNAME="HuggingFaceH4/mistral-7b-grok"
 helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device
-# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values codetrans/gaudi-values.yaml
+# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values codetrans/Intel/gaudi-values.yaml
 ```
 
 ## Verify

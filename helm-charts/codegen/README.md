@@ -18,7 +18,7 @@ export MODELNAME="meta-llama/CodeLlama-7b-hf"
 # To run on Xeon
 helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
 # To run on Gaudi
-#helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codegen/gaudi-values.yaml
+#helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codegen/Intel/gaudi-values.yaml
 ```
 
 ### IMPORTANT NOTE

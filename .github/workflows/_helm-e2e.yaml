@@ -98,7 +98,7 @@ jobs:
           echo "should_cleanup=true" >> $GITHUB_ENV
           value_file="values.yaml"
           if [ "${{ inputs.hardware }}" == "gaudi" ]; then
-            value_file="gaudi-values.yaml"
+            value_file="Intel/gaudi-values.yaml"
           fi
           if [[ ! -f ${{ env.CHART_FOLDER }}/${value_file} ]]; then
             echo "No value file found, exist test!"
