@@ -46,7 +46,7 @@ endif
 
 .PHONY: image
 image:
-	docker build -f tools/Dockerfile -t $(DOCKER_REGISTRY)/$(ISITO_IMG):$(ISTIO_TAG)
+	docker build -f tools/Dockerfile -t $(DOCKER_REGISTRY)/$(ISTIO_IMG):$(ISTIO_TAG)
 
 .PHONY: build-image
 build-image:
