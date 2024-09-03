@@ -7,7 +7,7 @@ load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 # Update Istio and Envoy by:
 #   1. Determine SHA256 `wget https://github.com/istio/proxy/archive/$COMMIT.tar.gz && sha256sum $COMMIT.tar.gz`.
-#   2. Update .bazelversion, envoy.bazelrc, BUILD, tools/Dockerfile and tools/build.sh if needed.
+#   2. Update .bazelversion, envoy.bazelrc, BUILD, Makefile and tools/Dockerfile* if needed.
 #
 # Istio 1.23.0.
 ISTIO_SHA = "165f7597596f5b4de7025bb635a7b59d1c3fe27e"

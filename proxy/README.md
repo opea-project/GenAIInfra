@@ -11,23 +11,24 @@ OPEA Pipeline Proxy is an enhancement of the default Istio proxy with additional
 OPEA Pipeline Proxy is based on Istio proxy and Envoy, you can refer to [Building Envoy with Bazel](https://github.com/envoyproxy/envoy/blob/main/bazel/README.md) for build locally. In addition, Clang and OpenVINO is required to build OPEA Pipeline Proxy.
 
 ```sh
-# Build the binary locally. The binary will be generated to `bazel-bin/envoy`.
-bazel build -c opt envoy
+# Build OPEA Pipeline Proxy. The binary will be generated to `bin/envoy`.
+make
 
-# Build the Docker image locally.
-mkdir -p bin
-cp -f bazel-bin/envoy bin/envoy
-docker build -f tools/Dockerfile .
+# Build the image. The image will be tagged as `opea/proxyv2:<ISTIO_TAG>` by default.
+make image
 ```
 
-(Recommended) You can also build OPEA Pipeline Proxy in the build container.
+You can also build OPEA Pipeline Proxy in the build container.
 
 ```sh
-# Build the binary within the Docker. The binary will be generated to `bin/envoy`.
-tools/build.sh
+# Build the build image.
+make build-image
 
-# Build the Docker image within the Docker. The image will be tagged as `opea/proxyv2:<ISTIO_TAG>`.
-BUILD_IMAGE=1 tools/build.sh
+# Build OPEA Pipeline Proxy with the build container. The binary will be generated to `bin/envoy`.
+BUILD_WITH_CONTAINER=1 make
+
+# Build the image. The image will be tagged as `opea/proxyv2:<ISTIO_TAG>` by default.
+make image
 ```
 
 ## Deployment
@@ -48,5 +49,11 @@ You can also use the annotation [here](https://istio.io/latest/docs/reference/co
 You can generate the [JSON Compilation Database](https://clang.llvm.org/docs/JSONCompilationDatabase.html) for Visual Studio Code with [clangd](https://marketplace.visualstudio.com/items?itemName=llvm-vs-code-extensions.vscode-clangd) extension and other compatible tools.
 
 ```sh
-$(bazel info output_base)/external/envoy/tools/gen_compilation_database.py --vscode //source/... //test/...
+make compilation-database
+```
+
+You can test OPEA Pipeline Proxy with the following command.
+
+```sh
+make test
 ```
