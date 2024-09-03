@@ -992,28 +992,3 @@ func TestIsMetadataChanged(t *testing.T) {
 		t.Errorf("Expected metadata changes to not be detected, but got true")
 	}
 }
-
-// func TestSetupWithManager(t *testing.T) {
-// 	// Set up a fake client and manager
-// 	fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
-// 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-// 		Scheme: scheme.Scheme,
-// 		Client: fakeClient,
-// 	})
-// 	assert.NoError(t, err)
-
-// 	// Create a new GMConnectorReconciler
-// 	reconciler := &GMConnectorReconciler{
-// 		Client: mgr.GetClient(),
-// 		Log:    ctrl.Log.WithName("controllers").WithName("GMConnector"),
-// 		Scheme: mgr.GetScheme(),
-// 	}
-
-// 	// Call the SetupWithManager function
-// 	err = reconciler.SetupWithManager(mgr)
-// 	assert.NoError(t, err)
-
-// 	// Additional assertions can be added here to verify the setup
-// 	// For example, you can check if the controller is added to the manager
-// 	assert.NotNil(t, mgr.GetController("GMConnector"))
-// }
