@@ -11,7 +11,7 @@ cd $GenAIInfra_DIR/microservices-connector/
 
 # TODO: to support more examples
 kubectl create ns chatqa
-kubectl apply -f $(pwd)/config/samples/chatQnA_nv.yaml
+kubectl apply -f $(pwd)/config/samples/ChatQnA/chatQnA_nv.yaml
 
 sleep 2
 kubectl get service -n chatqa

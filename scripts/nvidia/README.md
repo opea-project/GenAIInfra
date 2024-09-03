@@ -55,7 +55,7 @@ For more details, refer to [GMC installation](../../microservices-connector/READ
 
 Refer to [Usage guide for GMC](../../microservices-connector/usage_guide.md) for more details.
 
-Here provides a simple script to use GMC to compose ChatQnA pipeline.
+Here provides a simple script `./gmc-chatqna-pipeline.sh` to use GMC to compose ChatQnA pipeline.
 
 #### 3. Test ChatQnA service
 
