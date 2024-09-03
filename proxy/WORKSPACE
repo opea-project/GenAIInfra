@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 workspace(name = "dev_opea_proxy")
 
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")

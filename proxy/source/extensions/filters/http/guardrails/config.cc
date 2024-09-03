@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2024 Intel Corporation
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include "source/extensions/filters/http/guardrails/config.h"
 
 #include "source/extensions/common/inference/utility.h"

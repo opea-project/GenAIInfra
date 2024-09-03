@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 load(
     "@envoy//bazel:envoy_build_system.bzl",
     "envoy_cc_test",

@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2024 Intel Corporation
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include "source/extensions/common/inference/utility.h"
 
 #include "source/extensions/inference_runtime/openvino/config.h"

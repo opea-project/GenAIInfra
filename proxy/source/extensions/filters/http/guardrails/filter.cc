@@ -1,3 +1,8 @@
+/*
+ * Copyright (C) 2024 Intel Corporation
+ * SPDX-License-Identifier: Apache-2.0
+ */
+
 #include "source/extensions/filters/http/guardrails/filter.h"
 
 #include "source/common/json/json_loader.h"

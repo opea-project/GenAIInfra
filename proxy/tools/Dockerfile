@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 ARG BUILD_TAG=75238004b0fcfd8a7f71d380d7a774dda5c39622
 ARG ISTIO_TAG=1.23.0
 
