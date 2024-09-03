@@ -58,12 +58,12 @@ In this example, we setup rules that only users with JWT token issued by "testin
 ```sh
 # make sure running under authN-authZ/auth-istio folder
 # apply the yaml to request authentication using JWT token
-kubectl apply -f $(pwd)/$(DEPLOY_METHOD)/chatQnA_authZ_fakejwt.yaml -n chatqa
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_authZ_fakejwt.yaml -n chatqa
 
 # apply the yaml file to request that only JWT token with
 # issuer & sub == "testing@secure.istio.io" and groups belongs to group1
 # can access the endpoint of chatQnA service
-kubectl apply -f $(pwd)/$(DEPLOY_METHOD)/chatQnA_authN_fakejwt.yaml -n chatqa
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_authN_fakejwt.yaml -n chatqa
 ```
 
 After applying these two yaml files, we have setup the policy that only user with a valid JWT token (with valid issuer and claims) could access the pipeline endpoint.
@@ -151,14 +151,14 @@ Use the commands to apply the authentication and authorization rules.
 
 ```bash
 # export the router service through istio ingress gateway
-kubectl apply -f $(pwd)/$(DEPLOY_METHOD)/chatQnA_router_gateway.yaml
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway.yaml
 
 # 'envsubst' is used to substitute envs in yaml.
 # use 'sudo apt-get install gettext-base' to install envsubst if it does not exist on your machine
 # apply the authentication and authorization rule
 # these files will restrict user access with valid token (with valid issuer, username and realm role)
-envsubst < $(pwd)/$(DEPLOY_METHOD)/chatQnA_authN_keycloak.yaml | kubectl -n chatqa apply -f -
-envsubst < $(pwd)/$(DEPLOY_METHOD)/chatQnA_authZ_keycloak.yaml | kubectl -n chatqa apply -f -
+envsubst < $(pwd)/$DEPLOY_METHOD/chatQnA_authN_keycloak.yaml | kubectl -n chatqa apply -f -
+envsubst < $(pwd)/$DEPLOY_METHOD/chatQnA_authZ_keycloak.yaml | kubectl -n chatqa apply -f -
 ```
 
 User could customize the chatQnA_authZ_keycloak.yaml to reflect roles, groups or any other claims they defined in the OIDC provider for the user.
@@ -261,6 +261,7 @@ export CLIENT_SECRET=<YOUR_CLIENT_SECRET>
 # Using bash here. More methods found here:
 # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#generating-a-cookie-secret
 export COOKIE_SECRET=$(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo)
+kubectl create ns oauth2-proxy
 envsubst < $(pwd)/oauth2_install.yaml | kubectl apply -f -
 ```
 
@@ -270,7 +271,7 @@ Here we expose the chatQnA endpoint through the ingress gateway and then install
 
 ```bash
 # expose chatqna endpoint
-kubectl apply -f $(pwd)/$(DEPLOY_METHOD)/chatQnA_router_gateway_oauth.yaml
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway_oauth.yaml
 # build chatqna UI image if not exist on your machine
 git clone https://github.com/opea-project/GenAIExamples.git
 cd GenAIExamples/ChatQnA/docker/ui/
@@ -280,7 +281,11 @@ docker save -o ui.tar opea/chatqna-conversation-ui:latest
 sudo ctr -n k8s.io image import ui.tar
 # install chatqna conversation UI
 cd && cd GenAIInfra
-helm install chatqna-ui $(pwd)/helm-charts/common/chatqna-ui --set BACKEND_SERVICE_ENDPOINT="http://${INGRESS_HOST}:${INGRESS_PORT}/",DATAPREP_SERVICE_ENDPOINT="http://${INGRESS_HOST}:${INGRESS_PORT}/dataprep"
+if [ "${DEPLOY_METHOD}" = "gmc-based" ]; then
+    helm install chatqna-ui $(pwd)/helm-charts/common/chatqna-ui --set BACKEND_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/",DATAPREP_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/dataprep"
+else
+    helm install chatqna-ui $(pwd)/helm-charts/common/chatqna-ui --set BACKEND_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/v1/chatqna",DATAPREP_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/v1/dataprep"
+fi
 # expose ui service outside
 kubectl apply -f $(pwd)/chatQnA_ui_gateway.yaml
 ```
@@ -292,6 +297,7 @@ Here we apply the authentication and authorization rules.
 ```bash
 # Before applying the authorization rule, need to add the oauth2-proxy as the external authorization provider
 kubectl apply -f $(pwd)/chatQnA_istio_external_auth.yaml
+kubectl rollout restart deployment/istiod -n istio-system
 # 'envsubst' is used to substitute envs in yaml.
 # use 'sudo apt-get install gettext-base' to install envsubst if it does not exist on your machine
 # apply the authentication and authorization rule
