@@ -6,7 +6,7 @@
 # Metric descriptions:
 # - https://github.com/huggingface/text-generation-inference/discussions/1127#discussioncomment-7240527
 
-{{- if .Values.global.horizontalPodAutoscaler.enabled }}
+{{- if .Values.horizontalPodAutoscaler.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

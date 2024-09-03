@@ -1,11 +1,14 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if .Values.global.horizontalPodAutoscaler.enabled }}
+{{- if .Values.horizontalPodAutoscaler.enabled }}
 apiVersion: v1
 data:
   config.yaml: |
       rules:
+      {{- if .Values.tgi.horizontalPodAutoscaler.enabled }}
+      # check metric with:
+      # kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/tgi_request_latency | jq
       - seriesQuery: '{__name__="tgi_request_inference_duration_sum",service="{{ include "tgi.fullname" .Subcharts.tgi }}"}'
         # Average request latency from TGI histograms, over 1 min
         # (0.001 divider add is to make sure there's always a valid value)
@@ -22,6 +25,8 @@ data:
               resource: namespace
             service:
               resource: service
+      {{- end }}
+      {{- if .Values.teirerank.horizontalPodAutoscaler.enabled }}
       - seriesQuery: '{__name__="te_request_inference_duration_sum",service="{{ include "teirerank.fullname" .Subcharts.teirerank }}"}'
         # Average request latency from TEI histograms, over 1 min
         metricsQuery: 'rate(te_request_inference_duration_sum{service="{{ include "teirerank.fullname" .Subcharts.teirerank }}",<<.LabelMatchers>>}[1m]) / (0.001+rate(te_request_inference_duration_count{service="{{ include "teirerank.fullname" .Subcharts.teirerank }}",<<.LabelMatchers>>}[1m]))'
@@ -34,6 +39,8 @@ data:
               resource: namespace
             service:
               resource: service
+      {{- end }}
+      {{- if .Values.tei.horizontalPodAutoscaler.enabled }}
       - seriesQuery: '{__name__="te_request_inference_duration_sum",service="{{ include "tei.fullname" .Subcharts.tei }}"}'
         # Average request latency from TEI histograms, over 1 min
         metricsQuery: 'rate(te_request_inference_duration_sum{service="{{ include "tei.fullname" .Subcharts.tei }}",<<.LabelMatchers>>}[1m]) / (0.001+rate(te_request_inference_duration_count{service="{{ include "tei.fullname" .Subcharts.tei }}",<<.LabelMatchers>>}[1m]))'
@@ -46,6 +53,7 @@ data:
               resource: namespace
             service:
               resource: service
+      {{- end }}
 kind: ConfigMap
 metadata:
   name: adapter-config

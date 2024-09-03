@@ -9,7 +9,7 @@ metadata:
     {{- include "tei.labels" . | nindent 4 }}
 spec:
   # use explicit replica counts only of HorizontalPodAutoscaler is disabled
-  {{- if not .Values.global.horizontalPodAutoscaler.enabled }}
+  {{- if not .Values.horizontalPodAutoscaler.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
@@ -105,7 +105,7 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.global.horizontalPodAutoscaler.enabled }}
+      {{- if .Values.horizontalPodAutoscaler.enabled }}
       # extra time to finish processing buffered requests before HPA forcibly terminates pod
       terminationGracePeriodSeconds: 60
       {{- end }}

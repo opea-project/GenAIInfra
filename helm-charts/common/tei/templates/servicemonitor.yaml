@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if .Values.global.horizontalPodAutoscaler.enabled }}
+{{- if .Values.horizontalPodAutoscaler.enabled }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:

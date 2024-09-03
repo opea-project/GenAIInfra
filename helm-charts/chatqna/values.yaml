@@ -35,9 +35,30 @@ tolerations: []
 
 affinity: {}
 
-# To override values in subchart tgi
+# Enabling HorizontalPodAutoscaler (HPA) will:
+# - Overwrite named PrometheusAdapter configMap with ChatQnA specific custom metric queries
+#   for embedding, reranking, tgi services
+# Note: default configMap in upstream:
+#  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
+horizontalPodAutoscaler:
+  enabled: false
+
+# Override values in specific subcharts
+
+# Enabling "horizontalPodAutoscaler" for any of the subcharts requires enabling it also above!
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  horizontalPodAutoscaler:
+    maxReplicas: 6
+    enabled: false
+teirerank:
+  horizontalPodAutoscaler:
+    maxReplicas: 3
+    enabled: false
+tei:
+  horizontalPodAutoscaler:
+    maxReplicas: 2
+    enabled: false
 
 # disable guardrails-usvc by default
 # See guardrails-values.yaml for guardrail related options
@@ -61,11 +82,3 @@ global:
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
-
-  # Enabling HorizontalPodAutoscaler (HPA) will:
-  # - Overwrite existing PrometheusAdapter "adapter-config" configMap with ChatQnA specific custom metric queries
-  #   for embedding, reranking, tgi services
-  # Upstream default configMap:
-  #  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
-  horizontalPodAutoscaler:
-    enabled: false

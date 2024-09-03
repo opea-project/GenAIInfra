@@ -66,7 +66,7 @@ There are global options(which should be shared across all components of a workl
 | global     | http_proxy https_proxy no_proxy | Proxy settings. If you are running the workloads behind the proxy, you'll have to add your proxy settings here.                                                                                                                                                                |
 | global     | modelUsePVC                     | The PersistentVolumeClaim you want to use as huggingface hub cache. Default "" means not using PVC. Only one of modelUsePVC/modelUseHostPath can be set.                                                                                                                       |
 | global     | modelUseHostPath                | If you don't have Persistent Volume in your k8s cluster and want to use local directory as huggingface hub cache, set modelUseHostPath to your local directory name. Note that this can't share across nodes. Default "". Only one of modelUsePVC/modelUseHostPath can be set. |
-| global     | horizontalPodAutoscaler.enabled | Enable HPA autoscaling for TGI and TEI service deployments based on metrics they provide. See #pre-conditions and #gotchas before enabling!                                                                                                                                    |
+| chatqna    | horizontalPodAutoscaler.enabled | Enable HPA autoscaling for TGI and TEI service deployments based on metrics they provide. See [Pre-conditions](#pre-conditions) and [Gotchas](#gotchas) before enabling!                                                                                                       |
 | tgi        | LLM_MODEL_ID                    | The model id you want to use for tgi server. Default "Intel/neural-chat-7b-v3-3".                                                                                                                                                                                              |
 
 ## HorizontalPodAutoscaler (HPA) support
@@ -83,9 +83,9 @@ yet, it SHOULD be be installed before enabling HPA, e.g. by using:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
 
 Enabling HPA in top-level Helm chart (e.g. `chatqna`), overwrites cluster's current _PrometheusAdapter_
-configuration with relevant custom metric queries. If that has queries you wish to retain, _or_ HPA is
-otherwise enabled only in TGI or TEI subchart(s), you need add relevat queries to _PrometheusAdapter_
-configuration _manually_ (e.g. from `chatqna` custom metrics Helm template).
+configuration with relevant custom metric queries. If that has existing queries that should be retained,
+relevant queries need to be added to existing _PrometheusAdapter_ configuration _manually_ from the
+custom metrics Helm template (in top-level Helm chart).
 
 ### Gotchas
 
