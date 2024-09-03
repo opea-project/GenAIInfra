@@ -87,16 +87,36 @@ configuration with relevant custom metric queries. If that has existing queries 
 relevant queries need to be added to existing _PrometheusAdapter_ configuration _manually_ from the
 custom metrics Helm template (in top-level Helm chart).
 
+Names of the _Prometheus-operator_ related objects depend on where it is installed from.
+Default ones are:
+
+- "kube-prometheus" upstream manifests:
+  - Namespace: `monitoring`
+  - Metrics service: `prometheus-k8s`
+  - Adapter configMap: `adapter-config`
+- Helm chart for "kube-prometheus" (linked above):
+  - Namespace: `monitoring`
+  - Metrics service: `prom-kube-prometheus-stack-prometheus`
+  - Adapter configMap: `prom-adapter-prometheus-adapter`
+
+Make sure correct "configMap" name is used in top-level (e.g. `chatqna`) Helm chart `values.yaml`,
+and commands below!
+
 ### Gotchas
 
 Why HPA is opt-in:
 
 - Enabling (top level) chart `horizontalPodAutoscaler` option will _overwrite_ cluster's current
   `PrometheusAdapter` configuration with its own custom metrics configuration.
-  Take copy of the existing one before install, if that matters:
-  `kubectl -n monitoring get cm/adapter-config -o yaml > adapter-config.yaml`
+  Take copy of the existing `configMap` before install, if that matters:
+  ```console
+  kubectl -n monitoring get cm/prom-adapter-prometheus-adapter -o yaml > adapter-config.yaml
+  ```
 - `PrometheusAdapter` needs to be restarted after install, for it to read the new configuration:
-  `ns=monitoring; kubectl -n $ns delete $(kubectl -n $ns get pod --selector app.kubernetes.io/name=prometheus-adapter -o name)`
+  ```console
+  ns=monitoring;
+  kubectl -n $ns delete $(kubectl -n $ns get pod --selector app.kubernetes.io/name=prometheus-adapter -o name)
+  ```
 - By default Prometheus adds [k8s RBAC rules](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/prometheus-roleBindingSpecificNamespaces.yaml)
   for accessing metrics from `default`, `kube-system` and `monitoring` namespaces. If Helm is
   asked to install OPEA services to some other namespace, those rules need to be updated accordingly
@@ -105,14 +125,21 @@ Why HPA is opt-in:
 
 ### Verify HPA metrics
 
-To verify that metrics required by horizontalPodAutoscaler option work, check following...
+To verify that horizontalPodAutoscaler options work, it's better to check that both inferencing
+services metrics, and HPA rules using custom metrics generated from them work.
 
-Prometheus has found the metric endpoints, i.e. last number on `curl` output is non-zero:
+Use k8s object names matching your Prometheus installation:
+
+```console
+prom_svc=prom-kube-prometheus-stack-prometheus # Metrics service
+prom_ns=monitoring;                            # Prometheus namespace
+```
+
+Verify Prometheus found OPEA services metric endpoints, i.e. last number on `curl` output is non-zero:
 
 ```console
 chart=chatqna; # OPEA services prefix
-ns=monitoring; # Prometheus namespace
-prom_url=http://$(kubectl -n $ns get -o jsonpath="{.spec.clusterIP}:{.spec.ports[0].port}" svc/prometheus-k8s);
+prom_url=http://$(kubectl -n $prom_ns get -o jsonpath="{.spec.clusterIP}:{.spec.ports[0].port}" svc/$prom_svc);
 curl --no-progress-meter $prom_url/metrics | grep scrape_pool_targets.*$chart
 ```
 

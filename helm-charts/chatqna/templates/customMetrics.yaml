@@ -3,6 +3,10 @@
 
 {{- if .Values.horizontalPodAutoscaler.enabled }}
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Values.horizontalPodAutoscaler.configMap }}
+  namespace: monitoring
 data:
   config.yaml: |
       rules:
@@ -54,8 +58,4 @@ data:
             service:
               resource: service
       {{- end }}
-kind: ConfigMap
-metadata:
-  name: adapter-config
-  namespace: monitoring
 {{- end }}
