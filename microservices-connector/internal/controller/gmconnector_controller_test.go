@@ -14,7 +14,6 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
@@ -609,22 +608,22 @@ var _ = Describe("Predicate Functions", func() {
 
 	BeforeEach(func() {
 
-		mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-			Scheme: k8sClient.Scheme(),
-			// Client: k8sClient,
-		})
-		Expect(err).NotTo(HaveOccurred())
+		// mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+		// 	Scheme: k8sClient.Scheme(),
+		// 	// Client: k8sClient,
+		// })
+		// Expect(err).NotTo(HaveOccurred())
 
-		// Create a new GMConnectorReconciler
-		reconciler := &GMConnectorReconciler{
-			Client: k8sClient,
-			// Log:    ctrl.Log.WithName("controllers").WithName("GMConnector"),
-			Scheme: mgr.GetScheme(),
-		}
+		// // Create a new GMConnectorReconciler
+		// reconciler := &GMConnectorReconciler{
+		// 	Client: k8sClient,
+		// 	// Log:    ctrl.Log.WithName("controllers").WithName("GMConnector"),
+		// 	Scheme: mgr.GetScheme(),
+		// }
 
-		// Call the SetupWithManager function
-		err = reconciler.SetupWithManager(mgr)
-		Expect(err).NotTo(HaveOccurred())
+		// // Call the SetupWithManager function
+		// err = reconciler.SetupWithManager(mgr)
+		// Expect(err).NotTo(HaveOccurred())
 
 		oldGMConnector = &mcv1alpha3.GMConnector{
 			Spec: mcv1alpha3.GMConnectorSpec{
