@@ -38,7 +38,7 @@ using FilterConfigSharedPtr = std::shared_ptr<FilterConfig>;
 
 class Filter : public Http::StreamFilter, Logger::Loggable<Logger::Id::filter> {
 public:
-  Filter(std::shared_ptr<FilterConfig> config)
+  Filter(FilterConfigSharedPtr config)
       : config_(config), session_(config_->createInferenceSession()) {}
 
   // Http::StreamFilterBase
@@ -61,7 +61,7 @@ public:
   void setEncoderFilterCallbacks(Http::StreamEncoderFilterCallbacks& callbacks) override;
 
 protected:
-  std::shared_ptr<FilterConfig> config_;
+  FilterConfigSharedPtr config_;
   Extensions::Common::Inference::InferenceSessionPtr session_;
   Http::StreamDecoderFilterCallbacks* decoder_callbacks_{};
   Http::StreamEncoderFilterCallbacks* encoder_callbacks_{};
