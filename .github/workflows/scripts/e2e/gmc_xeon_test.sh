@@ -21,6 +21,7 @@ MODIFY_STEP_NAMESPACE="${APP_NAMESPACE}-modstep"
 WEBHOOK_NAMESPACE="${APP_NAMESPACE}-webhook"
 
 function validate_gmc() {
+    mkdir -p ${LOG_PATH}
     echo "validate audio-qna"
     validate_audioqa
 

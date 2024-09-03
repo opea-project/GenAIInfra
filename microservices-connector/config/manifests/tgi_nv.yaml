@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: tgi-config
   labels:
-    helm.sh/chart: tgi-0.9.0
+    helm.sh/chart: tgi-1.0.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -34,7 +34,7 @@ kind: Service
 metadata:
   name: tgi
   labels:
-    helm.sh/chart: tgi-0.9.0
+    helm.sh/chart: tgi-1.0.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -59,7 +59,7 @@ kind: Deployment
 metadata:
   name: tgi
   labels:
-    helm.sh/chart: tgi-0.9.0
+    helm.sh/chart: tgi-1.0.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
