@@ -39,25 +39,7 @@ var _ = Describe("GMConnector Controller", func() {
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind GMConnector")
-
-			mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
-				Scheme: k8sClient.Scheme(),
-				// Client: k8sClient,
-			})
-			Expect(err).NotTo(HaveOccurred())
-
-			// Create a new GMConnectorReconciler
-			reconciler := &GMConnectorReconciler{
-				Client: k8sClient,
-				// Log:    ctrl.Log.WithName("controllers").WithName("GMConnector"),
-				Scheme: mgr.GetScheme(),
-			}
-
-			// Call the SetupWithManager function
-			err = reconciler.SetupWithManager(mgr)
-			Expect(err).NotTo(HaveOccurred())
-
-			err = k8sClient.Get(ctx, typeNamespacedName, gmconnector)
+			err := k8sClient.Get(ctx, typeNamespacedName, gmconnector)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &mcv1alpha3.GMConnector{
 					TypeMeta: metav1.TypeMeta{
@@ -626,6 +608,24 @@ var _ = Describe("Predicate Functions", func() {
 	)
 
 	BeforeEach(func() {
+
+		mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+			Scheme: k8sClient.Scheme(),
+			// Client: k8sClient,
+		})
+		Expect(err).NotTo(HaveOccurred())
+
+		// Create a new GMConnectorReconciler
+		reconciler := &GMConnectorReconciler{
+			Client: k8sClient,
+			// Log:    ctrl.Log.WithName("controllers").WithName("GMConnector"),
+			Scheme: mgr.GetScheme(),
+		}
+
+		// Call the SetupWithManager function
+		err = reconciler.SetupWithManager(mgr)
+		Expect(err).NotTo(HaveOccurred())
+
 		oldGMConnector = &mcv1alpha3.GMConnector{
 			Spec: mcv1alpha3.GMConnectorSpec{
 				RouterConfig: mcv1alpha3.RouterConfig{
@@ -752,7 +752,7 @@ var _ = Describe("Predicate Functions", func() {
 			},
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "test-resource2",
-				Namespace: "default",
+				Namespace: "default2",
 				UID:       "1f9a258c-b7d2-4bb3-9fac-ddf1b4369d25",
 			},
 		}
@@ -760,7 +760,7 @@ var _ = Describe("Predicate Functions", func() {
 		oldDeployment = &appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "embedding-service-deployment",
-				Namespace: "default",
+				Namespace: "default2",
 				OwnerReferences: []metav1.OwnerReference{
 					{
 						APIVersion: "gmc.opea.io/v1alpha3",
