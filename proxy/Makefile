@@ -4,7 +4,7 @@
 BUILD_IMG ?= envoy-build-ubuntu
 BUILD_TAG ?= 75238004b0fcfd8a7f71d380d7a774dda5c39622
 ISTIO_IMG ?= proxyv2
-ISITO_TAG ?= 1.23.0
+ISTIO_TAG ?= 1.23.0
 DOCKER_REGISTRY ?= docker.io/opea
 
 BUILD_WITH_CONTAINER ?= 0
