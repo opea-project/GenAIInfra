@@ -14,6 +14,8 @@ import (
 	. "github.com/onsi/gomega"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
+	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -37,7 +39,25 @@ var _ = Describe("GMConnector Controller", func() {
 
 		BeforeEach(func() {
 			By("creating the custom resource for the Kind GMConnector")
-			err := k8sClient.Get(ctx, typeNamespacedName, gmconnector)
+
+			mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+				Scheme: k8sClient.Scheme(),
+				// Client: k8sClient,
+			})
+			Expect(err).NotTo(HaveOccurred())
+
+			// Create a new GMConnectorReconciler
+			reconciler := &GMConnectorReconciler{
+				Client: k8sClient,
+				// Log:    ctrl.Log.WithName("controllers").WithName("GMConnector"),
+				Scheme: mgr.GetScheme(),
+			}
+
+			// Call the SetupWithManager function
+			err = reconciler.SetupWithManager(mgr)
+			Expect(err).NotTo(HaveOccurred())
+
+			err = k8sClient.Get(ctx, typeNamespacedName, gmconnector)
 			if err != nil && errors.IsNotFound(err) {
 				resource := &mcv1alpha3.GMConnector{
 					TypeMeta: metav1.TypeMeta{
@@ -596,6 +616,223 @@ var _ = Describe("GMConnector Controller", func() {
 	})
 })
 
+var _ = Describe("Predicate Functions", func() {
+	var (
+		oldGMConnector *mcv1alpha3.GMConnector
+		newGMConnector *mcv1alpha3.GMConnector
+		oldDeployment  *appsv1.Deployment
+		newDeployment  *appsv1.Deployment
+		updateEvent    event.UpdateEvent
+	)
+
+	BeforeEach(func() {
+		oldGMConnector = &mcv1alpha3.GMConnector{
+			Spec: mcv1alpha3.GMConnectorSpec{
+				RouterConfig: mcv1alpha3.RouterConfig{
+					Name:        "router",
+					ServiceName: "router-service",
+					Config: map[string]string{
+						"endpoint": "/",
+					},
+				},
+				Nodes: map[string]mcv1alpha3.Router{
+					"root": {
+						RouterType: "Sequence",
+						Steps: []mcv1alpha3.Step{
+							{
+								StepName: Embedding,
+								Data:     "$response",
+								Executor: mcv1alpha3.Executor{
+									InternalService: mcv1alpha3.GMCTarget{
+										NameSpace:   "default",
+										ServiceName: "embedding-service",
+										Config: map[string]string{
+											"endpoint":               "/v1/embeddings",
+											"TEI_EMBEDDING_ENDPOINT": "tei-embedding-service",
+										},
+									},
+								},
+							},
+							{
+								StepName: TeiEmbedding,
+								Executor: mcv1alpha3.Executor{
+									InternalService: mcv1alpha3.GMCTarget{
+										NameSpace:   "default",
+										ServiceName: "tei-embedding-service",
+										Config: map[string]string{
+											"endpoint": "/v1/tei-embeddings",
+											"MODEL_ID": "somemodel",
+										},
+										IsDownstreamService: true,
+									},
+								},
+							},
+							{
+								StepName: VectorDB,
+								Executor: mcv1alpha3.Executor{
+									InternalService: mcv1alpha3.GMCTarget{
+										NameSpace:   "default",
+										ServiceName: "vector-service",
+										Config: map[string]string{
+											"endpoint": "/v1/vec",
+										},
+										IsDownstreamService: true,
+									},
+								},
+							},
+							{
+								StepName: Retriever,
+								Executor: mcv1alpha3.Executor{
+									InternalService: mcv1alpha3.GMCTarget{
+										NameSpace:   "default",
+										ServiceName: "retriever-service",
+										Config: map[string]string{
+											"endpoint":               "/v1/retrv",
+											"REDIS_URL":              "vector-service",
+											"TEI_EMBEDDING_ENDPOINT": "tei-embedding-service",
+										},
+									},
+								},
+							},
+							{
+								StepName: Reranking,
+								Executor: mcv1alpha3.Executor{
+									InternalService: mcv1alpha3.GMCTarget{
+										NameSpace:   "default",
+										ServiceName: "rerank-service",
+										Config: map[string]string{
+											"endpoint":               "/v1/reranking",
+											"TEI_RERANKING_ENDPOINT": "tei-reranking-svc",
+										},
+									},
+								},
+							},
+							{
+								StepName: TeiReranking,
+								Executor: mcv1alpha3.Executor{
+									InternalService: mcv1alpha3.GMCTarget{
+										NameSpace:   "default",
+										ServiceName: "tei-reranking-svc",
+										Config: map[string]string{
+											"endpoint": "/rernk",
+										},
+										IsDownstreamService: true,
+									},
+								},
+							},
+							{
+								StepName: Tgi,
+								Executor: mcv1alpha3.Executor{
+									InternalService: mcv1alpha3.GMCTarget{
+										NameSpace:   "default",
+										ServiceName: "tgi-service-name",
+										Config: map[string]string{
+											"endpoint": "/generate",
+										},
+										IsDownstreamService: true,
+									},
+								},
+							},
+							{
+								StepName: Llm,
+								Executor: mcv1alpha3.Executor{
+									InternalService: mcv1alpha3.GMCTarget{
+										NameSpace:   "default",
+										ServiceName: "llm-service",
+										Config: map[string]string{
+											"endpoint":         "/v1/llm",
+											"TGI_LLM_ENDPOINT": "tgi-service-name",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "test-resource2",
+				Namespace: "default",
+				UID:       "1f9a258c-b7d2-4bb3-9fac-ddf1b4369d25",
+			},
+		}
+		newGMConnector = oldGMConnector.DeepCopy()
+		oldDeployment = &appsv1.Deployment{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "embedding-service-deployment",
+				Namespace: "default",
+				OwnerReferences: []metav1.OwnerReference{
+					{
+						APIVersion: "gmc.opea.io/v1alpha3",
+						Kind:       "GMConnector",
+						Name:       "test-resource2",
+						UID:        "1f9a258c-b7d2-4bb3-9fac-ddf1b4369d25",
+					},
+				},
+			},
+			Status: appsv1.DeploymentStatus{
+				AvailableReplicas: 1,
+				Conditions: []appsv1.DeploymentCondition{
+					{
+						Type:   appsv1.DeploymentAvailable,
+						Status: corev1.ConditionTrue,
+					},
+				},
+				ReadyReplicas:   1,
+				Replicas:        1,
+				UpdatedReplicas: 1,
+			},
+		}
+		newDeployment = oldDeployment.DeepCopy()
+	})
+
+	Describe("isGMConnectorSpecOrMetadataChanged", func() {
+		It("should return true if the spec has changed", func() {
+			newGMConnector.Spec.RouterConfig.Name = "newRouter"
+			updateEvent = event.UpdateEvent{
+				ObjectOld: oldGMConnector,
+				ObjectNew: newGMConnector,
+			}
+			Expect(isGMCSpecOrMetadataChanged(updateEvent)).To(BeTrue())
+		})
+
+		It("should return true if the metadata has changed", func() {
+			newGMConnector.ObjectMeta.Name = "new-name"
+			updateEvent = event.UpdateEvent{
+				ObjectOld: oldGMConnector,
+				ObjectNew: newGMConnector,
+			}
+			Expect(isGMCSpecOrMetadataChanged(updateEvent)).To(BeTrue())
+		})
+		It("should return false if neither spec nor metadata has changed", func() {
+			updateEvent = event.UpdateEvent{
+				ObjectOld: oldGMConnector,
+				ObjectNew: newGMConnector,
+			}
+			Expect(isGMCSpecOrMetadataChanged(updateEvent)).To(BeFalse())
+		})
+	})
+
+	Describe("isDeploymentStatusChanged", func() {
+		It("should return true if the status has changed", func() {
+			newDeployment.Status.Conditions[0].Status = corev1.ConditionFalse
+			updateEvent = event.UpdateEvent{
+				ObjectOld: oldDeployment,
+				ObjectNew: newDeployment,
+			}
+			Expect(isDeploymentStatusChanged(updateEvent)).To(BeTrue())
+		})
+
+		It("should return false if the status has not changed", func() {
+			updateEvent = event.UpdateEvent{
+				ObjectOld: oldDeployment,
+				ObjectNew: newDeployment,
+			}
+			Expect(isDeploymentStatusChanged(updateEvent)).To(BeFalse())
+		})
+	})
+})
+
 func TestGetServiceURL(t *testing.T) {
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
@@ -756,65 +993,27 @@ func TestIsMetadataChanged(t *testing.T) {
 	}
 }
 
-// func TestHandleStatusUpdate(t *testing.T) {
-// 	// Create a fake GMConnector object
-// 	graph := &mcv1alpha3.GMConnector{
-// 		ObjectMeta: metav1.ObjectMeta{
-// 			Namespace: "default",
-// 			Name:      "test-graph",
-// 		},
+// func TestSetupWithManager(t *testing.T) {
+// 	// Set up a fake client and manager
+// 	fakeClient := fake.NewClientBuilder().WithScheme(scheme.Scheme).Build()
+// 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
+// 		Scheme: scheme.Scheme,
+// 		Client: fakeClient,
+// 	})
+// 	assert.NoError(t, err)
+
+// 	// Create a new GMConnectorReconciler
+// 	reconciler := &GMConnectorReconciler{
+// 		Client: mgr.GetClient(),
+// 		Log:    ctrl.Log.WithName("controllers").WithName("GMConnector"),
+// 		Scheme: mgr.GetScheme(),
 // 	}
 
-// 	// Create a fake Deployment object
-// 	deployment := &appsv1.Deployment{
-// 		ObjectMeta: metav1.ObjectMeta{
-// 			Namespace: "default",
-// 			Name:      "test-deployment",
-// 			OwnerReferences: []metav1.OwnerReference{
-// 				{
-// 					Kind: "GMConnector",
-// 					Name: "test-graph",
-// 				},
-// 			},
-// 		},
-// 	}
+// 	// Call the SetupWithManager function
+// 	err = reconciler.SetupWithManager(mgr)
+// 	assert.NoError(t, err)
 
-// 	// Create a fake GMConnectorReconciler
-// 	r := &GMConnectorReconciler{
-// 		Client: fake.NewFakeClientWithScheme(scheme.Scheme, graph, deployment),
-// 	}
-
-// 	// Create a fake context
-// 	ctx := context.TODO()
-
-// 	// Create a fake reconcile request
-// 	req := reconcile.Request{
-// 		NamespacedName: types.NamespacedName{
-// 			Namespace: "default",
-// 			Name:      "test-deployment",
-// 		},
-// 	}
-
-// 	// Call the handleStatusUpdate function
-// 	result, err := r.handleStatusUpdate(ctx, deployment)
-
-// 	// Check the result and error
-// 	if err != nil {
-// 		t.Errorf("handleStatusUpdate returned an error: %v", err)
-// 	}
-
-// 	if result != (reconcile.Result{}) {
-// 		t.Errorf("handleStatusUpdate returned an unexpected result: %v", result)
-// 	}
-
-// 	// Check if the GMConnector object's status has been updated
-// 	err = r.Get(ctx, types.NamespacedName{Namespace: "default", Name: "test-graph"}, graph)
-// 	if err != nil {
-// 		t.Errorf("Failed to get GMConnector object: %v", err)
-// 	}
-
-// 	expectedStatus := "0/0/1"
-// 	if graph.Status.Status != expectedStatus {
-// 		t.Errorf("GMConnector object's status is not updated correctly. Expected: %s, Got: %s", expectedStatus, graph.Status.Status)
-// 	}
+// 	// Additional assertions can be added here to verify the setup
+// 	// For example, you can check if the controller is added to the manager
+// 	assert.NotNil(t, mgr.GetController("GMConnector"))
 // }
