@@ -19,6 +19,10 @@ on:
         default: "xeon"
         required: true
         type: string
+      valuefile:
+        default: "values"
+        required: true
+        type: string
 
 env:
   CHARTS_DIR: "helm-charts"
@@ -96,10 +100,7 @@ jobs:
         run: |
           set -xe
           echo "should_cleanup=true" >> $GITHUB_ENV
-          value_file="values.yaml"
-          if [ "${{ inputs.hardware }}" == "gaudi" ]; then
-            value_file="Intel/gaudi-values.yaml"
-          fi
+          value_file="${{ inputs.valuefile }}.yaml"
           if [[ ! -f ${{ env.CHART_FOLDER }}/${value_file} ]]; then
             echo "No value file found, exist test!"
             echo "skip_validate=true" >> $GITHUB_ENV

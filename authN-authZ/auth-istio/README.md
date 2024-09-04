@@ -45,7 +45,7 @@ The istio ingress gateway will be used to access the chatQnA service in differen
 
 Authentication and authorization are essential for securing microservices architectures. Using Bearer JWT tokens for these processes ensures that only authenticated users with valid tokens can access specific services, protecting sensitive data. Authentication verifies user identity, while authorization controls their permissions. This layered approach not only prevents unauthorized access but also provides detailed control over service interactions, maintaining system security and compliance. Here we leverage Istio mechanisms together with Bearer JWT tokens to fulfill that.
 
-<img src="./docs/OPEA auth flow with OIDC provider.png" width="700" height="300">
+![OPEA auth flow with OIDC provider](./docs/OPEA_auth_flow_with_OIDC_provider.png)
 
 ### Perform authentication and authorization via fake JWT tokens
 
@@ -195,7 +195,7 @@ curl -X POST $accessUrl -d '{"text":"What is the revenue of Nike in 2023?","para
 
 Another choice we have is using oauth2-proxy and OIDC providers. These two streamline authentication and authorization by handling user identity and access management. oauth2-proxy acts as a gateway, integrating with OIDC providers to authenticate users and issue tokens. This setup ensures secure access to applications by validating user credentials and managing permissions, simplifying the implementation of robust security protocols across services.
 
-<img src="./docs/OPEA auth flow with oauth2-proxy.png" width="700" height="400">
+![OPEA auth flow with oauth2-proxy](./docs/OPEA_auth_flow_with_oauth2-proxy.png)
 
 We are using a similar scenario here that only privileged users can access our chatQnA service and ask questions. In this case, user `mary` who has the role `user` can access the chatQnA pipeline. And user `bob` with the role `viewer` will not be able to access the service. Of course, the other users without valid token cannot access the service.
 
@@ -221,31 +221,31 @@ The user management is done via Keycloak and the configuration steps look like t
 
 1. Create a new realm named `chatqna` within Keycloak.
 
-<img src="./docs/create_realm.png" width="600" height="300">
+   ![create realm](./docs/create_realm.png)
 
 2. Create a new client called `chatqna` and set `Client authentication` to 'On'. Set "http://chatqna-ui.com:${INGRESS_PORT}/*" in the `Valid redirect URIs` part. Note that `INGRESS_PORT` and `INGRESS_HOST` shall be exported following the guide [here](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports). Under the Credentials tab you will now be able to locate `<your client's secret>`, which will be used in the oauth2-proxy configs.
 
-<img src="./docs/create_client_1.png" width="600" height="300">
+   ![create client 1](./docs/create_client_1.png)
 
-<img src="./docs/create_client_2.png" width="600" height="300">
+   ![create client 2](./docs/create_client_2.png)
 
-<img src="./docs/create_client_3.png" width="600" height="300">
+   ![create client 3](./docs/create_client_3.png)
 
 3. Access the dedicated mappers pane by clicking `<your client's id>-dedicated`, located under Assigned client scope to configure a new `Audience` mapper with name `aud-mapper-<your client's id>`. And include Audience in your client with `ID token` and `access token` set to `On`.
 
-<img src="./docs/add_mapper.png" width="600" height="300">
+   ![add mapper](./docs/add_mapper.png)
 
 4. Create new roles `user` and `viewer` by navigating to `<your client's id> -> Roles`.
 
 5. Create a new user name as `mary` and another user as `bob` with `Email verified` set to `On`. Set passwords for both users (set 'Temporary' to 'Off').
 
-<img src="./docs/create_user.png" width="600" height="300">
+   ![create user](./docs/create_user.png)
 
 6. Create a new Client Scope with the name `groups` in Keycloak with `Include in Token Scope` set as `On`. Include a mapper of type `Group Membership` and set the `Token Claim Name` to `groups`. If the "Full group path" option is selected, you need to include a "/" separator in the group names defined in the --allowed-group option of OAuth2 Proxy. Example: "/groupname". After creating the Client Scope named `groups` you will need to attach it to your client. Go to Clients and find `<your client's id> -> Client scopes` and add client scope and select `groups` and choose `Optional` and you should now have a client that maps group memberships into the JWT tokens so that Oauth2 Proxy may evaluate them.
 
-<img src="./docs/add_group_scope.png" width="600" height="300">
+   ![add group scope](./docs/add_group_scope.png)
 
-<img src="./docs/attach_group_scope.png" width="600" height="300">
+   ![attach group scope](./docs/attach_group_scope.png)
 
 7. Create two groups `user` and `viewer` by navigating to Groups -> Create group. Assign role `user` to group `user` and role `viewer` to group `viewer` and add user `mary` as a member of group `user` and `bob` as a member of group `viewer`.
 
