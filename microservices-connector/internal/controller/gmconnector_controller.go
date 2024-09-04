@@ -797,100 +797,97 @@ func isMetadataChanged(oldObject, newObject *metav1.ObjectMeta) bool {
 	return false
 }
 
+func isGMCSpecOrMetadataChanged(e event.UpdateEvent) bool {
+	oldObject, ok1 := e.ObjectOld.(*mcv1alpha3.GMConnector)
+	newObject, ok2 := e.ObjectNew.(*mcv1alpha3.GMConnector)
+	if !ok1 || !ok2 {
+		// Not the correct type, allow the event through
+		return true
+	}
+
+	specChanged := !reflect.DeepEqual(oldObject.Spec, newObject.Spec)
+	metadataChanged := isMetadataChanged(&(oldObject.ObjectMeta), &(newObject.ObjectMeta))
+
+	fmt.Printf("\n| spec changed %t | meta changed: %t |\n", specChanged, metadataChanged)
+
+	// Compare the old and new spec, ignore metadata, status changes
+	// metadata change: name, namespace, such change should create a new GMC
+	// status change: deployment status
+	return specChanged || metadataChanged
+}
+
+func isDeploymentStatusChanged(e event.UpdateEvent) bool {
+	oldDeployment, ok1 := e.ObjectOld.(*appsv1.Deployment)
+	newDeployment, ok2 := e.ObjectNew.(*appsv1.Deployment)
+	if !ok1 || !ok2 {
+		// Not the correct type, allow the event through
+		return true
+	}
+
+	if len(newDeployment.OwnerReferences) == 0 {
+		// fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
+		return false
+	} else {
+		for _, owner := range newDeployment.OwnerReferences {
+			if owner.Kind == "GMConnector" {
+				// fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
+				break
+			}
+		}
+	}
+
+	oldStatus := corev1.ConditionUnknown
+	newStatus := corev1.ConditionUnknown
+	if !reflect.DeepEqual(oldDeployment.Status, newDeployment.Status) {
+		if newDeployment.Status.Conditions != nil {
+			for _, condition := range newDeployment.Status.Conditions {
+				if condition.Type == appsv1.DeploymentAvailable {
+					newStatus = condition.Status
+				}
+			}
+		}
+		if oldDeployment.Status.Conditions != nil {
+			for _, condition := range oldDeployment.Status.Conditions {
+				if condition.Type == appsv1.DeploymentAvailable {
+					oldStatus = condition.Status
+				}
+			}
+		}
+		// Only trigger if the status has changed from true to false|unknown or vice versa
+		if (oldStatus == corev1.ConditionTrue && oldStatus != newStatus) ||
+			(newStatus == corev1.ConditionTrue && oldStatus != newStatus) {
+			{
+				fmt.Printf("| %s:%s: status changed from : %v to %v|\n",
+					newDeployment.Namespace, newDeployment.Name,
+					oldStatus, newStatus)
+				return true
+			}
+		}
+	}
+	return false
+
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Predicate to ignore updates to status subresource
-	ignoreStatusUpdatePredicate := predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			// Cast objects to your GMConnector struct
-			oldObject, ok1 := e.ObjectOld.(*mcv1alpha3.GMConnector)
-			newObject, ok2 := e.ObjectNew.(*mcv1alpha3.GMConnector)
-			if !ok1 || !ok2 {
-				// Not the correct type, allow the event through
-				return true
-			}
-
-			specChanged := !reflect.DeepEqual(oldObject.Spec, newObject.Spec)
-			metadataChanged := isMetadataChanged(&(oldObject.ObjectMeta), &(newObject.ObjectMeta))
-
-			fmt.Printf("\n| spec changed %t | meta changed: %t |\n", specChanged, metadataChanged)
-
-			// Compare the old and new spec, ignore metadata, status changes
-			// metadata change: name, namespace, such change should create a new GMC
-			// status change: depoyment status
-			return specChanged || metadataChanged
-		},
+	gmcfilter := predicate.Funcs{
+		UpdateFunc: isGMCSpecOrMetadataChanged,
 		// Other funcs like CreateFunc, DeleteFunc, GenericFunc can be left as default
 		// if you only want to customize the UpdateFunc behavior.
 	}
 
 	// Predicate to only trigger on status changes for Deployment
-	deploymentStatusChangePredicate := predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldDeployment, ok1 := e.ObjectOld.(*appsv1.Deployment)
-			newDeployment, ok2 := e.ObjectNew.(*appsv1.Deployment)
-			if !ok1 || !ok2 {
-				// Not the correct type, allow the event through
-				fmt.Printf("| status missing |\n")
-				return true
-			}
-
-			if len(newDeployment.OwnerReferences) == 0 {
-				// fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
-				return false
-			} else {
-				for _, owner := range newDeployment.OwnerReferences {
-					if owner.Kind == "GMConnector" {
-						// fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
-						break
-					}
-				}
-			}
-
-			oldStatus := corev1.ConditionUnknown
-			newStatus := corev1.ConditionUnknown
-			if !reflect.DeepEqual(oldDeployment.Status, newDeployment.Status) {
-				if newDeployment.Status.Conditions != nil {
-					for _, condition := range newDeployment.Status.Conditions {
-						if condition.Type == appsv1.DeploymentAvailable {
-							newStatus = condition.Status
-						}
-					}
-				}
-				if oldDeployment.Status.Conditions != nil {
-					for _, condition := range oldDeployment.Status.Conditions {
-						if condition.Type == appsv1.DeploymentAvailable {
-							oldStatus = condition.Status
-						}
-					}
-				}
-				// Only trigger if the status has changed from true to false|unknown or vice versa
-				if (oldStatus == corev1.ConditionTrue && oldStatus != newStatus) ||
-					(newStatus == corev1.ConditionTrue && oldStatus != newStatus) {
-					{
-						fmt.Printf("| %s:%s: status changed from : %v to %v|\n",
-							newDeployment.Namespace, newDeployment.Name,
-							oldStatus, newStatus)
-						return true
-					}
-				}
-			}
-			return false
-		},
-		//ignore create and delete events, otherwise it will trigger the nested reconcile which is meaningless
-		CreateFunc: func(e event.CreateEvent) bool {
-			return false
-		}, DeleteFunc: func(e event.DeleteEvent) bool {
-			return false
-		},
+	deploymentFilter := predicate.Funcs{
+		UpdateFunc: isDeploymentStatusChanged,
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&mcv1alpha3.GMConnector{}, builder.WithPredicates(ignoreStatusUpdatePredicate)).
+		For(&mcv1alpha3.GMConnector{}, builder.WithPredicates(gmcfilter)).
 		Watches(
 			&appsv1.Deployment{},
 			&handler.EnqueueRequestForObject{},
-			builder.WithPredicates(deploymentStatusChangePredicate),
+			builder.WithPredicates(deploymentFilter),
 		).
 		Complete(r)
 }

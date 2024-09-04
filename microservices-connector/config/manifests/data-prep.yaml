@@ -18,6 +18,8 @@ data:
   EMBED_MODEL: ""
   REDIS_URL: "redis://data-prep-redis-vector-db:6379"
   INDEX_NAME: "rag-redis"
+  KEY_INDEX_NAME: "file-keys"
+  SEARCH_BATCH_SIZE: "10"
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   HF_HOME: "/tmp/.cache/huggingface"
   http_proxy: ""
@@ -26,6 +28,7 @@ data:
   LANGCHAIN_TRACING_V2: "false"
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
   LANGCHAIN_PROJECT: "opea-dataprep-service"
+  LOGFLAG: ""
 ---
 # Source: data-prep/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation

@@ -22,6 +22,7 @@ data:
   https_proxy: ""
   no_proxy: ""
   HF_HOME: "/tmp/.cache/huggingface"
+  LOGFLAG: ""
 ---
 # Source: web-retriever/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
