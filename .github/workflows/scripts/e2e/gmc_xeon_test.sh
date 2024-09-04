@@ -444,7 +444,7 @@ function validate_modify_config() {
     fi
 
     pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
-    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $((pods_count-1)) 0 3
+    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -461,7 +461,7 @@ function validate_modify_config() {
          exit 1
     fi
 
-    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $((pods_count-1)) 0 3
+    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -495,7 +495,7 @@ function validate_remove_step() {
     fi
 
     pods_count=$(kubectl get pods -n $DELETE_STEP_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
-    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $((pods_count-1)) 0 3
+    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
