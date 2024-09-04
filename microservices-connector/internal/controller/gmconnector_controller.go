@@ -474,6 +474,9 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 }
 
 func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnector, ctx context.Context) error {
+	if graph == nil || len(graph.Status.Annotations) == 0 {
+		return errors.New("graph is empty or no annotations")
+	}
 	var totalCnt uint = 0
 	var readyCnt uint = 0
 	for resName := range graph.Status.Annotations {
@@ -825,12 +828,12 @@ func isDeploymentStatusChanged(e event.UpdateEvent) bool {
 	}
 
 	if len(newDeployment.OwnerReferences) == 0 {
-		fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
+		// fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
 		return false
 	} else {
 		for _, owner := range newDeployment.OwnerReferences {
 			if owner.Kind == "GMConnector" {
-				fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
+				// fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
 				break
 			}
 		}
