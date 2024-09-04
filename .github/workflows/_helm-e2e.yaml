@@ -20,7 +20,7 @@ on:
         required: true
         type: string
       valuefile:
-        default: "values"
+        default: "Intel/xeon_values"
         required: true
         type: string
 

@@ -43,31 +43,31 @@ jobs:
           run_matrix="{\"include\":["
           if [[ -z "${{ inputs.workloads }}" ]]; then
             find "$CHARTS_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "common" -exec basename {} \; | while read -r subfolder; do
-              for file in "$CHARTS_DIR/$subfolder"/*values.yaml; do
+              for file in "$CHARTS_DIR/$subfolder"/*/*values.yaml; do
                 if [ -f "$file" ]; then
                   if [[ "$file" == *"nv-values.yaml" ]]; then
                     continue
                   fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    run_matrix="${run_matrix}{\"example\":\"${subfolder}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"${subfolder}\",\"hardware\":\"gaudi\", \"valuefile\":\"Intel/${filename}\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"${subfolder}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"${subfolder}\",\"hardware\":\"xeon\", \"valuefile\":\"Intel/${filename}\"},"
                   fi
                 fi
               done
             done
             find "$CHARTS_DIR/common" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | while read -r subfolder; do
-              for file in "$CHARTS_DIR/common/$subfolder"/*values.yaml; do
+              for file in "$CHARTS_DIR/common/$subfolder"/*/*values.yaml; do
                 if [ -f "$file" ]; then
                   if [[ "$file" == *"nv-values.yaml" ]]; then
                     continue
                   fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    run_matrix="${run_matrix}{\"example\":\"common/${subfolder}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"common/${subfolder}\",\"hardware\":\"gaudi\", \"valuefile\":\"Intel/${filename}\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"common/${subfolder}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"common/${subfolder}\",\"hardware\":\"xeon\", \"valuefile\":\"Intel/${filename}\"},"
                   fi
                 fi
               done
@@ -75,16 +75,16 @@ jobs:
           else
             service_list=($(echo ${{ github.event.inputs.workloads }} | tr ',' ' '))
             for service in $service_list; do
-              for file in "$CHARTS_DIR/$service"/*values.yaml; do
+              for file in "$CHARTS_DIR/$service"/*/*values.yaml; do
                 if [ -f "$file" ]; then
                   if [[ "$file" == *"nv-values.yaml" ]]; then
                     continue
                   fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"gaudi\", \"valuefile\":\"Intel/${filename}\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"xeon\", \"valuefile\":\"Intel/${filename}\"},"
                   fi
                 fi
               done

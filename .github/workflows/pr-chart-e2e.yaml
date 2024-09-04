@@ -47,31 +47,31 @@ jobs:
           cut -d'/' -f3 | sort -u )
           run_matrix="{\"include\":["
           for chart in ${e2e_charts}; do
-            for file in "$CHARTS_DIR/$chart"/*values.yaml; do
+            for file in "$CHARTS_DIR/$chart"/*/*values.yaml; do
               if [ -f "$file" ]; then
                 if [[ "$file" == *"nv-values.yaml" ]]; then
                   continue
                 fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"Intel/${filename}\"},"
                 else
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"Intel/${filename}\"},"
                 fi
               fi
             done
           done
           for chart in ${common_charts}; do
-            for file in "$CHARTS_DIR/common/$chart"/*values.yaml; do
+            for file in "$CHARTS_DIR/common/$chart"/*/*values.yaml; do
               if [ -f "$file" ]; then
                 if [[ "$file" == *"nv-values.yaml" ]]; then
                   continue
                 fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"Intel/${filename}\",\"directory\":\"common\"},"
                 else
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"Intel/${filename}\",\"directory\":\"common\"},"
                 fi
               fi
             done
