@@ -880,6 +880,12 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Predicate to only trigger on status changes for Deployment
 	deploymentFilter := predicate.Funcs{
 		UpdateFunc: isDeploymentStatusChanged,
+		//ignore create and delete events, otherwise it will trigger the nested reconcile which is meaningless
+		CreateFunc: func(e event.CreateEvent) bool {
+			return false
+		}, DeleteFunc: func(e event.DeleteEvent) bool {
+			return false
+		},
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
