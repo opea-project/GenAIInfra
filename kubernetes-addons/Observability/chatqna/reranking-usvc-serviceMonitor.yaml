@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/name: reranking-svc-exporter
+    app.kubernetes.io/version: v0.0.1
+    release: prometheus-stack
+  name: reranking-svc-exporter
+  namespace: monitoring
+spec:
+  namespaceSelector:
+      any: true
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: reranking-usvc
+  endpoints:
+  - port: reranking-svc
+    interval: 5s

@@ -1,0 +1,5554 @@
+{
+  "annotations": {
+    "list": [
+      {
+        "$$hashKey": "object:2661",
+        "builtIn": 1,
+        "datasource": "-- Grafana --",
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
+  "editable": true,
+  "gnetId": null,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
+  "panels": [
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Memory Bandwidth",
+      "id": 2,
+      "targets": [
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", socket=\"0\"}[4s])/1048576 + rate(DRAM_Writes{instance=\"$node\", socket=\"0\"}[4s])/1048576 + rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"0\"}[4s])/1048576 + rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", socket=\"1\"}[4s])/1048576 + rate(DRAM_Writes{instance=\"$node\", socket=\"1\"}[4s])/1048576 + rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"1\"}[4s])/1048576 + rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", aggregate=\"system\"}[4s])/1048576 + rate(DRAM_Writes{instance=\"$node\", aggregate=\"system\"}[4s])/1048576 + rate(Persistent_Memory_Reads{instance=\"$node\", aggregate=\"system\"}[4s])/1048576 + rate(Persistent_Memory_Writes{instance=\"$node\", aggregate=\"system\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "MByte/sec",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 0,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Memory Bandwidth (MByte/sec)",
+      "id": 3,
+      "targets": [
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", socket=\"0\"}[4s])/1048576 + rate(DRAM_Writes{instance=\"$node\", socket=\"0\"}[4s])/1048576 + rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"0\"}[4s])/1048576 + rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", socket=\"1\"}[4s])/1048576 + rate(DRAM_Writes{instance=\"$node\", socket=\"1\"}[4s])/1048576 + rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"1\"}[4s])/1048576 + rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", aggregate=\"system\"}[4s])/1048576 + rate(DRAM_Writes{instance=\"$node\", aggregate=\"system\"}[4s])/1048576 + rate(Persistent_Memory_Reads{instance=\"$node\", aggregate=\"system\"}[4s])/1048576 + rate(Persistent_Memory_Writes{instance=\"$node\", aggregate=\"system\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 5,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket0 Memory Bandwidth",
+      "id": 4,
+      "targets": [
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Reads",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Writes{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Writes",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Reads",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Writes",
+          "refId": "D"
+        },
+        {
+          "expr": "rate(CXL_Write_Mem{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "CXL Write Mem",
+          "refId": "E"
+        },
+        {
+          "expr": "rate(CXL_Write_Cache{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "CXL Write Cache",
+          "refId": "F"
+        },
+        {
+          "expr": "(rate(DRAM_Writes{instance=\"$node\", socket=\"0\"}[4s])+rate(DRAM_Reads{instance=\"$node\", socket=\"0\"}[4s]))/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Total",
+          "refId": "G"
+        },
+        {
+          "expr": "(rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"0\"}[4s])+rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"0\"}[4s]))/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Total",
+          "refId": "H"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "MByte/sec",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 5,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket0 Memory Bandwidth (MByte/sec)",
+      "id": 5,
+      "targets": [
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Reads",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Writes{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Writes",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Reads",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Writes",
+          "refId": "D"
+        },
+        {
+          "expr": "rate(CXL_Write_Mem{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "CXL Write Mem",
+          "refId": "E"
+        },
+        {
+          "expr": "rate(CXL_Write_Cache{instance=\"$node\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "CXL Write Cache",
+          "refId": "F"
+        },
+        {
+          "expr": "(rate(DRAM_Writes{instance=\"$node\", socket=\"0\"}[4s])+rate(DRAM_Reads{instance=\"$node\", socket=\"0\"}[4s]))/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Total",
+          "refId": "G"
+        },
+        {
+          "expr": "(rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"0\"}[4s])+rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"0\"}[4s]))/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Total",
+          "refId": "H"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 10,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket1 Memory Bandwidth",
+      "id": 6,
+      "targets": [
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Reads",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Writes{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Writes",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Reads",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Writes",
+          "refId": "D"
+        },
+        {
+          "expr": "rate(CXL_Write_Mem{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "CXL Write Mem",
+          "refId": "E"
+        },
+        {
+          "expr": "rate(CXL_Write_Cache{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "CXL Write Cache",
+          "refId": "F"
+        },
+        {
+          "expr": "(rate(DRAM_Writes{instance=\"$node\", socket=\"1\"}[4s])+rate(DRAM_Reads{instance=\"$node\", socket=\"1\"}[4s]))/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Total",
+          "refId": "G"
+        },
+        {
+          "expr": "(rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"1\"}[4s])+rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"1\"}[4s]))/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Total",
+          "refId": "H"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "MByte/sec",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 10,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket1 Memory Bandwidth (MByte/sec)",
+      "id": 7,
+      "targets": [
+        {
+          "expr": "rate(DRAM_Reads{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Reads",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Writes{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Writes",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Reads",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Writes",
+          "refId": "D"
+        },
+        {
+          "expr": "rate(CXL_Write_Mem{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "CXL Write Mem",
+          "refId": "E"
+        },
+        {
+          "expr": "rate(CXL_Write_Cache{instance=\"$node\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "CXL Write Cache",
+          "refId": "F"
+        },
+        {
+          "expr": "(rate(DRAM_Writes{instance=\"$node\", socket=\"1\"}[4s])+rate(DRAM_Reads{instance=\"$node\", socket=\"1\"}[4s]))/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Total",
+          "refId": "G"
+        },
+        {
+          "expr": "(rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"1\"}[4s])+rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"1\"}[4s]))/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Persistent Memory Total",
+          "refId": "H"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 15,
+        "w": 15,
+        "h": 5
+      },
+      "title": "PMEM/DRAM Bandwidth Ratio",
+      "id": 8,
+      "targets": [
+        {
+          "expr": "(rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"0\"}[4s])+rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"0\"}[4s]))/(rate(DRAM_Writes{instance=\"$node\", socket=\"0\"}[4s])+rate(DRAM_Reads{instance=\"$node\", socket=\"0\"}[4s]))",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "(rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"1\"}[4s])+rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"1\"}[4s]))/(rate(DRAM_Writes{instance=\"$node\", socket=\"1\"}[4s])+rate(DRAM_Reads{instance=\"$node\", socket=\"1\"}[4s]))",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "PMEM/DRAM",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 15,
+        "w": 9,
+        "h": 5
+      },
+      "title": "PMEM/DRAM Bandwidth Ratio",
+      "id": 9,
+      "targets": [
+        {
+          "expr": "(rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"0\"}[4s])+rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"0\"}[4s]))/(rate(DRAM_Writes{instance=\"$node\", socket=\"0\"}[4s])+rate(DRAM_Reads{instance=\"$node\", socket=\"0\"}[4s]))",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "(rate(Persistent_Memory_Writes{instance=\"$node\", socket=\"1\"}[4s])+rate(Persistent_Memory_Reads{instance=\"$node\", socket=\"1\"}[4s]))/(rate(DRAM_Writes{instance=\"$node\", socket=\"1\"}[4s])+rate(DRAM_Reads{instance=\"$node\", socket=\"1\"}[4s]))",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket0 UPI Utilization Outgoing Data And Non-Data Traffic",
+      "id": 10,
+      "targets": [
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "%",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 20,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket0 UPI Utilization Outgoing Data And Non-Data Traffic (%)",
+      "id": 11,
+      "targets": [
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 70
+                }
+              ]
+            },
+            "unit": "%"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "gauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 25,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket1 UPI Utilization Outgoing Data And Non-Data Traffic",
+      "id": 12,
+      "targets": [
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "%",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 25,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket1 UPI Utilization Outgoing Data And Non-Data Traffic (%)",
+      "id": 13,
+      "targets": [
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 70
+                }
+              ]
+            },
+            "unit": "%"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "gauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 30,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket0 UPI Utilization Incoming Data Traffic",
+      "id": 14,
+      "targets": [
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "%",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 30,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket0 UPI Utilization Incoming Data Traffic (%)",
+      "id": 15,
+      "targets": [
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 70
+                }
+              ]
+            },
+            "unit": "%"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "gauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 35,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket1 UPI Utilization Incoming Data Traffic",
+      "id": 16,
+      "targets": [
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "%",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 35,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket1 UPI Utilization Incoming Data Traffic (%)",
+      "id": 17,
+      "targets": [
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Utilization_Incoming_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])*100",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "options": {
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [],
+            "max": 100,
+            "min": 0,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                },
+                {
+                  "color": "red",
+                  "value": 70
+                }
+              ]
+            },
+            "unit": "%"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "auto",
+        "showThresholdLabels": false,
+        "showThresholdMarkers": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "gauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket0 UPI Outgoing Data And Non-Data Traffic",
+      "id": 18,
+      "targets": [
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "MByte/sec",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 40,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket0 UPI Outgoing Data And Non-Data Traffic (MByte/sec)",
+      "id": 19,
+      "targets": [
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 45,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket1 UPI Outgoing Data And Non-Data Traffic",
+      "id": 20,
+      "targets": [
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "MByte/sec",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 45,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket1 UPI Outgoing Data And Non-Data Traffic (MByte/sec)",
+      "id": 21,
+      "targets": [
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Outgoing_Data_And_Non_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 50,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket0 UPI Incoming Data Traffic",
+      "id": 22,
+      "targets": [
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "MByte/sec",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 50,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket0 UPI Incoming Data Traffic (MByte/sec)",
+      "id": 23,
+      "targets": [
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"0\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 55,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket1 UPI Incoming Data Traffic",
+      "id": 24,
+      "targets": [
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "MByte/sec",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 55,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket1 UPI Incoming Data Traffic (MByte/sec)",
+      "id": 25,
+      "targets": [
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_0{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_1{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_2{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI2",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(Incoming_Data_Traffic_On_Link_3{instance=\"$node\", aggregate=\"system\", socket=\"1\"}[4s])/1048576",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "UPI3",
+          "refId": "D"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 60,
+        "w": 15,
+        "h": 7
+      },
+      "title": "Core C-state residency",
+      "id": 26,
+      "targets": [
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"0\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C0",
+          "refId": "A"
+        },
+        {
+          "expr": "100 - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"0\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"2\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"3\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"4\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"5\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"6\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"7\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"8\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"9\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"10\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])) ",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C1",
+          "refId": "B"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"2\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C2",
+          "refId": "C"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"3\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C3",
+          "refId": "D"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"4\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C4",
+          "refId": "E"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"5\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C5",
+          "refId": "F"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"6\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C6",
+          "refId": "G"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"7\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C7",
+          "refId": "H"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"8\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C8",
+          "refId": "I"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"9\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C9",
+          "refId": "J"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"10\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C10",
+          "refId": "K"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "stacked %",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 60,
+        "w": 9,
+        "h": 7
+      },
+      "title": "Current Core C-state residency (%)",
+      "id": 27,
+      "targets": [
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"0\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C0",
+          "refId": "A"
+        },
+        {
+          "expr": "100 - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"0\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"2\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"3\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"4\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"5\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"6\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"7\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"8\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"9\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"10\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])) ",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C1",
+          "refId": "B"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"2\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C2",
+          "refId": "C"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"3\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C3",
+          "refId": "D"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"4\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C4",
+          "refId": "E"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"5\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C5",
+          "refId": "F"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"6\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C6",
+          "refId": "G"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"7\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C7",
+          "refId": "H"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"8\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C8",
+          "refId": "I"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"9\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C9",
+          "refId": "J"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"10\", source = \"core\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C10",
+          "refId": "K"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 67,
+        "w": 15,
+        "h": 7
+      },
+      "title": "Package C-state residency",
+      "id": 28,
+      "targets": [
+        {
+          "expr": "100 - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"1\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"2\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"3\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"4\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"5\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"6\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"7\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"8\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"9\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"10\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])) ",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C0",
+          "refId": "A"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"1\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C1",
+          "refId": "B"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"2\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C2",
+          "refId": "C"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"3\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C3",
+          "refId": "D"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"4\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C4",
+          "refId": "E"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"5\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C5",
+          "refId": "F"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"6\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C6",
+          "refId": "G"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"7\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C7",
+          "refId": "H"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"8\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C8",
+          "refId": "I"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"9\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C9",
+          "refId": "J"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"10\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C10",
+          "refId": "K"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": true,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "stacked %",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 67,
+        "w": 9,
+        "h": 7
+      },
+      "title": "Current Package C-state residency (%)",
+      "id": 29,
+      "targets": [
+        {
+          "expr": "100 - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"1\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"2\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"3\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"4\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"5\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"6\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"7\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"8\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"9\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s]))  - (100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"10\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])) ",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C0",
+          "refId": "A"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"1\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C1",
+          "refId": "B"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"2\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C2",
+          "refId": "C"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"3\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C3",
+          "refId": "D"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"4\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C4",
+          "refId": "E"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"5\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C5",
+          "refId": "F"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"6\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C6",
+          "refId": "G"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"7\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C7",
+          "refId": "H"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"8\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C8",
+          "refId": "I"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"9\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C9",
+          "refId": "J"
+        },
+        {
+          "expr": "100 * rate(RawCStateResidency{ instance=\"$node\", aggregate = \"system\", index = \"10\", source = \"uncore\" }[4s]) / ignoring(source, index) rate(Invariant_TSC{ instance=\"$node\", aggregate = \"system\" }[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "C10",
+          "refId": "K"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 74,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Instructions Per Cycle",
+      "id": 30,
+      "targets": [
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"system\"}[4s])/rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"system\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "IPC",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 74,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Instructions Per Cycle",
+      "id": 31,
+      "targets": [
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"system\"}[4s])/rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"system\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 79,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Active Frequency Ratio",
+      "id": 32,
+      "targets": [
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/rate(Clock_Unhalted_Ref{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/rate(Clock_Unhalted_Ref{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"system\"}[4s])/rate(Clock_Unhalted_Ref{instance=\"$node\", aggregate=\"system\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "AFREQ",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 79,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Active Frequency Ratio",
+      "id": 33,
+      "targets": [
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/rate(Clock_Unhalted_Ref{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/rate(Clock_Unhalted_Ref{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"system\"}[4s])/rate(Clock_Unhalted_Ref{instance=\"$node\", aggregate=\"system\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 84,
+        "w": 15,
+        "h": 5
+      },
+      "title": "L3 Cache Misses Per Instruction",
+      "id": 34,
+      "targets": [
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"system\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"system\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "L3 MPI",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 84,
+        "w": 9,
+        "h": 5
+      },
+      "title": "L3 Cache Misses Per Instruction",
+      "id": 35,
+      "targets": [
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"system\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"system\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 89,
+        "w": 15,
+        "h": 5
+      },
+      "title": "L2 Cache Misses Per Instruction",
+      "id": 36,
+      "targets": [
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"system\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"system\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "L2 MPI",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 89,
+        "w": 9,
+        "h": 5
+      },
+      "title": "L2 Cache Misses Per Instruction",
+      "id": 37,
+      "targets": [
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"system\"}[4s])/rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"system\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 94,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Instructions Retired Any",
+      "id": 38,
+      "targets": [
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "Million",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 94,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Instructions Retired Any (Million)",
+      "id": 39,
+      "targets": [
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Instructions_Retired_Any{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 99,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Clock Unhalted Thread",
+      "id": 40,
+      "targets": [
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "Million",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 99,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Clock Unhalted Thread (Million)",
+      "id": 41,
+      "targets": [
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(Clock_Unhalted_Thread{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 104,
+        "w": 15,
+        "h": 5
+      },
+      "title": "L2 Cache Hits",
+      "id": 42,
+      "targets": [
+        {
+          "expr": "rate(L2_Cache_Hits{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L2_Cache_Hits{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L2_Cache_Hits{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "Million",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 104,
+        "w": 9,
+        "h": 5
+      },
+      "title": "L2 Cache Hits (Million)",
+      "id": 43,
+      "targets": [
+        {
+          "expr": "rate(L2_Cache_Hits{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L2_Cache_Hits{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L2_Cache_Hits{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 109,
+        "w": 15,
+        "h": 5
+      },
+      "title": "L2 Cache Misses",
+      "id": 44,
+      "targets": [
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "Million",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 109,
+        "w": 9,
+        "h": 5
+      },
+      "title": "L2 Cache Misses (Million)",
+      "id": 45,
+      "targets": [
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L2_Cache_Misses{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 114,
+        "w": 15,
+        "h": 5
+      },
+      "title": "L3 Cache Hits",
+      "id": 46,
+      "targets": [
+        {
+          "expr": "rate(L3_Cache_Hits{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L3_Cache_Hits{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L3_Cache_Hits{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "Million",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 114,
+        "w": 9,
+        "h": 5
+      },
+      "title": "L3 Cache Hits (Million)",
+      "id": 47,
+      "targets": [
+        {
+          "expr": "rate(L3_Cache_Hits{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L3_Cache_Hits{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L3_Cache_Hits{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 119,
+        "w": 15,
+        "h": 5
+      },
+      "title": "L3 Cache Misses",
+      "id": 48,
+      "targets": [
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "Million",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 119,
+        "w": 9,
+        "h": 5
+      },
+      "title": "L3 Cache Misses (Million)",
+      "id": 49,
+      "targets": [
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"0\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket0",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"socket\", socket=\"1\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Socket1",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(L3_Cache_Misses{instance=\"$node\", aggregate=\"system\"}[4s])/1000000",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Total",
+          "refId": "C"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 124,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket0 Energy Consumption",
+      "id": 50,
+      "targets": [
+        {
+          "expr": "rate(Package_Joules_Consumed{instance=\"$node\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Package Joules Consumed",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Joules_Consumed{instance=\"$node\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Joules Consumed",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(PP0_Joules_Consumed{instance=\"$node\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "PP0 Joules Consumed",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(PP1_Joules_Consumed{instance=\"$node\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "PP1 Joules Consumed",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "Watt",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 124,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket0 Energy Consumption (Watt)",
+      "id": 51,
+      "targets": [
+        {
+          "expr": "rate(Package_Joules_Consumed{instance=\"$node\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Package Joules Consumed",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Joules_Consumed{instance=\"$node\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Joules Consumed",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(PP0_Joules_Consumed{instance=\"$node\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "PP0 Joules Consumed",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(PP1_Joules_Consumed{instance=\"$node\", socket=\"0\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "PP1 Joules Consumed",
+          "refId": "D"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 0,
+        "y": 129,
+        "w": 15,
+        "h": 5
+      },
+      "title": "Socket1 Energy Consumption",
+      "id": 52,
+      "targets": [
+        {
+          "expr": "rate(Package_Joules_Consumed{instance=\"$node\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Package Joules Consumed",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Joules_Consumed{instance=\"$node\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Joules Consumed",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(PP0_Joules_Consumed{instance=\"$node\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "PP0 Joules Consumed",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(PP1_Joules_Consumed{instance=\"$node\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "PP1 Joules Consumed",
+          "refId": "D"
+        }
+      ],
+      "aliasColors": {},
+      "bars": false,
+      "dashLength": 10,
+      "dashes": false,
+      "fill": 1,
+      "fillGradient": 0,
+      "hiddenSeries": false,
+      "legend": {
+        "avg": false,
+        "current": false,
+        "max": false,
+        "min": false,
+        "show": true,
+        "total": false,
+        "values": false
+      },
+      "lines": true,
+      "linewidth": 1,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "nullPointMode": "null",
+      "options": {
+        "dataLinks": []
+      },
+      "percentage": false,
+      "pluginVersion": "10.4.2",
+      "pointradius": 2,
+      "points": false,
+      "renderer": "flot",
+      "seriesOverrides": [],
+      "spaceLength": 10,
+      "stack": false,
+      "steppedLine": false,
+      "thresholds": [],
+      "timeFrom": null,
+      "timeRegions": [],
+      "timeShift": null,
+      "tooltip": {
+        "shared": true,
+        "sort": 0,
+        "value_type": "individual"
+      },
+      "type": "timeseries",
+      "xaxis": {
+        "buckets": null,
+        "mode": "time",
+        "name": null,
+        "show": true,
+        "values": []
+      },
+      "yaxes": [
+        {
+          "$$hashKey": "object:2758",
+          "format": "none",
+          "label": "Watt",
+          "logBase": 1,
+          "max": null,
+          "min": "0",
+          "show": true
+        },
+        {
+          "$$hashKey": "object:2759",
+          "format": "none",
+          "label": null,
+          "logBase": 1,
+          "max": null,
+          "min": null,
+          "show": true
+        }
+      ],
+      "yaxis": {
+        "align": false,
+        "alignLevel": null
+      }
+    },
+    {
+      "datasource": null,
+      "interval": "2s",
+      "gridPos": {
+        "x": 15,
+        "y": 129,
+        "w": 9,
+        "h": 5
+      },
+      "title": "Current Socket1 Energy Consumption (Watt)",
+      "id": 53,
+      "targets": [
+        {
+          "expr": "rate(Package_Joules_Consumed{instance=\"$node\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "Package Joules Consumed",
+          "refId": "A"
+        },
+        {
+          "expr": "rate(DRAM_Joules_Consumed{instance=\"$node\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "DRAM Joules Consumed",
+          "refId": "B"
+        },
+        {
+          "expr": "rate(PP0_Joules_Consumed{instance=\"$node\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "PP0 Joules Consumed",
+          "refId": "C"
+        },
+        {
+          "expr": "rate(PP1_Joules_Consumed{instance=\"$node\", socket=\"1\"}[4s])",
+          "instant": false,
+          "interval": "",
+          "legendFormat": "PP1 Joules Consumed",
+          "refId": "D"
+        }
+      ],
+      "cacheTimeout": null,
+      "links": [
+        {
+          "title": "",
+          "url": ""
+        }
+      ],
+      "options": {
+        "displayMode": "lcd",
+        "fieldOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "defaults": {
+            "mappings": [
+              {
+                "$$hashKey": "object:413",
+                "id": 0,
+                "op": "=",
+                "text": "N/A",
+                "type": 1,
+                "value": "null"
+              }
+            ],
+            "nullValueMode": "connected",
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            },
+            "unit": "none"
+          },
+          "overrides": [],
+          "values": false
+        },
+        "orientation": "vertical",
+        "showUnfilled": true
+      },
+      "pluginVersion": "6.7.2",
+      "timeFrom": null,
+      "timeShift": null,
+      "type": "bargauge"
+    }
+  ],
+  "refresh": "5s",
+  "schemaVersion": 22,
+  "style": "dark",
+  "tags": [],
+  "templating": {
+    "list": [
+      {
+        "current": {
+          "selected": false,
+          "text": "ip addr:port",
+          "value": "ip addr:port"
+        },
+        "datasource": null,
+        "definition": "label_values(Number_of_sockets,instance)",
+        "hide": 0,
+        "includeAll": false,
+        "label": "Host",
+        "multi": false,
+        "name": "node",
+        "options": [],
+        "query":{"query": "label_values(Number_of_sockets,instance)","refId": "StandardVariableQuery"},
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 0,
+        "type": "query"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-5m",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "",
+  "title": "Intel(r) Performance Counter Monitor (Intel(r) PCM) Dashboard - gaudi3",
+  "uid": "A_CvwTCWk",
+  "variables": {
+    "list": []
+  },
+  "version": 1
+}
