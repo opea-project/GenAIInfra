@@ -31,11 +31,10 @@ A Transformer model is usually consists of a tokenizer and some Transformer bloc
 In the tutorial, we use [Titeiiko/OTIS-Official-Spam-Model](https://huggingface.co/Titeiiko/OTIS-Official-Spam-Model) for SPAM filtering.
 
 ```sh
-git clone https://huggingface.co/Titeiiko/OTIS-Official-Spam-Model
-# Convert the ONNX model to OpenVINO IR.
-ovc OTIS-Official-Spam-Model/model.onnx --output_model OTIS-Official-Spam-Model/model.xml
+# Convert HuggingFace model to OpenVINO IR.
+optimum-cli export openvino --model Titeiiko/OTIS-Official-Spam-Model OTIS-Official-Spam-Model
 # Convert the tokenizer to OpenVINO IR.
-convert_tokenizer ./OTIS-Official-Spam-Model -o ./OTIS-Official-Spam-Model
+convert_tokenizer Titeiiko/OTIS-Official-Spam-Model -o ./OTIS-Official-Spam-Model
 ```
 
 ```python
@@ -44,7 +43,7 @@ from openvino_tokenizers import connect_models
 
 core = Core()
 tokenizer = core.read_model("OTIS-Official-Spam-Model/openvino_tokenizer.xml")
-model = core.read_model("OTIS-Official-Spam-Model/model.xml")
+model = core.read_model("OTIS-Official-Spam-Model/openvino_model.xml")
 # Merge the model and its tokenizer.
 combined_model = connect_models(tokenizer, model)
 save_model(combined_model, "OTIS-Official-Spam-Model/combined.xml")
