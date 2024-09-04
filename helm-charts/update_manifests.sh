@@ -16,11 +16,11 @@ function generate_yaml {
   outputdir=$2
 
   local extraparams=""
-  if [[ $(grep -c 'tag: "latest"' ./common/$chart/values.yaml) != 0 ]]; then
+  if [[ $(grep -c 'tag: "latest"' ./common/$chart/Intel/xeon_values.yaml) != 0 ]]; then
      extraparams="--set image.tag=$NEWTAG"
   fi
 
-  helm template $chart ./common/$chart --skip-tests --values ./common/$chart/values.yaml --set global.extraEnvConfig=extra-env-config,global.modelUseHostPath=$MODELPATH,noProbe=true $extraparams > ${outputdir}/$chart.yaml
+  helm template $chart ./common/$chart --skip-tests --values ./common/$chart/Intel/xeon_values.yaml --set global.extraEnvConfig=extra-env-config,global.modelUseHostPath=$MODELPATH,noProbe=true $extraparams > ${outputdir}/$chart.yaml
 
   for f in `ls ./common/$chart/*-values.yaml 2>/dev/null `; do
     ext=$(basename $f | cut -d'-' -f1)
