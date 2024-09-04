@@ -31,7 +31,7 @@ function generate_yaml {
   extraparams="--set global.modelUseHostPath=${MODELPATH},image.tag=latest,asr.image.tag=latest,data-prep.image.tag=latest,embedding-usvc.image.tag=latest,llm-uservice.image.tag=latest,reranking-usvc.image.tag=latest,retriever-usvc.image.tag=latest,speecht5.image.tag=latest,tts.image.tag=latest,web-retriever.image.tag=latest,whisper.image.tag=latest"
 
   helm dependency update $chart
-  helm template $chart $chart --skip-tests $extraparams -f $chart/values.yaml       > $outputdir/xeon/${chart}.yaml
+  helm template $chart $chart --skip-tests $extraparams -f $chart/Intel/xeon_values.yaml       > $outputdir/xeon/${chart}.yaml
   helm template $chart $chart --skip-tests $extraparams -f $chart/Intel/gaudi-values.yaml > $outputdir/gaudi/${chart}.yaml
 
 }
