@@ -825,12 +825,12 @@ func isDeploymentStatusChanged(e event.UpdateEvent) bool {
 	}
 
 	if len(newDeployment.OwnerReferences) == 0 {
-		// fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
+		fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
 		return false
 	} else {
 		for _, owner := range newDeployment.OwnerReferences {
 			if owner.Kind == "GMConnector" {
-				// fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
+				fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
 				break
 			}
 		}
