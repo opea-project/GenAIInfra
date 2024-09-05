@@ -474,6 +474,9 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 }
 
 func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnector, ctx context.Context) error {
+	if graph == nil || len(graph.Status.Annotations) == 0 {
+		return errors.New("graph is empty or no annotations")
+	}
 	var totalCnt uint = 0
 	var readyCnt uint = 0
 	for resName := range graph.Status.Annotations {
@@ -880,6 +883,12 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Predicate to only trigger on status changes for Deployment
 	deploymentFilter := predicate.Funcs{
 		UpdateFunc: isDeploymentStatusChanged,
+		//ignore create and delete events, otherwise it will trigger the nested reconcile which is meaningless
+		CreateFunc: func(e event.CreateEvent) bool {
+			return false
+		}, DeleteFunc: func(e event.DeleteEvent) bool {
+			return false
+		},
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
