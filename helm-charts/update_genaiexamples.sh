@@ -33,8 +33,7 @@ function generate_yaml {
   extra=$5
 
   local extraparams=""
-  extraparams="--set global.modelUseHostPath=${MODELPATH}"
-  [[ "x$extra" != "x" ]] && extraparams="${extraparams},${extra}"
+  [[ "x$extra" != "x" ]] && extraparams="--set ${extra}"
 
   helm dependency update $chart
   helm template $chart $chart --skip-tests $extraparams -f $chart/${valuefile} > $outputdir/$outputfile
