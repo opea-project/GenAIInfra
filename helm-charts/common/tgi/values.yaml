@@ -7,13 +7,16 @@
 
 replicaCount: 1
 
+horizontalPodAutoscaler:
+  maxReplicas: 6
+
 port: 2080
 
 image:
   repository: ghcr.io/huggingface/text-generation-inference
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest-intel-cpu"
+  tag: "2.2.0"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -117,3 +120,9 @@ global:
   # By default, both var are set to empty, the model will be downloaded and saved to a tmp volume.
   modelUseHostPath: ""
   modelUsePVC: ""
+  # Enabling HPA will:
+  # - Ignore above replica count, as it will be controlled by HPA
+  # - Add example HPA scaling rules with thresholds suitable for Xeon deployments
+  # - Require custom metrics ConfigMap available in the main application chart
+  horizontalPodAutoscaler:
+    enabled: false

@@ -7,6 +7,9 @@
 
 replicaCount: 1
 
+horizontalPodAutoscaler:
+  maxReplicas: 2
+
 port: 2081
 shmSize: 1Gi
 EMBEDDING_MODEL_ID: "BAAI/bge-base-en-v1.5"
@@ -92,3 +95,9 @@ global:
   # By default, both var are set to empty, the model will be downloaded and saved to a tmp volume.
   modelUseHostPath: ""
   modelUsePVC: ""
+  # Enabling HPA will:
+  # - Ignore above replica count, as it will be controlled by HPA
+  # - Add example HPA scaling rules with thresholds suitable for Xeon deployments
+  # - Require custom metrics ConfigMap available in the main application chart
+  horizontalPodAutoscaler:
+    enabled: false

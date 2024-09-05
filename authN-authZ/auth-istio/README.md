@@ -1,4 +1,4 @@
-# Use GMC and Istio to compose an OPEA Pipeline with authentication and authorization enabled
+# Leveraging Istio to compose an OPEA Pipeline with authentication and authorization enabled
 
 In enterprise settings not only do we want to identify who is using a service but also what they are entitled to use. This is where authentication and authorization comes in. In contrast, API tokens provide full access by virtue of possession as long as they are valid/not expired. With that aside, we first provide the solution on AuthN and AuthZ in OPEA using Istio and JWT tokens. Another option is to leverage the oauth2-proxy with various OIDC providers for authentication and authorization. Using oauth2-proxy with Istio ensures secure, scalable access control, centralizes user management, and provides seamless single sign-on capabilities, improving overall security and user experience in complex microservices environments.
 
@@ -6,17 +6,27 @@ Currently we provide three kinds of setups for authentication and authorization:
 
 ## Prerequisite
 
-Before composing an OPEA pipeline with authN & authZ using GMC, user need to install Istio to support this feature. Please follow the steps [here](https://istio.io/latest/docs/setup/install/istioctl/) for installation.
+Before composing an OPEA pipeline with authN & authZ, user need to install Istio to support this feature. Please follow the steps [here](https://istio.io/latest/docs/setup/install/istioctl/) for Istio installation.
 
-**Deploy chatQnA GMC custom resource and enable Istio sidecar injection**
+**Deploy chatQnA pipeline and enable Istio sidecar injection**
 
 ```sh
-# make sure you are executing under the microservices-connector folder
-kubectl create ns chatqa
-kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
 
-# patch the router deployment to enable istio sidecar injection
-kubectl patch deployment -n chatqa router-server --patch '{
+# deploy ChatQnA pipeline. You can either leverage GMC or the ChatQnA helm chart.
+kubectl create ns chatqa
+# here's the command to leverage GMC custom resource for ChatQnA deployment.
+kubectl apply -f $(pwd)/../../microservices-connector/config/samples/ChatQnA/chatQnA_xeon.yaml
+# please refer the doc https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/chatqna for deployment with helm chart.
+# and install under `chatqa` namespace
+
+# expose an environment variable to set the deployment method
+# which will affect the configuration we use for authentication and authorization
+export DEPLOY_METHOD=<your deploy method, valid values: "gmc-based" and "helm-chart-based">
+
+# patch the deployment to enable istio sidecar injection
+# for GMC based deployment, set the `deployment-name` to `router-service-deployment`
+# for helm chart based deployment, set the `deployment-name` to `chatqna`
+kubectl patch deployment -n chatqa <deployment-name> --patch '{
   "spec": {
     "template": {
       "metadata": {
@@ -29,13 +39,13 @@ kubectl patch deployment -n chatqa router-server --patch '{
 }'
 ```
 
-The istio ingress gateway will be used to access the chatQnA service in different setups. Follow the istio guide [here](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) to determine the ingress IP and ports.
+The istio ingress gateway will be used to access the chatQnA service in different setups. Follow the istio guide [here](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) to determine the ingress IP and ports and expose them as environment variables.
 
-## Perform authentication and authorization via Bearer JWT tokens
+## Perform authentication and authorization via Bearer JWT tokens and curl
 
 Authentication and authorization are essential for securing microservices architectures. Using Bearer JWT tokens for these processes ensures that only authenticated users with valid tokens can access specific services, protecting sensitive data. Authentication verifies user identity, while authorization controls their permissions. This layered approach not only prevents unauthorized access but also provides detailed control over service interactions, maintaining system security and compliance. Here we leverage Istio mechanisms together with Bearer JWT tokens to fulfill that.
 
-<img src="./docs/OPEA auth flow with OIDC provider.png" width="700" height="300">
+![OPEA auth flow with OIDC provider](./docs/OPEA_auth_flow_with_OIDC_provider.png)
 
 ### Perform authentication and authorization via fake JWT tokens
 
@@ -46,13 +56,14 @@ In this example, we setup rules that only users with JWT token issued by "testin
 **Apply authentication and authorization policies to the pipeline endpoint based on raw JWT tokens**
 
 ```sh
+# make sure running under authN-authZ/auth-istio folder
 # apply the yaml to request authentication using JWT token
-kubectl apply -f $(pwd)/config/authN-authZ/chatQnA_authZ_fakejwt.yaml -n chatqa
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_authZ_fakejwt.yaml -n chatqa
 
 # apply the yaml file to request that only JWT token with
 # issuer & sub == "testing@secure.istio.io" and groups belongs to group1
 # can access the endpoint of chatQnA service
-kubectl apply -f $(pwd)/config/authN-authZ/chatQnA_authN_fakejwt.yaml -n chatqa
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_authN_fakejwt.yaml -n chatqa
 ```
 
 After applying these two yaml files, we have setup the policy that only user with a valid JWT token (with valid issuer and claims) could access the pipeline endpoint.
@@ -83,7 +94,12 @@ Deploy one client pod and test the chatQnA application with different tokens
 kubectl create deployment client-test -n chatqa --image=python:3.8.13 -- sleep infinity
 
 export CLIENT_POD=$(kubectl get pod -n chatqa -l app=client-test -o jsonpath={.items..metadata.name})
-export accessUrl=$(kubectl get gmc -n chatqa -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+
+# export an accessUrl based on either GMC or helm chart based ChatQnA
+if [ "${DEPLOY_METHOD}" = "gmc-based" ]; then
+    export accessUrl=$(kubectl get gmc -n chatqa -o jsonpath="{.items[?(@.metadata.name=='chatqa')].status.accessUrl}")
+else
+    export accessUrl="http://chatqna.chatqa.svc.cluster.local:8888"
 
 # try without token. Shall get response: "RBAC: access denied 403"
 kubectl exec -it -n chatqa $CLIENT_POD -- curl -X POST $accessUrl -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -sS -H 'Content-Type: application/json' -w " %{http_code}\n"
@@ -103,11 +119,11 @@ In this sample, we are going to test with the scenario that only privileged user
 
 **Sample OIDC provider installation and configuration: Keycloak**
 
-Install Keycloak in the kubernetes cluster for user management. **Note:** Replace the admin password as your own in the keycloak_install.yaml file.
+Install Keycloak in the kubernetes cluster for user management. **Note:** Replace the admin password as your own in the command.
 
 ```bash
-cd $(pwd)
-kubectl apply -f $(pwd)/config/authN-authZ/keycloak_install.yaml
+# make sure running under authN-authZ/auth-istio folder
+kubectl apply -f $(pwd)/keycloak_install.yaml
 
 # get the ip and port to access keycloak.
 export HOST_IP=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' | cut -d '/' -f3 | cut -d ':' -f1)
@@ -135,14 +151,14 @@ Use the commands to apply the authentication and authorization rules.
 
 ```bash
 # export the router service through istio ingress gateway
-kubectl apply -f $(pwd)/config/authN-authZ/chatQnA_router_gateway.yaml
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway.yaml
 
 # 'envsubst' is used to substitute envs in yaml.
 # use 'sudo apt-get install gettext-base' to install envsubst if it does not exist on your machine
 # apply the authentication and authorization rule
 # these files will restrict user access with valid token (with valid issuer, username and realm role)
-envsubst < $(pwd)/config/authN-authZ/chatQnA_authN_keycloak.yaml | kubectl -n chatqa apply -f -
-envsubst < $(pwd)/config/authN-authZ/chatQnA_authZ_keycloak.yaml | kubectl -n chatqa apply -f -
+envsubst < $(pwd)/$DEPLOY_METHOD/chatQnA_authN_keycloak.yaml | kubectl -n chatqa apply -f -
+envsubst < $(pwd)/$DEPLOY_METHOD/chatQnA_authZ_keycloak.yaml | kubectl -n chatqa apply -f -
 ```
 
 User could customize the chatQnA_authZ_keycloak.yaml to reflect roles, groups or any other claims they defined in the OIDC provider for the user.
@@ -175,11 +191,11 @@ curl -X POST $accessUrl -d '{"text":"What is the revenue of Nike in 2023?","para
 curl -X POST $accessUrl -d '{"text":"What is the revenue of Nike in 2023?","parameters":{"max_new_tokens":17, "do_sample": true}}' -sS -H "Authorization: Bearer $TOKENA" -H 'Content-Type: application/json' -w " %{http_code}\n"
 ```
 
-## Perform authentication and authorization via oauth2-proxy and OIDC provider
+## Perform authentication and authorization via oauth2-proxy and OIDC provider and UI
 
-Another choice we have is using oauth2-proxy and OIDC providers. These two streamline authentication and authorization by handling user identity and access management. oauth2-Proxy acts as a gateway, integrating with OIDC providers to authenticate users and issue tokens. This setup ensures secure access to applications by validating user credentials and managing permissions, simplifying the implementation of robust security protocols across services.
+Another choice we have is using oauth2-proxy and OIDC providers. These two streamline authentication and authorization by handling user identity and access management. oauth2-proxy acts as a gateway, integrating with OIDC providers to authenticate users and issue tokens. This setup ensures secure access to applications by validating user credentials and managing permissions, simplifying the implementation of robust security protocols across services.
 
-<img src="./docs/OPEA auth flow with oauth2-proxy.png" width="700" height="400">
+![OPEA auth flow with oauth2-proxy](./docs/OPEA_auth_flow_with_oauth2-proxy.png)
 
 We are using a similar scenario here that only privileged users can access our chatQnA service and ask questions. In this case, user `mary` who has the role `user` can access the chatQnA pipeline. And user `bob` with the role `viewer` will not be able to access the service. Of course, the other users without valid token cannot access the service.
 
@@ -188,8 +204,8 @@ We are using a similar scenario here that only privileged users can access our c
 Here we take Keycloak as the sample OIDC Provider to use in the example. Follow the steps to install and configure Keycloak.
 
 ```bash
-cd $(pwd)
-kubectl apply -f $(pwd)/config/authN-authZ/keycloak_install.yaml
+# make sure running under authN-authZ/auth-istio folder
+kubectl apply -f $(pwd)/keycloak_install.yaml
 
 # get the ip and port to access keycloak.
 export HOST_IP=$(kubectl config view --minify -o jsonpath='{.clusters[0].cluster.server}' | cut -d '/' -f3 | cut -d ':' -f1)
@@ -205,31 +221,31 @@ The user management is done via Keycloak and the configuration steps look like t
 
 1. Create a new realm named `chatqna` within Keycloak.
 
-<img src="./docs/create_realm.png" width="600" height="300">
+   ![create realm](./docs/create_realm.png)
 
 2. Create a new client called `chatqna` and set `Client authentication` to 'On'. Set "http://chatqna-ui.com:${INGRESS_PORT}/*" in the `Valid redirect URIs` part. Note that `INGRESS_PORT` and `INGRESS_HOST` shall be exported following the guide [here](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports). Under the Credentials tab you will now be able to locate `<your client's secret>`, which will be used in the oauth2-proxy configs.
 
-<img src="./docs/create_client_1.png" width="600" height="300">
+   ![create client 1](./docs/create_client_1.png)
 
-<img src="./docs/create_client_2.png" width="600" height="300">
+   ![create client 2](./docs/create_client_2.png)
 
-<img src="./docs/create_client_3.png" width="600" height="300">
+   ![create client 3](./docs/create_client_3.png)
 
 3. Access the dedicated mappers pane by clicking `<your client's id>-dedicated`, located under Assigned client scope to configure a new `Audience` mapper with name `aud-mapper-<your client's id>`. And include Audience in your client with `ID token` and `access token` set to `On`.
 
-<img src="./docs/add_mapper.png" width="600" height="300">
+   ![add mapper](./docs/add_mapper.png)
 
 4. Create new roles `user` and `viewer` by navigating to `<your client's id> -> Roles`.
 
 5. Create a new user name as `mary` and another user as `bob` with `Email verified` set to `On`. Set passwords for both users (set 'Temporary' to 'Off').
 
-<img src="./docs/create_user.png" width="600" height="300">
+   ![create user](./docs/create_user.png)
 
 6. Create a new Client Scope with the name `groups` in Keycloak with `Include in Token Scope` set as `On`. Include a mapper of type `Group Membership` and set the `Token Claim Name` to `groups`. If the "Full group path" option is selected, you need to include a "/" separator in the group names defined in the --allowed-group option of OAuth2 Proxy. Example: "/groupname". After creating the Client Scope named `groups` you will need to attach it to your client. Go to Clients and find `<your client's id> -> Client scopes` and add client scope and select `groups` and choose `Optional` and you should now have a client that maps group memberships into the JWT tokens so that Oauth2 Proxy may evaluate them.
 
-<img src="./docs/add_group_scope.png" width="600" height="300">
+   ![add group scope](./docs/add_group_scope.png)
 
-<img src="./docs/attach_group_scope.png" width="600" height="300">
+   ![attach group scope](./docs/attach_group_scope.png)
 
 7. Create two groups `user` and `viewer` by navigating to Groups -> Create group. Assign role `user` to group `user` and role `viewer` to group `viewer` and add user `mary` as a member of group `user` and `bob` as a member of group `viewer`.
 
@@ -245,7 +261,8 @@ export CLIENT_SECRET=<YOUR_CLIENT_SECRET>
 # Using bash here. More methods found here:
 # https://oauth2-proxy.github.io/oauth2-proxy/configuration/overview#generating-a-cookie-secret
 export COOKIE_SECRET=$(dd if=/dev/urandom bs=32 count=1 2>/dev/null | base64 | tr -d -- '\n' | tr -- '+/' '-_' ; echo)
-envsubst < $(pwd)/config/authN-authZ/oauth2_install.yaml | kubectl apply -f -
+kubectl create ns oauth2-proxy
+envsubst < $(pwd)/oauth2_install.yaml | kubectl apply -f -
 ```
 
 **Expose the pipeline endpoint through Istio Ingressgateway and install chatQnA UI**
@@ -254,21 +271,23 @@ Here we expose the chatQnA endpoint through the ingress gateway and then install
 
 ```bash
 # expose chatqna endpoint
-kubectl apply -f $(pwd)/config/authN-authZ/chatQnA_router_gateway_oauth.yaml
-# build chatqna UI image
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway_oauth.yaml
+# build chatqna UI image if not exist on your machine
 git clone https://github.com/opea-project/GenAIExamples.git
 cd GenAIExamples/ChatQnA/docker/ui/
-export BACKEND_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/"
-export DATAPREP_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/dataprep"
-docker build --no-cache -t opea/chatqna-conversation-ui:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy --build-arg BACKEND_SERVICE_ENDPOINT=$BACKEND_SERVICE_ENDPOINT --build-arg DATAPREP_SERVICE_ENDPOINT=$DATAPREP_SERVICE_ENDPOINT -f ./docker/Dockerfile.react .
+docker build --no-cache -t opea/chatqna-conversation-ui:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f ./docker/Dockerfile.react .
 # inject image to containerd repo
 docker save -o ui.tar opea/chatqna-conversation-ui:latest
 sudo ctr -n k8s.io image import ui.tar
 # install chatqna conversation UI
-cd && cd GenAIInfra/microservices-connector
-helm install chatqna-ui ../helm-charts/common/chatqna-ui
+cd && cd GenAIInfra
+if [ "${DEPLOY_METHOD}" = "gmc-based" ]; then
+    helm install chatqna-ui $(pwd)/helm-charts/common/chatqna-ui --set BACKEND_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/",DATAPREP_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/dataprep"
+else
+    helm install chatqna-ui $(pwd)/helm-charts/common/chatqna-ui --set BACKEND_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/v1/chatqna",DATAPREP_SERVICE_ENDPOINT="http://chatqna-service.com:${INGRESS_PORT}/v1/dataprep"
+fi
 # expose ui service outside
-kubectl apply -f $(pwd)/config/authN-authZ/chatQnA_ui_gateway.yaml
+kubectl apply -f $(pwd)/chatQnA_ui_gateway.yaml
 ```
 
 **Add authentication and authorization rules to the pipeline through Istio Ingress Gateway**
@@ -277,13 +296,14 @@ Here we apply the authentication and authorization rules.
 
 ```bash
 # Before applying the authorization rule, need to add the oauth2-proxy as the external authorization provider
-kubectl apply -f $(pwd)/config/authN-authZ/chatQnA_istio_external_auth.yaml
+kubectl apply -f $(pwd)/chatQnA_istio_external_auth.yaml
+kubectl rollout restart deployment/istiod -n istio-system
 # 'envsubst' is used to substitute envs in yaml.
 # use 'sudo apt-get install gettext-base' to install envsubst if it does not exist on your machine
 # apply the authentication and authorization rule
 # these files will restrict user access with valid token (with valid group and role)
-envsubst < $(pwd)/config/authN-authZ/chatQnA_authN_oauth.yaml | kubectl apply -f -
-envsubst < $(pwd)/config/authN-authZ/chatQnA_authZ_oauth.yaml | kubectl apply -f -
+envsubst < $(pwd)/chatQnA_authN_oauth.yaml | kubectl apply -f -
+envsubst < $(pwd)/chatQnA_authZ_oauth.yaml | kubectl apply -f -
 ```
 
 **Validate authentication and authorization with UI service**

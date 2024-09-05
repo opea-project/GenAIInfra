@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: teirerank-config
   labels:
-    helm.sh/chart: teirerank-0.8.0
+    helm.sh/chart: teirerank-1.0.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-0.8.0
+    helm.sh/chart: teirerank-1.0.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -57,12 +57,13 @@ kind: Deployment
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-0.8.0
+    helm.sh/chart: teirerank-1.0.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
+  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
   replicas: 1
   selector:
     matchLabels:
@@ -134,3 +135,11 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
+---
+# Source: teirerank/templates/horizontalPodAutoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: teirerank/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

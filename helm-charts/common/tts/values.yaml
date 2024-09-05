@@ -10,13 +10,17 @@ autodependency:
 
 replicaCount: 1
 
+# Set it as a non-null string, such as true, if you want to enable logging facility,
+# otherwise, keep it as "" to disable it.
+LOGFLAG: ""
+
 TTS_ENDPOINT: ""
 
 image:
   repository: opea/tts
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""

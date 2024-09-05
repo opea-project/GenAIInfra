@@ -1,0 +1,58 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Freeze helm release tag in helm charts on manual event
+
+on:
+  workflow_dispatch:
+    inputs:
+      oldversion:
+        default: "0.9.0"
+        description: "Old helm version to be replaced"
+        required: true
+        type: string
+      newversion:
+        default: "1.0.0"
+        description: "New helm version to replace"
+        required: true
+        type: string
+      imageversion:
+        default: "v1.0"
+        description: "New image version to replace"
+        required: true
+        type: string
+
+jobs:
+  freeze-tag:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Set up Git
+        run: |
+          git config --global user.name "NeuralChatBot"
+          git config --global user.email "grp_neural_chat_bot@intel.com"
+          git remote set-url origin https://NeuralChatBot:"${{ secrets.ACTION_TOKEN }}"@github.com/opea-project/GenAIInfra.git
+
+      - name: Run script
+        env:
+          NEWTAG: ${{ inputs.imageversion }}
+        run: |
+          find helm-charts/ -name '*values.yaml' -type f -exec sed -i "s#tag: \"latest\"#tag: \"${imageversion}\"#g" {} \;
+          find helm-charts/ -name 'Chart.yaml' -type f -exec sed -i "s#version: ${{ inputs.oldversion }}#version: ${{ inputs.newversion }}#g" {} \;
+          find microservices-connector/helm/ -name '*values.yaml' -type f -exec sed -i "s#tag: \"latest\"#tag: \"${imageversion}\"#g" {} \;
+          find microservices-connector/helm/ -name 'Chart.yaml' -type f -exec sed -i "s#version: ${{ inputs.oldversion }}#version: ${{ inputs.newversion }}#g" {} \;
+          sed -i "s|opea/gmcrouter:latest|opea/gmcrouter:$NEWTAG|g" microservices-connector/config/gmcrouter/gmc-router.yaml
+          sed -i "s|opea/gmcmanager:latest|opea/gmcmanager:$NEWTAG|g" microservices-connector/config/manager/gmc-manager.yaml
+          ./helm-charts/update_manifests.sh
+
+      - name: Commit changes
+        run: |
+          git add .
+          git commit -s -m "Freeze Helm charts versions"
+          git push

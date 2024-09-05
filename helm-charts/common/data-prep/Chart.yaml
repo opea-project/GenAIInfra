@@ -5,15 +5,15 @@ apiVersion: v2
 name: data-prep
 description: The Helm chart for deploying data prep as microservice
 type: application
-version: 0.8.0
+version: 1.0.0
 # The data prep microservice server version
-appVersion: "v0.8"
+appVersion: "v1.0"
 dependencies:
   - name: tei
-    version: 0.8.0
+    version: 1.0.0
     repository: file://../tei
     condition: autodependency.enabled
   - name: redis-vector-db
-    version: 0.8.0
+    version: 1.0.0
     repository: file://../redis-vector-db
     condition: autodependency.enabled

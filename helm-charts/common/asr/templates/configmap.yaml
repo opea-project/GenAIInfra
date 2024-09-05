@@ -20,3 +20,4 @@ data:
   {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}
+  LOGFLAG: {{ .Values.LOGFLAG | quote }}

@@ -21,6 +21,7 @@ MODIFY_STEP_NAMESPACE="${APP_NAMESPACE}-modstep"
 WEBHOOK_NAMESPACE="${APP_NAMESPACE}-webhook"
 
 function validate_gmc() {
+    mkdir -p ${LOG_PATH}
     echo "validate audio-qna"
     validate_audioqa
 
@@ -55,7 +56,7 @@ function validate_gmc() {
 function validate_webhook() {
     kubectl create ns $WEBHOOK_NAMESPACE || echo "namespace $WEBHOOK_NAMESPACE is created."
     # validate root node existence
-    yq ".spec.nodes.node123 = .spec.nodes.root | del(.spec.nodes.root)" config/samples/chatQnA_xeon.yaml > /tmp/webhook-case1.yaml
+    yq ".spec.nodes.node123 = .spec.nodes.root | del(.spec.nodes.root)" config/samples/ChatQnA/chatQnA_xeon.yaml > /tmp/webhook-case1.yaml
     sed -i "s|namespace: chatqa|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case1.yaml
     output=$(! kubectl apply -f /tmp/webhook-case1.yaml 2>&1)
     if ! (echo $output | grep -q "a root node is required"); then
@@ -65,7 +66,7 @@ function validate_webhook() {
     fi
 
     # StepName validation
-    yq '(.spec.nodes.root.steps[] | select ( .name == "Llm")).name = "xyz"' config/samples/chatQnA_gaudi.yaml > /tmp/webhook-case2.yaml
+    yq '(.spec.nodes.root.steps[] | select ( .name == "Llm")).name = "xyz"' config/samples/ChatQnA/chatQnA_gaudi.yaml > /tmp/webhook-case2.yaml
     sed -i "s|namespace: chatqa|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case2.yaml
     output=$(! kubectl apply -f /tmp/webhook-case2.yaml 2>&1)
     if ! (echo $output | grep -q "invalid step name"); then
@@ -75,7 +76,7 @@ function validate_webhook() {
     fi
 
     # nodeName existence
-    yq '(.spec.nodes.root.steps[] | select ( .name == "Embedding")).nodeName = "node123"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case3.yaml
+    yq '(.spec.nodes.root.steps[] | select ( .name == "Embedding")).nodeName = "node123"' config/samples/ChatQnA/chatQnA_switch_xeon.yaml > /tmp/webhook-case3.yaml
     sed -i "s|namespace: switch|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case3.yaml
     output=$(! kubectl apply -f /tmp/webhook-case3.yaml 2>&1)
     if ! (echo $output | grep -q "node name: node123 in step Embedding does not exist"); then
@@ -85,7 +86,7 @@ function validate_webhook() {
     fi
 
     # serviceName uniqueness
-    yq '(.spec.nodes.node1.steps[] | select ( .name == "Embedding")).internalService.serviceName = "tei-embedding-svc-bge15"' config/samples/chatQnA_switch_xeon.yaml > /tmp/webhook-case4.yaml
+    yq '(.spec.nodes.node1.steps[] | select ( .name == "Embedding")).internalService.serviceName = "tei-embedding-svc-bge15"' config/samples/ChatQnA/chatQnA_switch_xeon.yaml > /tmp/webhook-case4.yaml
     sed -i "s|namespace: switch|namespace: $WEBHOOK_NAMESPACE|g"  /tmp/webhook-case4.yaml
     output=$(! kubectl apply -f /tmp/webhook-case4.yaml 2>&1)
     if ! (echo $output | grep -q "service name: tei-embedding-svc-bge15 in node node1 already exists"); then
@@ -114,8 +115,8 @@ function cleanup_apps() {
 
 function validate_audioqa() {
    kubectl create ns $AUDIOQA_NAMESPACE
-   sed -i "s|namespace: audioqa|namespace: $AUDIOQA_NAMESPACE|g"  $(pwd)/config/samples/audioQnA_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/audioQnA_xeon.yaml
+   sed -i "s|namespace: audioqa|namespace: $AUDIOQA_NAMESPACE|g"  $(pwd)/config/samples/AudioQnA/audioQnA_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/AudioQnA/audioQnA_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the audioqa router service to be ready..."
@@ -133,7 +134,7 @@ function validate_audioqa() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $AUDIOQA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $AUDIOQA_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $AUDIOQA_NAMESPACE 'audioqa' $((pods_count-1)) 0 7
@@ -152,7 +153,7 @@ function validate_audioqa() {
    accessUrl=$(kubectl get gmc -n $AUDIOQA_NAMESPACE -o jsonpath="{.items[?(@.metadata.name=='audioqa')].status.accessUrl}")
    byte_str=$(kubectl exec "$CLIENT_POD" -n $AUDIOQA_NAMESPACE -- curl $accessUrl -s -X POST  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA", "parameters":{"max_new_tokens":64, "do_sample": true, "streaming":false}}' -H 'Content-Type: application/json' | jq .byte_str)
    if [ -z "$byte_str" ]; then
-       echo "audioqa failed, please check the the!"
+       echo "audioqa failed!"
        exit 1
    fi
    echo "Audioqa response check succeed!"
@@ -165,10 +166,10 @@ function validate_audioqa() {
 
 function validate_chatqna() {
    kubectl create ns $CHATQNA_NAMESPACE
-   sed -i "s|namespace: chatqa|namespace: $CHATQNA_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_xeon.yaml
+   sed -i "s|namespace: chatqa|namespace: $CHATQNA_NAMESPACE|g"  $(pwd)/config/samples/ChatQnA/chatQnA_xeon.yaml
    # workaround for issue #268
-   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/chatQnA_xeon.yaml
+   #yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/ChatQnA/chatQnA_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/ChatQnA/chatQnA_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
@@ -186,8 +187,7 @@ function validate_chatqna() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-
+    pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $((pods_count-1)) 0 9
@@ -236,10 +236,10 @@ function validate_chatqna() {
 
 function validate_chatqna_with_dataprep() {
    kubectl create ns $CHATQNA_DATAPREP_NAMESPACE
-   sed -i "s|namespace: chatqa|namespace: $CHATQNA_DATAPREP_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
+   sed -i "s|namespace: chatqa|namespace: $CHATQNA_DATAPREP_NAMESPACE|g"  $(pwd)/config/samples/ChatQnA/chatQnA_dataprep_xeon.yaml
    # workaround for issue #268
-   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
+   #yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/ChatQnA/chatQnA_dataprep_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/ChatQnA/chatQnA_dataprep_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
@@ -257,7 +257,7 @@ function validate_chatqna_with_dataprep() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_DATAPREP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $CHATQNA_DATAPREP_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $CHATQNA_DATAPREP_NAMESPACE 'chatqa' $((pods_count-1)) 0 10
@@ -329,10 +329,10 @@ function validate_chatqna_with_dataprep() {
 
 function validate_chatqna_in_switch() {
    kubectl create ns $CHATQNA_SWITCH_NAMESPACE
-   sed -i "s|namespace: switch|namespace: $CHATQNA_SWITCH_NAMESPACE|g"  $(pwd)/config/samples/chatQnA_switch_xeon.yaml
+   sed -i "s|namespace: switch|namespace: $CHATQNA_SWITCH_NAMESPACE|g"  $(pwd)/config/samples/ChatQnA/chatQnA_switch_xeon.yaml
    # workaround for issue #268
-   yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/chatQnA_switch_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/chatQnA_switch_xeon.yaml
+   #yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/ChatQnA/chatQnA_switch_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/ChatQnA/chatQnA_switch_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the chatqa router service to be ready..."
@@ -350,7 +350,7 @@ function validate_chatqna_in_switch() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_SWITCH_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $CHATQNA_SWITCH_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $CHATQNA_SWITCH_NAMESPACE 'switch' $((pods_count-1)) 0 15
@@ -358,7 +358,6 @@ function validate_chatqna_in_switch() {
        echo "GMC status is not as expected"
        exit 1
     fi
-
 
    # giving time to populating data
    sleep 90
@@ -427,9 +426,9 @@ function validate_chatqna_in_switch() {
 
 function validate_modify_config() {
     kubectl create ns $MODIFY_STEP_NAMESPACE
-    cp $(pwd)/config/samples/codegen_xeon.yaml $(pwd)/config/samples/codegen_xeon_mod.yaml
-    sed -i "s|namespace: codegen|namespace: $MODIFY_STEP_NAMESPACE|g" $(pwd)/config/samples/codegen_xeon_mod.yaml
-    kubectl apply -f $(pwd)/config/samples/codegen_xeon_mod.yaml
+    cp $(pwd)/config/samples/CodeGen/codegen_xeon.yaml $(pwd)/config/samples/CodeGen/codegen_xeon_mod.yaml
+    sed -i "s|namespace: codegen|namespace: $MODIFY_STEP_NAMESPACE|g" $(pwd)/config/samples/CodeGen/codegen_xeon_mod.yaml
+    kubectl apply -f $(pwd)/config/samples/CodeGen/codegen_xeon_mod.yaml
 
     # Wait until the router service is ready
     echo "Waiting for the router service to be ready..."
@@ -444,26 +443,32 @@ function validate_modify_config() {
          exit 1
     fi
 
-    pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
+    pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
+    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
     fi
 
     #change the model id of the step named "Tgi" in the codegen_xeon_mod.yaml
-    yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "bigscience/bloom-560m"' $(pwd)/config/samples/codegen_xeon_mod.yaml
-    kubectl apply -f $(pwd)/config/samples/codegen_xeon_mod.yaml
+    yq -i '(.spec.nodes.root.steps[] | select ( .name == "Tgi")).internalService.config.MODEL_ID = "HuggingFaceH4/mistral-7b-grok"' $(pwd)/config/samples/CodeGen/codegen_xeon_mod.yaml
+    kubectl apply -f $(pwd)/config/samples/CodeGen/codegen_xeon_mod.yaml
 
-    pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
+    # Wait until all pods are ready
+    wait_until_all_pod_ready $MODIFY_STEP_NAMESPACE 300s
+    if [ $? -ne 0 ]; then
+         echo "Error Some pods are not ready!"
+         exit 1
+    fi
+
+    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
     fi
 
    #revert the codegen yaml
-   sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_mod.yaml
+   sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/CodeGen/codegen_xeon_mod.yaml
    kubectl delete gmc -n $MODIFY_STEP_NAMESPACE 'codegen'
    echo "sleep 10s for cleaning up"
    sleep 10
@@ -472,9 +477,9 @@ function validate_modify_config() {
 
 function validate_remove_step() {
     kubectl create ns $DELETE_STEP_NAMESPACE
-    cp $(pwd)/config/samples/codegen_xeon.yaml $(pwd)/config/samples/codegen_xeon_del.yaml
-    sed -i "s|namespace: codegen|namespace: $DELETE_STEP_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon_del.yaml
-    kubectl apply -f $(pwd)/config/samples/codegen_xeon_del.yaml
+    cp $(pwd)/config/samples/CodeGen/codegen_xeon.yaml $(pwd)/config/samples/CodeGen/codegen_xeon_del.yaml
+    sed -i "s|namespace: codegen|namespace: $DELETE_STEP_NAMESPACE|g"  $(pwd)/config/samples/CodeGen/codegen_xeon_del.yaml
+    kubectl apply -f $(pwd)/config/samples/CodeGen/codegen_xeon_del.yaml
 
     # Wait until the router service is ready
     echo "Waiting for the router service to be ready..."
@@ -489,16 +494,16 @@ function validate_remove_step() {
          exit 1
     fi
 
-    pods_count=$(kubectl get pods -n $DELETE_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $pods_count 0 3
+    pods_count=$(kubectl get pods -n $DELETE_STEP_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
+    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
     fi
 
     # remove the step named "llm" in the codegen_xeon.yaml
-    yq -i 'del(.spec.nodes.root.steps[] | select ( .name == "Llm"))' $(pwd)/config/samples/codegen_xeon_del.yaml
-    kubectl apply -f $(pwd)/config/samples/codegen_xeon_del.yaml
+    yq -i 'del(.spec.nodes.root.steps[] | select ( .name == "Llm"))' $(pwd)/config/samples/CodeGen/codegen_xeon_del.yaml
+    kubectl apply -f $(pwd)/config/samples/CodeGen/codegen_xeon_del.yaml
 
     sleep 10
     check_pod_terminated $DELETE_STEP_NAMESPACE
@@ -510,7 +515,7 @@ function validate_remove_step() {
     fi
 
    #revert the codegen yaml
-   sed -i "s|namespace: $MODIFY_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/codegen_xeon_del.yaml
+   sed -i "s|namespace: $DELETE_STEP_NAMESPACE|namespace: codegen|g"  $(pwd)/config/samples/CodeGen/codegen_xeon_del.yaml
    kubectl delete gmc -n $DELETE_STEP_NAMESPACE 'codegen'
    echo "sleep 10s for cleaning up"
    sleep 10
@@ -519,8 +524,8 @@ function validate_remove_step() {
 
 function validate_codegen() {
    kubectl create ns $CODEGEN_NAMESPACE
-   sed -i "s|namespace: codegen|namespace: $CODEGEN_NAMESPACE|g"  $(pwd)/config/samples/codegen_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/codegen_xeon.yaml
+   sed -i "s|namespace: codegen|namespace: $CODEGEN_NAMESPACE|g"  $(pwd)/config/samples/CodeGen/codegen_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/CodeGen/codegen_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the codegen router service to be ready..."
@@ -573,8 +578,8 @@ function validate_codegen() {
 
 function validate_codetrans() {
    kubectl create ns $CODETRANS_NAMESPACE
-   sed -i "s|namespace: codetrans|namespace: $CODETRANS_NAMESPACE|g"  $(pwd)/config/samples/codetrans_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/codetrans_xeon.yaml
+   sed -i "s|namespace: codetrans|namespace: $CODETRANS_NAMESPACE|g"  $(pwd)/config/samples/CodeTrans/codetrans_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/CodeTrans/codetrans_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the codetrans router service to be ready..."
@@ -626,8 +631,8 @@ function validate_codetrans() {
 
 function validate_docsum() {
    kubectl create ns $DOCSUM_NAMESPACE
-   sed -i "s|namespace: docsum|namespace: $DOCSUM_NAMESPACE|g"  $(pwd)/config/samples/docsum_xeon.yaml
-   kubectl apply -f $(pwd)/config/samples/docsum_xeon.yaml
+   sed -i "s|namespace: docsum|namespace: $DOCSUM_NAMESPACE|g"  $(pwd)/config/samples/DocSum/docsum_xeon.yaml
+   kubectl apply -f $(pwd)/config/samples/DocSum/docsum_xeon.yaml
 
    # Wait until the router service is ready
    echo "Waiting for the docsum router service to be ready..."

@@ -83,8 +83,9 @@ Access `http://localhost:5174` to play with the ChatQnA workload through UI.
 
 ## Values
 
-| Key              | Type   | Default                       | Description                                                              |
-| ---------------- | ------ | ----------------------------- | ------------------------------------------------------------------------ |
-| image.repository | string | `"opea/chatqna"`              |                                                                          |
-| service.port     | string | `"8888"`                      |                                                                          |
-| tgi.LLM_MODEL_ID | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory |
+| Key                                    | Type   | Default                       | Description                                                                                                                             |
+| -------------------------------------- | ------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
+| image.repository                       | string | `"opea/chatqna"`              |                                                                                                                                         |
+| service.port                           | string | `"8888"`                      |                                                                                                                                         |
+| tgi.LLM_MODEL_ID                       | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
+| global.horizontalPodAutoscaler.enabled | bop;   | false                         | HPA autoscaling for the TGI and TEI service deployments based on metrics they provide. See HPA section in ../README.md before enabling! |

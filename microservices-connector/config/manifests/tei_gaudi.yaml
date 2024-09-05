@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: tei-config
   labels:
-    helm.sh/chart: tei-0.8.0
+    helm.sh/chart: tei-1.0.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
@@ -33,7 +33,7 @@ kind: Service
 metadata:
   name: tei
   labels:
-    helm.sh/chart: tei-0.8.0
+    helm.sh/chart: tei-1.0.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
@@ -58,12 +58,13 @@ kind: Deployment
 metadata:
   name: tei
   labels:
-    helm.sh/chart: tei-0.8.0
+    helm.sh/chart: tei-1.0.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
+  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
   replicas: 1
   selector:
     matchLabels:
@@ -136,3 +137,11 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
+---
+# Source: tei/templates/horizontalPodAutoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: tei/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

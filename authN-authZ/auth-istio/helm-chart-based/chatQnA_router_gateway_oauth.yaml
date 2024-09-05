@@ -1,0 +1,47 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: chatqna-gateway
+  namespace: istio-system
+spec:
+  selector:
+    istio: ingressgateway
+  servers:
+  - hosts:
+    - chatqna-service.com
+    port:
+      name: http
+      number: 80
+      protocol: HTTP
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: chatqna-virtual-service
+  namespace: istio-system
+spec:
+  gateways:
+  - istio-system/chatqna-gateway
+  hosts:
+  - chatqna-service.com
+  http:
+  - match:
+    - uri:
+        prefix: /v1/chatqna
+    route:
+    - destination:
+        host: chatqna.chatqa.svc.cluster.local
+        port:
+          number: 8888
+  - match:
+    - uri:
+        prefix: /v1/dataprep
+    route:
+    - destination:
+        host: chatqna-data-prep.chatqa.svc.cluster.local
+        port:
+          number: 6007

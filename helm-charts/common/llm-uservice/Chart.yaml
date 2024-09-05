@@ -5,11 +5,11 @@ apiVersion: v2
 name: llm-uservice
 description: The Helm chart for deploying llm as microservice
 type: application
-version: 0.8.0
+version: 1.0.0
 # The llm microservice server version
-appVersion: "v0.8"
+appVersion: "v1.0"
 dependencies:
   - name: tgi
-    version: 0.8.0
+    version: 1.0.0
     repository: file://../tgi
     condition: autodependency.enabled

@@ -11,11 +11,15 @@ autodependency:
 replicaCount: 1
 TGI_LLM_ENDPOINT: ""
 
+# Set it as a non-null string, such as true, if you want to enable logging facility,
+# otherwise, keep it as "" to disable it.
+LOGFLAG: ""
+
 image:
   repository: opea/llm-tgi
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""

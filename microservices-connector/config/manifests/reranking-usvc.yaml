@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: reranking-usvc-config
   labels:
-    helm.sh/chart: reranking-usvc-0.8.0
+    helm.sh/chart: reranking-usvc-1.0.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_RERANKING_ENDPOINT: "http://reranking-usvc-teirerank"
@@ -21,6 +21,7 @@ data:
   LANGCHAIN_TRACING_V2: "false"
   LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
   LANGCHAIN_PROJECT: "opea-reranking-service"
+  LOGFLAG: ""
 ---
 # Source: reranking-usvc/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -31,10 +32,10 @@ kind: Service
 metadata:
   name: reranking-usvc
   labels:
-    helm.sh/chart: reranking-usvc-0.8.0
+    helm.sh/chart: reranking-usvc-1.0.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -56,10 +57,10 @@ kind: Deployment
 metadata:
   name: reranking-usvc
   labels:
-    helm.sh/chart: reranking-usvc-0.8.0
+    helm.sh/chart: reranking-usvc-1.0.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1

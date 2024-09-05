@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: chatqna-ui-config
   labels:
-    helm.sh/chart: chatqna-ui-0.8.0
+    helm.sh/chart: chatqna-ui-1.0.0
     app.kubernetes.io/name: chatqna-ui
     app.kubernetes.io/instance: chatqna-ui
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
   http_proxy: ""
@@ -33,10 +33,10 @@ kind: Service
 metadata:
   name: chatqna-ui
   labels:
-    helm.sh/chart: chatqna-ui-0.8.0
+    helm.sh/chart: chatqna-ui-1.0.0
     app.kubernetes.io/name: chatqna-ui
     app.kubernetes.io/instance: chatqna-ui
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -58,10 +58,10 @@ kind: Deployment
 metadata:
   name: chatqna-ui
   labels:
-    helm.sh/chart: chatqna-ui-0.8.0
+    helm.sh/chart: chatqna-ui-1.0.0
     app.kubernetes.io/name: chatqna-ui
     app.kubernetes.io/instance: chatqna-ui
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
@@ -72,10 +72,10 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: chatqna-ui-0.8.0
+        helm.sh/chart: chatqna-ui-1.0.0
         app.kubernetes.io/name: chatqna-ui
         app.kubernetes.io/instance: chatqna-ui
-        app.kubernetes.io/version: "v0.8"
+        app.kubernetes.io/version: "v1.0"
         app.kubernetes.io/managed-by: Helm
     spec:
       securityContext:

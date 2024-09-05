@@ -120,5 +120,5 @@ spec:
             serviceName: tgi-service-llama
             config:
               endpoint: /generate
-              MODEL_ID: bigscience/bloom-560m
+              MODEL_ID: openlm-research/open_llama_3b
             isDownstreamService: true

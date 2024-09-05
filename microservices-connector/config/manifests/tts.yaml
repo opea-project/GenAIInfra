@@ -8,16 +8,17 @@ kind: ConfigMap
 metadata:
   name: tts-config
   labels:
-    helm.sh/chart: tts-0.8.0
+    helm.sh/chart: tts-1.0.0
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
   TTS_ENDPOINT: "http://tts-speecht5:7055"
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
+  LOGFLAG: ""
 ---
 # Source: tts/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -28,10 +29,10 @@ kind: Service
 metadata:
   name: tts
   labels:
-    helm.sh/chart: tts-0.8.0
+    helm.sh/chart: tts-1.0.0
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -53,10 +54,10 @@ kind: Deployment
 metadata:
   name: tts
   labels:
-    helm.sh/chart: tts-0.8.0
+    helm.sh/chart: tts-1.0.0
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1

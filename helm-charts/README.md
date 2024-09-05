@@ -9,6 +9,10 @@ This directory contains helm charts for [GenAIComps](https://github.com/opea-pro
   - [Components](#components)
 - [How to deploy with helm charts](#deploy-with-helm-charts)
 - [Helm Charts Options](#helm-charts-options)
+- [HorizontalPodAutoscaler (HPA) support](#horizontalpodautoscaler-hpa-support)
+  - [Pre-conditions](#pre-conditions)
+  - [Gotchas](#gotchas)
+  - [Verify HPA metrics](#verify-hpa-metrics)
 - [Using Persistent Volume](#using-persistent-volume)
 - [Using Private Docker Hub](#using-private-docker-hub)
 - [Helm Charts repository](#helm-chart-repository)
@@ -26,7 +30,7 @@ AI application examples you can run directly on Xeon and Gaudi. You can also ref
 | ------------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | [codegen](./codegen)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/CodeGen)       | An example of copilot designed for code generation in Visual Studio Code.                       |
 | [codetrans](./codetrans) | [Code Translation](https://github.com/opea-project/GenAIExamples/tree/main/CodeTrans)    | An example of programming language code translation.                                            |
-| [chatqna](./chatqna)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA)       | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
+| [chatqna](./chatqna)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
 | [docsum](./docsum)       | [Document Summarization](https://github.com/opea-project/GenAIExamples/tree/main/DocSum) | An example of document summarization.                                                           |
 
 ### Components
@@ -62,7 +66,70 @@ There are global options(which should be shared across all components of a workl
 | global     | http_proxy https_proxy no_proxy | Proxy settings. If you are running the workloads behind the proxy, you'll have to add your proxy settings here.                                                                                                                                                                |
 | global     | modelUsePVC                     | The PersistentVolumeClaim you want to use as huggingface hub cache. Default "" means not using PVC. Only one of modelUsePVC/modelUseHostPath can be set.                                                                                                                       |
 | global     | modelUseHostPath                | If you don't have Persistent Volume in your k8s cluster and want to use local directory as huggingface hub cache, set modelUseHostPath to your local directory name. Note that this can't share across nodes. Default "". Only one of modelUsePVC/modelUseHostPath can be set. |
+| global     | horizontalPodAutoscaler.enabled | Enable HPA autoscaling for TGI and TEI service deployments based on metrics they provide. See #pre-conditions and #gotchas before enabling!                                                                                                                                    |
 | tgi        | LLM_MODEL_ID                    | The model id you want to use for tgi server. Default "Intel/neural-chat-7b-v3-3".                                                                                                                                                                                              |
+
+## HorizontalPodAutoscaler (HPA) support
+
+`horizontalPodAutoscaler` option enables HPA scaling for the TGI and TEI inferencing deployments:
+https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+
+Autoscaling is based on custom application metrics provided through [Prometheus](https://prometheus.io/).
+
+### Pre-conditions
+
+If cluster does not run [Prometheus operator](https://github.com/prometheus-operator/kube-prometheus)
+yet, it SHOULD be be installed before enabling HPA, e.g. by using:
+https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
+
+Enabling HPA in top-level Helm chart (e.g. `chatqna`), overwrites cluster's current _PrometheusAdapter_
+configuration with relevant custom metric queries. If that has queries you wish to retain, _or_ HPA is
+otherwise enabled only in TGI or TEI subchart(s), you need add relevat queries to _PrometheusAdapter_
+configuration _manually_ (e.g. from `chatqna` custom metrics Helm template).
+
+### Gotchas
+
+Why HPA is opt-in:
+
+- Enabling (top level) chart `horizontalPodAutoscaler` option will _overwrite_ cluster's current
+  `PrometheusAdapter` configuration with its own custom metrics configuration.
+  Take copy of the existing one before install, if that matters:
+  `kubectl -n monitoring get cm/adapter-config -o yaml > adapter-config.yaml`
+- `PrometheusAdapter` needs to be restarted after install, for it to read the new configuration:
+  `ns=monitoring; kubectl -n $ns delete $(kubectl -n $ns get pod --selector app.kubernetes.io/name=prometheus-adapter -o name)`
+- By default Prometheus adds [k8s RBAC rules](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/prometheus-roleBindingSpecificNamespaces.yaml)
+  for accessing metrics from `default`, `kube-system` and `monitoring` namespaces. If Helm is
+  asked to install OPEA services to some other namespace, those rules need to be updated accordingly
+- Current HPA rules are examples for Xeon, for efficient scaling they need to be fine-tuned for given setup
+  performance (underlying HW, used models and data types, OPEA version etc)
+
+### Verify HPA metrics
+
+To verify that metrics required by horizontalPodAutoscaler option work, check following...
+
+Prometheus has found the metric endpoints, i.e. last number on `curl` output is non-zero:
+
+```console
+chart=chatqna; # OPEA services prefix
+ns=monitoring; # Prometheus namespace
+prom_url=http://$(kubectl -n $ns get -o jsonpath="{.spec.clusterIP}:{.spec.ports[0].port}" svc/prometheus-k8s);
+curl --no-progress-meter $prom_url/metrics | grep scrape_pool_targets.*$chart
+```
+
+**NOTE**: TGI and TEI inferencing services provide metrics endpoint only after they've processed their first request!
+
+PrometheusAdapter lists TGI and/or TGI custom metrics (`te_*` / `tgi_*`):
+
+```console
+kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq .resources[].name
+```
+
+HPA rules list valid (not `<unknown>`) TARGET values for service deployments:
+
+```console
+ns=default;  # OPEA namespace
+kubectl -n $ns get hpa
+```
 
 ## Using Persistent Volume
 
@@ -142,11 +209,14 @@ export OPEA_IMAGE_REPO=192.168.0.100:5000/
 find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
 ```
 
-## Helm Charts repository
+## Helm Charts repository (Experimental)
 
-TBD
+https://opea-project.github.io/GenAIInfra
 
 ## Generate manifests from Helm Charts
 
 Some users may want to use kubernetes manifests(yaml files) for workload deployment, we do not maintain manifests itself, and will generate them using `helm template`.  
-See update_manifests.yaml for how the manifests are generated.
+See update_genaiexamples.sh for how the manifests are generated for supported GenAIExamples.  
+See update_manifests.sh for how the manifests are generated for supported GenAIComps.  
+Please note that the above scripts have hardcoded settings to reduce user configuration effort.  
+They are not supposed to be directly used by users.

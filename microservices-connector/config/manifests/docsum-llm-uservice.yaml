@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: docsum-llm-uservice-config
   labels:
-    helm.sh/chart: llm-uservice-0.8.0
+    helm.sh/chart: llm-uservice-1.0.0
     app.kubernetes.io/name: llm-uservice
     app.kubernetes.io/instance: docsum
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
   TGI_LLM_ENDPOINT: "http://docsum-tgi"
@@ -23,6 +23,7 @@ data:
   LANGCHAIN_TRACING_V2: "false"
   LANGCHAIN_API_KEY: insert-your-langchain-key-here
   LANGCHAIN_PROJECT: "opea-llm-uservice"
+  LOGFLAG: ""
 ---
 # Source: llm-uservice/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -33,10 +34,10 @@ kind: Service
 metadata:
   name: docsum-llm-uservice
   labels:
-    helm.sh/chart: llm-uservice-0.8.0
+    helm.sh/chart: llm-uservice-1.0.0
     app.kubernetes.io/name: llm-uservice
     app.kubernetes.io/instance: docsum
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -58,10 +59,10 @@ kind: Deployment
 metadata:
   name: docsum-llm-uservice
   labels:
-    helm.sh/chart: llm-uservice-0.8.0
+    helm.sh/chart: llm-uservice-1.0.0
     app.kubernetes.io/name: llm-uservice
     app.kubernetes.io/instance: docsum
-    app.kubernetes.io/version: "v0.8"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
