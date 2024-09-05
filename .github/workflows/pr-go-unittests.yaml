@@ -9,6 +9,7 @@ on:
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
       - microservices-connector/**
+      - kubernetes-addons/memory-bandwidth-exporter/**
       - "!microservices-connector/helm/**"
       - "!**.md"
       - "!**.txt"
@@ -21,11 +22,45 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GOSRC_DIR: "microservices-connector"
+  GMC_DIR: "microservices-connector"
+  MBE_DIR: "kubernetes-addons/memory-bandwidth-exporter"
 
 jobs:
-  go-unittests:
+  job1:
+    name: Get-test-matrix
     runs-on: ubuntu-latest
+    outputs:
+      run_matrix: ${{ steps.get-test-matrix.outputs.run_matrix }}
+    steps:
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get test matrix
+        id: get-test-matrix
+        run: |
+          set -xe
+          base_commit=${{ github.event.pull_request.base.sha }}
+          merged_commit=${{ github.event.pull_request.head.sha }}
+          run_matrix="["
+          if git diff --name-only ${base_commit} ${merged_commit} | grep -q "^${GMC_DIR}/"; then
+            run_matrix="${run_matrix}\"${GMC_DIR}\","
+          fi
+          if git diff --name-only ${base_commit} ${merged_commit} | grep -q "^${MBE_DIR}/"; then
+            run_matrix="${run_matrix}\"${MBE_DIR}\","
+          fi
+          run_matrix=${run_matrix%,}"]"
+          echo "run_matrix=${run_matrix}"
+          echo "run_matrix=${run_matrix}" >> $GITHUB_OUTPUT
+
+  go-unittests:
+    needs: [job1]
+    runs-on: ubuntu-latest
+    if: always() && ${{ needs.job1.outputs.run_matrix.length }} > 0
+    strategy:
+      matrix:
+        gopath: ${{ fromJSON(needs.job1.outputs.run_matrix) }}
     permissions:
       contents: write
       actions: write
@@ -47,15 +82,15 @@ jobs:
         with:
           args: --timeout=10m
           version: v1.55.2
-          working-directory: ${{ env.GOSRC_DIR }}
+          working-directory: ${{ matrix.gopath }}
 
       - name: Run golangunit test
         run: |
-          cd $GOSRC_DIR
+          cd ${{ matrix.gopath }}
           make test
 
       - name: Run tests and generate coverage
         run: |
-          cd $GOSRC_DIR
+          cd ${{ matrix.gopath }}
           go test -coverprofile=coverage.out $(go list ./... | grep -v /e2e)
           ../.github/workflows/scripts/go-coverage.sh
