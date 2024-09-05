@@ -58,7 +58,7 @@ make clean
 
 ### GMC Deployment on K8s cluster
 
-**GMC Images NOTE:** This image ought to be published in [dockhub](https://hub.docker.com/u/opea), including [gmcmanager](https://hub.docker.com/r/opea/gmcmanager) and [gmcrouter](https://hub.docker.com/r/opea/gmcrouter). Make sure you have the proper permission to the registry and use the latest images.
+**GMC Images NOTE:** This image ought to be published in [OPEA docker hub](https://hub.docker.com/u/opea), including [gmcmanager](https://hub.docker.com/r/opea/gmcmanager) and [gmcrouter](https://hub.docker.com/r/opea/gmcrouter). Make sure you have the proper permission to the registry and use the latest images.
 
 There are 2 methods for deploying GMC on K8s cluster:
 
@@ -76,7 +76,7 @@ There are 3 steps for deploying GMC on K8s cluster as below:
 **Deploy GMC NOTE:**
 
 - Before installting the manifests, please replace your own huggingface tokens
-- Please set the path to the manifests if you have pre-defined directory to save the models on you cluster hosts
+- `MOUNT_DIR` is the `hostPath` to save the models on you cluster hosts, so please make sure it is ready on every node of the k8s nodes and the microservices have enough permission to access it.
 - The `SYSTEM_NAMESPACE` should keep the same with the namespace defined in `gmc-manager.yaml` and `gmc-manager-rbac.yaml`
 - The configmap name `gmcyaml` is defined in gmcmanager deployment Spec. Please modify accordingly if you want
   use a different name for the configmap
