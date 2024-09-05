@@ -46,10 +46,9 @@ curl http://localhost:9000/v1/chat/completions \
 
 ## Values
 
-| Key                             | Type   | Default              | Description                                                                                                                                                  |
-| ------------------------------- | ------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                 | Your own Hugging Face API token                                                                                                                              |
-| global.modelUseHostPath         | string | `"/mnt/opea-models"` | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
-| image.repository                | string | `"opea/llm-tgi"`     |                                                                                                                                                              |
-| service.port                    | string | `"9000"`             |                                                                                                                                                              |
-| TGI_LLM_ENDPOINT                | string | `""`                 | LLM endpoint                                                                                                                                                 |
+| Key                             | Type   | Default          | Description                     |
+| ------------------------------- | ------ | ---------------- | ------------------------------- |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`             | Your own Hugging Face API token |
+| image.repository                | string | `"opea/llm-tgi"` |                                 |
+| service.port                    | string | `"9000"`         |                                 |
+| TGI_LLM_ENDPOINT                | string | `""`             | LLM endpoint                    |
