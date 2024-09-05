@@ -22,7 +22,6 @@ data:
   no_proxy: ""
   HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
-  TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
   CUDA_GRAPHS: "0"
 ---
