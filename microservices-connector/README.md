@@ -74,11 +74,12 @@ There are 3 steps for deploying GMC on K8s cluster as below:
 - Deploy GMC Manager
 
 **Deploy GMC NOTE:**
-- Before installting the manifests, please replace your own huggingface tokens 
+
+- Before installting the manifests, please replace your own huggingface tokens
 - Please set the path to the manifests if you have pre-defined directory to save the models on you cluster hosts
 - The `SYSTEM_NAMESPACE` should keep the same with the namespace defined in `gmc-manager.yaml` and `gmc-manager-rbac.yaml`
 - The configmap name `gmcyaml` is defined in gmcmanager deployment Spec. Please modify accordingly if you want
-use a different name for the configmap
+  use a different name for the configmap
 
 ```sh
 # Install GMC CRD
