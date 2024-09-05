@@ -1,12 +1,13 @@
 # memory bandwidth exporter
 
-Pod/container grained memory bandwidth exporter provides users memory bandwidth metrics of their running containers.  The metrics include llc_occupancy, mbm_local_bytes, mbm_total_bytes, cpu utilization and memory usage, and the metrics have been processed. In addition to container-level metrics, it also provides class-level and socket-level metrics. Users can configure the list of metrics to be collected. It serves as an exporter which can be connected to Promethus-like obserbility tools. And it also can be used as a telementry provider.
+Pod/container grained memory bandwidth exporter provides users memory bandwidth metrics of their running containers. The metrics include llc_occupancy, mbm_local_bytes, mbm_total_bytes, cpu utilization and memory usage, and the metrics have been processed. In addition to container-level metrics, it also provides class-level and socket-level metrics. Users can configure the list of metrics to be collected. It serves as an exporter which can be connected to Promethus-like obserbility tools. And it also can be used as a telementry provider.
 
 Memory bandwidth exporter makes use of state-of-the-art technologies like NRI to build a resource-efficient and well-maintained solution. This solution provides observability to memory bandwidth to OPEA micro-services. It lays the groundwork of better scaling and auto scaling of OPEA. It can also be deployed separately on end user environments, supporting any cases that memory bandwidth metrics are required.
 
 ## Setup
 
 ### Enable NRI in Containerd
+
 ```sh
 # download containerd binary, containerd version v1.7.0 or higher is required
 $ wget https://github.com/containerd/containerd/releases/download/v1.7.0/containerd-1.7.0-linux-amd64.tar.gz
@@ -41,6 +42,7 @@ $ ./build/bin/logger -idx 00
 ### Enable RDT
 
 Mount resctrl to the directory `/sys/fs/resctrl`:
+
 ```sh
 $ sudo mount -t resctrl resctrl /sys/fs/resctrl
 ```
@@ -48,6 +50,7 @@ $ sudo mount -t resctrl resctrl /sys/fs/resctrl
 ### Setup memory bandwidth exporter
 
 Before setup, you need to configure the runc hook:
+
 ```sh
 $ ./config/config.sh
 ```
@@ -57,7 +60,7 @@ $ ./config/config.sh
 ```sh
 $ make build
 $ sudo ./bin/memory-bandwidth-exporter
-# e.g., sudo ./bin/memory-bandwidth-exporter --collector.node.name=<node_name> --collector.container.namespaceWhiteList="calico-apiserver,calico-system,kube-system,tigera-operator" 
+# e.g., sudo ./bin/memory-bandwidth-exporter --collector.node.name=<node_name> --collector.container.namespaceWhiteList="calico-apiserver,calico-system,kube-system,tigera-operator"
 
 # get memory bandwidth metrics
 $ curl http://localhost:9100/metrics
@@ -105,6 +108,7 @@ memory-bandwidth-exporter-zxhdl   1/1     Running   0          3m
 ```
 
 get memory bandwidth metrics
+
 ```sh
 $ curl http://<memory_bandwidth_exporter_container_ip>:9100/metrics
 ```
@@ -118,6 +122,7 @@ $ make clean
 ## More flags about memory bandwidth exporter
 
 There are some flags to help users better use memory bandwidth exporter:
+
 ```sh
 -h, --[no-]help                               Show context-sensitive help (also try --help-long and --help-man).
 --collector.node.name=""                      Give node name.

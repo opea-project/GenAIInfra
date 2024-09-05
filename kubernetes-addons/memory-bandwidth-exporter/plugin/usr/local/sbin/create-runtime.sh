@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 container_state=$(cat)
 container_pid=$(echo "$container_state" | jq -r '.pid')
 
