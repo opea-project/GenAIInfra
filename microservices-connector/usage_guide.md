@@ -7,17 +7,17 @@ Below are sample use cases:
 
 ## Use GMC to compose a chatQnA Pipeline
 
-A sample for chatQnA can be found at config/samples/chatQnA_dataprep_xeon.yaml
+A sample for chatQnA can be found at config/samples/ChatQnA/chatQnA_dataprep_xeon.yaml
 
 **Deploy chatQnA GMC custom resource**
 
 ```sh
 kubectl create ns chatqa
-kubectl apply -f $(pwd)/config/samples/chatQnA_dataprep_xeon.yaml
+kubectl apply -f $(pwd)/config/samples/ChatQnA/chatQnA_dataprep_xeon.yaml
 # To use Gaudi device
-#kubectl apply -f $(pwd)/config/samples/chatQnA_dataprep_gaudi.yaml
+#kubectl apply -f $(pwd)/config/samples/ChatQnA/chatQnA_dataprep_gaudi.yaml
 # To use Nvidia GPU
-#kubectl apply -f $(pwd)/config/samples/chatQnA_nv.yaml
+#kubectl apply -f $(pwd)/config/samples/ChatQnA/chatQnA_nv.yaml
 ```
 
 **GMC will reconcile chatQnA custom resource and get all related components/services ready**

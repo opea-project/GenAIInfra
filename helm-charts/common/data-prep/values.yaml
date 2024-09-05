@@ -79,6 +79,10 @@ tolerations: []
 
 affinity: {}
 
+# Set it as a non-null string, such as true, if you want to enable logging facility,
+# otherwise, keep it as "" to disable it.
+LOGFLAG: ""
+
 # text embedding inference service URL, e.g. http://<service-name>:<port>
 TEI_EMBEDDING_ENDPOINT: ""
 
@@ -88,6 +92,8 @@ EMBED_MODEL: ""
 # redis DB service URL, e.g. redis://<service-name>:<port>
 REDIS_URL: ""
 INDEX_NAME: "rag-redis"
+KEY_INDEX_NAME: "file-keys"
+SEARCH_BATCH_SIZE: 10
 
 global:
   http_proxy: ""
