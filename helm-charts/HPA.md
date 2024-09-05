@@ -5,6 +5,7 @@
 - [Introduction](#introduction)
 - [Pre-conditions](#pre-conditions)
 - [Gotchas](#gotchas)
+- [Enable](#enable)
 - [Verify](#verify)
 
 ## Introduction
@@ -49,8 +50,8 @@ Default ones are:
   - Metrics service: `prom-kube-prometheus-stack-prometheus`
   - Adapter configMap: `prom-adapter-prometheus-adapter`
 
-Make sure correct "configMap" name is used in top-level (e.g. `chatqna`) Helm chart `values.yaml`,
-and commands below!
+Make sure correct "configMap" name is used in top-level (e.g. `chatqna`) Helm chart
+`hpa-values.yaml` file, and in commands below!
 
 ### Gotchas
 
@@ -76,6 +77,12 @@ Why HPA is opt-in:
   service inferencing pods from each other, scaled up instances may never get to ready state
 - Current HPA rules are examples for Xeon, for efficient scaling they need to be fine-tuned for given setup
   performance (underlying HW, used models and data types, OPEA version etc)
+
+## Enable
+
+ChatQnA includes pre-configured values files for scaling the services.
+
+To enable HPA, add `-f chatqna/hpa-values.yaml` option to your `helm install` command line.
 
 ### Verify
 

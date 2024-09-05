@@ -35,34 +35,15 @@ tolerations: []
 
 affinity: {}
 
-# Enabling HorizontalPodAutoscaler (HPA) will:
-# - Overwrite named PrometheusAdapter configMap with ChatQnA specific custom metric queries
-#   for embedding, reranking, tgi services
-# Note: default configMap in upstream:
-#  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
+# This is just to avoid Helm errors when HPA is NOT used
+# (use hpa-values.yaml files to actually enable HPA).
 horizontalPodAutoscaler:
-  # Name in upstream PrometheusAdapter manifest
-  # configMap: "adapter-config"
-  # Name when installed with Prometheus operator Helm chart
-  configMap: "prom-adapter-prometheus-adapter"
+  configMap: "MISSING"
   enabled: false
 
 # Override values in specific subcharts
-
-# Enabling "horizontalPodAutoscaler" for any of the subcharts requires enabling it also above!
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
-  horizontalPodAutoscaler:
-    maxReplicas: 4
-    enabled: false
-teirerank:
-  horizontalPodAutoscaler:
-    maxReplicas: 3
-    enabled: false
-tei:
-  horizontalPodAutoscaler:
-    maxReplicas: 2
-    enabled: false
 
 # disable guardrails-usvc by default
 # See guardrails-values.yaml for guardrail related options
