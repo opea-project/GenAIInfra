@@ -4,7 +4,7 @@ Helm chart for deploying LLM microservice.
 
 llm-uservice depends on TGI, you should set TGI_LLM_ENDPOINT as tgi endpoint.
 
-## (Option1): Installing the chart separately:
+## (Option1): Installing the chart separately
 
 First, you need to install the tgi chart, please refer to the [tgi](../tgi) chart for more information.
 
@@ -20,7 +20,7 @@ helm dependency update
 helm install llm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set TGI_LLM_ENDPOINT=${TGI_LLM_ENDPOINT} --wait
 ```
 
-## (Option2): Installing the chart with dependencies automatically:
+## (Option2): Installing the chart with dependencies automatically
 
 ```console
 cd GenAIInfra/helm-charts/common/llm-uservice

@@ -4,7 +4,7 @@ Helm chart for deploying LLM microservice.
 
 guardrails-usvc depends on TGI, you should set TGI_LLM_ENDPOINT as tgi endpoint.
 
-## (Option1): Installing the chart separately:
+## (Option1): Installing the chart separately
 
 First, you need to install the tgi chart, please refer to the [tgi](../tgi) chart for more information. Please use model `meta-llama/Meta-Llama-Guard-2-8B` during installation.
 
@@ -21,7 +21,7 @@ helm dependency update
 helm install guardrails-usvc . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set SAFETY_GUARD_ENDPOINT=${SAFETY_GUARD_ENDPOINT} --set SAFETY_GUARD_MODEL_ID=${SAFETY_GUARD_MODEL_ID} --wait
 ```
 
-## (Option2): Installing the chart with dependencies automatically:
+## (Option2): Installing the chart with dependencies automatically
 
 ```console
 cd GenAIInfra/helm-charts/common/guardrails-usvc
