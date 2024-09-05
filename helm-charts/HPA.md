@@ -84,6 +84,10 @@ ChatQnA includes pre-configured values files for scaling the services.
 
 To enable HPA, add `-f chatqna/hpa-values.yaml` option to your `helm install` command line.
 
+If **CPU** versions of TGI (and TEI) services are being scaled, resource requests and probe timings
+suitable for CPU usage need to be used. Add `-f chatqna/cpu-values.yaml` option to your `helm install`
+line.
+
 ### Verify
 
 To verify that horizontalPodAutoscaler options work, it's better to check that both inferencing
