@@ -13,6 +13,7 @@ The GenAIInfra repository is organized under four main directories, which includ
 | `kubernetes-addons`       | Deploy Kubernetes add-ons for OPEA.                                                                                                                                                                                                                                                                                                                                                |
 | `manifests`               | Manifests for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes and on Docker Compose.                                                                                                                                                                                                                                                         |
 | `scripts`                 | Scripts for testing, tools to facilitate OPEA deployment, and etc.                                                                                                                                                                                                                                                                                                                 |
+| `mlops platform`          | MLOps platform to enable enterprise AI at scale.                                                                                                                                                                                                                                                                                                                                   |
 
 ## Prerequisite
 
@@ -25,6 +26,14 @@ Please follow [Kubernetes official setup guide](https://kubernetes.io/docs/setup
 There are different methods to setup Kubernetes production cluster, such as [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/), [kubespray](https://kubespray.io/), and [more](https://kubernetes.io/docs/setup/production-environment/tools/).
 
 NOTE: We recommend to use containerd when choosing the container runtime during Kubernetes setup. Docker engine is also verified on Ubuntu 22.04 and above.
+
+### Setup MLOps platform
+
+[Charmed Kubeflow](https://charmed-kubeflow.io/) is an open source MLOps platform that enables organisations to run AI at scale. It is a cloud native applications, used to develop ML models, automate workloads, optimise models and serve them to the edge.
+
+In order to deploy Kubeflow on your infrastructure, follow the [tutorial](https://charmed-kubeflow.io/docs/get-started-with-charmed-kubeflow).
+
+Read more from [a guide to MLOps](https://ubuntu.com/engage/mlops-guide).
 
 ### (Optional) To run GenAIInfra on [Intel Gaudi](https://habana.ai/products/) product:
 
@@ -85,6 +94,18 @@ Select the example workflow you want to deploy, deploy the example (e.g. DocSum)
 ```shell
 kubectl apply -f ./DocSum/manifests/
 ```
+
+## AI workstations with Data Science Stack
+
+Data science stack (DSS) is a ready-to-run environment for machine learning and data science. It’s built on open-source tooling (including MicroK8s, JupyterLab and MLflow) and usable on any Ubuntu/Snap-enabled workstation.
+
+DSS provides a Command Line Interface (CLI) for managing containerised ML environments images such as PyTorch or TensorFlow, on top of MicroK8s.
+
+Get your ML environment up & running in less than 10 minutes, so you can easily evaluate your projects locally following the [tutorial](https://documentation.ubuntu.com/data-science-stack/en/latest/). The product architecture is also [available](https://documentation.ubuntu.com/data-science-stack/en/latest/explanation/dss-arch/) for further reference.
+
+### Use snaps to get your ML environment
+
+DSS is packaged as a snap, being native to Ubuntu. To read more the snap, [follow the link](https://snapcraft.io/data-science-stack).
 
 ## Additional Content
 
