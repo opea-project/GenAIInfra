@@ -25,9 +25,6 @@ data:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  LANGCHAIN_TRACING_V2: "false"
-  LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
-  LANGCHAIN_PROJECT: "opea-dataprep-service"
   LOGFLAG: ""
 ---
 # Source: data-prep/templates/service.yaml
