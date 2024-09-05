@@ -39,6 +39,11 @@ affinity: {}
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
+# disable guardrails-usvc by default
+# See guardrails-values.yaml for guardrail related options
+guardrails-usvc:
+  enabled: false
+
 global:
   http_proxy: ""
   https_proxy: ""
