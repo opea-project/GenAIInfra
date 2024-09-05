@@ -1,0 +1,11 @@
+apiVersion: v2
+name: llm-vllm-uservice
+description: A Helm chart for LLM microservice for which connects with vLLM microservice to recieve inferences.
+type: application
+version: 0.9.0
+appVersion: "v0.9"
+dependencies:
+  - name: vllm-openvino
+    version: 0.9.0
+    repository: file://../vllm-openvino
+    condition: autodependency.enabled

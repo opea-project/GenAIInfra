@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "llm-vllm-uservice.fullname" . }}
+  labels:
+    {{- include "llm-vllm-uservice.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.service.targetPort }}
+      protocol: TCP
+      name: llm-vllm
+  selector:
+    {{- include "llm-vllm-uservice.selectorLabels" . | nindent 4 }}
