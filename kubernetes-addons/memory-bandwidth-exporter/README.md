@@ -93,10 +93,11 @@ $ curl http://localhost:9100/metrics
 Build and push your image to the location specified by `MBE_IMG`, and apply manifest:
 
 ```sh
-make docker.build docker.push MBE_IMG=<some-registry>/opea/memory-bandwidth-exporter:<tag>
-make change_img MBE_IMG=<some-registry>/opea/memory-bandwidth-exporter:<tag>
-kubectl create ns system
-kubectl apply -f config/manifests/memory-bandwidth-exporter.yaml
+$ make docker.build docker.push MBE_IMG=<some-registry>/opea/memory-bandwidth-exporter:<tag>
+$ make change_img MBE_IMG=<some-registry>/opea/memory-bandwidth-exporter:<tag>
+# If namespace system does not exist, create it.
+$ kubectl create ns system
+$ kubectl apply -f config/manifests/memory-bandwidth-exporter.yaml
 ```
 
 Check the installation result:

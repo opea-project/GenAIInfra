@@ -178,6 +178,7 @@ func (h *handler) innerHandler(filters ...string) (http.Handler, error) {
 func main() {
 	promlogConfig := &promlog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
+	version.Version = "v0.1.0"
 	kingpin.Version(version.Print("memory bandwidth exporter"))
 	kingpin.CommandLine.UsageWriter(os.Stdout)
 	kingpin.HelpFlag.Short('h')
