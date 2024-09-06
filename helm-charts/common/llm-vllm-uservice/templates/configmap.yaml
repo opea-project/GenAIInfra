@@ -13,7 +13,7 @@ data:
   {{- else }}
   vLLM_ENDPOINT: "http://{{ .Release.Name }}-vllm-openvino"
   {{- end }}
-  LLM_MODEL: {{ .Values.global.LLM_MODEL_ID | quote }}
+  LLM_MODEL: {{ .Values.LLM_MODEL_ID | quote }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.global.HF_ENDPOINT }}

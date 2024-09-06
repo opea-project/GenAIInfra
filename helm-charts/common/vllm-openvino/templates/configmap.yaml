@@ -8,7 +8,7 @@ metadata:
   labels:
     {{- include "vllm-openvino.labels" . | nindent 4 }}
 data:
-  MODEL_ID: {{ .Values.global.LLM_MODEL_ID | quote }}
+  MODEL_ID: {{ .Values.LLM_MODEL_ID | quote }}
   PORT: {{ .Values.service.port | quote }}
   HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   VLLM_CPU_KVCACHE_SPACE: {{ .Values.VLLM_CPU_KVCACHE_SPACE | quote }}
@@ -22,7 +22,6 @@ data:
   no_proxy: {{ .Values.global.no_proxy | quote }}
   HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
-  TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.CUDA_GRAPHS }}
   CUDA_GRAPHS: {{ .Values.CUDA_GRAPHS | quote }}

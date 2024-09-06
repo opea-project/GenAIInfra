@@ -24,7 +24,15 @@ Apart from above mentioned services, there are following conditional dependencie
 
 ## Installing the Chart
 
-To install the chart, run the following:
+Please follow the following steps to install the ChatQnA Chart:
+
+1. Clone the GenAIInfra repository:
+
+```bash
+git clone https://github.com/opea-project/GenAIInfra.git
+```
+
+2. Setup the dependencies and required environment variables:
 
 ```bash
 cd GenAIInfra/helm-charts/
@@ -33,20 +41,41 @@ helm dependency update chatqna
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="Intel/neural-chat-7b-v3-3"
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
-
-# To use Gaudi device
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
-
-# To use Nvidia GPU
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
-
-
-# To use OpenVINO vLLM inference engine on Xeon device
-
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set global.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm-openvino.enabled=true
 ```
 
+3. Depending on the device which we are targeting for running ChatQnA, please use one the following installation commands:
+
+```bash
+# Install the chart on a Xeon machine
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
+```
+
+```bash
+# To use Gaudi device
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
+```
+
+```bash
+# To use Nvidia GPU
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
+```
+
+```bash
+# To include guardrail component in chatqna on Xeon
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-values.yaml
+```
+
+```bash
+# To include guardrail component in chatqna on Gaudi
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
+```
+
+>**_NOTE:_** Default installation will use [TGI (Text Generation Inference)](https://github.com/huggingface/text-generation-inference) as inference engine. To use vLLM as inference engine, please see below.
+
+```bash
+# To use OpenVINO vLLM inference engine on Xeon device
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-vllm-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm-openvino.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm-openvino.enabled=true
+```
 
 ### IMPORTANT NOTE
 

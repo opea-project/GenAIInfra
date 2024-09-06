@@ -31,7 +31,7 @@ export http_proxy=<your_http_proxy>
 export https_proxy=<your_https_proxy>
 
 helm dependency update
-helm install llm-vllm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vLLM_ENDPOINT=${vLLM_ENDPOINT} --set global.LLM_MODEL_ID=${MODELNAME} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
+helm install llm-vllm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vLLM_ENDPOINT=${vLLM_ENDPOINT} --set LLM_MODEL_ID=${MODELNAME} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
 ```
 
 ## (Option 2): Installing the chart with automatic installation of dependency:
@@ -39,6 +39,7 @@ helm install llm-vllm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN
 ```bash
 cd GenAIInfra/helm-charts/common/llm-vllm-uservice
 export HFTOKEN="insert-your-huggingface-token-here"
+export MODELDIR="/mnt/opea-models"
 export MODELNAME="bigscience/bloom-560m"
 
 # If proxy is required, please export the appropriate proxy values.
@@ -46,7 +47,7 @@ export http_proxy=<your_http_proxy>
 export https_proxy=<your_https_proxy>
 
 helm dependency update
-helm install llm-vllm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.LLM_MODEL_ID=${MODELNAME} --set autodependency.enabled=true --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
+helm install llm-vllm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set vllm-openvino.LLM_MODEL_ID=${MODELNAME} --set autodependency.enabled=true --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
 ```
 
 `--wait` flag in above installation command will make sure that all the dependencies are resolved and all services are deployed.

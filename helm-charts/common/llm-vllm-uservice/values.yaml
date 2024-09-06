@@ -87,6 +87,13 @@ tolerations: []
 
 affinity: {}
 
+# Model ID to be used by llm-vllm microservice
+LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
+
+# Overriding the Model ID being used by vllm-openvino service.(As llm-vllm microservice depends on vllm-openvino, these 2 values should be same.)
+vllm-openvino:
+  LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
+
 global:
   http_proxy: ""
   https_proxy: ""
@@ -98,4 +105,3 @@ global:
   # comment out modeluseHostPath if you want to download the model from huggingface
   # modelUseHostPath: ""
   modelUseHostPath: ""
-  LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"

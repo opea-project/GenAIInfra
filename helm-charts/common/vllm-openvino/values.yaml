@@ -96,6 +96,8 @@ tolerations: []
 
 affinity: {}
 
+LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
 CUDA_GRAPHS: "0"
 VLLM_CPU_KVCACHE_SPACE: 50
 HABANA_VISIBLE_DEVICES: all
@@ -106,8 +108,6 @@ global:
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-
-  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
   # Choose where to save your downloaded models
   # Set modelUseHostPath for local directory, this is good for one node test. Example:

@@ -20,7 +20,7 @@ spec:
           for ((i=1; i<=max_retry; i++)); do \
             curl http://{{ include "vllm-openvino.fullname" . }}/v1/completions -sS --fail-with-body \
               -X POST \
-              -d '{"prompt":"What is Deep Learning?", "model": {{ .Values.global.LLM_MODEL_ID | quote }}, "max_tokens":17, "temperature": 0.5}' \
+              -d '{"prompt":"What is Deep Learning?", "model": {{ .Values.LLM_MODEL_ID | quote }}, "max_tokens":17, "temperature": 0.5}' \
               -H 'Content-Type: application/json' && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;

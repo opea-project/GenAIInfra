@@ -78,7 +78,7 @@ spec:
             - |
               cd / && \
               python3 -m vllm.entrypoints.openai.api_server \
-                --model "{{ .Values.global.LLM_MODEL_ID }}" \
+                --model "{{ .Values.LLM_MODEL_ID }}" \
                 --host 0.0.0.0 \
                 --port 80
       volumes:

@@ -16,7 +16,7 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export http_proxy=<your_http_proxy>
 export https_proxy=<your_https_proxy>
 
-helm install vllm-openvino vllm-openvino --set global.modelUseHostPath=${MODELDIR} --set global.LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
+helm install vllm-openvino vllm-openvino --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
 ```
 
 `--wait` flag in the above helm installation command lets the shell wait till `vllm-openvino` is completely up and ready.
