@@ -9,9 +9,27 @@ dependencies:
   - name: tgi
     version: 0.9.0
     repository: "file://../common/tgi"
+    condition: tgi.enabled
+    tags:
+      - tgi
+  - name: vllm-openvino
+    version: 0.9.0
+    repository: "file://../common/vllm-openvino"
+    condition: vllm-openvino.enabled
+    tags:
+      - vllm
   - name: llm-uservice
     version: 0.9.0
     repository: "file://../common/llm-uservice"
+    condition: tgi.enabled
+    tags:
+      - tgi
+  - name: llm-vllm-uservice
+    version: 0.9.0
+    repository: "file://../common/llm-vllm-uservice"
+    condition: vllm-openvino.enabled
+    tags:
+      - vllm
   - name: tei
     version: 0.9.0
     repository: "file://../common/tei"

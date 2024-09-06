@@ -30,8 +30,13 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           env:
+            {{- if (index .Values "vllm-openvino" "enabled") }}
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-llm-vllm-uservice
+            {{- else }}
             - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-uservice
+            {{- end }}
             - name: RERANK_SERVICE_HOST_IP
               value: {{ .Release.Name }}-reranking-usvc
             - name: RETRIEVER_SERVICE_HOST_IP
@@ -49,22 +54,6 @@ spec:
             - name: chatqna
               containerPort: {{ .Values.port }}
               protocol: TCP
-                #          startupProbe:
-                #            httpGet:
-                #              host: {{ .Release.Name }}-llm-uservice
-                #              port: {{ index .Values "llm-uservice" "service" "port" }}
-                #              path: /
-                #            initialDelaySeconds: 5
-                #            periodSeconds: 5
-                #            failureThreshold: 120
-                #          livenessProbe:
-                #            httpGet:
-                #              path: /
-                #              port: {{ .Values.port }}
-                #          readinessProbe:
-                #            httpGet:
-                #              path: /
-                #              port: {{ .Values.port }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:

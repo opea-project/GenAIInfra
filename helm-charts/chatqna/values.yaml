@@ -18,6 +18,14 @@ service:
   type: ClusterIP
   port: 8888
 
+imagePullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+resources: {}
+
 securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
@@ -35,18 +43,27 @@ tolerations: []
 
 affinity: {}
 
-# To override values in subchart tgi
+# To override values in subchart tgi and vllm-ov
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+vllm-openvino:
+  enabled: false
+
+tags:
+  tgi: true
+  vllm: false
+
 
 global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   # set modelUseHostPath or modelUsePVC to use model cache.
   modelUseHostPath: ""
-  # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
 
   # Enabling HorizontalPodAutoscaler (HPA) will:
