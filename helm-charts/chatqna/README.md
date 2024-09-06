@@ -9,14 +9,24 @@ Helm chart for deploying ChatQnA service. ChatQnA depends on the following servi
 - [redis-vector-db](../common/redis-vector-db)
 - [reranking-usvc](../common/reranking-usvc)
 - [teirerank](../common/teirerank)
-- [llm-uservice](../common/llm-uservice)
-- [tgi](../common/tgi)
+
+Apart from above mentioned services, there are following conditional dependencies (out of which, one are required):
+
+1. If we want to use TGI as our inference service, following 2 services will be required:
+
+    - [llm-uservice](../common/llm-uservice)
+    - [tgi](../common/tgi)
+
+2. If we want to use OpenVINO vLLM inference service, following 2 services would be required:
+    - [llm-vllm-uservice](../common/llm-vllm-uservice)
+    - [vllm-openvino](../common/vllm-openvino)
+
 
 ## Installing the Chart
 
 To install the chart, run the following:
 
-```console
+```bash
 cd GenAIInfra/helm-charts/
 ./update_dependency.sh
 helm dependency update chatqna
@@ -24,15 +34,25 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="Intel/neural-chat-7b-v3-3"
 helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
+
 # To use Gaudi device
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
+
 # To use Nvidia GPU
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
+
+
+# To use OpenVINO vLLM inference engine on Xeon device
+
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set global.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm-openvino.enabled=true
 ```
+
 
 ### IMPORTANT NOTE
 
-1. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
+1. Make sure your `MODELDIR` exists on the node where your workload is scheduled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
+
+2. Please set `http_proxy`, `https_proxy` and `no_proxy` values while installing chart, if you are behind a proxy.
 
 ## Verify
 
@@ -46,8 +66,9 @@ Run the command `kubectl port-forward svc/chatqna 8888:8888` to expose the servi
 
 Open another terminal and run the following command to verify the service if working:
 
-```console
+```bash
 curl http://localhost:8888/v1/chatqna \
+    -X POST \
     -H "Content-Type: application/json" \
     -d '{"messages": "What is the revenue of Nike in 2023?"}'
 ```
@@ -71,7 +92,6 @@ docker save -o ui.tar opea/chatqna-conversation-ui:latest
 sudo ctr -n k8s.io image import ui.tar
 
 # install UI using helm chart. Replace image tag if required
-cd
 cd GenAIInfra/helm-charts/
 helm install ui common/chatqna-ui --set BACKEND_SERVICE_ENDPOINT="http://${host_ip}:8888/v1/chatqna",DATAPREP_SERVICE_ENDPOINT="http://${host_ip}:6007/v1/dataprep",image.tag="latest"
 
@@ -88,4 +108,5 @@ Access `http://localhost:5174` to play with the ChatQnA workload through UI.
 | image.repository                       | string | `"opea/chatqna"`              |                                                                                                                                         |
 | service.port                           | string | `"8888"`                      |                                                                                                                                         |
 | tgi.LLM_MODEL_ID                       | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
-| global.horizontalPodAutoscaler.enabled | bop;   | false                         | HPA autoscaling for the TGI and TEI service deployments based on metrics they provide. See HPA section in ../README.md before enabling! |
+| vllm-openvino.LLM_MODEL_ID                       | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
+| global.horizontalPodAutoscaler.enabled | bool  | false                         | HPA autoscaling for the TGI and TEI service deployments based on metrics they provide. See HPA section in ../README.md before enabling! |
