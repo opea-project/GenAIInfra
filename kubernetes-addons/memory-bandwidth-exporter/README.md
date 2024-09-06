@@ -4,6 +4,8 @@ Pod/container grained memory bandwidth exporter provides users memory bandwidth 
 
 Memory bandwidth exporter makes use of state-of-the-art technologies like NRI to build a resource-efficient and well-maintained solution. This solution provides observability to memory bandwidth to OPEA micro-services. It lays the groundwork of better scaling and auto scaling of OPEA. It can also be deployed separately on end user environments, supporting any cases that memory bandwidth metrics are required.
 
+The memory bandwidth exporter currently only supports Intel platforms with RDT, and will fail on other platforms. We will add node feature discovery in the future.
+
 ## Setup
 
 ### Enable NRI in Containerd

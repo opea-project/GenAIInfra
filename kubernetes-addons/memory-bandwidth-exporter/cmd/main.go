@@ -175,6 +175,8 @@ func (h *handler) innerHandler(filters ...string) (http.Handler, error) {
 	return handler, nil
 }
 
+// The memory bandwidth exporter currently only supports Intel platforms with RDT, and will fail on other platforms.
+// We will add node feature discovery in the future.
 func main() {
 	promlogConfig := &promlog.Config{}
 	flag.AddFlags(kingpin.CommandLine, promlogConfig)
