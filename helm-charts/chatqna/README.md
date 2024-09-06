@@ -14,13 +14,12 @@ Apart from above mentioned services, there are following conditional dependencie
 
 1. If we want to use TGI as our inference service, following 2 services will be required:
 
-    - [llm-uservice](../common/llm-uservice)
-    - [tgi](../common/tgi)
+   - [llm-uservice](../common/llm-uservice)
+   - [tgi](../common/tgi)
 
 2. If we want to use OpenVINO vLLM inference service, following 2 services would be required:
-    - [llm-vllm-uservice](../common/llm-vllm-uservice)
-    - [vllm-openvino](../common/vllm-openvino)
-
+   - [llm-vllm-uservice](../common/llm-vllm-uservice)
+   - [vllm-openvino](../common/vllm-openvino)
 
 ## Installing the Chart
 
@@ -70,7 +69,7 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
 ```
 
->**_NOTE:_** Default installation will use [TGI (Text Generation Inference)](https://github.com/huggingface/text-generation-inference) as inference engine. To use vLLM as inference engine, please see below.
+> **_NOTE:_** Default installation will use [TGI (Text Generation Inference)](https://github.com/huggingface/text-generation-inference) as inference engine. To use vLLM as inference engine, please see below.
 
 ```bash
 # To use OpenVINO vLLM inference engine on Xeon device
@@ -137,5 +136,5 @@ Access `http://localhost:5174` to play with the ChatQnA workload through UI.
 | image.repository                       | string | `"opea/chatqna"`              |                                                                                                                                         |
 | service.port                           | string | `"8888"`                      |                                                                                                                                         |
 | tgi.LLM_MODEL_ID                       | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
-| vllm-openvino.LLM_MODEL_ID                       | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
-| global.horizontalPodAutoscaler.enabled | bool  | false                         | HPA autoscaling for the TGI and TEI service deployments based on metrics they provide. See HPA section in ../README.md before enabling! |
+| vllm-openvino.LLM_MODEL_ID             | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
+| global.horizontalPodAutoscaler.enabled | bool   | false                         | HPA autoscaling for the TGI and TEI service deployments based on metrics they provide. See HPA section in ../README.md before enabling! |

@@ -1,6 +1,9 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v2
 name: llm-vllm-uservice
-description: A Helm chart for LLM microservice for which connects with vLLM microservice to recieve inferences.
+description: A Helm chart for LLM microservice for which connects with vLLM microservice to receive inferences.
 type: application
 version: 0.9.0
 appVersion: "v0.9"

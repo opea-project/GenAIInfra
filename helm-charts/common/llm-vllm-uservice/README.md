@@ -4,7 +4,7 @@ Helm chart for deploying a microservice which facilitates connections and handle
 
 `llm-vllm-uservice` depends on OpenVINO vLLM. You should properly set `vLLM_ENDPOINT` as the HOST URI of vLLM microservice. If not set, it will consider the default value : `http://<helm-release-name>-vllm-openvino:80`
 
-As this service depends on vLLM microservice, we can proceed in either of 2 ways: 
+As this service depends on vLLM microservice, we can proceed in either of 2 ways:
 
 - Install both microservices separately one after another.
 - Install the vLLM microservice as dependency for the our main `llm-vllm-uservice` microservice.
@@ -14,7 +14,6 @@ As this service depends on vLLM microservice, we can proceed in either of 2 ways
 First, you need to install the `vllm-openvino` chart, please refer to the [vllm-openvino](../vllm-openvino) chart for more information.
 
 After you've deployed the `vllm-openvino` chart successfully, please run `kubectl get svc` to get the vLLM service name with port. We need to provide this to `llm-vllm-uservice` as a value for vLLM_ENDPOINT for letting it discover and connect to the vLLM microservice.
-
 
 > **_NOTE:_** While installing charts separately, if you don't provide any vLLM endpoint explicitly, it will take the default endpoint as `http://<helm-release-name>-vllm-openvino:80`. So, if you are not providing the vLLM endpoint explicitly, please make sure to provide same helm release name to both the charts while installing.
 
@@ -66,7 +65,7 @@ Once you see `llm-vllm-uservice` pod and `llm-vllm-uservice-vllm-openvino` pod i
 kubectl port-forward svc/llm-vllm-uservice 9000:9000
 ```
 
-This exposes the port 9000, on which `llm-vllm-uservice` is running inside the pod, at port 9000 on the host. 
+This exposes the port 9000, on which `llm-vllm-uservice` is running inside the pod, at port 9000 on the host.
 
 Now, we can access the service from the host machine. Open another terminal and run the following command to verify whether `llm-vllm-uservice` is working:
 
@@ -79,10 +78,10 @@ curl http://localhost:9000/v1/chat/completions \
 
 ## Values
 
-| Key                             | Type   | Default              | Description                                                                                                                                                  |
-| ------------------------------- | ------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                 | Your own Hugging Face API token                                                                                                                              |
+| Key                             | Type   | Default              | Description                                                                                                                                                   |
+| ------------------------------- | ------ | -------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                 | Your own Hugging Face API token                                                                                                                               |
 | global.modelUseHostPath         | string | `"/mnt/opea-models"` | Cached models directory, vLLM will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
-| image.repository                | string | `"opea/llm-vllm"`     |                                                                                                                                                              |
-| service.port                    | string | `"9000"`             |                                                                                                                                                              |
-| vLLM_ENDPOINT                | string | `""`                 | OpenVINO vLLM service endpoint                                                                                                                                                 |
+| image.repository                | string | `"opea/llm-vllm"`    |                                                                                                                                                               |
+| service.port                    | string | `"9000"`             |                                                                                                                                                               |
+| vLLM_ENDPOINT                   | string | `""`                 | OpenVINO vLLM service endpoint                                                                                                                                |
