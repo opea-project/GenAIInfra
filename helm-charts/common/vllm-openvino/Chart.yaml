@@ -5,5 +5,5 @@ apiVersion: v2
 name: vllm-openvino
 description: A Helm chart for OpenVINO optimized vLLM Service
 type: application
-version: 0.9.0
-appVersion: "v0.9"
+version: 1.0.0
+appVersion: "v1.0"
