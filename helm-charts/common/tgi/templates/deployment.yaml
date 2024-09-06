@@ -113,3 +113,12 @@ spec:
       # extra time to finish processing buffered requests before HPA forcibly terminates pod
       terminationGracePeriodSeconds: 120
       {{- end }}
+      {{- if .Values.evenly_distributed }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "tgi.selectorLabels" . | nindent 14 }}
+      {{- end }}
