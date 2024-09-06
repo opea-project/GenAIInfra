@@ -94,6 +94,8 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: model-volume
+            - mountPath: /dev/shm
+              name: shm
             - mountPath: /tmp
               name: tmp
           ports:
@@ -124,6 +126,10 @@ spec:
           hostPath:
             path: /mnt/opea-models
             type: Directory
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
 ---

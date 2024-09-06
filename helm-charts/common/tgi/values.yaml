@@ -11,6 +11,11 @@ horizontalPodAutoscaler:
   maxReplicas: 6
 
 port: 2080
+shmSize: 1Gi
+
+# Set extraCmdArgs if you need to pass additional parameters to TGI for performance
+# Refer to https://huggingface.co/docs/text-generation-inference/en/reference/launcher for more options.
+# extraCmdArgs: ["--dtype","bfloat16"]
 
 image:
   repository: ghcr.io/huggingface/text-generation-inference
