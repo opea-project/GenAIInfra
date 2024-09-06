@@ -133,6 +133,7 @@ func (c *classCollector) Update(ch chan<- prometheus.Metric) error {
 	if !isNeedCollectMbLLc(c.metrics) {
 		return nil
 	}
+	// cid is the container id
 	for cid, stats := range c.statsCache {
 		ch <- prometheus.MustNewConstMetric(
 			classTotalMemoryBandwidthDesc,
@@ -155,6 +156,7 @@ func (c *classCollector) Update(ch chan<- prometheus.Metric) error {
 			cid,
 			c.nodeName,
 		)
+		// sid is the socket id
 		for sid, s := range stats.processedStats.MemoryBandwidth {
 			ch <- prometheus.MustNewConstMetric(
 				socketClassTotalMemoryBandwidthDesc,
@@ -173,6 +175,7 @@ func (c *classCollector) Update(ch chan<- prometheus.Metric) error {
 				c.nodeName,
 			)
 		}
+		// sid is the socket id
 		for sid, s := range stats.processedStats.Cache {
 			ch <- prometheus.MustNewConstMetric(
 				socketClassLLCacheDesc,

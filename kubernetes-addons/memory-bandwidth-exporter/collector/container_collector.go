@@ -194,6 +194,7 @@ func (c *containerCollector) Update(ch chan<- prometheus.Metric) error {
 		c.logger.Log("info", "container collector stats have no cache")
 		return nil
 	}
+	// cid is the container id
 	for cid, stats := range c.statsCache {
 		if isNeedCollectMbLLc(c.metrics) && stats.processedStats.MemoryBandwidth != nil {
 			ch <- prometheus.MustNewConstMetric(
@@ -214,6 +215,7 @@ func (c *containerCollector) Update(ch chan<- prometheus.Metric) error {
 				c.containerInfos[cid].PodName,
 				c.containerInfos[cid].NameSpace,
 			)
+			// sid is the socket id
 			for sid, s := range stats.processedStats.MemoryBandwidth {
 				ch <- prometheus.MustNewConstMetric(
 					totalMemoryBandwidthDesc,
@@ -247,6 +249,7 @@ func (c *containerCollector) Update(ch chan<- prometheus.Metric) error {
 				c.containerInfos[cid].PodName,
 				c.containerInfos[cid].NameSpace,
 			)
+			// sid is the socket id
 			for sid, s := range stats.processedStats.Cache {
 				ch <- prometheus.MustNewConstMetric(
 					llcacheDesc,
