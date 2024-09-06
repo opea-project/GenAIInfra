@@ -7,31 +7,31 @@ description: The Helm chart to deploy ChatQnA
 type: application
 dependencies:
   - name: tgi
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/tgi"
   - name: llm-uservice
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/llm-uservice"
   - name: tei
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/tei"
   - name: embedding-usvc
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/embedding-usvc"
   - name: teirerank
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/teirerank"
   - name: reranking-usvc
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/reranking-usvc"
   - name: redis-vector-db
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/redis-vector-db"
   - name: retriever-usvc
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/retriever-usvc"
   - name: data-prep
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/data-prep"
-version: 0.9.0
-appVersion: "v0.9"
+version: 1.0.0
+appVersion: "v1.0"

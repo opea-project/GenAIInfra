@@ -15,11 +15,11 @@ on:
         description: "Image tag to be tested"
         required: true
         type: string
-      nodes:
-        default: "xeon,gaudi"
-        required: true
+      opea_branch:
+        default: "main"
+        description: 'OPEA branch for image build'
+        required: false
         type: string
-        description: 'Hardwares used to run tests'
 
 env:
   CHARTS_DIR: "helm-charts"
@@ -28,41 +28,80 @@ jobs:
   get-build-matrix:
     runs-on: ubuntu-latest
     outputs:
-      services: ${{ steps.get-services.outputs.services }}
-      nodes: ${{ steps.get-services.outputs.nodes }}
+      run_matrix: ${{ steps.get-services.outputs.run_matrix }}
     steps:
       - name: Checkout out Repo
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          ref: ${{ inputs.opea_branch }}
 
       - name: Get test Services
         id: get-services
         run: |
           set -x
+          run_matrix="{\"include\":["
           if [[ -z "${{ inputs.workloads }}" ]]; then
-            subfolders=$(find "$CHARTS_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "common" -exec basename {} \; | sed 's/^/"/; s/$/"/' | paste -sd, -)
-            common_subfolders=$(find "$CHARTS_DIR/common" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | sed 's|^|"common/|; s/$/"/' | paste -sd, -)
-            services="[$subfolders,$common_subfolders]"
-            echo "services=$services" >> $GITHUB_OUTPUT
+            find "$CHARTS_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "common" -exec basename {} \; | while read -r subfolder; do
+              for file in "$CHARTS_DIR/$subfolder"/*values.yaml; do
+                if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]]; then
+                    continue
+                  fi
+                  filename=$(basename "$file" .yaml)
+                  if [[ "$filename" == *"gaudi"* ]]; then
+                    run_matrix="${run_matrix}{\"example\":\"${subfolder}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                  else
+                    run_matrix="${run_matrix}{\"example\":\"${subfolder}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                  fi
+                fi
+              done
+            done
+            find "$CHARTS_DIR/common" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | while read -r subfolder; do
+              for file in "$CHARTS_DIR/common/$subfolder"/*values.yaml; do
+                if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]]; then
+                    continue
+                  fi
+                  filename=$(basename "$file" .yaml)
+                  if [[ "$filename" == *"gaudi"* ]]; then
+                    run_matrix="${run_matrix}{\"example\":\"common/${subfolder}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                  else
+                    run_matrix="${run_matrix}{\"example\":\"common/${subfolder}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                  fi
+                fi
+              done
+            done
           else
             service_list=($(echo ${{ github.event.inputs.workloads }} | tr ',' ' '))
-            services=$(printf '%s\n' "${service_list[@]}" | sort -u | jq -R '.' | jq -sc '.')
-            echo "services=$services" >> $GITHUB_OUTPUT
+            for service in $service_list; do
+              for file in "$CHARTS_DIR/$service"/*values.yaml; do
+                if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]]; then
+                    continue
+                  fi
+                  filename=$(basename "$file" .yaml)
+                  if [[ "$filename" == *"gaudi"* ]]; then
+                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                  else
+                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                  fi
+                fi
+              done
+            done
           fi
-          node_list=($(echo ${{ github.event.inputs.nodes }} | tr ',' ' '))
-          nodes=$(printf '%s\n' "${node_list[@]}" | sort -u | jq -R '.' | jq -sc '.')
-          echo "nodes=$nodes" >> $GITHUB_OUTPUT
+          run_matrix=$run_matrix"]}"
+          echo "run_matrix=${run_matrix}"
+          echo "run_matrix=${run_matrix}" >> $GITHUB_OUTPUT
 
   helm-release:
     needs: get-build-matrix
     strategy:
-      matrix:
-        workload: ${{ fromJSON(needs.get-build-matrix.outputs.services) }}
-        node: ${{ fromJSON(needs.get-build-matrix.outputs.nodes) }}
+      matrix: ${{ fromJSON(needs.get-build-matrix.outputs.run_matrix) }}
     uses: ./.github/workflows/_helm-e2e.yaml
     with:
       tag: ${{ inputs.tag }}
-      workload: ${{ matrix.workload }}
-      hardware: ${{ matrix.node }}
+      workload: ${{ matrix.example }}
+      hardware: ${{ matrix.hardware }}
+      valuefile: ${{ matrix.valuefile }}
     secrets: inherit

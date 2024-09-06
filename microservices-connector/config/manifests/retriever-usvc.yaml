@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: retriever-usvc-config
   labels:
-    helm.sh/chart: retriever-usvc-0.9.0
+    helm.sh/chart: retriever-usvc-1.0.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "v0.9"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_EMBEDDING_ENDPOINT: "http://retriever-usvc-tei"
@@ -27,6 +27,7 @@ data:
   LANGCHAIN_PROJECT: "opea-retriever-service"
   HF_HOME: "/tmp/.cache/huggingface"
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  LOGFLAG: ""
 ---
 # Source: retriever-usvc/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -37,10 +38,10 @@ kind: Service
 metadata:
   name: retriever-usvc
   labels:
-    helm.sh/chart: retriever-usvc-0.9.0
+    helm.sh/chart: retriever-usvc-1.0.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "v0.9"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -62,10 +63,10 @@ kind: Deployment
 metadata:
   name: retriever-usvc
   labels:
-    helm.sh/chart: retriever-usvc-0.9.0
+    helm.sh/chart: retriever-usvc-1.0.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "v0.9"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1
