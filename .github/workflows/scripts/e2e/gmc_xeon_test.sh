@@ -21,6 +21,7 @@ MODIFY_STEP_NAMESPACE="${APP_NAMESPACE}-modstep"
 WEBHOOK_NAMESPACE="${APP_NAMESPACE}-webhook"
 
 function validate_gmc() {
+    mkdir -p ${LOG_PATH}
     echo "validate audio-qna"
     validate_audioqa
 
@@ -133,7 +134,7 @@ function validate_audioqa() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $AUDIOQA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $AUDIOQA_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $AUDIOQA_NAMESPACE 'audioqa' $((pods_count-1)) 0 7
@@ -186,7 +187,7 @@ function validate_chatqna() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $CHATQNA_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $CHATQNA_NAMESPACE 'chatqa' $((pods_count-1)) 0 9
@@ -256,7 +257,7 @@ function validate_chatqna_with_dataprep() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_DATAPREP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $CHATQNA_DATAPREP_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $CHATQNA_DATAPREP_NAMESPACE 'chatqa' $((pods_count-1)) 0 10
@@ -349,7 +350,7 @@ function validate_chatqna_in_switch() {
        exit 1
    fi
 
-    pods_count=$(kubectl get pods -n $CHATQNA_SWITCH_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
+    pods_count=$(kubectl get pods -n $CHATQNA_SWITCH_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
     # expected_ready_pods, expected_external_pods, expected_total_pods
     # pods_count-1 is to exclude the client pod in this namespace
     check_gmc_status $CHATQNA_SWITCH_NAMESPACE 'switch' $((pods_count-1)) 0 15
@@ -442,8 +443,8 @@ function validate_modify_config() {
          exit 1
     fi
 
-    pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
+    pods_count=$(kubectl get pods -n $MODIFY_STEP_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
+    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -460,7 +461,7 @@ function validate_modify_config() {
          exit 1
     fi
 
-    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $pods_count 0 3
+    check_gmc_status $MODIFY_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1
@@ -493,8 +494,8 @@ function validate_remove_step() {
          exit 1
     fi
 
-    pods_count=$(kubectl get pods -n $DELETE_STEP_NAMESPACE -o jsonpath='{.items[*].metadata.name}' | wc -w)
-    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $pods_count 0 3
+    pods_count=$(kubectl get pods -n $DELETE_STEP_NAMESPACE --no-headers | grep -v "Terminating" | wc -l)
+    check_gmc_status $DELETE_STEP_NAMESPACE 'codegen' $((pods_count)) 0 3
     if [ $? -ne 0 ]; then
        echo "GMC status is not as expected"
        exit 1

@@ -42,6 +42,6 @@ spec:
         prefix: /
     route:
     - destination:
-        host: ui.default.svc.cluster.local
+        host: chatqna-ui.default.svc.cluster.local
         port:
           number: 5174

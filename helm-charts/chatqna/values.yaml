@@ -11,7 +11,7 @@ image:
   repository: opea/chatqna
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 port: 8888
 service:
@@ -58,6 +58,10 @@ tags:
   tgi: true
   vllm: false
 
+# disable guardrails-usvc by default
+# See guardrails-values.yaml for guardrail related options
+guardrails-usvc:
+  enabled: false
 
 global:
   http_proxy: ""

@@ -4,11 +4,11 @@ Helm chart for deploying Retriever microservice.
 
 retriever-usvc depends on redis and tei, you should set these endpoints before start.
 
-## (Option1): Installing the chart separately:
+## (Option1): Installing the chart separately
 
-First, you need to install the tei and redis-vector-db chart, please refer to the [tei](../tei) and [redis-vector-db](../redis-vector-db) for more information.
+First, you need to install the tei and redis-vector-db chart, refer to the [tei](../tei) and [redis-vector-db](../redis-vector-db) for more information.
 
-After you've deployted the tei and redis-vector-db chart successfully, please run `kubectl get svc` to get the service endpoint and URL respectively, i.e. `http://tei`, `redis://redis-vector-db:6379`.
+After you've deployed the tei and redis-vector-db chart successfully, run `kubectl get svc` to get the service endpoint and URL respectively, i.e. `http://tei`, `redis://redis-vector-db:6379`.
 
 To install retriever-usvc chart, run the following:
 
@@ -20,7 +20,7 @@ helm dependency update
 helm install retriever-usvc . --set REDIS_URL=${REDIS_URL} --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT}
 ```
 
-## (Option2): Installing the chart with dependencies automatically:
+## (Option2): Installing the chart with dependencies automatically
 
 ```console
 cd GenAIInfra/helm-charts/common/retriever-usvc

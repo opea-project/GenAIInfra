@@ -4,7 +4,7 @@ Helm chart for deploying data-prep microservice.
 
 data-prep will use redis and tei service, please specify the endpoints.
 
-## (Option1): Installing the chart separately:
+## (Option1): Installing the chart separately
 
 First, you need to install the tei and redis-vector-db chart, please refer to the [tei](../tei) and [redis-vector-db](../redis-vector-db) for more information.
 
@@ -20,7 +20,7 @@ helm dependency update
 helm install data-prep . --set REDIS_URL=${REDIS_URL} --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT}
 ```
 
-## (Option2): Installing the chart with dependencies automatically:
+## (Option2): Installing the chart with dependencies automatically
 
 ```console
 cd GenAIInfra/helm-charts/common/data-prep

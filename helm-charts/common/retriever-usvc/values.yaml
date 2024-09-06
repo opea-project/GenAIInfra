@@ -10,6 +10,10 @@ autodependency:
 
 replicaCount: 1
 
+# Set it as a non-null string, such as true, if you want to enable logging facility,
+# otherwise, keep it as "" to disable it.
+LOGFLAG: ""
+
 TEI_EMBEDDING_ENDPOINT: ""
 EMBED_MODEL: ""
 
@@ -20,7 +24,7 @@ image:
   repository: opea/retriever-redis
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -90,6 +94,4 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  LANGCHAIN_TRACING_V2: false
-  LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"

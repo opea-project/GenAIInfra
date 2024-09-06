@@ -8,24 +8,24 @@ kind: ConfigMap
 metadata:
   name: data-prep-config
   labels:
-    helm.sh/chart: data-prep-0.9.0
+    helm.sh/chart: data-prep-1.0.0
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
-    app.kubernetes.io/version: "v0.9"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_ENDPOINT: "http://data-prep-tei"
   EMBED_MODEL: ""
   REDIS_URL: "redis://data-prep-redis-vector-db:6379"
   INDEX_NAME: "rag-redis"
+  KEY_INDEX_NAME: "file-keys"
+  SEARCH_BATCH_SIZE: "10"
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   HF_HOME: "/tmp/.cache/huggingface"
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  LANGCHAIN_TRACING_V2: "false"
-  LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
-  LANGCHAIN_PROJECT: "opea-dataprep-service"
+  LOGFLAG: ""
 ---
 # Source: data-prep/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -36,10 +36,10 @@ kind: Service
 metadata:
   name: data-prep
   labels:
-    helm.sh/chart: data-prep-0.9.0
+    helm.sh/chart: data-prep-1.0.0
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
-    app.kubernetes.io/version: "v0.9"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -61,10 +61,10 @@ kind: Deployment
 metadata:
   name: data-prep
   labels:
-    helm.sh/chart: data-prep-0.9.0
+    helm.sh/chart: data-prep-1.0.0
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
-    app.kubernetes.io/version: "v0.9"
+    app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
   replicas: 1

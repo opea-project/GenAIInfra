@@ -29,7 +29,7 @@ For Gaudi:
 - tgi-service: ghcr.io/huggingface/tgi-gaudi:1.2.1
 
 > [NOTE]  
-> Please refer to [Xeon README](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/docker/xeon/README.md) or [Gaudi README](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/docker/gaudi/README.md) to build the OPEA images. These too will be available on Docker Hub soon to simplify use.
+> Refer to [Xeon README](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/docker/xeon/README.md) or [Gaudi README](https://github.com/opea-project/GenAIExamples/blob/main/ChatQnA/docker/gaudi/README.md) to build the OPEA images. These too will be available on Docker Hub soon to simplify use.
 
 ## Deploy ChatQnA pipeline
 
@@ -138,9 +138,8 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_datapr
    chatqa   http://router-service.chatqa.svc.cluster.local:8080      10/0/10    3m
    ```
 
-> [NOTE]
-
-Comparing with `General ChatQnA with preset RAG data`, there should be `10` microservices, the extra one is the microservice of `dataprep`.
+   > [NOTE]
+   > Comparing with `General ChatQnA with preset RAG data`, there should be `10` microservices, the extra one is the microservice of `dataprep`.
 
 4. Deploy a client pod to test the application
 
@@ -162,9 +161,8 @@ Comparing with `General ChatQnA with preset RAG data`, there should be `10` micr
    kubectl exec "$CLIENT_POD" -n chatqa -- curl -s --no-buffer $accessUrl  -X POST  '{"text":"What are the key features of Intel Gaudi?","parameters":{"max_new_tokens":100, "do_sample": true}}' -H 'Content-Type: application/json'
    ```
 
-> [NOTE]
-
-You can remove your ChatQnA pipeline by executing standard Kubernetes kubectl commands to remove a custom resource. Verify it was removed by executing kubectl get pods in the chatqa namespace.
+   > [NOTE]
+   > You can remove your ChatQnA pipeline by executing standard Kubernetes kubectl commands to remove a custom resource. Verify it was removed by executing kubectl get pods in the chatqa namespace.
 
 ### ChatQnA supports multiple LLM models
 
@@ -191,9 +189,8 @@ This involves deploying the ChatQnA custom resource. You can use `chatQnA_switch
    switch   http://router-service.switch.svc.cluster.local:8080   15/0/15   83s
    ```
 
-> [NOTE]
-
-Comparing with `General ChatQnA with preset RAG data`, there should be `15` microservices, the extra are the microservices for different embedding models and LLM models.
+   > [NOTE]
+   > Comparing with `General ChatQnA with preset RAG data`, there should be `15` microservices, the extra are the microservices for different embedding models and LLM models.
 
 4. Deploy a client pod to test the application
 
@@ -217,6 +214,5 @@ Comparing with `General ChatQnA with preset RAG data`, there should be `15` micr
    kubectl exec "$CLIENT_POD" -n switch -- curl -s --no-buffer $accessUrl  -X POST  -d '{"text":"What are the key features of Intel Gaudi?", "model-id":"llama", "embedding-model-id":"small", "parameters":{"max_new_tokens":50, "do_sample": true}}' -H 'Content-Type: application/json'
    ```
 
-> [NOTE]
-
-Showing as above, user can switch the LLM models in runtime by changing the request body, such as adding `"model-id":"llama"` in request body to use the Llama model or changing it into `"model-id":"intel"` to use the Intel model.
+   > [NOTE]
+   > Showing as above, user can switch the LLM models in runtime by changing the request body, such as adding `"model-id":"llama"` in request body to use the Llama model or changing it into `"model-id":"intel"` to use the Intel model.

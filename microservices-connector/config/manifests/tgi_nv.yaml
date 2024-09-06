@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: tgi-config
   labels:
-    helm.sh/chart: tgi-0.9.0
+    helm.sh/chart: tgi-1.0.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -22,7 +22,6 @@ data:
   no_proxy: ""
   HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
-  TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
 ---
 # Source: tgi/templates/service.yaml
@@ -34,7 +33,7 @@ kind: Service
 metadata:
   name: tgi
   labels:
-    helm.sh/chart: tgi-0.9.0
+    helm.sh/chart: tgi-1.0.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -59,7 +58,7 @@ kind: Deployment
 metadata:
   name: tgi
   labels:
-    helm.sh/chart: tgi-0.9.0
+    helm.sh/chart: tgi-1.0.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -94,6 +93,8 @@ spec:
           volumeMounts:
             - mountPath: /data
               name: model-volume
+            - mountPath: /dev/shm
+              name: shm
             - mountPath: /tmp
               name: tmp
           ports:
@@ -125,6 +126,10 @@ spec:
           hostPath:
             path: /mnt/opea-models
             type: Directory
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
 ---

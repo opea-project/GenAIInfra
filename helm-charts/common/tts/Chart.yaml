@@ -5,12 +5,12 @@ apiVersion: v2
 name: tts
 description: The Helm chart for deploying tts as microservice
 type: application
-version: 0.9.0
+version: 1.0.0
 # The tts microservice server version
-appVersion: "v0.9"
+appVersion: "v1.0"
 
 dependencies:
   - name: speecht5
-    version: 0.9.0
+    version: 1.0.0
     repository: file://../speecht5
     condition: autodependency.enabled

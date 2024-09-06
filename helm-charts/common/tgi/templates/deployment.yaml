@@ -48,9 +48,17 @@ spec:
             {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.extraCmdArgs }}
+          args:
+            {{- range .Values.extraCmdArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
           volumeMounts:
             - mountPath: /data
               name: model-volume
+            - mountPath: /dev/shm
+              name: shm
             - mountPath: /tmp
               name: tmp
           ports:
@@ -83,6 +91,10 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.shmSize }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}

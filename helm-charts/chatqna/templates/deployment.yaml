@@ -43,6 +43,8 @@ spec:
               value: {{ .Release.Name }}-retriever-usvc
             - name: EMBEDDING_SERVICE_HOST_IP
               value: {{ .Release.Name }}-embedding-usvc
+            - name: GUARDRAIL_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-guardrails-usvc
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
