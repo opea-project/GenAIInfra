@@ -176,9 +176,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -440,9 +438,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -704,9 +700,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -884,9 +878,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -1084,9 +1076,7 @@
       ],
       "options": {
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [],
             "max": 100,
@@ -1281,9 +1271,7 @@
       ],
       "options": {
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [],
             "max": 100,
@@ -1478,9 +1466,7 @@
       ],
       "options": {
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [],
             "max": 100,
@@ -1675,9 +1661,7 @@
       ],
       "options": {
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [],
             "max": 100,
@@ -1880,9 +1864,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -2088,9 +2070,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -2296,9 +2276,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -2504,9 +2482,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -2810,9 +2786,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -3116,9 +3090,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -3310,9 +3282,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -3504,9 +3474,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -3698,9 +3666,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -3892,9 +3858,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -4086,9 +4050,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -4280,9 +4242,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -4474,9 +4434,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -4668,9 +4626,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -4862,9 +4818,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -5056,9 +5010,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -5264,9 +5216,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -5472,9 +5422,7 @@
       "options": {
         "displayMode": "lcd",
         "fieldOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
+          "calcs": ["lastNotNull"],
           "defaults": {
             "mappings": [
               {
@@ -5530,7 +5478,7 @@
         "multi": false,
         "name": "node",
         "options": [],
-        "query":{"query": "label_values(Number_of_sockets,instance)","refId": "StandardVariableQuery"},
+        "query": { "query": "label_values(Number_of_sockets,instance)", "refId": "StandardVariableQuery" },
         "refresh": 1,
         "regex": "",
         "skipUrlSync": false,
