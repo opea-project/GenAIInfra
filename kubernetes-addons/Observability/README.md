@@ -3,11 +3,11 @@
 This guide provides a step-by-step approach to setting up observability for the OPEA workload in a Kubernetes environment. We will cover the setup of Prometheus and Grafana, as well as the collection of metrics for Gaudi hardware, OPEA/chatqna including TGI,TEI-Embedding,TEI-Reranking and other microservies, and PCM.
 
 #### Prepare
+
 ```
 git clone https://github.com/opea-project/GenAIInfra.git
 cd kubernetes-addons/Observability
 ```
-
 
 ## 1. Setup Prometheus & Grafana
 
@@ -43,6 +43,7 @@ Open your browser and navigate to http://localhost:3000. Use "admin/prom-operato
 To monitor Gaudi hardware metrics, you can use the following steps:
 
 ### Step 1: Install daemonset
+
 ```
 kubectl create -f https://vault.habana.ai/artifactory/gaudi-metric-exporter/yaml/1.16.2/metric-exporter-daemonset.yaml
 ```
@@ -60,6 +61,7 @@ kubectl apply -f ./habana/metric-exporter-serviceMonitor.yaml
 ```
 
 ### Step 4: Verify the metrics
+
 The metric endpoints for habana will be a headless service, so we need to get endpoint to verify
 
 ```
@@ -105,14 +107,15 @@ Install Helm (version >= 3.15) first. Refer to the [Helm Installation Guide](htt
 Refer to the [ChatQnA helm chart](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/chatqna) for instructions on deploying ChatQnA into Kubernetes on Xeon & Gaudi.
 
 ### Step 2: Install all the serviceMonitor
+
 ###### NOTE:
-> If the chatQnA installed into another instance instead of chatqna(Default instance name),you should modify the 
-matchLabels  app.kubernetes.io/instance:${instanceName} with proper instanceName
+
+> If the chatQnA installed into another instance instead of chatqna(Default instance name),you should modify the
+> matchLabels app.kubernetes.io/instance:${instanceName} with proper instanceName
 
 ```
 kubectl apply -f chatqna/
 ```
-
 
 ### Step 3: Install the dashboard
 
