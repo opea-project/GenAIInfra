@@ -5,8 +5,11 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.horizontalPodAutoscaler.configMap }}
-  namespace: monitoring
+  # easy to find for the required manual step
+  namespace: default
+  name: {{ include "chatqna.fullname" . }}-custom-metrics
+  labels:
+    app.kubernetes.io/name: prometheus-adapter
 data:
   config.yaml: |
       rules:

@@ -67,3 +67,6 @@ global:
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
+
+  # Prometheus Helm installation info for subchart serviceMonitors
+  prometheusRelease: prometheus-stack

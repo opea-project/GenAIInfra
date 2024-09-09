@@ -6,6 +6,8 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: {{ include "tei.fullname" . }}
+  labels:
+    release: {{ .Values.global.prometheusRelease }}
 spec:
   selector:
     matchLabels:

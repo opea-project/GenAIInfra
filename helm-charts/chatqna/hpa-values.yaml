@@ -10,10 +10,6 @@
 #  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
 
 horizontalPodAutoscaler:
-  # Name in upstream PrometheusAdapter manifest
-  # configMap: "adapter-config"
-  # Name when installed with Prometheus operator Helm chart
-  configMap: "prom-adapter-prometheus-adapter"
   enabled: true
 
 # Override values in specific subcharts
