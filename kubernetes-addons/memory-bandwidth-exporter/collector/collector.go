@@ -48,37 +48,41 @@ func ParseCollectorMetrics() bool {
 	for collector := range collectorState {
 		if collector == containerCollectorSubsystem {
 			var isDefaultEnabled bool
-			if *containerCollectorMetrics == noMetrics {
+			if containerCollectorMetrics == nil || *containerCollectorMetrics == noMetrics {
 				isDefaultEnabled = false
+				collectorMetrics[collector] = noMetrics
 			} else {
 				isDefaultEnabled = true
+				collectorMetrics[collector] = *containerCollectorMetrics
 			}
 			collectorState[collector] = &isDefaultEnabled
-			collectorMetrics[collector] = *containerCollectorMetrics
-			if *containerCollectorMetrics == allMetrics || strings.Contains(*containerCollectorMetrics, "mb") ||
-				strings.Contains(*containerCollectorMetrics, "llc") {
+			if containerCollectorMetrics != nil && (*containerCollectorMetrics == allMetrics ||
+				strings.Contains(*containerCollectorMetrics, "mb") ||
+				strings.Contains(*containerCollectorMetrics, "llc")) {
 				isNeedNRIPlugin = true
 			}
 		}
 		if collector == classCollectorSubsystem {
 			var isDefaultEnabled bool
-			if *classCollectorMetrics == "none" {
+			if classCollectorMetrics == nil || *classCollectorMetrics == noMetrics {
 				isDefaultEnabled = false
+				collectorMetrics[collector] = noMetrics
 			} else {
 				isDefaultEnabled = true
+				collectorMetrics[collector] = *classCollectorMetrics
 			}
 			collectorState[collector] = &isDefaultEnabled
-			collectorMetrics[collector] = *classCollectorMetrics
 		}
 		if collector == nodeCollectorSubsystem {
 			var isDefaultEnabled bool
-			if *nodeCollectorMetrics == "none" {
+			if nodeCollectorMetrics == nil || *nodeCollectorMetrics == noMetrics {
 				isDefaultEnabled = false
+				collectorMetrics[collector] = noMetrics
 			} else {
 				isDefaultEnabled = true
+				collectorMetrics[collector] = *nodeCollectorMetrics
 			}
 			collectorState[collector] = &isDefaultEnabled
-			collectorMetrics[collector] = *nodeCollectorMetrics
 		}
 	}
 	return isNeedNRIPlugin
