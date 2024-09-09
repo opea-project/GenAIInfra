@@ -15,6 +15,7 @@ spec:
       any: true
   selector:
     matchLabels:
+      app.kubernetes.io/instance: chatqna
       app.kubernetes.io/name: llm-uservice
   endpoints:
   - port: llm-uservice

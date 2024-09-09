@@ -16,31 +16,31 @@ The GenAIInfra repository is organized under four main directories, which includ
 
 ## Prerequisite
 
-GenAIInfra uses Kubernetes as the cloud native infrastructure. Please follow the steps below to prepare the Kubernetes environment.
+GenAIInfra uses Kubernetes as the cloud native infrastructure. Follow the steps below to prepare the Kubernetes environment.
 
 ### Setup Kubernetes cluster
 
-Please follow [Kubernetes official setup guide](https://kubernetes.io/docs/setup/) to setup Kubernetes. We recommend to use Kubernetes with version >= 1.27.
+Follow [Kubernetes official setup guide](https://kubernetes.io/docs/setup/) to setup Kubernetes. We recommend to use Kubernetes with version >= 1.27.
 
 There are different methods to setup Kubernetes production cluster, such as [kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/), [kubespray](https://kubespray.io/), and [more](https://kubernetes.io/docs/setup/production-environment/tools/).
 
 NOTE: We recommend to use containerd when choosing the container runtime during Kubernetes setup. Docker engine is also verified on Ubuntu 22.04 and above.
 
-### (Optional) To run GenAIInfra on [Intel Gaudi](https://habana.ai/products/) product:
+### (Optional) To run GenAIInfra on [Intel Gaudi](https://habana.ai/products/) product
 
 The following steps are optional. They're only required if you want to run the workloads on Intel Gaudi product.
 
-1. Please check the [support matrix](https://docs.habana.ai/en/latest/Support_Matrix/Support_Matrix.html) to make sure that environment meets the requirements.
+1. Check the [support matrix](https://docs.habana.ai/en/latest/Support_Matrix/Support_Matrix.html) to make sure that environment meets the requirements.
 
 2. [Install Intel Gaudi software stack](https://docs.habana.ai/en/latest/Installation_Guide/Bare_Metal_Fresh_OS.html#driver-fw-install-bare).
 
 3. [Install and setup container runtime](https://docs.habana.ai/en/latest/Installation_Guide/Bare_Metal_Fresh_OS.html#set-up-container-usage), based on the container runtime used by Kubernetes.
 
-NOTE: Please make sure you configure the appropriate container runtime based on the type of container runtime you installed during Kubernetes setup.
+   NOTE: Make sure you configure the appropriate container runtime based on the type of container runtime you installed during Kubernetes setup.
 
 4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Orchestration/Gaudi_Kubernetes/Device_Plugin_for_Kubernetes.html).
 
-Alternatively, Intel provides a base operator to manage the Gaudi software stack. Please refer to [this file](kubernetes-addons/Intel-Gaudi-Base-Operator/README.md) for details.
+   Alternatively, Intel provides a base operator to manage the Gaudi software stack. Refer to [this file](kubernetes-addons/Intel-Gaudi-Base-Operator/README.md) for details.
 
 ## Usages
 

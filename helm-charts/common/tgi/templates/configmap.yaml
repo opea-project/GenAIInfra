@@ -19,7 +19,6 @@ data:
   no_proxy: {{ .Values.global.no_proxy | quote }}
   HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
-  TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.MAX_INPUT_LENGTH }}
   MAX_INPUT_LENGTH: {{ .Values.MAX_INPUT_LENGTH | quote }}

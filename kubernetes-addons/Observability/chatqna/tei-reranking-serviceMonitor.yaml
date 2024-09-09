@@ -15,6 +15,7 @@ spec:
       any: true
   selector:
     matchLabels:
+      app.kubernetes.io/instance: chatqna
       app.kubernetes.io/name: teirerank
   endpoints:
   - port: teirerank
