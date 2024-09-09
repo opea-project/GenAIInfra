@@ -8,9 +8,6 @@ metadata:
   labels:
     {{- include "ui.labels" . | nindent 4 }}
 data:
-  http_proxy: {{ .Values.global.http_proxy | quote }}
-  https_proxy: {{ .Values.global.https_proxy | quote }}
-  no_proxy: {{ .Values.global.no_proxy | quote }}
   APP_BACKEND_SERVICE_ENDPOINT: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   APP_DATA_PREP_SERVICE_URL: {{ .Values.DATAPREP_SERVICE_ENDPOINT | quote }}
   CHAT_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}

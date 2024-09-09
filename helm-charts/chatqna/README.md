@@ -23,6 +23,8 @@ helm dependency update chatqna
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="Intel/neural-chat-7b-v3-3"
+# If you would like to use the traditional UI, please change the image as well as the containerport within the values
+# append these at the end of the command "--set chatqna-ui.image.repository=opea/chatqna-ui,chatqna-ui.image.tag=latest,chatqna-ui.containerPort=5173"
 helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
@@ -58,32 +60,14 @@ curl http://localhost:8888/v1/chatqna \
 
 ### Verify the workload through UI
 
-UI need to get installed before accessing. Follow the steps below to build and install UI:
+The UI has already been installed via the Helm chart. To access it, use the external IP of your Kubernetes cluster along with the NGINX port. You can find the NGINX port using the following command:
 
 ```bash
-# expose endpoint of ChatQnA service and dataprep service
-kubectl port-forward svc/chatqna --address 0.0.0.0 8888:8888
-kubectl port-forward svc/chatqna-data-prep --address 0.0.0.0 6007:6007
-
-# build and push the UI image if not exist
-# skip these steps if the image already exists
-git clone https://github.com/opea-project/GenAIExamples.git
-cd GenAIExamples/ChatQnA/docker/ui/
-docker build --no-cache -t opea/chatqna-conversation-ui:latest --build-arg https_proxy=$https_proxy --build-arg http_proxy=$http_proxy -f ./docker/Dockerfile.react .
-# push the image to your cluster, make sure the image exists on each node of your cluster
-docker save -o ui.tar opea/chatqna-conversation-ui:latest
-sudo ctr -n k8s.io image import ui.tar
-
-# install UI using helm chart. Replace image tag if required
-cd
-cd GenAIInfra/helm-charts/
-helm install ui common/chatqna-ui --set BACKEND_SERVICE_ENDPOINT="http://${host_ip}:8888/v1/chatqna",DATAPREP_SERVICE_ENDPOINT="http://${host_ip}:6007/v1/dataprep",image.tag="latest"
-
-# expose the endpoint of UI for verification
-kubectl port-forward svc/ui --address 0.0.0.0 5174:5174
+export port=$(kubectl get service chatqna-nginx --output='jsonpath={.spec.ports[0].nodePort}')
+echo $port
 ```
 
-Access `http://localhost:5174` to play with the ChatQnA workload through UI.
+Open a browser to access `http://<k8s-cluster-ip-address>:${port}` to play with the ChatQnA workload.
 
 ## Values
 
