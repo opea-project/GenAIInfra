@@ -49,7 +49,7 @@ jobs:
           for chart in ${e2e_charts}; do
             for file in "$CHARTS_DIR/$chart"/*values.yaml; do
               if [ -f "$file" ]; then
-                if [[ "$file" == *"nv-values.yaml" ]]; then
+                if [ "$file" == *"nv-values.yaml" ] || [ "$file" == *"hpa-values.yaml" ]; then
                   continue
                 fi
                 filename=$(basename "$file" .yaml)
@@ -64,7 +64,7 @@ jobs:
           for chart in ${common_charts}; do
             for file in "$CHARTS_DIR/common/$chart"/*values.yaml; do
               if [ -f "$file" ]; then
-                if [[ "$file" == *"nv-values.yaml" ]]; then
+                if [ "$file" == *"nv-values.yaml" ] || [ "$file" == *"hpa-values.yaml" ]; then
                   continue
                 fi
                 filename=$(basename "$file" .yaml)
