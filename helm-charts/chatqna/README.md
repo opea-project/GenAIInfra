@@ -61,6 +61,7 @@ curl http://localhost:8888/v1/chatqna \
 ### Verify the workload through UI
 
 The UI has already been installed via the Helm chart. To access it, use the external IP of your Kubernetes cluster along with the NGINX port. You can find the NGINX port using the following command:
+
 ```bash
 export port=$(kubectl get service chatqna-nginx --output='jsonpath={.spec.ports[0].nodePort}')
 echo $port
