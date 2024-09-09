@@ -1,0 +1,58 @@
+# Core Counters Aggregate Socket 0
+# Core Counters Aggregate Socket 1
+# Core Counters Aggregate System
+# Core Counters Socket 0
+# Core Counters Socket 1
+# UPI/QPI Counters
+# Uncore Counters Aggregate System
+# Uncore Counters Socket 0
+# Uncore Counters Socket 1
+CStateResidency
+CXL_Write_Cache
+CXL_Write_Mem
+Clock_Unhalted_Ref
+Clock_Unhalted_Thread
+DRAM_Joules_Consumed
+DRAM_Reads
+DRAM_Writes
+Embedded_DRAM_Reads
+Embedded_DRAM_Writes
+Incoming_Data_Traffic_On_Link_0
+Incoming_Data_Traffic_On_Link_1
+Incoming_Data_Traffic_On_Link_2
+Incoming_Data_Traffic_On_Link_3
+Instructions_Retired_Any
+Invariant_TSC
+L2_Cache_Hits
+L2_Cache_Misses
+L3_Cache_Hits
+L3_Cache_Misses
+L3_Cache_Occupancy
+Local_Memory_Bandwidth
+Measurement_Interval_in_us 425032687536
+Memory_Controller_GT_Requests
+Memory_Controller_IA_Requests
+Memory_Controller_IO_Requests
+Number_of_sockets 2
+OS_ID
+Outgoing_Data_And_Non_Data_Traffic_On_Link_0
+Outgoing_Data_And_Non_Data_Traffic_On_Link_1
+Outgoing_Data_And_Non_Data_Traffic_On_Link_2
+Outgoing_Data_And_Non_Data_Traffic_On_Link_3
+PP0_Joules_Consumed
+PP1_Joules_Consumed
+Package_Joules_Consumed
+Persistent_Memory_Reads
+Persistent_Memory_Writes
+RawCStateResidency
+Remote_Memory_Bandwidth
+SMI_Count
+Thermal_Headroom
+Utilization_Incoming_Data_Traffic_On_Link_0
+Utilization_Incoming_Data_Traffic_On_Link_1
+Utilization_Incoming_Data_Traffic_On_Link_2
+Utilization_Incoming_Data_Traffic_On_Link_3
+Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_0
+Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_1
+Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_2
+Utilization_Outgoing_Data_And_Non_Data_Traffic_On_Link_3

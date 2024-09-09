@@ -1,0 +1,21 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/name: pcm-metric-exporter
+    app.kubernetes.io/version: v0.0.1
+    release: prometheus-stack
+  name: pcm-metric-exporter
+  namespace: monitoring
+spec:
+  namespaceSelector:
+      any: true
+  selector:
+    matchLabels:
+      app: pcm-service
+  endpoints:
+  - port: pcm-metrics
+    interval: 2s

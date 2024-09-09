@@ -1,0 +1,22 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  labels:
+    app.kubernetes.io/name: tgi-gaudi-exporter
+    app.kubernetes.io/version: v0.0.1
+    release: prometheus-stack
+  name: tgi-gaudi-exporter
+  namespace: monitoring
+spec:
+  namespaceSelector:
+      any: true
+  selector:
+    matchLabels:
+      app.kubernetes.io/instance: chatqna
+      app.kubernetes.io/name: tgi
+  endpoints:
+  - port: tgi
+    interval: 5s
