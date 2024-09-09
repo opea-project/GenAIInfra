@@ -57,6 +57,8 @@ Make sure correct "configMap" name is used in top-level (e.g. `chatqna`) Helm ch
 
 Why HPA is opt-in:
 
+- Top level chart name needs to match Prometheus metric naming conventions, because
+  it works as metric name prefix (with dashes convertted to underscores).
 - Enabling (top level) chart `horizontalPodAutoscaler` option will _overwrite_ cluster's current
   `PrometheusAdapter` configuration with its own custom metrics configuration.
   Take copy of the existing `configMap` before install, if that matters:

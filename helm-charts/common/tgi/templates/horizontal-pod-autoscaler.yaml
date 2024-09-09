@@ -18,7 +18,7 @@ spec:
     object:
       metric:
         # TGI time metrics are in seconds
-        name: tgi_request_latency
+        name: {{ include "tgi.metricPrefix" . }}_request_latency
       describedObject:
         apiVersion: v1
         # get metric for named object of given type (in same namespace)
