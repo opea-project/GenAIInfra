@@ -24,6 +24,10 @@ helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN
 
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
 
+Curl command and UI are the two options that can be leveraged to verify the result.
+
+### Verify the workload through curl command
+
 Then run the command `kubectl port-forward svc/codetrans 7777:7777` to expose the CodeTrans service for access.
 
 Open another terminal and run the following command to verify the service if working:
@@ -33,6 +37,17 @@ curl http://localhost:7777/v1/codetrans \
     -H 'Content-Type: application/json' \
     -d '{"language_from": "Golang","language_to": "Python","source_code": "package main\n\nimport \"fmt\"\nfunc main() {\n    fmt.Println(\"Hello, World!\");\n}"}'
 ```
+
+### Verify the workload through UI
+
+The UI has already been installed via the Helm chart. To access it, use the external IP of one your Kubernetes node along with the NGINX port. You can find the NGINX port using the following command:
+
+```bash
+export port=$(kubectl get service codetrans-nginx --output='jsonpath={.spec.ports[0].nodePort}')
+echo $port
+```
+
+Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the ChatQnA workload.
 
 ## Values
 

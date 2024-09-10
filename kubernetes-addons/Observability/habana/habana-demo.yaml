@@ -1,0 +1,25 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: habanalabs-gaudi-demo
+spec:
+   template:
+      spec:
+         hostIPC: true
+         restartPolicy: OnFailure
+         containers:
+         - name: habana-ai-base-container
+           image: vault.habana.ai/gaudi-docker/1.16.1/ubuntu22.04/habanalabs/pytorch-installer-2.2.2:latest
+           workingDir: /root
+           command: ["hl-smi"]
+           securityContext:
+             capabilities:
+               add: ["SYS_NICE"]
+           resources:
+             limits:
+               habana.ai/gaudi: 1
+               #memory: 409Gi
+               #hugepages-2Mi: 95000Mi

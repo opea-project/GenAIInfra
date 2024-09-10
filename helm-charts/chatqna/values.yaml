@@ -39,6 +39,19 @@ affinity: {}
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
+# disable guardrails-usvc by default
+# See guardrails-values.yaml for guardrail related options
+guardrails-usvc:
+  enabled: false
+
+# If you would like to switch to traditional UI image
+# Uncomment the following lines
+# chatqna-ui:
+#   image:
+#     repository: "opea/chatqna-ui"
+#     tag: "latest"
+#   containerPort: "5173"
+
 global:
   http_proxy: ""
   https_proxy: ""

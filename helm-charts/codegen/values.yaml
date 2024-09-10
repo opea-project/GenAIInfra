@@ -39,6 +39,13 @@ affinity: {}
 tgi:
   LLM_MODEL_ID: meta-llama/CodeLlama-7b-hf
 
+codegen-ui:
+  image:
+    repository: opea/codegen-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/codegen"
+  containerPort: 5173
+
 global:
   http_proxy: ""
   https_proxy: ""

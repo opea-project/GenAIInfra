@@ -48,9 +48,17 @@ spec:
             {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.extraCmdArgs }}
+          args:
+            {{- range .Values.extraCmdArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
           volumeMounts:
             - mountPath: /data
               name: model-volume
+            - mountPath: /dev/shm
+              name: shm
             - mountPath: /tmp
               name: tmp
           ports:
@@ -83,6 +91,10 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: {{ .Values.shmSize }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}
@@ -100,4 +112,13 @@ spec:
       {{- if .Values.global.horizontalPodAutoscaler.enabled }}
       # extra time to finish processing buffered requests before HPA forcibly terminates pod
       terminationGracePeriodSeconds: 120
+      {{- end }}
+      {{- if .Values.evenly_distributed }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "tgi.selectorLabels" . | nindent 14 }}
       {{- end }}
