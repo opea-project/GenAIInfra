@@ -34,7 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -99,7 +98,7 @@ var yamlDict = map[string]string{
 }
 
 var (
-	_log = log.Log.WithName("GMC")
+	_log = ctrl.Log.WithName("GMC")
 )
 
 // GMConnectorReconciler reconciles a GMConnector object
@@ -132,7 +131,7 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 		return nil, errors.New("invalid svc config")
 	}
 
-	_log.V(2).Info("processing step", "config", *stepCfg)
+	_log.V(1).Info("processing step", "config", *stepCfg)
 
 	var retObjs []*unstructured.Unstructured
 	// by default, the svc's namespace is the same as the graph
@@ -680,7 +679,7 @@ func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFi
 		if err != nil {
 			return string(yamlFile), fmt.Errorf("error executing template: %v", err)
 		} else {
-			// fmt.Printf("applied config %s\n", appliedCfg.String())
+			_log.V(1).Info("applied config", "content", appliedCfg.String())
 			return appliedCfg.String(), nil
 		}
 	} else {
@@ -820,9 +819,7 @@ func isGMCSpecOrMetadataChanged(e event.UpdateEvent) bool {
 	specChanged := !reflect.DeepEqual(oldObject.Spec, newObject.Spec)
 	metadataChanged := isMetadataChanged(&(oldObject.ObjectMeta), &(newObject.ObjectMeta))
 
-	_log.Info("Check trigger condition?", "spec changed", specChanged, "meta changed", metadataChanged)
-	fmt.Printf("\n| spec changed %t | meta changed: %t |\n", specChanged, metadataChanged)
-
+	_log.V(1).Info("Check trigger condition?", "spec changed", specChanged, "meta changed", metadataChanged)
 	// Compare the old and new spec, ignore metadata, status changes
 	// metadata change: name, namespace, such change should create a new GMC
 	// status change: deployment status
@@ -838,12 +835,12 @@ func isDeploymentStatusChanged(e event.UpdateEvent) bool {
 	}
 
 	if len(newDeployment.OwnerReferences) == 0 {
-		// fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
+		_log.V(1).Info("No owner reference", "ns", newDeployment.Namespace, "name", newDeployment.Name)
 		return false
 	} else {
 		for _, owner := range newDeployment.OwnerReferences {
 			if owner.Kind == "GMConnector" {
-				// fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
+				_log.V(1).Info("Owner is GMConnector", "ns", newDeployment.Namespace, "name", newDeployment.Name)
 				break
 			}
 		}
@@ -870,9 +867,9 @@ func isDeploymentStatusChanged(e event.UpdateEvent) bool {
 		if (oldStatus == corev1.ConditionTrue && oldStatus != newStatus) ||
 			(newStatus == corev1.ConditionTrue && oldStatus != newStatus) {
 			{
-				fmt.Printf("| %s:%s: status changed from : %v to %v|\n",
-					newDeployment.Namespace, newDeployment.Name,
-					oldStatus, newStatus)
+				_log.Info("status changed", "ns",
+					newDeployment.Namespace, "name", newDeployment.Name,
+					"from", oldStatus, "to", newStatus)
 				return true
 			}
 		}
