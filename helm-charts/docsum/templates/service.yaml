@@ -16,3 +16,4 @@ spec:
       name: docsum
   selector:
     {{- include "docsum.selectorLabels" . | nindent 4 }}
+    app: {{ include "docsum.fullname" . }}

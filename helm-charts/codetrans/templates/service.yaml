@@ -16,3 +16,4 @@ spec:
       name: codetrans
   selector:
     {{- include "codetrans.selectorLabels" . | nindent 4 }}
+    app: {{ include "codetrans.fullname" . }}

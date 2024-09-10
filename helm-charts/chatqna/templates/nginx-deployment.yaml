@@ -56,24 +56,29 @@ data:
 
 kind: ConfigMap
 metadata:
-  name: nginx-default-config
+  name: {{ include "chatqna.fullname" . }}-nginx-config
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "chatqna.fullname" . }}-nginx
+  labels:
+    {{- include "chatqna.labels" . | nindent 4 }}
+    app: {{ include "chatqna.fullname" . }}-nginx
 spec:
   selector:
     matchLabels:
+      {{- include "chatqna.selectorLabels" . | nindent 6 }}
       app: {{ include "chatqna.fullname" . }}-nginx
   template:
     metadata:
       labels:
+        {{- include "chatqna.selectorLabels" . | nindent 8 }}
         app: {{ include "chatqna.fullname" . }}-nginx
     spec:
       containers:
       - image: nginx:1.27.1
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
         name: nginx
         volumeMounts:
         - mountPath: /etc/nginx/conf.d
@@ -82,8 +87,20 @@ spec:
       volumes:
       - configMap:
           defaultMode: 420
-          name: nginx-default-config
+          name: {{ include "chatqna.fullname" . }}-nginx-config
         name: nginx-config-volume
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
 ---
 apiVersion: v1
 kind: Service
@@ -95,5 +112,6 @@ spec:
     protocol: TCP
     targetPort: 80
   selector:
+    {{- include "chatqna.selectorLabels" . | nindent 4 }}
     app: {{ include "chatqna.fullname" . }}-nginx
   type: NodePort

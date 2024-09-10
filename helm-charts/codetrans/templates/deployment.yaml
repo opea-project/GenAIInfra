@@ -7,11 +7,13 @@ metadata:
   name: {{ include "codetrans.fullname" . }}
   labels:
     {{- include "codetrans.labels" . | nindent 4 }}
+    app: {{ include "codetrans.fullname" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "codetrans.selectorLabels" . | nindent 6 }}
+      app: {{ include "codetrans.fullname" . }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -20,6 +22,7 @@ spec:
       {{- end }}
       labels:
         {{- include "codetrans.selectorLabels" . | nindent 8 }}
+        app: {{ include "codetrans.fullname" . }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -74,4 +77,5 @@ spec:
           labelSelector:
             matchLabels:
               {{- include "codetrans.selectorLabels" . | nindent 14 }}
+              app: {{ include "codetrans.fullname" . }}
       {{- end }}
