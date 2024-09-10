@@ -8,8 +8,8 @@ metadata:
   labels:
     {{- include "tei.labels" . | nindent 4 }}
 spec:
-  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
-  {{- if not .Values.horizontalPodAutoscaler.enabled }}
+  {{- if ne (int .Values.replicaCount) 1 }}
+  # remove if replica count should not be reset on pod update with HPA
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
@@ -105,8 +105,8 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      {{- if .Values.horizontalPodAutoscaler.enabled }}
-      # extra time to finish processing buffered requests before HPA forcibly terminates pod
+      {{- if not .Values.accelDevice }}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
       terminationGracePeriodSeconds: 60
       {{- end }}
       {{- if .Values.evenly_distributed }}

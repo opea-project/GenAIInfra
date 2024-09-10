@@ -28,6 +28,9 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "2.2.0"
 
+# empty for CPU
+accelDevice: ""
+
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
