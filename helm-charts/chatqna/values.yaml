@@ -38,7 +38,6 @@ affinity: {}
 # This is just to avoid Helm errors when HPA is NOT used
 # (use hpa-values.yaml files to actually enable HPA).
 horizontalPodAutoscaler:
-  configMap: "MISSING"
   enabled: false
 
 # Override values in specific subcharts

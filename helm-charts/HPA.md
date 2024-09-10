@@ -66,7 +66,7 @@ otherwise adapter cannot access it!
 
 (Alternative for setting the above `prometheusSpec` variable to `false` is making sure that
 `prometheusRelease` value in top-level chart matches the release name given to the Prometheus
-install i.e. when it differs from `prometheus-stack` used above.  That is used to annotate
+install i.e. when it differs from `prometheus-stack` used above. That is used to annotate
 created serviceMonitors with a label Prometheus requires when above option is `true`.)
 
 ## Gotchas
@@ -97,7 +97,7 @@ To enable HPA, add `-f chatqna/hpa-values.yaml` option to your `helm install` co
 
 If **CPU** versions of TGI (and TEI) services are being scaled, resource requests and probe timings
 suitable for CPU usage need to be used. Add `-f chatqna/cpu-values.yaml` option to your `helm install`
-line.  If you need to change model specified there, update the resource requests accordingly.
+line. If you need to change model specified there, update the resource requests accordingly.
 
 ### Post-install
 
