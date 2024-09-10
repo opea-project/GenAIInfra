@@ -160,7 +160,6 @@ func main() {
 	if err = (&controller.GMConnectorReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
-		Log:    ctrl.Log.WithName("GMC"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "GMConnector")
 		os.Exit(1)
