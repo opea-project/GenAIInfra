@@ -53,11 +53,14 @@ https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-
 To install (older versions) of them:
 
 ```console
-$ ns=monitoring
-$ helm install prometheus-stack prometheus-community/kube-prometheus-stack --version 55.5.2 -n $ns
-$ kubectl get services -n $ns
-$ helm install  prometheus-adapter prometheus-community/prometheus-adapter --version 4.10.0 -n $ns \
-  --set prometheus.url=http://prometheus-stack-kube-prom-prometheus.$ns.svc \
+$ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+$ helm repo update
+$ prom_ns=monitoring  # namespace for Prometheus/-adapter
+$ kubectl create ns $prom_ns
+$ helm install prometheus-stack prometheus-community/kube-prometheus-stack --version 55.5.2 -n $prom_ns
+$ kubectl get services -n $prom_ns
+$ helm install  prometheus-adapter prometheus-community/prometheus-adapter --version 4.10.0 -n $prom_ns \
+  --set prometheus.url=http://prometheus-stack-kube-prom-prometheus.$prom_ns.svc \
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 ```
 
@@ -134,7 +137,8 @@ $ kubectl apply -f adapter-config.yaml
 And restart it, so that it will use the new config:
 
 ```console
-$ kubectl -n $ns delete $(kubectl -n $ns get pod --selector app.kubernetes.io/name=prometheus-adapter -o name)
+$ selector=app.kubernetes.io/name=prometheus-adapter
+$ kubectl -n $prom_ns delete $(kubectl -n $prom_ns get pod --selector $selector -o name)
 ```
 
 ## Verify
