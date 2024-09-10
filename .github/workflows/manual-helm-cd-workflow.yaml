@@ -45,7 +45,7 @@ jobs:
             find "$CHARTS_DIR" -mindepth 1 -maxdepth 1 -type d ! -name "common" -exec basename {} \; | while read -r subfolder; do
               for file in "$CHARTS_DIR/$subfolder"/*values.yaml; do
                 if [ -f "$file" ]; then
-                  if [ "$file" == *"nv-values.yaml" ] || [ "$file" == *"hpa-values.yaml" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]]; then
                     continue
                   fi
                   filename=$(basename "$file" .yaml)
@@ -60,7 +60,7 @@ jobs:
             find "$CHARTS_DIR/common" -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | while read -r subfolder; do
               for file in "$CHARTS_DIR/common/$subfolder"/*values.yaml; do
                 if [ -f "$file" ]; then
-                  if [ "$file" == *"nv-values.yaml" ] || [ "$file" == *"hpa-values.yaml" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]]; then
                     continue
                   fi
                   filename=$(basename "$file" .yaml)
