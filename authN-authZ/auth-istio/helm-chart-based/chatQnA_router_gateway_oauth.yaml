@@ -34,14 +34,22 @@ spec:
         prefix: /v1/chatqna
     route:
     - destination:
-        host: chatqna.chatqa.svc.cluster.local
+        host: chatqna-nginx.chatqa.svc.cluster.local
         port:
-          number: 8888
+          number: 80
   - match:
     - uri:
         prefix: /v1/dataprep
     route:
     - destination:
-        host: chatqna-data-prep.chatqa.svc.cluster.local
+        host: chatqna-nginx.chatqa.svc.cluster.local
         port:
-          number: 6007
+          number: 80
+  - match:
+     - uri:
+         prefix: /
+    route:
+    - destination:
+        host: chatqna-nginx.chatqa.svc.cluster.local
+        port:
+          number: 80
