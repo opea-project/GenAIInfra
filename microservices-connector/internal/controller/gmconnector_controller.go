@@ -667,7 +667,7 @@ func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFi
 			HttpProxy:   (*svcCfg)["http_proxy"],
 			HttpsProxy:  (*svcCfg)["https_proxy"],
 			GRAPH_JSON:  (*svcCfg)["nodes"]}
-		_log.Info("Apply the config to router", "content", userDefinedCfg)
+		_log.V(1).Info("Apply the config to router", "content", userDefinedCfg)
 
 		tmpl, err := template.New("yamlTemplate").Parse(string(yamlFile))
 		if err != nil {
