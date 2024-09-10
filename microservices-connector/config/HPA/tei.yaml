@@ -1,5 +1,5 @@
 ---
-# Source: tei/templates/horizontalPodAutoscaler.yaml
+# Source: tei/templates/horizontal-pod-autoscaler.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 apiVersion: autoscaling/v2
@@ -17,8 +17,8 @@ spec:
   - type: Object
     object:
       metric:
-        # tei-embedding time metrics are in seconds
-        name: embedding_request_latency
+        # TEI time metrics are in seconds
+        name: tei_request_latency
       describedObject:
         apiVersion: v1
         # get metric for named object of given type (in same namespace)

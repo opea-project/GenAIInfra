@@ -1,5 +1,5 @@
 ---
-# Source: teirerank/templates/horizontalPodAutoscaler.yaml
+# Source: teirerank/templates/horizontal-pod-autoscaler.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 apiVersion: autoscaling/v2
@@ -17,8 +17,8 @@ spec:
   - type: Object
     object:
       metric:
-        # tei-reranking time metrics are in seconds
-        name: reranking_request_latency
+        # TEI time metrics are in seconds
+        name: teirerank_request_latency
       describedObject:
         apiVersion: v1
         # get metric for named object of given type (in same namespace)
