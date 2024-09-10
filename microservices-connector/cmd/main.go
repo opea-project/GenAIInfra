@@ -8,11 +8,15 @@ package main
 import (
 	"crypto/tls"
 	"flag"
+	"fmt"
+	"net/http"
 	"os"
+
+	uzap "go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
-	"go.uber.org/zap/zapcore"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	"k8s.io/apimachinery/pkg/runtime"
@@ -62,14 +66,39 @@ func main() {
 		"If set the metrics endpoint is served securely")
 	flag.BoolVar(&enableHTTP2, "enable-http2", false,
 		"If set, HTTP/2 will be enabled for the metrics and webhook servers")
+	atomicLevel := uzap.NewAtomicLevel()
+	atomicLevel.SetLevel(zapcore.InfoLevel) // Set initial log level
 	opts := zap.Options{
 		Development: true,
-		Level:       zapcore.InfoLevel,
+		Level:       atomicLevel,
 	}
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	// Set up an HTTP server to change the log level dynamically
+	http.HandleFunc("/loglevel", func(w http.ResponseWriter, r *http.Request) {
+		level := r.URL.Query().Get("level")
+		var zapLevel zapcore.Level
+		if err := zapLevel.UnmarshalText([]byte(level)); err != nil {
+			http.Error(w, fmt.Sprintf("invalid log level: %v", err), http.StatusBadRequest)
+			return
+		}
+		atomicLevel.SetLevel(zapLevel)
+		fmt.Fprintf(w, "log level set to %s\n", zapLevel.String())
+		// setupLog.V(1).Info("1 log level set to ", "level", zapLevel.String())
+		// setupLog.V(2).Info("2 log level set to ", "level", zapLevel.String())
+		// setupLog.Info("log level set to ", "level", zapLevel.String())
+
+	})
+
+	// Start the HTTP server
+	go func() {
+		if err := http.ListenAndServe(":8008", nil); err != nil {
+			setupLog.Error(err, "HTTP server failed")
+		}
+	}()
 
 	// if the enable-http2 flag is false (the default), http/2 should be disabled
 	// due to its vulnerabilities. More specifically, disabling http/2 will
