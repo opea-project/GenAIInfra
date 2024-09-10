@@ -12,7 +12,6 @@ data:
   PORT: {{ .Values.service.port | quote }}
   HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   VLLM_CPU_KVCACHE_SPACE: {{ .Values.VLLM_CPU_KVCACHE_SPACE | quote }}
-  HABANA_VISIBLE_DEVICES : {{ .Values.HABANA_VISIBLE_DEVICES | quote }}
   OMPI_MCA_btl_vader_single_copy_mechanism: {{ .Values.OMPI_MCA_btl_vader_single_copy_mechanism | quote }}
   {{- if .Values.global.HF_ENDPOINT }}
   HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}

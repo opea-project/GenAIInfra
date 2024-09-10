@@ -100,7 +100,6 @@ LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 CUDA_GRAPHS: "0"
 VLLM_CPU_KVCACHE_SPACE: 50
-HABANA_VISIBLE_DEVICES: all
 OMPI_MCA_btl_vader_single_copy_mechanism: none
 
 global:
