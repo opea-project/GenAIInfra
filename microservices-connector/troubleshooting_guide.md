@@ -47,4 +47,4 @@ After the CR for GMC pipeline has been deployed, correct the CR if you encounter
    curl -X PUT "http://localhost:8008/loglevel" -d '{"log_level":"debug"}' -H "Content-Type: application/json"
    log level set to debug
    ```
-   the log levels supported by the log system are `debug|info|warn|error|panic|dpanic|panic|tatal`, but current GMC only has the `debug|info|error` logs 
+   the log levels supported by the log system are `debug|info|warn|error|panic|dpanic|panic|tatal`, but current GMC only has the `debug|info|error` logs
