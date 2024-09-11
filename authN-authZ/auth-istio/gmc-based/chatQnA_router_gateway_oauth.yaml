@@ -29,7 +29,20 @@ spec:
   hosts:
   - chatqna-service.com
   http:
-  - match:
+  - corsPolicy:
+      allowCredentials: true
+      allowHeaders:
+      - content-type
+      - authorization
+      allowMethods:
+      - POST
+      - GET
+      - OPTIONS
+      - PUT
+      - DELETE
+      allowOrigins:
+      - regex: http://chatqna-ui.com:.*
+    match:
     - uri:
         prefix: /
     route:
