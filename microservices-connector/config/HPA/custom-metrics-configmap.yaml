@@ -4,10 +4,10 @@ apiVersion: v1
 data:
   config.yaml: |
       rules:
-      - seriesQuery: '{__name__="tgi_request_inference_duration_sum",service="release-name-tgi"}'
+      - seriesQuery: '{__name__="tgi_request_inference_duration_sum",service="tgi"}'
         # Average request latency from TGI histograms, over 1 min
         # (0.001 divider add is to make sure there's always a valid value)
-        metricsQuery: 'rate(tgi_request_inference_duration_sum{service="release-name-tgi",<<.LabelMatchers>>}[1m]) / (0.001+rate(tgi_request_inference_duration_count{service="release-name-tgi",<<.LabelMatchers>>}[1m]))'
+        metricsQuery: 'rate(tgi_request_inference_duration_sum{service="tgi",<<.LabelMatchers>>}[1m]) / (0.001+rate(tgi_request_inference_duration_count{service="tgi",<<.LabelMatchers>>}[1m]))'
         name:
           matches: ^tgi_request_inference_duration_sum
           as: "tgi_request_latency"
@@ -20,24 +20,24 @@ data:
               resource: namespace
             service:
               resource: service
-      - seriesQuery: '{__name__="te_request_inference_duration_sum",service="release-name-teirerank"}'
+      - seriesQuery: '{__name__="te_request_inference_duration_sum",service="teirerank"}'
         # Average request latency from TEI histograms, over 1 min
-        metricsQuery: 'rate(te_request_inference_duration_sum{service="release-name-teirerank",<<.LabelMatchers>>}[1m]) / (0.001+rate(te_request_inference_duration_count{service="release-name-teirerank",<<.LabelMatchers>>}[1m]))'
+        metricsQuery: 'rate(te_request_inference_duration_sum{service="teirerank",<<.LabelMatchers>>}[1m]) / (0.001+rate(te_request_inference_duration_count{service="teirerank",<<.LabelMatchers>>}[1m]))'
         name:
           matches: ^te_request_inference_duration_sum
-          as: "reranking_request_latency"
+          as: "teirerank_request_latency"
         resources:
           overrides:
             namespace:
               resource: namespace
             service:
               resource: service
-      - seriesQuery: '{__name__="te_request_inference_duration_sum",service="release-name-tei"}'
+      - seriesQuery: '{__name__="te_request_inference_duration_sum",service="tei"}'
         # Average request latency from TEI histograms, over 1 min
-        metricsQuery: 'rate(te_request_inference_duration_sum{service="release-name-tei",<<.LabelMatchers>>}[1m]) / (0.001+rate(te_request_inference_duration_count{service="release-name-tei",<<.LabelMatchers>>}[1m]))'
+        metricsQuery: 'rate(te_request_inference_duration_sum{service="tei",<<.LabelMatchers>>}[1m]) / (0.001+rate(te_request_inference_duration_count{service="tei",<<.LabelMatchers>>}[1m]))'
         name:
           matches: ^te_request_inference_duration_sum
-          as: "embedding_request_latency"
+          as: "tei_request_latency"
         resources:
           overrides:
             namespace:

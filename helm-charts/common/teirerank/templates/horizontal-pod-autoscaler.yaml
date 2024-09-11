@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if .Values.global.horizontalPodAutoscaler.enabled }}
+{{- if .Values.horizontalPodAutoscaler.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -17,8 +17,8 @@ spec:
   - type: Object
     object:
       metric:
-        # tei-reranking time metrics are in seconds
-        name: reranking_request_latency
+        # TEI time metrics are in seconds
+        name: {{ include "teirerank.metricPrefix" . }}_request_latency
       describedObject:
         apiVersion: v1
         # get metric for named object of given type (in same namespace)

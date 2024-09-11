@@ -31,6 +31,13 @@ Create chart name and version as used by the chart label.
 {{- end }}
 
 {{/*
+Convert chart name to a string suitable as metric prefix
+*/}}
+{{- define "teirerank.metricPrefix" -}}
+{{- include "teirerank.fullname" . | replace "-" "_" | regexFind "[a-zA-Z_:][a-zA-Z0-9_:]*" }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "teirerank.labels" -}}
