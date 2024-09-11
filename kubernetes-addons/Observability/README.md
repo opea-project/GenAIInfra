@@ -2,7 +2,7 @@
 
 This guide provides a step-by-step approach to setting up observability for the OPEA workload in a Kubernetes environment. We will cover the setup of Prometheus and Grafana, as well as the collection of metrics for Gaudi hardware, OPEA/chatqna including TGI,TEI-Embedding,TEI-Reranking and other microservies, and PCM.
 
-#### Prepare
+## Prepare
 
 ```
 git clone https://github.com/opea-project/GenAIInfra.git
@@ -22,19 +22,19 @@ helm repo update
 helm install prometheus-stack prometheus-community/kube-prometheus-stack --version 55.5.1 -n monitoring
 ```
 
-### Step 2: Verify the installation:
+### Step 2: Verify the installation
 
 ```
 kubectl get pods -n monitoring
 ```
 
-### Step 3: Port-forward to access Grafana:
+### Step 3: Port-forward to access Grafana
 
 ```
 kubectl port-forward service/grafana 3000:80
 ```
 
-### Step 4: Access Grafana:
+### Step 4: Access Grafana
 
 Open your browser and navigate to http://localhost:3000. Use "admin/prom-operator" as the username and the password to login.
 
@@ -108,8 +108,7 @@ Refer to the [ChatQnA helm chart](https://github.com/opea-project/GenAIInfra/tre
 
 ### Step 2: Install all the serviceMonitor
 
-###### NOTE:
-
+> NOTE:
 > If the chatQnA installed into another instance instead of chatqna(Default instance name),you should modify the
 > matchLabels app.kubernetes.io/instance:${instanceName} with proper instanceName
 
