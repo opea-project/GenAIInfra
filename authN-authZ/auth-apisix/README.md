@@ -74,8 +74,8 @@ export accessUrl=http://$NODE_IP:$NODE_PORT/<your published endpoint uri>
 
 </br>
 Apisix helm chart provides configs to change the service type to other options like LoadBalancer (apisix.service.type) and externalTrafficPolicy to 'local'(apisix.service.externalTrafficPolicy). These can be added in values_apisix_gw.yaml </br></br>
-While accessing the published APIs, the HTTP Authorization header of the request should contain the Access token provided by Identity provider as 'Bearer \<Access Token\>' </br></br>
-The access token, refresh token, userinfo and user roles can be obtained by invoking OIDC auth endpoint through UI or token endpoint through curl and providing user credentials. </br></br>
+While accessing the published APIs, the HTTP Authorization header of the request should contain the Access token provided by Identity provider as 'Bearer &ltAccess Token>'. </br></br>
+The access token, refresh token, userinfo, user roles and OIDC scopes assigned to user can be obtained by invoking OIDC auth endpoint through UI or token endpoint through curl and providing user credentials. </br></br>
 
 Below steps can be followed to get access token from keycloak and access the APISIX published ChatQnA API through curl
 
