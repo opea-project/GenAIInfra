@@ -12,13 +12,13 @@ The memory bandwidth exporter currently only supports Intel platforms with RDT, 
 
 ```sh
 # download containerd binary, containerd version v1.7.0 or higher is required
-$ wget https://github.com/containerd/containerd/releases/download/v1.7.0/containerd-1.7.0-linux-amd64.tar.gz
+wget https://github.com/containerd/containerd/releases/download/v1.7.0/containerd-1.7.0-linux-amd64.tar.gz
 
 # stop running containerd
-$ sudo systemctl stop containerd
+sudo systemctl stop containerd
 
 # replace old containerd
-$ sudo tar Cxzvf /usr/local containerd-1.7.0-linux-amd64.tar.gz
+sudo tar Cxzvf /usr/local containerd-1.7.0-linux-amd64.tar.gz
 
 # enable NRI in containerd
 # add an item in /etc/containerd/config.toml
@@ -31,14 +31,14 @@ $ sudo tar Cxzvf /usr/local containerd-1.7.0-linux-amd64.tar.gz
     config_file = "/etc/nri/nri.conf"
 
 # restart containerd
-$ sudo systemctl start containerd
-$ sudo systemctl status containerd
+sudo systemctl start containerd
+sudo systemctl status containerd
 
 # test nri
-$ git clone https://github.com/containerd/nri
-$ cd nri
-$ make
-$ ./build/bin/logger -idx 00
+git clone https://github.com/containerd/nri
+cd nri
+make
+./build/bin/logger -idx 00
 ```
 
 ### Enable RDT
@@ -46,7 +46,7 @@ $ ./build/bin/logger -idx 00
 Mount resctrl to the directory `/sys/fs/resctrl`:
 
 ```sh
-$ sudo mount -t resctrl resctrl /sys/fs/resctrl
+sudo mount -t resctrl resctrl /sys/fs/resctrl
 ```
 
 ### Setup memory bandwidth exporter
@@ -54,25 +54,25 @@ $ sudo mount -t resctrl resctrl /sys/fs/resctrl
 Before setup, you need to configure the runc hook:
 
 ```sh
-$ ./config/config.sh
+./config/config.sh
 ```
 
 #### How to build the binary and setup?
 
 ```sh
-$ make build
-$ sudo ./bin/memory-bandwidth-exporter
+make build
+sudo ./bin/memory-bandwidth-exporter
 # e.g., sudo ./bin/memory-bandwidth-exporter --collector.node.name=<node_name> --collector.container.namespaceWhiteList="calico-apiserver,calico-system,kube-system,tigera-operator"
 
 # get memory bandwidth metrics
-$ curl http://localhost:9100/metrics
+curl http://localhost:9100/metrics
 ```
 
 #### How to build the docker image and setup?
 
 ```sh
-$ make docker.build
-$ sudo docker run \
+make docker.build
+sudo docker run \
   -e NODE_NAME=<node_name> \
   -e NAMESPACE_WHITELIST="calico-apiserver,calico-system,kube-system,tigera-operator" \
   --mount type=bind,source=/etc/containers/oci/hooks.d/,target=/etc/containers/oci/hooks.d/ \
@@ -87,7 +87,7 @@ $ sudo docker run \
   opea/memory-bandwidth-exporter:latest
 
 # get memory bandwidth metrics
-$ curl http://localhost:9100/metrics
+curl http://localhost:9100/metrics
 ```
 
 #### How to deploy on the K8s cluster?
@@ -95,11 +95,11 @@ $ curl http://localhost:9100/metrics
 Build and push your image to the location specified by `MBE_IMG`, and apply manifest:
 
 ```sh
-$ make docker.build docker.push MBE_IMG=<some-registry>/opea/memory-bandwidth-exporter:<tag>
-$ make change_img MBE_IMG=<some-registry>/opea/memory-bandwidth-exporter:<tag>
+make docker.build docker.push MBE_IMG=<some-registry>/opea/memory-bandwidth-exporter:<tag>
+make change_img MBE_IMG=<some-registry>/opea/memory-bandwidth-exporter:<tag>
 # If namespace system does not exist, create it.
-$ kubectl create ns system
-$ kubectl apply -f config/manifests/memory-bandwidth-exporter.yaml
+kubectl create ns system
+kubectl apply -f config/manifests/memory-bandwidth-exporter.yaml
 ```
 
 Check the installation result:
@@ -113,13 +113,13 @@ memory-bandwidth-exporter-zxhdl   1/1     Running   0          3m
 get memory bandwidth metrics
 
 ```sh
-$ curl http://<memory_bandwidth_exporter_container_ip>:9100/metrics
+curl http://<memory_bandwidth_exporter_container_ip>:9100/metrics
 ```
 
 #### How to delete binary?
 
 ```sh
-$ make clean
+make clean
 ```
 
 ## More flags about memory bandwidth exporter
