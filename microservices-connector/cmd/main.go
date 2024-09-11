@@ -7,6 +7,7 @@ package main
 
 import (
 	"crypto/tls"
+	"encoding/json"
 	"flag"
 	"fmt"
 	"net/http"
@@ -51,6 +52,43 @@ func init() {
 	//+kubebuilder:scaffold:scheme
 }
 
+func logLevelHandler(atomicLevel uzap.AtomicLevel) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			// Return the current log level
+			currentLevel := atomicLevel.Level()
+			fmt.Fprintf(w, "current log level: %s\n", currentLevel.String())
+		case http.MethodPut:
+			// Change the log level
+			var reqBody struct {
+				LogLevel string `json:"log_level"`
+			}
+			if err := json.NewDecoder(r.Body).Decode(&reqBody); err != nil {
+				http.Error(w, fmt.Sprintf("invalid request body: %v\n", err), http.StatusBadRequest)
+				return
+			} else {
+				if reqBody.LogLevel == "" {
+					http.Error(w, "log_level field is required\n", http.StatusBadRequest)
+					return
+				}
+			}
+			var zapLevel zapcore.Level
+			if err := zapLevel.UnmarshalText([]byte(reqBody.LogLevel)); err != nil {
+				http.Error(w, fmt.Sprintf("invalid log level: %v\n", err), http.StatusBadRequest)
+				return
+			}
+			atomicLevel.SetLevel(zapLevel)
+			fmt.Fprintf(w, "log level set to %s\n", zapLevel.String())
+			setupLog.V(1).Info("1 log level set to ", "level", zapLevel.String())
+			setupLog.V(2).Info("2 log level set to ", "level", zapLevel.String())
+			setupLog.Info("log level set to ", "level", zapLevel.String())
+		default:
+			http.Error(w, "method not allowed", http.StatusMethodNotAllowed)
+		}
+	}
+}
+
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
@@ -78,20 +116,7 @@ func main() {
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
 
 	// Set up an HTTP server to change the log level dynamically
-	http.HandleFunc("/loglevel", func(w http.ResponseWriter, r *http.Request) {
-		level := r.URL.Query().Get("level")
-		var zapLevel zapcore.Level
-		if err := zapLevel.UnmarshalText([]byte(level)); err != nil {
-			http.Error(w, fmt.Sprintf("invalid log level: %v", err), http.StatusBadRequest)
-			return
-		}
-		atomicLevel.SetLevel(zapLevel)
-		fmt.Fprintf(w, "log level set to %s\n", zapLevel.String())
-		// setupLog.V(1).Info("1 log level set to ", "level", zapLevel.String())
-		// setupLog.V(2).Info("2 log level set to ", "level", zapLevel.String())
-		// setupLog.Info("log level set to ", "level", zapLevel.String())
-
-	})
+	http.HandleFunc("/loglevel", logLevelHandler(atomicLevel))
 
 	// Start the HTTP server
 	go func() {
