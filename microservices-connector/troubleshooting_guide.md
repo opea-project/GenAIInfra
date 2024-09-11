@@ -34,3 +34,17 @@ After the CR for GMC pipeline has been deployed, correct the CR if you encounter
    ```
 
    The serviceName specified in the `spec.nodes.<nodeName>.steps[].internalService.serviceName` field must be unique and not duplicated with service names in other steps.
+
+5. change log levels
+   GMConnectoer's controller support log level management to filter the logs for different purpose.
+   To get the current log level, you can send a http GET to GMController like below:
+   ```
+   curl -X GET "http://localhost:8008/loglevel"
+   current log level: info
+   ```
+   if you want to change the log level for debugging, you can sent a http PUT like below:
+   ```
+   curl -X PUT "http://localhost:8008/loglevel" -d '{"log_level":"debug"}' -H "Content-Type: application/json"
+   log level set to debug
+   ```
+   the log levels supported by the log system are `debug|info|warn|error|panic|dpanic|panic|tatal`, but current GMC only has the `debug|info|error` logs
