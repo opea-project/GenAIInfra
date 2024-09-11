@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 tei:
+  accelDevice: "gaudi"
   image:
     repository: ghcr.io/huggingface/tei-gaudi
     tag: synapse_1.16
@@ -13,6 +14,7 @@ tei:
 
 # To override values in subchart tgi
 tgi:
+  accelDevice: "gaudi"
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
     tag: "2.0.1"

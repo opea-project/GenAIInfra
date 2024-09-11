@@ -54,7 +54,7 @@ function wait_until_all_pod_ready() {
   timeout=$2
 
   echo "Wait for all pods in NS $namespace to be ready..."
-  pods=$(kubectl get pods -n $namespace --no-headers -o custom-columns=":metadata.name")
+  pods=$(kubectl get pods -n $namespace --no-headers | grep -v "Terminating" | awk '{print $1}')
   # Loop through each pod
   echo "$pods" | while read -r line; do
     pod_name=$line

@@ -4,7 +4,7 @@ Helm chart for deploying asr microservice.
 
 asr depends on whisper, you should set ASR_ENDPOINT endpoints before start.
 
-## (Option1): Installing the chart separately:
+## (Option1): Installing the chart separately
 
 First, you need to install the whisper chart, please refer to the [whisper](../whisper) chart for more information.
 
@@ -19,7 +19,7 @@ helm dependency update
 helm install asr . --set ASR_ENDPOINT=${ASR_ENDPOINT}
 ```
 
-## (Option2): Installing the chart with dependencies automatically:
+## (Option2): Installing the chart with dependencies automatically
 
 ```console
 cd GenAIInfra/helm-charts/common/asr

@@ -12,7 +12,7 @@ image:
   repository: opea/docsum
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 port: 8888
 service:
@@ -44,6 +44,13 @@ llm-uservice:
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+docsum-ui:
+  image:
+    repository: opea/docsum-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
+  containerPort: 5173
 
 global:
   http_proxy: ""

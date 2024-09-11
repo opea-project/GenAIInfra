@@ -16,3 +16,4 @@ spec:
       name: chatqna
   selector:
     {{- include "chatqna.selectorLabels" . | nindent 4 }}
+    app: {{ include "chatqna.fullname" . }}

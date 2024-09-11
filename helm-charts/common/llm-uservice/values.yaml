@@ -11,11 +11,15 @@ autodependency:
 replicaCount: 1
 TGI_LLM_ENDPOINT: ""
 
+# Set it as a non-null string, such as true, if you want to enable logging facility,
+# otherwise, keep it as "" to disable it.
+LOGFLAG: ""
+
 image:
   repository: opea/llm-tgi
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -86,8 +90,3 @@ global:
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-  LANGCHAIN_TRACING_V2: false
-  LANGCHAIN_API_KEY: "insert-your-langchain-key-here"
-  # set modelUseHostPath to host directory if you want to use hostPath volume for model storage
-  # comment out modeluseHostPath if you want to download the model from huggingface
-  modelUseHostPath: /mnt/opea-models

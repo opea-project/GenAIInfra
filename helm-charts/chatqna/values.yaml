@@ -11,7 +11,7 @@ image:
   repository: opea/chatqna
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 port: 8888
 service:
@@ -35,9 +35,27 @@ tolerations: []
 
 affinity: {}
 
-# To override values in subchart tgi
+# This is just to avoid Helm errors when HPA is NOT used
+# (use hpa-values.yaml files to actually enable HPA).
+horizontalPodAutoscaler:
+  enabled: false
+
+# Override values in specific subcharts
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+# disable guardrails-usvc by default
+# See guardrails-values.yaml for guardrail related options
+guardrails-usvc:
+  enabled: false
+
+# If you would like to switch to traditional UI image
+# Uncomment the following lines
+# chatqna-ui:
+#   image:
+#     repository: "opea/chatqna-ui"
+#     tag: "latest"
+#   containerPort: "5173"
 
 global:
   http_proxy: ""
@@ -49,10 +67,5 @@ global:
   # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
 
-  # Enabling HorizontalPodAutoscaler (HPA) will:
-  # - Overwrite existing PrometheusAdapter "adapter-config" configMap with ChatQnA specific custom metric queries
-  #   for embedding, reranking, tgi services
-  # Upstream default configMap:
-  #  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
-  horizontalPodAutoscaler:
-    enabled: false
+  # Prometheus Helm installation info for subchart serviceMonitors
+  prometheusRelease: prometheus-stack

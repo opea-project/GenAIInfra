@@ -31,30 +31,70 @@ data:
     session_store_type="redis"
     redis_connection_url="redis://redis-service:6379"
     # Redirect url
-    redirect_url="http://chatqna-ui.com:${INGRESS_PORT}/oauth2/callback"
+    redirect_url="${URL}/oauth2/callback"
     #extra attributes
-    pass_host_header = true
     reverse_proxy = true
     auth_logging = true
+    request_logging = true
+    silence_ping_logging = true
+    standard_logging = true
     cookie_httponly = true
     cookie_refresh = "2m"
     cookie_expire = "3m"
     email_domains = "*"
     pass_access_token = true
     pass_authorization_header = true
-    request_logging = true
+    pass_basic_auth = true
+    pass_user_headers = true
     set_authorization_header = true
     set_xauthrequest = true
-    silence_ping_logging = true
     skip_provider_button = true
-    skip_auth_strip_headers = false
+    skip_auth_preflight = true
     skip_jwt_bearer_tokens = true
-    ssl_insecure_skip_verify = true
-    standard_logging = true
 kind: ConfigMap
 metadata:
   name: oauth2-proxy-config
   namespace: oauth2-proxy
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: oauth2-proxy
+spec:
+  selector:
+    matchLabels:
+      app: redis
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: redis:latest
+          ports:
+            - containerPort: 6379
+          resources:
+            limits:
+              cpu: "0.5"
+              memory: "512Mi"
+          command: ["redis-server"]
+          args: ["--save", "", "--appendonly", "no"]
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: redis-service
+  namespace: oauth2-proxy
+spec:
+  selector:
+    app: redis
+  ports:
+    - protocol: TCP
+      port: 6379
+      targetPort: 6379
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -94,7 +134,7 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    app: oauth-proxy
+    app: oauth2-proxy
   name: oauth-proxy
   namespace: oauth2-proxy
 spec:
@@ -104,7 +144,7 @@ spec:
     protocol: TCP
     targetPort: 4180
   selector:
-    app: oauth-proxy
+    app: oauth2-proxy
   sessionAffinity: None
   type: ClusterIP
 status:

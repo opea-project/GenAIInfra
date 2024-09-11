@@ -7,10 +7,14 @@ description: The Helm chart to deploy CodeGen
 type: application
 dependencies:
   - name: tgi
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/tgi"
   - name: llm-uservice
-    version: 0.9.0
+    version: 1.0.0
     repository: "file://../common/llm-uservice"
-version: 0.9.0
-appVersion: "v0.9"
+  - name: ui
+    version: 1.0.0
+    repository: "file://../common/ui"
+    alias: codegen-ui
+version: 1.0.0
+appVersion: "v1.0"

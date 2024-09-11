@@ -3,7 +3,8 @@
 This repo defines the GenAI Microservice Connector(GMC) for OPEA projects. GMC can be used to compose and adjust GenAI pipelines dynamically
 on kubernetes. It can leverage the microservices provided by [GenAIComps](https://github.com/opea-project/GenAIComps) and external services to compose GenAI pipelines. External services might be running in a public cloud or on-prem by providing an URL and access details such as an API key and ensuring there is network connectivity. It also allows users to adjust the pipeline on the fly like switching to a different Large language Model(LLM), adding new functions into the chain(like adding guardrails),etc. GMC supports different types of steps in the pipeline, like sequential, parallel and conditional.
 
-Please refer this [usage_guide](./usage_guide.md) for sample use cases.
+Refer to [usage_guide](./usage_guide.md) for sample use cases.
+Refer to [chatqna_use_cases](./config/samples/ChatQnA/use_cases.md) for more ChatQnA use cases.
 
 ## Description
 
@@ -30,88 +31,69 @@ Istio Service Mesh can also be leveraged to facilicate communication between mic
 
 ### Introduction
 
-There are `2` components in this repo:
+There are two components in this repo:
 
-- 1. `manager`: controller manager to handle GMC CRD
-- 2. `router`: route the traffic among the microservices defined in GMC
+- `manager`: controller manager to handle GMC CRD
+- `router`: route the traffic among the microservices defined in GMC
 
-#### How to build these binaries?
+### GMC build
+
+#### Binaries building
 
 ```sh
 make build
 ```
 
-#### How to build docker images for these 2 components?
+#### Docker images building
 
 ```sh
 make docker.build
 ```
 
-#### How to delete these components' binaries?
+#### Binaries deleting
 
 ```sh
 make clean
 ```
 
-### To Deploy on the cluster
+### GMC Deployment on K8s cluster
 
-**Build and push your image to the location specified by `CTR_IMG`:**
+**GMC Images NOTE:** This image ought to be published in [OPEA docker hub](https://hub.docker.com/u/opea), including [gmcmanager](https://hub.docker.com/r/opea/gmcmanager) and [gmcrouter](https://hub.docker.com/r/opea/gmcrouter). Make sure you have the proper permission to the registry and use the latest images.
+
+There are 2 methods for deploying GMC on K8s cluster:
+
+- Deploy via native kubectl
+- Deploy via helm chart
+
+#### Deploy using native kubectl
+
+There are 3 steps for deploying GMC on K8s cluster as below:
+
+- Install GMC CRD
+- Prepare GenAI Components and GMC Router manifests
+- Deploy GMC Manager
+
+**Deploy GMC NOTE:**
+
+- Before installting the manifests, replace your own huggingface tokens
+- `MOUNT_DIR` is the `hostPath` to save the models on you cluster hosts, so make sure it is ready on every node of the k8s nodes and the microservices have enough permission to access it.
+- The `SYSTEM_NAMESPACE` should keep the same with the namespace defined in `gmc-manager.yaml` and `gmc-manager-rbac.yaml`
+- The configmap name `gmcyaml` is defined in gmcmanager deployment Spec. Modify accordingly if you want
+  use a different name for the configmap
 
 ```sh
-make docker.build docker.push CTR_IMG=<some-registry>/gmcmanager:tag
-```
-
-**NOTE:** This image ought to be published in the personal registry you specified.
-And it is required to have access to pull the image from the working environment.
-Make sure you have the proper permission to the registry if the above commands don’t work.
-
-**Install GMC CRD**
-
-```sh
+# Install GMC CRD
 kubectl apply -f config/crd/bases/gmc.opea.io_gmconnectors.yaml
-```
-
-**Copy GMC router manifest**
-
-```sh
+# Prepare GenAI Components and GMC Router manifests
 cp $(pwd)/config/gmcrouter/gmc-router.yaml -p $(pwd)/config/manifests/
-```
-
-**NOTE:**
-before apply the manifests, please replace your own huggingface tokens in the manifests
-
-```sh
+export YOUR_HF_TOKEN=<your hugging facetoken>
+export MOUNT_DIR=<your model path>
 find . -name '*.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#$YOURTOKEN#g" {} \;
-```
-
-if you have pre-defined directory to save the models on you cluster hosts, please set the path to the manifests
-
-```sh
 find . -name '*.yaml' -type f -exec sed -i "s#path: /mnt/opea-models#path: $MOUNT_DIR#g" {} \;
-```
-
-**Create Namespace for gmcmanager deployment**
-\*\*Create Namespace for gmcmanager deployment
-
-```sh
+# Deploy GMC Manager
 export SYSTEM_NAMESPACE=system
 kubectl create namespace $SYSTEM_NAMESPACE
-```
-
-**NOTE:** The `SYSTEM_NAMESPACE` should keep the same with the namespace defined in gmc-manager.yaml and gmc-manager-rbac.yaml.
-
-**Create ConfigMap for GMC to hold GenAI Components and GMC Router manifests**
-
-```sh
 kubectl create configmap gmcyaml -n $SYSTEM_NAMESPACE --from-file $(pwd)/config/manifests
-```
-
-**NOTE:** The configmap name `gmcyaml' is defined in gmcmanager deployment Spec. Please modify accordingly if you want
-use a different name for the configmap.
-
-**Install GMC manager**
-
-```sh
 kubectl apply -f $(pwd)/config/rbac/gmc-manager-rbac.yaml
 kubectl apply -f $(pwd)/config/manager/gmc-manager.yaml
 ```
@@ -124,34 +106,26 @@ NAME                              READY   STATUS    RESTARTS   AGE
 gmc-controller-78f9c748cb-ltcdv   1/1     Running   0          3m
 ```
 
-### Next Step
-
-Please refer to this [usage_guide](./usage_guide.md) for sample use cases.
-
-### To Uninstall
-
-**Delete the instances (CRs) from the cluster:**
+**To Uninstall via kubectl**
 
 ```sh
+# Delete the instances (CRs) from the cluster
 kubectl delete -k config/samples/
-```
-
-**Delete the APIs(CRDs) from the cluster:**
-
-```sh
+# Delete the APIs(CRDs) from the cluster
 make uninstall
-```
-
-**UnDeploy the controller from the cluster:**
-
-```sh
+# UnDeploy the controller from the cluster
 make undeploy
 ```
 
-### Deploy using helm chart
+#### Deploy via helm chart
 
-Please refer to the [helm chart README](./helm/README.md) for deploying GMC using helm chart.
+Refer to [helm chart README](./helm/README.md) for deploying GMC using helm chart.
+
+### Next Step
+
+Refer to [usage_guide](./usage_guide.md) for sample use cases.
+Refer to [advanced_use_cases](./config/samples/ChatQnA/use_cases.md) for more use cases based on ChatQnA example.
 
 ### Troubleshooting guide
 
-Please refer to this [troubleshooting_guide](./troubleshooting_guide.md) for identifying GMC Custom Resource issues.
+Refer to this [troubleshooting_guide](./troubleshooting_guide.md) for identifying GMC Custom Resource issues.

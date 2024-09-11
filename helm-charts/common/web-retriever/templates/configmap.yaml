@@ -24,3 +24,4 @@ data:
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}
   HF_HOME: "/tmp/.cache/huggingface"
+  LOGFLAG: {{ .Values.LOGFLAG | quote }}

@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: teirerank-config
   labels:
-    helm.sh/chart: teirerank-0.9.0
+    helm.sh/chart: teirerank-1.0.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-0.9.0
+    helm.sh/chart: teirerank-1.0.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -57,7 +57,7 @@ kind: Deployment
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-0.9.0
+    helm.sh/chart: teirerank-1.0.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -107,14 +107,16 @@ spec:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 8
+            periodSeconds: 8
+            timeoutSeconds: 4
           readinessProbe:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 8
+            periodSeconds: 8
+            timeoutSeconds: 4
           startupProbe:
             failureThreshold: 120
             httpGet:
@@ -135,6 +137,8 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
+      # extra time to finish processing buffered requests before pod is forcibly terminated
+      terminationGracePeriodSeconds: 60
 ---
 # Source: teirerank/templates/horizontalPodAutoscaler.yaml
 # Copyright (C) 2024 Intel Corporation

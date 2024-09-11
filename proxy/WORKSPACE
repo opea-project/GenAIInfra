@@ -1,0 +1,71 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+workspace(name = "dev_opea_proxy")
+
+load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+# Update Istio and Envoy by:
+#   1. Determine SHA256 `wget https://github.com/istio/proxy/archive/$COMMIT.tar.gz && sha256sum $COMMIT.tar.gz`.
+#   2. Update .bazelversion, envoy.bazelrc, BUILD, Makefile and tools/Dockerfile* if needed.
+#
+# Istio 1.23.0.
+ISTIO_SHA = "165f7597596f5b4de7025bb635a7b59d1c3fe27e"
+ISTIO_SHA256 = "ac44db76cd00442c0485f5ce99d69ae1044f33ea62c2dccb8e72c26bcf03b4e3"
+ISTIO_ORG = "istio"
+ISTIO_REPO = "proxy"
+
+http_archive(
+    name = "istio",
+    sha256 = ISTIO_SHA256,
+    strip_prefix = ISTIO_REPO + "-" + ISTIO_SHA,
+    url = "https://github.com/" + ISTIO_ORG + "/" + ISTIO_REPO + "/archive/" + ISTIO_SHA + ".tar.gz",
+)
+
+# TODO(zhxie): remove external repository fetch since it is the same repository as Istio.
+http_archive(
+    name = "envoy_build_config",
+    sha256 = ISTIO_SHA256,
+    strip_prefix = ISTIO_REPO + "-" + ISTIO_SHA + "/bazel/extension_config",
+    url = "https://github.com/" + ISTIO_ORG + "/" + ISTIO_REPO + "/archive/" + ISTIO_SHA + ".tar.gz",
+)
+
+ENVOY_SHA = "97d97011f522006a816f8fe340c8a6f23d0dd712"
+ENVOY_SHA256 = "0ed516f812f477b23da723aa379fbe96fcd84a04112d8a5e27bfcfb34c986eea"
+ENVOY_ORG = "envoyproxy"
+ENVOY_REPO = "envoy"
+
+http_archive(
+    name = "envoy",
+    sha256 = ENVOY_SHA256,
+    strip_prefix = ENVOY_REPO + "-" + ENVOY_SHA,
+    url = "https://github.com/" + ENVOY_ORG + "/" + ENVOY_REPO + "/archive/" + ENVOY_SHA + ".tar.gz",
+)
+
+load("@envoy//bazel:api_binding.bzl", "envoy_api_binding")
+
+envoy_api_binding()
+
+load("@envoy//bazel:api_repositories.bzl", "envoy_api_dependencies")
+
+envoy_api_dependencies()
+
+load("@envoy//bazel:repositories.bzl", "envoy_dependencies")
+
+envoy_dependencies()
+
+load("@envoy//bazel:repositories_extra.bzl", "envoy_dependencies_extra")
+
+envoy_dependencies_extra(ignore_root_user_error = True)
+
+load("@envoy//bazel:python_dependencies.bzl", "envoy_python_dependencies")
+
+envoy_python_dependencies()
+
+load("@base_pip3//:requirements.bzl", "install_deps")
+
+install_deps()
+
+load("@envoy//bazel:dependency_imports.bzl", "envoy_dependency_imports")
+
+envoy_dependency_imports()

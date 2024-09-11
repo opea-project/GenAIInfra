@@ -16,6 +16,7 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"os"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -932,5 +933,78 @@ func TestMcDataHandler(t *testing.T) {
 	if strings.TrimSpace(rr.Body.String()) != expected {
 		t.Errorf("handler returned unexpected body: got %v want %v",
 			rr.Body.String(), expected)
+	}
+}
+
+func TestMergeRequests(t *testing.T) {
+	// Define the test cases
+	tests := []struct {
+		name        string
+		respReq     []byte
+		initReqData map[string]interface{}
+		expected    []byte
+		expectErr   bool
+	}{
+		{
+			name:    "Merge with Parameters",
+			respReq: []byte(`{"key1":"value1","key2":"value2"}`),
+			initReqData: map[string]interface{}{
+				"parameters": map[string]interface{}{
+					"key2": "newValue2",
+					"key3": "value3",
+				},
+			},
+			expected:  []byte(`{"key1":"value1","key2":"newValue2","key3":"value3"}`),
+			expectErr: false,
+		},
+		{
+			name:        "No Parameters in initReqData",
+			respReq:     []byte(`{"key1":"value1"}`),
+			initReqData: map[string]interface{}{},
+			expected:    []byte(`{"key1":"value1"}`),
+			expectErr:   false,
+		},
+		{
+			name: "Invalid JSON in respReq",
+			// Invalid JSON
+			respReq: []byte(`{"key1":value1}`),
+			initReqData: map[string]interface{}{
+				"parameters": map[string]interface{}{
+					"key2": "value2",
+				},
+			},
+			expected:  nil,
+			expectErr: true,
+		},
+	}
+
+	// Run the test cases
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := mergeRequests(tt.respReq, tt.initReqData)
+
+			if tt.expectErr {
+				if result != nil {
+					t.Errorf("Expected error, but got result: %s", string(result))
+				}
+				return
+			}
+
+			// Unmarshal the JSON result to compare
+			var resultMap map[string]interface{}
+			if err := json.Unmarshal(result, &resultMap); err != nil {
+				t.Fatalf("Failed to unmarshal result: %v", err)
+			}
+
+			var expectedMap map[string]interface{}
+			if err := json.Unmarshal(tt.expected, &expectedMap); err != nil {
+				t.Fatalf("Failed to unmarshal expected result: %v", err)
+			}
+
+			// Compare the actual result with the expected result
+			if !reflect.DeepEqual(resultMap, expectedMap) {
+				t.Errorf("Test %s failed: expected %v, got %v", tt.name, expectedMap, resultMap)
+			}
+		})
 	}
 }

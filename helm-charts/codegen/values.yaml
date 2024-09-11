@@ -11,7 +11,7 @@ image:
   repository: opea/codegen
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: ""
+  tag: "latest"
 
 port: 7778
 service:
@@ -38,6 +38,13 @@ affinity: {}
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: meta-llama/CodeLlama-7b-hf
+
+codegen-ui:
+  image:
+    repository: opea/codegen-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/codegen"
+  containerPort: 5173
 
 global:
   http_proxy: ""

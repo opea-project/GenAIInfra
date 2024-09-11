@@ -7,11 +7,13 @@ metadata:
   name: {{ include "chatqna.fullname" . }}
   labels:
     {{- include "chatqna.labels" . | nindent 4 }}
+    app: {{ include "chatqna.fullname" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "chatqna.selectorLabels" . | nindent 6 }}
+      app: {{ include "chatqna.fullname" . }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -20,6 +22,7 @@ spec:
       {{- end }}
       labels:
         {{- include "chatqna.selectorLabels" . | nindent 8 }}
+        app: {{ include "chatqna.fullname" . }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -38,6 +41,8 @@ spec:
               value: {{ .Release.Name }}-retriever-usvc
             - name: EMBEDDING_SERVICE_HOST_IP
               value: {{ .Release.Name }}-embedding-usvc
+            - name: GUARDRAIL_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-guardrails-usvc
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -49,22 +54,6 @@ spec:
             - name: chatqna
               containerPort: {{ .Values.port }}
               protocol: TCP
-                #          startupProbe:
-                #            httpGet:
-                #              host: {{ .Release.Name }}-llm-uservice
-                #              port: {{ index .Values "llm-uservice" "service" "port" }}
-                #              path: /
-                #            initialDelaySeconds: 5
-                #            periodSeconds: 5
-                #            failureThreshold: 120
-                #          livenessProbe:
-                #            httpGet:
-                #              path: /
-                #              port: {{ .Values.port }}
-                #          readinessProbe:
-                #            httpGet:
-                #              path: /
-                #              port: {{ .Values.port }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -81,4 +70,14 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.evenly_distributed }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "chatqna.selectorLabels" . | nindent 14 }}
+              app: {{ include "chatqna.fullname" . }}
       {{- end }}

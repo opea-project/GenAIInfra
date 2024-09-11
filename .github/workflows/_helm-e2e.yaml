@@ -19,6 +19,10 @@ on:
         default: "xeon"
         required: true
         type: string
+      valuefile:
+        default: "values"
+        required: true
+        type: string
 
 env:
   CHARTS_DIR: "helm-charts"
@@ -79,7 +83,7 @@ jobs:
           # insert a prefix before opea/.*, the prefix is OPEA_IMAGE_REPO
           find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
           # set OPEA image tag to ${{ inputs.tag }}
-          find . -name '*values.yaml' -type f -exec sed -i 's#tag: ""#tag: ${{ inputs.tag }}#g' {} \;
+          find . -name '*values.yaml' -type f -exec sed -i 's#tag: "latest"#tag: ${{ inputs.tag }}#g' {} \;
           # set huggingface token
           find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#${HFTOKEN}#g" {} \;
           # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
@@ -96,10 +100,7 @@ jobs:
         run: |
           set -xe
           echo "should_cleanup=true" >> $GITHUB_ENV
-          value_file="values.yaml"
-          if [ "${{ inputs.hardware }}" == "gaudi" ]; then
-            value_file="gaudi-values.yaml"
-          fi
+          value_file="${{ inputs.valuefile }}.yaml"
           if [[ ! -f ${{ env.CHART_FOLDER }}/${value_file} ]]; then
             echo "No value file found, exist test!"
             echo "skip_validate=true" >> $GITHUB_ENV

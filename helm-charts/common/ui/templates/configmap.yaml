@@ -1,0 +1,21 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "ui.fullname" . }}-config
+  labels:
+    {{- include "ui.labels" . | nindent 4 }}
+data:
+  APP_BACKEND_SERVICE_ENDPOINT: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  APP_DATA_PREP_SERVICE_URL: {{ .Values.DATAPREP_SERVICE_ENDPOINT | quote }}
+  CHAT_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  UPLOAD_FILE_BASE_URL: {{ .Values.DATAPREP_SERVICE_ENDPOINT | quote }}
+  GET_FILE: {{ .Values.DATAPREP_GET_FILE_ENDPOINT | quote }}
+  DELETE_FILE: {{ .Values.DATAPREP_DELETE_FILE_ENDPOINT | quote }}
+  BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  DOC_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  BASIC_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  VITE_CODE_GEN_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  VITE_DOC_SUM_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}

@@ -34,7 +34,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 )
@@ -98,6 +97,10 @@ var yamlDict = map[string]string{
 	DataPrep:          yaml_dir + "data-prep.yaml",
 }
 
+var (
+	_log = ctrl.Log.WithName("GMC")
+)
+
 // GMConnectorReconciler reconciles a GMConnector object
 type GMConnectorReconciler struct {
 	client.Client
@@ -128,7 +131,7 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 		return nil, errors.New("invalid svc config")
 	}
 
-	fmt.Printf("get resource config: %v\n", *stepCfg)
+	_log.V(1).Info("processing step", "config", *stepCfg)
 
 	var retObjs []*unstructured.Unstructured
 	// by default, the svc's namespace is the same as the graph
@@ -142,12 +145,11 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 
 	yamlFile, err := getTemplateBytes(stepCfg.StepName)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read YAML file: %v", err)
+		_log.Error(err, "Failed to get template bytes for", "step", stepCfg.StepName)
+		return nil, err
 	}
 
 	resources := strings.Split(string(yamlFile), "---")
-	fmt.Printf("The raw yaml file has been split into %v yaml files\n", len(resources))
-
 	for _, res := range resources {
 		if res == "" || !strings.Contains(res, "kind:") {
 			continue
@@ -157,7 +159,8 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 		obj := &unstructured.Unstructured{}
 		_, _, err := decUnstructured.Decode([]byte(res), nil, obj)
 		if err != nil {
-			return nil, fmt.Errorf("failed to decode YAML: %v", err)
+			_log.Error(err, "Failed to decode YAML")
+			return nil, err
 		}
 
 		// Set the namespace according to user defined value
@@ -170,19 +173,22 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 			service_obj := &corev1.Service{}
 			err = scheme.Scheme.Convert(obj, service_obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to service %s: %v", svc, err)
+				_log.Error(err, "Failed to convert unstructured to service", "name", svc)
+				return nil, err
 			}
 			service_obj.SetName(svc)
 			service_obj.Spec.Selector["app"] = svc
 			err = scheme.Scheme.Convert(service_obj, obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert service %s to object: %v", svc, err)
+				_log.Error(err, "Failed to convert service to object", "name", svc)
+				return nil, err
 			}
 		} else if obj.GetKind() == Deployment {
 			deployment_obj := &appsv1.Deployment{}
 			err = scheme.Scheme.Convert(obj, deployment_obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert unstructured to deployment %s: %v", obj.GetName(), err)
+				_log.Error(err, "Failed to convert unstructured to deployment", "name", obj.GetName())
+				return nil, err
 			}
 			if svc != "" {
 				deployment_obj.SetName(svc + dplymtSubfix)
@@ -200,9 +206,9 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 				if isDownStreamEndpointKey(name) {
 					ds := findDownStreamService(value, stepCfg, nodeCfg)
 					value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
-					// value = getDsEndpoint(platform, name, graphNs, ds)
 					if err != nil {
-						return nil, fmt.Errorf("failed to find downstream service endpoint %s-%s: %v", name, value, err)
+						_log.Error(err, "Failed to find downstream service endpoint", "name", name, "value", value)
+						return nil, err
 					}
 				}
 				itemEnvVar := corev1.EnvVar{
@@ -222,15 +228,17 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 
 			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
 			if err != nil {
-				return nil, fmt.Errorf("failed to convert deployment %s to obj: %v", deployment_obj.GetName(), err)
+				_log.Error(err, "Failed to convert deployment to obj", "name", deployment_obj.GetName())
+				return nil, err
 			}
 		}
 
 		err = r.applyResourceToK8s(graph, ctx, obj)
 		if err != nil {
-			return nil, fmt.Errorf("failed to reconcile resource: %v", err)
+			_log.Error(err, "Failed to reconcile resource", "name", obj.GetName())
+			return nil, err
 		} else {
-			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
+			_log.Info("Success to reconcile resource", "kind", obj.GetKind(), "name", obj.GetName())
 			retObjs = append(retObjs, obj)
 		}
 	}
@@ -251,7 +259,7 @@ func findDownStreamService(dsName string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv
 	if stepCfg == nil || nodeCfg == nil {
 		return nil
 	}
-	fmt.Printf("find downstream service for %s with name %s \n", stepCfg.StepName, dsName)
+	_log.Info("Find downstream service for step", "name", stepCfg.StepName, "downstream", dsName)
 
 	for _, otherStep := range nodeCfg.Steps {
 		if otherStep.InternalService.ServiceName == dsName && otherStep.InternalService.IsDownstreamService {
@@ -329,8 +337,8 @@ func getServiceURL(service *corev1.Service) string {
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.17.3/pkg/reconcile
 func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
-	fmt.Println("-----------------Reconciling GMConnector", req, "-------------------------")
+	// _ = log.FromContext(ctx)
+	_log.Info("----RECONCILE REQUEST----", "req", req)
 
 	graph := &mcv1alpha3.GMConnector{}
 	if err := r.Get(ctx, req.NamespacedName, graph); err != nil {
@@ -341,7 +349,7 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			if err == nil {
 				return r.handleStatusUpdate(ctx, deployment)
 			} else {
-				fmt.Printf("resource %s not found or deleted, %v, ignore\n", req.Name, err)
+				_log.Info("Resource not found or deleted, ignore", "name", req.Name, "err", err)
 				return ctrl.Result{}, nil
 			}
 		} else {
@@ -357,9 +365,6 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 			Kind:       "GMConnector",
 		}
 	}
-
-	// r.Log.Info("Reconciling connector graph", "apiVersion", graph.APIVersion, "graph", graph.Name)
-	fmt.Println("Reconciling kind ", graph.Kind, "apiVersion ", graph.APIVersion, " graph ", graph.Name)
 
 	var totalService uint
 	var externalService uint
@@ -378,13 +383,13 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 	for nodeName, node := range graph.Spec.Nodes {
 		for i, step := range node.Steps {
 			if step.NodeName != "" {
-				fmt.Println("\nthis is a nested step: ", step.StepName)
+				_log.Info("This is a nested step", "step", step.StepName)
 				continue
 			}
-			fmt.Println("\nreconcile resource for node:", step.StepName)
+			_log.Info("Reconcile step", "graph", graph.Name, "name", step.StepName)
 			totalService += 1
 			if step.Executor.ExternalService == "" {
-				fmt.Println("trying to reconcile internal service [", step.Executor.InternalService.ServiceName, "] in namespace ", step.Executor.InternalService.NameSpace)
+				_log.Info("Trying to reconcile internal service", " service", step.Executor.InternalService.ServiceName)
 
 				objs, err := r.reconcileResource(ctx, graph.Namespace, &step, &node, graph)
 				if err != nil {
@@ -399,12 +404,11 @@ func (r *GMConnectorReconciler) Reconcile(ctx context.Context, req ctrl.Request)
 					}
 				}
 			} else {
-				fmt.Println("external service is found", "name", step.ExternalService)
+				_log.Info("External service is found", "name", step.ExternalService)
 				graph.Spec.Nodes[nodeName].Steps[i].ServiceURL = step.ExternalService
 				externalService += 1
 			}
 		}
-		fmt.Println()
 	}
 
 	//to start a router service
@@ -443,7 +447,7 @@ func (r *GMConnectorReconciler) handleStatusUpdate(ctx context.Context, deployme
 			if err == nil {
 				ue := r.collectResourceStatus(graph, ctx)
 				if ue != nil {
-					fmt.Printf("failed to get graph before update status %s %v\n", graph.Name, err)
+					_log.Error(err, "Failed to get graph before update status", "name", graph.Name)
 					return reconcile.Result{}, err
 				}
 			}
@@ -467,13 +471,16 @@ func (r *GMConnectorReconciler) deleteRecordedResource(key string, ctx context.C
 	// ignore the error if delete failed i.e resource not found
 	// since I don't want to block the process for not clearing the finalizer
 	if err != nil {
-		fmt.Printf("Failed to delete resource %s:%s:%s: %v\n", ns, kind, name, err)
+		_log.Info("Failed to delete resource", "namespace", ns, "kind", kind, "name", name, "error", err)
 	} else {
-		fmt.Printf("Success to delete %s:%s:%s\n", ns, kind, name)
+		_log.Info("Success to delete resource", "namespace", ns, "kind", kind, "name", name)
 	}
 }
 
 func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnector, ctx context.Context) error {
+	if graph == nil || len(graph.Status.Annotations) == 0 {
+		return errors.New("graph is empty or no annotations")
+	}
 	var totalCnt uint = 0
 	var readyCnt uint = 0
 	for resName := range graph.Status.Annotations {
@@ -487,7 +494,7 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 			deployment := &appsv1.Deployment{}
 			err := r.Get(ctx, client.ObjectKey{Namespace: ns, Name: name}, deployment)
 			if err != nil {
-				fmt.Printf("Collecting status: failed to get deployment %s: %v\n", name, err)
+				_log.Info("Collecting status: failed to get deployment", "name", name, "error", err)
 				continue
 			}
 			var deploymentStatus strings.Builder
@@ -521,7 +528,7 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 	var latestGraph mcv1alpha3.GMConnector
 	err = r.Client.Get(ctx, types.NamespacedName{Namespace: graph.Namespace, Name: graph.Name}, &latestGraph)
 	if err != nil && apierr.IsNotFound(err) {
-		fmt.Printf("failed to get graph %s before update status : %s\n", graph.Name, err)
+		_log.Info("Failed to get graph before update status", "name", graph.Name, "error", err)
 	} else {
 		graph.SetResourceVersion(latestGraph.GetResourceVersion())
 	}
@@ -549,12 +556,12 @@ func recordResource(graph *mcv1alpha3.GMConnector, nodeName string, stepIdx int,
 			//set this for router
 			graph.Spec.Nodes[nodeName].Steps[stepIdx].ServiceURL = url
 			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = url
-			fmt.Printf("the service URL is: %s\n", url)
+			_log.Info("Service URL is: ", "URL", url)
 		} else {
 			url := getServiceURL(service)
 			graph.Status.Annotations[fmt.Sprintf("%s:%s:%s:%s", obj.GetKind(), obj.GetAPIVersion(), obj.GetName(), obj.GetNamespace())] = url
 			graph.Status.AccessURL = url
-			fmt.Printf("the router URL is: %s\n", url)
+			_log.Info("Router URL is: ", "URL", url)
 		}
 	}
 	return nil
@@ -567,7 +574,7 @@ func getTemplateBytes(resourceType string) ([]byte, error) {
 	}
 	yamlBytes, err := os.ReadFile(tmpltFile)
 	if err != nil {
-		return nil, fmt.Errorf("failed to read YAML file: %v", err)
+		return nil, err
 	}
 	return yamlBytes, nil
 }
@@ -614,7 +621,8 @@ func (r *GMConnectorReconciler) reconcileRouterService(ctx context.Context, grap
 	var resources []string
 	appliedCfg, err := applyRouterConfigToTemplates(Router, &configForRouter, templateBytes)
 	if err != nil {
-		return fmt.Errorf("failed to apply user config: %v", err)
+		_log.Error(err, "Failed to apply user config")
+		return err
 	}
 
 	resources = strings.Split(appliedCfg, "---")
@@ -626,19 +634,22 @@ func (r *GMConnectorReconciler) reconcileRouterService(ctx context.Context, grap
 		obj := &unstructured.Unstructured{}
 		_, _, err := decUnstructured.Decode([]byte(res), nil, obj)
 		if err != nil {
-			return fmt.Errorf("failed to decode YAML: %v", err)
+			_log.Error(err, "Failed to decode YAML")
+			return err
 		}
 
 		err = r.applyResourceToK8s(graph, ctx, obj)
 		if err != nil {
-			return fmt.Errorf("failed to reconcile resource: %v", err)
+			_log.Error(err, "Failed to reconcile resource", "name", obj.GetName())
+			return err
 		} else {
-			fmt.Printf("Success to reconcile %s: %s\n", obj.GetKind(), obj.GetName())
+			_log.Info("Success to reconcile resource", "kind", obj.GetKind(), "name", obj.GetName())
 		}
 		// save the resource name into annotation for status update and resource management
 		err = recordResource(graph, "", 0, obj)
 		if err != nil {
-			return fmt.Errorf("resource created with failure %s: %v", obj.GetName(), err)
+			_log.Error(err, "Resource created with failure", "name", obj.GetName())
+			return err
 		}
 	}
 
@@ -656,7 +667,7 @@ func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFi
 			HttpProxy:   (*svcCfg)["http_proxy"],
 			HttpsProxy:  (*svcCfg)["https_proxy"],
 			GRAPH_JSON:  (*svcCfg)["nodes"]}
-		fmt.Printf("user config %v\n", userDefinedCfg)
+		_log.V(1).Info("Apply the config to router", "content", userDefinedCfg)
 
 		tmpl, err := template.New("yamlTemplate").Parse(string(yamlFile))
 		if err != nil {
@@ -668,7 +679,7 @@ func applyRouterConfigToTemplates(step string, svcCfg *map[string]string, yamlFi
 		if err != nil {
 			return string(yamlFile), fmt.Errorf("error executing template: %v", err)
 		} else {
-			// fmt.Printf("applied config %s\n", appliedCfg.String())
+			_log.V(1).Info("applied config", "content", appliedCfg.String())
 			return appliedCfg.String(), nil
 		}
 	} else {
@@ -706,7 +717,7 @@ func (r *GMConnectorReconciler) applyResourceToK8s(graph *mcv1alpha3.GMConnector
 					}
 				} else {
 					// If there was another error, continue
-					fmt.Printf("get object err: %v", err)
+					_log.Info("Get object err", "message", err)
 					continue
 				}
 			} else {
@@ -714,7 +725,7 @@ func (r *GMConnectorReconciler) applyResourceToK8s(graph *mcv1alpha3.GMConnector
 				obj.SetResourceVersion(latest.GetResourceVersion()) // Ensure we're updating the latest version
 				err = r.Client.Update(ctx, obj, &client.UpdateOptions{})
 				if err != nil {
-					fmt.Printf("update object err: %v\n", err)
+					_log.Info("Update object err", "message", err)
 					continue
 				}
 			}
@@ -773,110 +784,112 @@ func getServiceDetailsFromManifests(filePath string) (string, int, error) {
 
 func isMetadataChanged(oldObject, newObject *metav1.ObjectMeta) bool {
 	if oldObject == nil || newObject == nil {
-		fmt.Printf("Metadata changes detected, old/new object is nil\n")
+		_log.Info("Metadata changes detected, old/new object is nil")
 		return oldObject != newObject
 	}
 	// only care limited changes
 	if oldObject.Name != newObject.Name {
-		fmt.Printf("Metadata changes detected, Name changed from %s to %s\n", oldObject.Name, newObject.Name)
+		_log.Info("Metadata.Name changes detected", "old", oldObject.Name, "new", newObject.Name)
 		return true
 	}
 	if oldObject.Namespace != newObject.Namespace {
-		fmt.Printf("Metadata changes detected, Namespace changed from %s to %s\n", oldObject.Namespace, newObject.Namespace)
+		_log.Info("Metadata.Namespace changes detected", "old", oldObject.Namespace, "new", newObject.Namespace)
 		return true
 	}
 	if !reflect.DeepEqual(oldObject.Labels, newObject.Labels) {
-		fmt.Printf("Metadata changes detected, Labels changed from %v to %v\n", oldObject.Labels, newObject.Labels)
+		_log.Info("Metadata.Labels changes detected", "old", oldObject.Labels, "new", newObject.Labels)
 		return true
 	}
 	if !reflect.DeepEqual(oldObject.DeletionTimestamp, newObject.DeletionTimestamp) {
-		fmt.Printf("Metadata changes detected, DeletionTimestamp changed from %v to %v\n", oldObject.DeletionTimestamp, newObject.DeletionTimestamp)
+		_log.Info("Metadata.DeletionTimestamp changes detected", "old", oldObject.DeletionTimestamp, "new", newObject.DeletionTimestamp)
 		return true
 	}
 	// Add more fields as needed
 	return false
 }
 
+func isGMCSpecOrMetadataChanged(e event.UpdateEvent) bool {
+	oldObject, ok1 := e.ObjectOld.(*mcv1alpha3.GMConnector)
+	newObject, ok2 := e.ObjectNew.(*mcv1alpha3.GMConnector)
+	if !ok1 || !ok2 {
+		// Not the correct type, allow the event through
+		return true
+	}
+
+	specChanged := !reflect.DeepEqual(oldObject.Spec, newObject.Spec)
+	metadataChanged := isMetadataChanged(&(oldObject.ObjectMeta), &(newObject.ObjectMeta))
+
+	_log.V(1).Info("Check trigger condition?", "spec changed", specChanged, "meta changed", metadataChanged)
+	// Compare the old and new spec, ignore metadata, status changes
+	// metadata change: name, namespace, such change should create a new GMC
+	// status change: deployment status
+	return specChanged || metadataChanged
+}
+
+func isDeploymentStatusChanged(e event.UpdateEvent) bool {
+	oldDeployment, ok1 := e.ObjectOld.(*appsv1.Deployment)
+	newDeployment, ok2 := e.ObjectNew.(*appsv1.Deployment)
+	if !ok1 || !ok2 {
+		// Not the correct type, allow the event through
+		return true
+	}
+
+	if len(newDeployment.OwnerReferences) == 0 {
+		_log.V(1).Info("No owner reference", "ns", newDeployment.Namespace, "name", newDeployment.Name)
+		return false
+	} else {
+		for _, owner := range newDeployment.OwnerReferences {
+			if owner.Kind == "GMConnector" {
+				_log.V(1).Info("Owner is GMConnector", "ns", newDeployment.Namespace, "name", newDeployment.Name)
+				break
+			}
+		}
+	}
+
+	oldStatus := corev1.ConditionUnknown
+	newStatus := corev1.ConditionUnknown
+	if !reflect.DeepEqual(oldDeployment.Status, newDeployment.Status) {
+		if newDeployment.Status.Conditions != nil {
+			for _, condition := range newDeployment.Status.Conditions {
+				if condition.Type == appsv1.DeploymentAvailable {
+					newStatus = condition.Status
+				}
+			}
+		}
+		if oldDeployment.Status.Conditions != nil {
+			for _, condition := range oldDeployment.Status.Conditions {
+				if condition.Type == appsv1.DeploymentAvailable {
+					oldStatus = condition.Status
+				}
+			}
+		}
+		// Only trigger if the status has changed from true to false|unknown or vice versa
+		if (oldStatus == corev1.ConditionTrue && oldStatus != newStatus) ||
+			(newStatus == corev1.ConditionTrue && oldStatus != newStatus) {
+			{
+				_log.Info("status changed", "ns",
+					newDeployment.Namespace, "name", newDeployment.Name,
+					"from", oldStatus, "to", newStatus)
+				return true
+			}
+		}
+	}
+	return false
+
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Predicate to ignore updates to status subresource
-	ignoreStatusUpdatePredicate := predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			// Cast objects to your GMConnector struct
-			oldObject, ok1 := e.ObjectOld.(*mcv1alpha3.GMConnector)
-			newObject, ok2 := e.ObjectNew.(*mcv1alpha3.GMConnector)
-			if !ok1 || !ok2 {
-				// Not the correct type, allow the event through
-				return true
-			}
-
-			specChanged := !reflect.DeepEqual(oldObject.Spec, newObject.Spec)
-			metadataChanged := isMetadataChanged(&(oldObject.ObjectMeta), &(newObject.ObjectMeta))
-
-			fmt.Printf("\n| spec changed %t | meta changed: %t |\n", specChanged, metadataChanged)
-
-			// Compare the old and new spec, ignore metadata, status changes
-			// metadata change: name, namespace, such change should create a new GMC
-			// status change: depoyment status
-			return specChanged || metadataChanged
-		},
+	gmcfilter := predicate.Funcs{
+		UpdateFunc: isGMCSpecOrMetadataChanged,
 		// Other funcs like CreateFunc, DeleteFunc, GenericFunc can be left as default
 		// if you only want to customize the UpdateFunc behavior.
 	}
 
 	// Predicate to only trigger on status changes for Deployment
-	deploymentStatusChangePredicate := predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			oldDeployment, ok1 := e.ObjectOld.(*appsv1.Deployment)
-			newDeployment, ok2 := e.ObjectNew.(*appsv1.Deployment)
-			if !ok1 || !ok2 {
-				// Not the correct type, allow the event through
-				fmt.Printf("| status missing |\n")
-				return true
-			}
-
-			if len(newDeployment.OwnerReferences) == 0 {
-				// fmt.Printf("| %s:%s: no owner reference |\n", newDeployment.Namespace, newDeployment.Name)
-				return false
-			} else {
-				for _, owner := range newDeployment.OwnerReferences {
-					if owner.Kind == "GMConnector" {
-						// fmt.Printf("| %s:%s: owner is GMConnector |\n", newDeployment.Namespace, newDeployment.Name)
-						break
-					}
-				}
-			}
-
-			oldStatus := corev1.ConditionUnknown
-			newStatus := corev1.ConditionUnknown
-			if !reflect.DeepEqual(oldDeployment.Status, newDeployment.Status) {
-				if newDeployment.Status.Conditions != nil {
-					for _, condition := range newDeployment.Status.Conditions {
-						if condition.Type == appsv1.DeploymentAvailable {
-							newStatus = condition.Status
-						}
-					}
-				}
-				if oldDeployment.Status.Conditions != nil {
-					for _, condition := range oldDeployment.Status.Conditions {
-						if condition.Type == appsv1.DeploymentAvailable {
-							oldStatus = condition.Status
-						}
-					}
-				}
-				// Only trigger if the status has changed from true to false|unknown or vice versa
-				if (oldStatus == corev1.ConditionTrue && oldStatus != newStatus) ||
-					(newStatus == corev1.ConditionTrue && oldStatus != newStatus) {
-					{
-						fmt.Printf("| %s:%s: status changed from : %v to %v|\n",
-							newDeployment.Namespace, newDeployment.Name,
-							oldStatus, newStatus)
-						return true
-					}
-				}
-			}
-			return false
-		},
+	deploymentFilter := predicate.Funcs{
+		UpdateFunc: isDeploymentStatusChanged,
 		//ignore create and delete events, otherwise it will trigger the nested reconcile which is meaningless
 		CreateFunc: func(e event.CreateEvent) bool {
 			return false
@@ -886,11 +899,11 @@ func (r *GMConnectorReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&mcv1alpha3.GMConnector{}, builder.WithPredicates(ignoreStatusUpdatePredicate)).
+		For(&mcv1alpha3.GMConnector{}, builder.WithPredicates(gmcfilter)).
 		Watches(
 			&appsv1.Deployment{},
 			&handler.EnqueueRequestForObject{},
-			builder.WithPredicates(deploymentStatusChangePredicate),
+			builder.WithPredicates(deploymentFilter),
 		).
 		Complete(r)
 }
