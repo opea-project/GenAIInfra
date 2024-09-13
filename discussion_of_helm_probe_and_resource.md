@@ -17,15 +17,16 @@ Below is the proposal from @eero-t :
 [2] What's IMHO needed to fix resource requests:
 
 - Current sub-optimal component arguments are optimized, and resulting resource requirements are profiled, for all relevant models
-  -  For example on SPR, CPU TGI data type can be set to bfloat16, which halves its memory usage
+
+  - For example on SPR, CPU TGI data type can be set to bfloat16, which halves its memory usage
   - Observability support + suitable Grafana dashboards will help with profiling
 
 - Instead of subcomponent model & corresponding resources being specified in top-level chart, helm install command uses suitable model+resource+args file from given component, like this:
-     -f common/tgi/gaudi/neural-chat-7b.yaml
-     -f common/teirerank/gaudi/bge-reranker-base.yaml
-     -f common/tei/cpu/bge-base.yaml
-     -f common/data-prep/gpu/values.yaml
-     (These would provide values with subchart prefix/heading so they can be used from top-level charts)
+  -f common/tgi/gaudi/neural-chat-7b.yaml
+  -f common/teirerank/gaudi/bge-reranker-base.yaml
+  -f common/tei/cpu/bge-base.yaml
+  -f common/data-prep/gpu/values.yaml
+  (These would provide values with subchart prefix/heading so they can be used from top-level charts)
 
 - There could also be a global option for ignoring (CPU side) resource requests that can be used when things need to be re-profiled
 
