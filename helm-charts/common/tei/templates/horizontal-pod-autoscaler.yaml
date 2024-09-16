@@ -16,21 +16,30 @@ spec:
   metrics:
   - type: Object
     object:
-      metric:
-        # TEI time metrics are in seconds
-        name: {{ include "tei.metricPrefix" . }}_request_latency
       describedObject:
         apiVersion: v1
         # get metric for named object of given type (in same namespace)
         kind: Service
         name: {{ include "tei.fullname" . }}
       target:
-        # embedding_request_latency is average for all TEI pods. To avoid replica fluctuations when
-        # TEI startup + request processing takes longer than HPA evaluation period, this uses
-        # "Value" (replicas = metric.value / target.value), instead of "averageValue" type:
+{{- if .Values.accelDevice }}
+        # Metric is sum from all pods. "AverageValue" divides value returned from
+        # the custom metrics API by the number of Pods before comparing to the target:
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details
+        #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
+        type: AverageValue
+        averageValue: 15
+      metric:
+        name: {{ include "tei.metricPrefix" . }}_queue_size_sum
+{{- else }}
+        # Metric is average for all the pods. To avoid replica fluctuation when pod
+        # startup + request processing takes longer than HPA evaluation period, this uses
+        # "Value" (replicas = metric.value / target.value), instead of "AverageValue" type.
         type: Value
-        value: 4
+        value: 4 # seconds
+      metric:
+        name: {{ include "tei.metricPrefix" . }}_request_latency
+{{- end }}
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 180
