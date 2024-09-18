@@ -29,14 +29,16 @@ helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MOD
 ```
 
 - To deploy on Gaudi enabled Kubernetes cluster:
+
 ```bash
 helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values vllm/gaudi-values.yaml
 ```
 
 - To deploy OpenVINO optimized vLLM on XEON device:
-```bash
+
+````bash
 helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --values vllm/openvino-values.yaml
-`` 
+``
 
 By default, the vllm service will downloading the "Intel/neural-chat-7b-v3-3".
 
@@ -58,7 +60,7 @@ Open another terminal and run the following command to verify the service if wor
 curl http://localhost:2080/v1/completions \
   -H "Content-Type: application/json" \
   -d '{"model": "Intel/neural-chat-7b-v3-3", "prompt": "What is Deep Learning?", "max_tokens": 32, "temperature": 0}'
-```
+````
 
 ## Values
 
