@@ -7,8 +7,13 @@
 
 replicaCount: 1
 
+# Enabling HPA will:
+# - Ignore above replica count, as it will be controlled by HPA
+# - Add example HPA scaling rules with thresholds suitable for Xeon deployments
+# - Require custom metrics ConfigMap available in the main application chart
 horizontalPodAutoscaler:
-  maxReplicas: 6
+  maxReplicas: 4
+  enabled: false
 
 port: 2080
 shmSize: 1Gi
@@ -22,6 +27,9 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "2.2.0"
+
+# empty for CPU
+accelDevice: ""
 
 imagePullSecrets: []
 nameOverride: ""
@@ -125,9 +133,6 @@ global:
   # By default, both var are set to empty, the model will be downloaded and saved to a tmp volume.
   modelUseHostPath: ""
   modelUsePVC: ""
-  # Enabling HPA will:
-  # - Ignore above replica count, as it will be controlled by HPA
-  # - Add example HPA scaling rules with thresholds suitable for Xeon deployments
-  # - Require custom metrics ConfigMap available in the main application chart
-  horizontalPodAutoscaler:
-    enabled: false
+
+  # Prometheus Helm installation info for serviceMonitor
+  prometheusRelease: prometheus-stack

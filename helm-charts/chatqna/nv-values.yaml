@@ -3,6 +3,7 @@
 
 # To override values in subchart tgi
 tgi:
+  accelDevice: "nvidia"
   image:
     repository: ghcr.io/huggingface/text-generation-inference
     tag: "2.2.0"

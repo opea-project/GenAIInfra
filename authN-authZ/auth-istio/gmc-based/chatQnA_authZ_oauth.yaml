@@ -13,6 +13,8 @@ spec:
   rules:
   - to:
     - operation:
+        hosts:
+        - chatqna-ui.com:${INGRESS_PORT}
         notPaths:
         - /realms/*
   selector:

@@ -1,32 +1,32 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if .Values.global.horizontalPodAutoscaler.enabled }}
+{{- if .Values.horizontalPodAutoscaler.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "tgi.fullname" . }}
+  name: {{ include "tei.fullname" . }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "tgi.fullname" . }}
+    name: {{ include "tei.fullname" . }}
   minReplicas: 1
   maxReplicas: {{ .Values.horizontalPodAutoscaler.maxReplicas }}
   metrics:
   - type: Object
     object:
       metric:
-        # TGI time metrics are in seconds
-        name: tgi_request_latency
+        # TEI time metrics are in seconds
+        name: {{ include "tei.metricPrefix" . }}_request_latency
       describedObject:
         apiVersion: v1
         # get metric for named object of given type (in same namespace)
         kind: Service
-        name: {{ include "tgi.fullname" . }}
+        name: {{ include "tei.fullname" . }}
       target:
-        # tgi_request_latency is average for all the TGI pods. To avoid replica fluctuations when
-        # TGI startup + request processing takes longer than HPA evaluation period, this uses
+        # embedding_request_latency is average for all TEI pods. To avoid replica fluctuations when
+        # TEI startup + request processing takes longer than HPA evaluation period, this uses
         # "Value" (replicas = metric.value / target.value), instead of "averageValue" type:
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details
         type: Value

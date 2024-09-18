@@ -45,6 +45,13 @@ llm-uservice:
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
+docsum-ui:
+  image:
+    repository: opea/docsum-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
+  containerPort: 5173
+
 global:
   http_proxy: ""
   https_proxy: ""

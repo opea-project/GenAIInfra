@@ -66,8 +66,6 @@ metadata:
     app.kubernetes.io/version: "2.1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
-  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: tgi

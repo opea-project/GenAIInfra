@@ -8,10 +8,11 @@ The GenAIInfra repository is organized under four main directories, which includ
 
 | Directory                 | Purpose                                                                                                                                                                                                                                                                                                                                                                            |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `microservices-connector` | GenAI Microservices Connector (GMC) supports the launching, monitoring, and updating of GenAI microservice chains, such as those in [GenAIExamples](https://github.com/opea-project/GenAIExamples) on Kubernetes. It essentially supports a Kubernetes Custom Resource Definition for GenAI chains/pipelines that may be comprised of sequential, conditional, and parallel steps. |
+| `authN-authZ`             | Authentication and Authorization scenarios for OPEA.                                                                                                                                                                                                                                                                                                                               |
 | `helm-charts`             | Helm charts for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes.                                                                                                                                                                                                                                                                             |
+| `microservices-connector` | GenAI Microservices Connector (GMC) supports the launching, monitoring, and updating of GenAI microservice chains, such as those in [GenAIExamples](https://github.com/opea-project/GenAIExamples) on Kubernetes. It essentially supports a Kubernetes Custom Resource Definition for GenAI chains/pipelines that may be comprised of sequential, conditional, and parallel steps. |
 | `kubernetes-addons`       | Deploy Kubernetes add-ons for OPEA.                                                                                                                                                                                                                                                                                                                                                |
-| `manifests`               | Manifests for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes and on Docker Compose.                                                                                                                                                                                                                                                         |
+| `proxy`                   | OPEA Pipeline Proxy is an enhancement of the default Istio proxy with additional features designed specifically for OPEA RAG pipelines.                                                                                                                                                                                                                                            |
 | `scripts`                 | Scripts for testing, tools to facilitate OPEA deployment, and etc.                                                                                                                                                                                                                                                                                                                 |
 
 ## Prerequisite
@@ -55,36 +56,6 @@ Once you have deployed GMC in your Kubernetes cluster, you can deploy any of the
 To deploy GenAIExamples to Kubernetes using helm charts, you need [Helm](https://helm.sh/docs/intro/install/) installed on your machine.
 
 For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts)
-
-Clone the GenAIInfra repository and change into the `helm-charts` directory:
-
-```shell
-git clone https://github.com/opea-project/GenAIInfra.git
-cd GenAIInfra/helm-charts
-```
-
-Select the example workflow you want to deploy, set the customized values in `values.yaml` and deploy the example (e.g. codegen) using `helm`:
-
-```shell
-helm install codegen ./codegen
-```
-
-### Use manifests to deploy
-
-GenAIInfra also supports deploy GenAIExamples using manifests, you need [kubectl](https://kubernetes.io/docs/tasks/tools) installed on your machine.
-
-Clone the GenAIInfra repository and change into the `manifests` directory:
-
-```shell
-git clone https://github.com/opea-project/GenAIInfra.git
-cd GenAIInfra/manifests
-```
-
-Select the example workflow you want to deploy, deploy the example (e.g. DocSum) using `kubectl`:
-
-```shell
-kubectl apply -f ./DocSum/manifests/
-```
 
 ## Additional Content
 

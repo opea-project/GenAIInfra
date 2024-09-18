@@ -1,18 +1,29 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if .Values.global.horizontalPodAutoscaler.enabled }}
+{{- if .Values.horizontalPodAutoscaler.enabled }}
 apiVersion: v1
+kind: ConfigMap
+metadata:
+  # easy to find for the required manual step
+  namespace: default
+  name: {{ include "chatqna.fullname" . }}-custom-metrics
+  labels:
+    app.kubernetes.io/name: prometheus-adapter
 data:
   config.yaml: |
       rules:
+      {{- if .Values.tgi.horizontalPodAutoscaler.enabled }}
+      # check metric with:
+      # kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/{{ include "tgi.metricPrefix" .Subcharts.tgi }}_request_latency | jq
+      #
       - seriesQuery: '{__name__="tgi_request_inference_duration_sum",service="{{ include "tgi.fullname" .Subcharts.tgi }}"}'
         # Average request latency from TGI histograms, over 1 min
         # (0.001 divider add is to make sure there's always a valid value)
         metricsQuery: 'rate(tgi_request_inference_duration_sum{service="{{ include "tgi.fullname" .Subcharts.tgi }}",<<.LabelMatchers>>}[1m]) / (0.001+rate(tgi_request_inference_duration_count{service="{{ include "tgi.fullname" .Subcharts.tgi }}",<<.LabelMatchers>>}[1m]))'
         name:
           matches: ^tgi_request_inference_duration_sum
-          as: "tgi_request_latency"
+          as: "{{ include "tgi.metricPrefix" .Subcharts.tgi }}_request_latency"
         resources:
           # HPA needs both namespace + suitable object resource for its query paths:
           # /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/tgi_request_latency
@@ -22,32 +33,33 @@ data:
               resource: namespace
             service:
               resource: service
+      {{- end }}
+      {{- if .Values.teirerank.horizontalPodAutoscaler.enabled }}
       - seriesQuery: '{__name__="te_request_inference_duration_sum",service="{{ include "teirerank.fullname" .Subcharts.teirerank }}"}'
         # Average request latency from TEI histograms, over 1 min
         metricsQuery: 'rate(te_request_inference_duration_sum{service="{{ include "teirerank.fullname" .Subcharts.teirerank }}",<<.LabelMatchers>>}[1m]) / (0.001+rate(te_request_inference_duration_count{service="{{ include "teirerank.fullname" .Subcharts.teirerank }}",<<.LabelMatchers>>}[1m]))'
         name:
           matches: ^te_request_inference_duration_sum
-          as: "reranking_request_latency"
+          as: "{{ include "teirerank.metricPrefix" .Subcharts.teirerank }}_request_latency"
         resources:
           overrides:
             namespace:
               resource: namespace
             service:
               resource: service
+      {{- end }}
+      {{- if .Values.tei.horizontalPodAutoscaler.enabled }}
       - seriesQuery: '{__name__="te_request_inference_duration_sum",service="{{ include "tei.fullname" .Subcharts.tei }}"}'
         # Average request latency from TEI histograms, over 1 min
         metricsQuery: 'rate(te_request_inference_duration_sum{service="{{ include "tei.fullname" .Subcharts.tei }}",<<.LabelMatchers>>}[1m]) / (0.001+rate(te_request_inference_duration_count{service="{{ include "tei.fullname" .Subcharts.tei }}",<<.LabelMatchers>>}[1m]))'
         name:
           matches: ^te_request_inference_duration_sum
-          as: "embedding_request_latency"
+          as: "{{ include "tei.metricPrefix" .Subcharts.tei }}_request_latency"
         resources:
           overrides:
             namespace:
               resource: namespace
             service:
               resource: service
-kind: ConfigMap
-metadata:
-  name: adapter-config
-  namespace: monitoring
+      {{- end }}
 {{- end }}

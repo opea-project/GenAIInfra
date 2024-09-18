@@ -40,6 +40,13 @@ affinity: {}
 tgi:
   LLM_MODEL_ID: HuggingFaceH4/mistral-7b-grok
 
+codetrans-ui:
+  image:
+    repository: opea/codetrans-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/codetrans"
+  containerPort: 5173
+
 global:
   http_proxy: ""
   https_proxy: ""

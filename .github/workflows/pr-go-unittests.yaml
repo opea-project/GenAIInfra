@@ -91,9 +91,6 @@ jobs:
 
       - name: Run tests and generate coverage
         run: |
-          if [ "${{ matrix.gopath }}" == "${MBE_DIR}" ]; then
-            exit 0
-          fi
           cd ${{ matrix.gopath }}
           go test -coverprofile=coverage.out $(go list ./... | grep -v /e2e)
           ${{ github.workspace }}/.github/workflows/scripts/go-coverage.sh

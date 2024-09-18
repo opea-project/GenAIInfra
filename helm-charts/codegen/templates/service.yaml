@@ -16,3 +16,4 @@ spec:
       name: codegen
   selector:
     {{- include "codegen.selectorLabels" . | nindent 4 }}
+    app: {{ include "codegen.fullname" . }}

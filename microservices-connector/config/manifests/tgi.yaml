@@ -65,8 +65,6 @@ metadata:
     app.kubernetes.io/version: "2.1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
-  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: tgi
@@ -104,19 +102,22 @@ spec:
               protocol: TCP
           livenessProbe:
             failureThreshold: 24
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 8
+            periodSeconds: 8
+            timeoutSeconds: 4
             tcpSocket:
               port: http
           readinessProbe:
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 16
+            periodSeconds: 8
+            timeoutSeconds: 4
             tcpSocket:
               port: http
           startupProbe:
-            failureThreshold: 120
-            initialDelaySeconds: 5
+            failureThreshold: 180
+            initialDelaySeconds: 10
             periodSeconds: 5
+            timeoutSeconds: 2
             tcpSocket:
               port: http
           resources:
@@ -132,6 +133,8 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
+      # extra time to finish processing buffered requests before pod is forcibly terminated
+      terminationGracePeriodSeconds: 120
 ---
 # Source: tgi/templates/horizontalPorAutoscaler.yaml
 # Copyright (C) 2024 Intel Corporation
