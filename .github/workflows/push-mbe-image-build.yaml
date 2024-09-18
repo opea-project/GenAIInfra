@@ -7,13 +7,12 @@ on:
   push:
     branches: ["main"]
     paths:
-      - microservices-connector/**
-      - "!microservices-connector/helm/**"
+      - kubernetes-addons/memory-bandwidth-exporter/**
       - "!**.md"
       - "!**.txt"
       - "!**.png"
       - "!.**"
-      - .github/workflows/gmc-on-push.yaml
+      - .github/workflows/push-mbe-image-build.yaml
   workflow_dispatch:
 
 concurrency:
@@ -21,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  GOSRC_DIR: "microservices-connector"
+  GOSRC_DIR: "kubernetes-addons/memory-bandwidth-exporter"
 
 jobs:
   image-build:

@@ -1,0 +1,82 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: GMC Image Build
+permissions: read-all
+on:
+  workflow_call:
+    inputs:
+      image_repo:
+        required: false
+        type: string
+      image_tag:
+        required: true
+        type: string
+      runner_label:
+        required: false
+        type: string
+        default: 'docker-build-xeon'
+    outputs:
+      image_repo:
+        description: "The image repository used for the image build"
+        value: ${{ jobs.image-build.outputs.image_repo }}
+      image_tag:
+        description: "The image tag used for the image build"
+        value: ${{ jobs.image-build.outputs.version }}
+env:
+  GOSRC_DIR: "kubernetes-addons/memory-bandwidth-exporter"
+
+jobs:
+  image-build:
+    runs-on: ${{ inputs.runner_label }}
+    outputs:
+      image_repo: ${{ steps.set_variables.outputs.IMAGE_REPO }}
+      version: ${{ steps.set_variables.outputs.VERSION }}
+    steps:
+      - name: Clean Up Working Directory
+        run: sudo rm -rf ${{github.workspace}}/*
+
+      - name: Get checkout ref
+        id: get-checkout-ref
+        run: |
+          if [ "${{ github.event_name }}" == "pull_request" ] || [ "${{ github.event_name }}" == "pull_request_target" ]; then
+            CHECKOUT_REF=refs/pull/${{ github.event.number }}/merge
+          else
+            CHECKOUT_REF=${{ github.ref }}
+          fi
+          echo "CHECKOUT_REF=${CHECKOUT_REF}" >> $GITHUB_OUTPUT
+          echo "checkout ref ${CHECKOUT_REF}"
+
+      - name: Checkout out Repo
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.get-checkout-ref.outputs.CHECKOUT_REF }}
+          fetch-depth: 0
+
+      - name: Set variables
+        id: set_variables
+        env:
+          imagerepo: ${{ inputs.image_repo }}
+        run: |
+          if [[ -z "$imagerepo" ]]; then
+            echo "DOCKER_REGISTRY=${OPEA_IMAGE_REPO}opea" >> $GITHUB_ENV
+            echo "IMAGE_REPO=${OPEA_IMAGE_REPO}" >> $GITHUB_OUTPUT
+          else
+            echo "DOCKER_REGISTRY=${imagerepo}/opea" >> $GITHUB_ENV
+            echo "IMAGE_REPO=${imagerepo}/" >> $GITHUB_OUTPUT
+          fi
+          echo "VERSION=${{ inputs.image_tag }}" >> $GITHUB_ENV
+          echo "VERSION=${{ inputs.image_tag }}" >> $GITHUB_OUTPUT
+
+      - name: Build image and push
+        run: |
+          cd $GOSRC_DIR
+          make docker.build
+          make docker.push
+
+      - name: Clean up images
+        if: always()
+        run: |
+          # clean up the images
+          docker rmi ${{ env.DOCKER_REGISTRY }}/memory-bandwidth-exporter:${{ env.VERSION }}
+          echo y |  docker image prune
