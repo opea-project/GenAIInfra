@@ -1,0 +1,33 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Upgrade memory bandwidth exporter on push event
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - kubernetes-addons/memory-bandwidth-exporter/**
+      - "!**.md"
+      - "!**.txt"
+      - "!**.png"
+      - "!.**"
+      - .github/workflows/push-mbe-image-build.yaml
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}-on-push
+  cancel-in-progress: true
+
+env:
+  GOSRC_DIR: "kubernetes-addons/memory-bandwidth-exporter"
+
+jobs:
+  image-build:
+    strategy:
+      matrix:
+        platform: [xeon, gaudi]
+    uses: ./.github/workflows/_mbe-image-build.yaml
+    with:
+      image_tag: 'latest'
+      runner_label: 'docker-build-${{ matrix.platform }}'

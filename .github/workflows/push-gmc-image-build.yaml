@@ -13,7 +13,7 @@ on:
       - "!**.txt"
       - "!**.png"
       - "!.**"
-      - .github/workflows/gmc-on-push.yaml
+      - .github/workflows/push-gmc-image-build.yaml
   workflow_dispatch:
 
 concurrency:
