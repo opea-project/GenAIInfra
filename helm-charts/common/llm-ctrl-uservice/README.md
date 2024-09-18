@@ -1,19 +1,19 @@
-# llm-vllm Microservice
+# llm-ctrl Microservice
 
 Helm chart for deploying a microservice which facilitates connections and handles responses from OpenVINO vLLM microservice.
 
-`llm-vllm-uservice` depends on OpenVINO vLLM. You should properly set `vLLM_ENDPOINT` as the HOST URI of vLLM microservice. If not set, it will consider the default value : `http://<helm-release-name>-vllm-openvino:80`
+`llm-ctrl-uservice` depends on OpenVINO vLLM. You should properly set `vLLM_ENDPOINT` as the HOST URI of vLLM microservice. If not set, it will consider the default value : `http://<helm-release-name>-vllm-openvino:80`
 
 As this service depends on vLLM microservice, we can proceed in either of 2 ways:
 
 - Install both microservices separately one after another.
-- Install the vLLM microservice as dependency for the our main `llm-vllm-uservice` microservice.
+- Install the vLLM microservice as dependency for the our main `llm-ctrl-uservice` microservice.
 
 ## (Option 1): Installing the chart separately:
 
 First, you need to install the `vllm-openvino` chart, please refer to the [vllm](../vllm) chart for more information.
 
-After you've deployed the `vllm` chart successfully, please run `kubectl get svc` to get the vLLM service name with port. We need to provide this to `llm-vllm-uservice` as a value for vLLM_ENDPOINT for letting it discover and connect to the vLLM microservice.
+After you've deployed the `vllm` chart successfully, please run `kubectl get svc` to get the vLLM service name with port. We need to provide this to `llm-ctrl-uservice` as a value for vLLM_ENDPOINT for letting it discover and connect to the vLLM microservice.
 
 > **_NOTE:_** While installing charts separately, if you don't provide any vLLM endpoint explicitly, it will take the default endpoint as `http://<helm-release-name>-vllm:80`. So, if you are not providing the vLLM endpoint explicitly, please make sure to provide same helm release name to both the charts while installing.
 
@@ -24,7 +24,7 @@ Get the service name for vLLM deployment by running: `kubectl get svc`. In the c
 To install the chart, run the following:
 
 ```bash
-cd GenAIInfra/helm-charts/common/llm-vllm-uservice
+cd GenAIInfra/helm-charts/common/llm-ctrl-uservice
 export HFTOKEN="insert-your-huggingface-token-here"
 export vLLM_ENDPOINT="http://myvllm"
 export MODELNAME="Intel/neural-chat-7b-v3-3"
@@ -34,13 +34,13 @@ export http_proxy=<your_http_proxy>
 export https_proxy=<your_https_proxy>
 
 helm dependency update
-helm install llmcontrol . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vLLM_ENDPOINT=${vLLM_ENDPOINT} --set LLM_MODEL_ID=${MODELNAME} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
+helm install llm-ctrl-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vLLM_ENDPOINT=${vLLM_ENDPOINT} --set LLM_MODEL_ID=${MODELNAME} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
 ```
 
 ## (Option 2): Installing the chart with automatic installation of dependency:
 
 ```bash
-cd GenAIInfra/helm-charts/common/llm-vllm-uservice
+cd GenAIInfra/helm-charts/common/llm-ctrl-uservice
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="Intel/neural-chat-7b-v3-3"
@@ -50,7 +50,7 @@ export http_proxy=<your_http_proxy>
 export https_proxy=<your_https_proxy>
 
 helm dependency update
-helm install llmcontrol . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set autodependency.enabled=true --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
+helm install llm-ctrl-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set autodependency.enabled=true --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
 ```
 
 `--wait` flag in above installation command will make sure that all the dependencies are resolved and all services are deployed.
@@ -63,15 +63,15 @@ To verify the installation, run the following command to make sure all pods are 
 kubectl get pod
 ```
 
-Once you see `llmcontrolr-llm-vllm-uservice` pod and `llmcontrol-vllm` pod in ready and running state, run the following command:
+Once you see `llm-ctrl-uservice` pod and `llm-ctrl-uservice-vllm` pod in ready and running state, run the following command:
 
 ```bash
-kubectl port-forward svc/llmcontrol-llm-vllm-uservice 9000:9000
+kubectl port-forward svc/llm-ctrl-uservice 9000:9000
 ```
 
-This exposes the port 9000, on which `llmcontrol-llm-vllm-uservice` is running inside the pod, at port 9000 on the host.
+This exposes the port 9000, on which `llm-ctrl-uservice` is running inside the pod, at port 9000 on the host.
 
-Now, we can access the service from the host machine. Open another terminal and run the following command to verify whether `llmcontrol-llm-vllm-uservice` is working:
+Now, we can access the service from the host machine. Open another terminal and run the following command to verify whether `llm-ctrl-uservice` is working:
 
 ```bash
 curl http://localhost:9000/v1/chat/completions \

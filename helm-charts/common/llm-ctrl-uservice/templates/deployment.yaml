@@ -4,16 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "vllm-openvino.fullname" . }}
+  name: {{ include "llm-ctrl-uservice.fullname" . }}
   labels:
-    {{- include "vllm-openvino.labels" . | nindent 4 }}
+    {{- include "llm-ctrl-uservice.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.global.horizontalPodAutoscaler.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
-      {{- include "vllm-openvino.selectorLabels" . | nindent 6 }}
+      {{- include "llm-ctrl-uservice.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -21,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "vllm-openvino.labels" . | nindent 8 }}
+        {{- include "llm-ctrl-uservice.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -36,63 +34,38 @@ spec:
         - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
-                name: {{ include "vllm-openvino.fullname" . }}-config
+                name: {{ include "llm-ctrl-uservice.fullname" . }}-config
             {{- if .Values.global.extraEnvConfig }}
             - configMapRef:
                 name: {{ .Values.global.extraEnvConfig }}
                 optional: true
             {{- end }}
           securityContext:
-            {{- if .Values.global.modelUseHostPath }}
-            {}
-            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
-            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: http
+            - name: llm-vllm
               containerPort: {{ .Values.service.targetPort }}
               protocol: TCP
-          {{- if .Values.livenessProbe}}
+          {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{ end }}
-          {{- if .Values.readinessProbe}}
+          {{- end }}
+          {{- if .Values.readinessProbe }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{ end }}
+          {{- end }}
           {{- if .Values.startupProbe }}
           startupProbe:
             {{- toYaml .Values.startupProbe | nindent 12 }}
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
           volumeMounts:
-            {{- toYaml . | nindent 12 }}
-          {{- end }}
-          command: ["/bin/bash"]
-          args:
-            - "-c"
-            - |
-              cd / && \
-              python3 -m vllm.entrypoints.openai.api_server \
-                --model "{{ .Values.LLM_MODEL_ID }}" \
-                --host 0.0.0.0 \
-                --port 80
+            - mountPath: /tmp
+              name: tmp
       volumes:
-        - name: model-volume
-          {{- if .Values.global.modelUsePVC }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.global.modelUsePVC }}
-          {{- else if .Values.global.modelUseHostPath }}
-          hostPath:
-            path: {{ .Values.global.modelUseHostPath }}
-            type: Directory
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}
@@ -106,8 +79,4 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.global.horizontalPodAutoscaler.enabled }}
-      # extra time to finish processing buffered requests before HPA forcibly terminates pod
-      terminationGracePeriodSeconds: 120
       {{- end }}

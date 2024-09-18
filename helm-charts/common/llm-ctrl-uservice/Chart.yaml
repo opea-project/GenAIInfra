@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
-name: llm-vllm-uservice
-description: A Helm chart for LLM microservice for which connects with vLLM microservice to receive inferences.
+name: llm-ctrl-uservice
+description: A Helm chart for LLM controller microservice which connects with vLLM microservice to provide inferences.
 type: application
 version: 1.0.0
 appVersion: "v1.0"

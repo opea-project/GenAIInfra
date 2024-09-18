@@ -35,7 +35,7 @@ spec:
           env:
             {{- if .Values.vllm.enabled }}
             - name: LLM_SERVICE_HOST_IP
-              value: {{ .Release.Name }}-llm-vllm-uservice
+              value: {{ .Release.Name }}-llm-ctrl-uservice
             {{- else }}
             - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-uservice

@@ -4,9 +4,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "vllm-openvino.fullname" . }}-testpod"
+  name: "{{ include "llm-ctrl-uservice.fullname" . }}-testpod"
   labels:
-    {{- include "vllm-openvino.labels" . | nindent 4 }}
+    {{- include "llm-ctrl-uservice.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
 spec:
@@ -17,10 +17,10 @@ spec:
       args:
         - |
           max_retry=20;
-          for ((i=1; i<=max_retry; i++)); do \
-            curl http://{{ include "vllm-openvino.fullname" . }}/v1/completions -sS --fail-with-body \
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ include "llm-ctrl-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \
               -X POST \
-              -d '{"prompt":"What is Deep Learning?", "model": {{ .Values.LLM_MODEL_ID | quote }}, "max_tokens":17, "temperature": 0.5}' \
+              -d '{"query":"What is Deep Learning?","max_new_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
               -H 'Content-Type: application/json' && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;

@@ -1,7 +1,7 @@
 {{/*
 Expand the name of the chart.
 */}}
-{{- define "llm-vllm-uservice.name" -}}
+{{- define "llm-ctrl-uservice.name" -}}
 {{- default .Chart.Name .Values.nameOverride | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
@@ -10,7 +10,7 @@ Create a default fully qualified app name.
 We truncate at 63 chars because some Kubernetes name fields are limited to this (by the DNS naming spec).
 If release name contains chart name it will be used as a full name.
 */}}
-{{- define "llm-vllm-uservice.fullname" -}}
+{{- define "llm-ctrl-uservice.fullname" -}}
 {{- if .Values.fullnameOverride }}
 {{- .Values.fullnameOverride | trunc 63 | trimSuffix "-" }}
 {{- else }}
@@ -26,16 +26,16 @@ If release name contains chart name it will be used as a full name.
 {{/*
 Create chart name and version as used by the chart label.
 */}}
-{{- define "llm-vllm-uservice.chart" -}}
+{{- define "llm-ctrl-uservice.chart" -}}
 {{- printf "%s-%s" .Chart.Name .Chart.Version | replace "+" "_" | trunc 63 | trimSuffix "-" }}
 {{- end }}
 
 {{/*
 Common labels
 */}}
-{{- define "llm-vllm-uservice.labels" -}}
-helm.sh/chart: {{ include "llm-vllm-uservice.chart" . }}
-{{ include "llm-vllm-uservice.selectorLabels" . }}
+{{- define "llm-ctrl-uservice.labels" -}}
+helm.sh/chart: {{ include "llm-ctrl-uservice.chart" . }}
+{{ include "llm-ctrl-uservice.selectorLabels" . }}
 {{- if .Chart.AppVersion }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
@@ -45,17 +45,17 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{/*
 Selector labels
 */}}
-{{- define "llm-vllm-uservice.selectorLabels" -}}
-app.kubernetes.io/name: {{ include "llm-vllm-uservice.name" . }}
+{{- define "llm-ctrl-uservice.selectorLabels" -}}
+app.kubernetes.io/name: {{ include "llm-ctrl-uservice.name" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
 {{- end }}
 
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "llm-vllm-uservice.serviceAccountName" -}}
+{{- define "llm-ctrl-uservice.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "llm-vllm-uservice.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "llm-ctrl-uservice.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}

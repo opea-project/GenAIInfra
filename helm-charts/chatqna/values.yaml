@@ -56,7 +56,7 @@ vllm:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   enabled: false
 
-llm-vllm-uservice:
+llm-ctrl-uservice:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 tags:

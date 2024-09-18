@@ -33,9 +33,9 @@ dependencies:
     condition: tgi.enabled
     tags:
       - tgi
-  - name: llm-vllm-uservice
+  - name: llm-ctrl-uservice
     version: 1.0.0
-    repository: "file://../common/llm-vllm-uservice"
+    repository: "file://../common/llm-ctrl-uservice"
     condition: vllm.enabled
     tags:
       - vllm

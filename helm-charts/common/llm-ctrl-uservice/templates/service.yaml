@@ -4,9 +4,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "llm-vllm-uservice.fullname" . }}
+  name: {{ include "llm-ctrl-uservice.fullname" . }}
   labels:
-    {{- include "llm-vllm-uservice.labels" . | nindent 4 }}
+    {{- include "llm-ctrl-uservice.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -15,4 +15,4 @@ spec:
       protocol: TCP
       name: llm-vllm
   selector:
-    {{- include "llm-vllm-uservice.selectorLabels" . | nindent 4 }}
+    {{- include "llm-ctrl-uservice.selectorLabels" . | nindent 4 }}

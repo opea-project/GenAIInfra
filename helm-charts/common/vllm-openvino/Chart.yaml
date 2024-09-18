@@ -1,9 +1,0 @@
-# Copyright (C) 2024 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
-
-apiVersion: v2
-name: vllm-openvino
-description: A Helm chart for OpenVINO optimized vLLM Service
-type: application
-version: 1.0.0
-appVersion: "v1.0"

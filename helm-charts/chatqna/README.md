@@ -17,9 +17,9 @@ Apart from above mentioned services, there are following conditional dependencie
    - [llm-uservice](../common/llm-uservice)
    - [tgi](../common/tgi)
 
-2. If we want to use OpenVINO vLLM inference service, following 2 services would be required:
-   - [llm-vllm-uservice](../common/llm-vllm-uservice)
-   - [vllm-openvino](../common/vllm-openvino)
+2. If we want to use vLLM inference service, following 2 services would be required:
+   - [llm-ctrl-uservice](../common/llm-ctrl-uservice)
+   - [vllm](../common/vllm)
 
 ## Installing the Chart
 
@@ -76,8 +76,11 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 > **_NOTE:_** Default installation will use [TGI (Text Generation Inference)](https://github.com/huggingface/text-generation-inference) as inference engine. To use vLLM as inference engine, please see below.
 
 ```bash
-# To use OpenVINO vLLM inference engine on Xeon device
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-vllm-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm.enabled=true
+# To use vLLM inference engine on XEON device
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm.enabled=true
+
+# To use OpenVINO optimized vLLM inference engine on XEON device
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm.enabled=true --values common/vllm/openvino-values.yaml 
 ```
 
 ### IMPORTANT NOTE
