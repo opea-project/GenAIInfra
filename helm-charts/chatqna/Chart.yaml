@@ -23,7 +23,7 @@ dependencies:
       - tgi
   - name: vllm
     version: 1.0.0
-    repository: "file://../common/vllm-openvino"
+    repository: "file://../common/vllm"
     condition: vllm.enabled
     tags:
       - vllm

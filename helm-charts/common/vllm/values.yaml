@@ -6,8 +6,6 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-fullnameOverride: "myvllm"
-nameOverride: "myvllm"
 
 port: 2080
 shmSize: 1Gi
