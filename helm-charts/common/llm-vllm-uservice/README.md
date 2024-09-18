@@ -11,26 +11,30 @@ As this service depends on vLLM microservice, we can proceed in either of 2 ways
 
 ## (Option 1): Installing the chart separately:
 
-First, you need to install the `vllm-openvino` chart, please refer to the [vllm-openvino](../vllm-openvino) chart for more information.
+First, you need to install the `vllm-openvino` chart, please refer to the [vllm](../vllm) chart for more information.
 
-After you've deployed the `vllm-openvino` chart successfully, please run `kubectl get svc` to get the vLLM service name with port. We need to provide this to `llm-vllm-uservice` as a value for vLLM_ENDPOINT for letting it discover and connect to the vLLM microservice.
+After you've deployed the `vllm` chart successfully, please run `kubectl get svc` to get the vLLM service name with port. We need to provide this to `llm-vllm-uservice` as a value for vLLM_ENDPOINT for letting it discover and connect to the vLLM microservice.
 
-> **_NOTE:_** While installing charts separately, if you don't provide any vLLM endpoint explicitly, it will take the default endpoint as `http://<helm-release-name>-vllm-openvino:80`. So, if you are not providing the vLLM endpoint explicitly, please make sure to provide same helm release name to both the charts while installing.
+> **_NOTE:_** While installing charts separately, if you don't provide any vLLM endpoint explicitly, it will take the default endpoint as `http://<helm-release-name>-vllm:80`. So, if you are not providing the vLLM endpoint explicitly, please make sure to provide same helm release name to both the charts while installing.
+
+Get the service name for vLLM deployment by running: `kubectl get svc`. In the current case, service name would be `myvllm`.
+
+> **_NOTE:_** Please add the service name for vLLM to the value of no_proxy env var, if you are behind a proxy.
 
 To install the chart, run the following:
 
 ```bash
 cd GenAIInfra/helm-charts/common/llm-vllm-uservice
 export HFTOKEN="insert-your-huggingface-token-here"
-export vLLM_ENDPOINT="http://vllm-openvino"
-export MODELNAME="bigscience/bloom-560m"
+export vLLM_ENDPOINT="http://myvllm"
+export MODELNAME="Intel/neural-chat-7b-v3-3"
 
 # If proxy is required, please export the appropriate proxy values.
 export http_proxy=<your_http_proxy>
 export https_proxy=<your_https_proxy>
 
 helm dependency update
-helm install llm-vllm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vLLM_ENDPOINT=${vLLM_ENDPOINT} --set LLM_MODEL_ID=${MODELNAME} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
+helm install llmcontrol . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vLLM_ENDPOINT=${vLLM_ENDPOINT} --set LLM_MODEL_ID=${MODELNAME} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
 ```
 
 ## (Option 2): Installing the chart with automatic installation of dependency:
@@ -39,14 +43,14 @@ helm install llm-vllm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN
 cd GenAIInfra/helm-charts/common/llm-vllm-uservice
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
-export MODELNAME="bigscience/bloom-560m"
+export MODELNAME="Intel/neural-chat-7b-v3-3"
 
 # If proxy is required, please export the appropriate proxy values.
 export http_proxy=<your_http_proxy>
 export https_proxy=<your_https_proxy>
 
 helm dependency update
-helm install llm-vllm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set vllm-openvino.LLM_MODEL_ID=${MODELNAME} --set autodependency.enabled=true --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
+helm install llmcontrol . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set autodependency.enabled=true --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
 ```
 
 `--wait` flag in above installation command will make sure that all the dependencies are resolved and all services are deployed.
@@ -59,15 +63,15 @@ To verify the installation, run the following command to make sure all pods are 
 kubectl get pod
 ```
 
-Once you see `llm-vllm-uservice` pod and `llm-vllm-uservice-vllm-openvino` pod in ready and running state, run the following command:
+Once you see `llmcontrolr-llm-vllm-uservice` pod and `llmcontrol-vllm` pod in ready and running state, run the following command:
 
 ```bash
-kubectl port-forward svc/llm-vllm-uservice 9000:9000
+kubectl port-forward svc/llmcontrol-llm-vllm-uservice 9000:9000
 ```
 
-This exposes the port 9000, on which `llm-vllm-uservice` is running inside the pod, at port 9000 on the host.
+This exposes the port 9000, on which `llmcontrol-llm-vllm-uservice` is running inside the pod, at port 9000 on the host.
 
-Now, we can access the service from the host machine. Open another terminal and run the following command to verify whether `llm-vllm-uservice` is working:
+Now, we can access the service from the host machine. Open another terminal and run the following command to verify whether `llmcontrol-llm-vllm-uservice` is working:
 
 ```bash
 curl http://localhost:9000/v1/chat/completions \

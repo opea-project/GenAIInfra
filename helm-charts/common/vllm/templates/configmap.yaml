@@ -8,10 +8,17 @@ metadata:
   labels:
     {{- include "vllm.labels" . | nindent 4 }}
 data:
+  {{- if .Values.openvino_enabled }}
+  MODEL_ID: {{ .Values.LLM_MODEL_ID | quote }}
+  PORT: {{ .Values.port | quote }}
+  {{- end }}
   HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   {{- if .Values.global.HF_ENDPOINT }}
   HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
   {{- end }}
+  {{- if .Values.OMPI_MCA_btl_vader_single_copy_mechanism }}
+  OMPI_MCA_btl_vader_single_copy_mechanism: {{ .Values.OMPI_MCA_btl_vader_single_copy_mechanism | quote }}
+  {{-  end}}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
@@ -22,4 +29,10 @@ data:
   OUTLINES_CACHE_DIR: "/tmp/.cache/outlines"
   {{- if .Values.VLLM_CPU_KVCACHE_SPACE }}
   VLLM_CPU_KVCACHE_SPACE: {{ .Values.VLLM_CPU_KVCACHE_SPACE | quote}}
+  {{- end }}
+  {{- if .Values.VLLM_OPENVINO_KVCACHE_SPACE }}
+  VLLM_OPENVINO_KVCACHE_SPACE: {{ .Values.VLLM_OPENVINO_KVCACHE_SPACE | quote }}
+  {{- end }}
+  {{- if .Values.CUDA_GRAPHS }}
+  CUDA_GRAPHS: {{ .Values.CUDA_GRAPHS | quote }}
   {{- end }}

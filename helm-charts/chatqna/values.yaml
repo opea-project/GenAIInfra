@@ -47,7 +47,7 @@ affinity: {}
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
-vllm-openvino:
+vllm:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   enabled: false
 

@@ -91,7 +91,7 @@ affinity: {}
 LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
 
 # Overriding the Model ID being used by vllm-openvino service.(As llm-vllm microservice depends on vllm-openvino, these 2 values should be same.)
-vllm-openvino:
+vllm:
   LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
 
 global:

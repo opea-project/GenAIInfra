@@ -1,0 +1,24 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Values for OpenVINO optimized vLLM.
+
+openvino_enabled: true
+
+image:
+  repository: vllm
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "openvino"
+
+extraCmdArgs: []
+
+LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+CUDA_GRAPHS: "0"
+VLLM_CPU_KVCACHE_SPACE: 50
+VLLM_OPENVINO_KVCACHE_SPACE: 32
+OMPI_MCA_btl_vader_single_copy_mechanism: none
+
+ov_command: ["/bin/bash"]
+

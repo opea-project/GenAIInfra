@@ -30,7 +30,7 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           env:
-            {{- if (index .Values "vllm-openvino" "enabled") }}
+            {{- if .Values.vllm.enabled }}
             - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-vllm-uservice
             {{- else }}

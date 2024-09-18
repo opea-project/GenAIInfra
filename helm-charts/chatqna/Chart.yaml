@@ -21,10 +21,10 @@ dependencies:
     condition: tgi.enabled
     tags:
       - tgi
-  - name: vllm-openvino
+  - name: vllm
     version: 1.0.0
     repository: "file://../common/vllm-openvino"
-    condition: vllm-openvino.enabled
+    condition: vllm.enabled
     tags:
       - vllm
   - name: llm-uservice
@@ -36,7 +36,7 @@ dependencies:
   - name: llm-vllm-uservice
     version: 1.0.0
     repository: "file://../common/llm-vllm-uservice"
-    condition: vllm-openvino.enabled
+    condition: vllm.enabled
     tags:
       - vllm
   - name: tei
