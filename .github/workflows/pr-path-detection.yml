@@ -104,6 +104,7 @@ jobs:
                         echo "*****Retry successfully*****"
                       else
                         echo "Invalid link from $real_path: $url_dev or $url"
+                        echo "$png_line"
                         fail="TRUE"
                       fi
                     else
