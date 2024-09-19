@@ -74,7 +74,12 @@ curl http://localhost:9100/metrics
 make docker.build
 sudo docker run \
   -e NODE_NAME=<node_name> \
-  -e NAMESPACE_WHITELIST="calico-apiserver,calico-system,kube-system,tigera-operator" \
+  -e NAMESPACE_WHITELIST="kube-system" \
+  -e COLLECTER_INTERVAL=1s \
+  -e CONTAINER_METRICS="all" \
+  -e CLASS_METRICS="none" \
+  -e NODE_METRICS="none" \
+  -e WEB_LISTEN_ADDRESS=":9100" \
   --mount type=bind,source=/etc/containers/oci/hooks.d/,target=/etc/containers/oci/hooks.d/ \
   --privileged \
   --cgroupns=host \
