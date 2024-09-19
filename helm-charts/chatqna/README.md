@@ -77,3 +77,7 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 | service.port                           | string | `"8888"`                      |                                                                                                                                         |
 | tgi.LLM_MODEL_ID                       | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
 | global.horizontalPodAutoscaler.enabled | bop;   | false                         | HPA autoscaling for the TGI and TEI service deployments based on metrics they provide. See HPA section in ../README.md before enabling! |
+
+## Troubleshooting
+
+If you encount any issues, please refer to [ChatQnA Troubleshooting](troubleshooting.md)
