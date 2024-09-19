@@ -2,7 +2,7 @@
 
 Helm chart for deploying vLLM Inference service.
 
-Refer to [Deploy with Helm Charts](../README.md) for global guides.
+Refer to [Deploy with Helm Charts](../../README.md) for global guides.
 
 ## Installing the Chart
 
