@@ -1,0 +1,39 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: react-ui
+spec:
+  lookupPolicy:
+    local: true
+---
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: react-ui
+spec:
+  output:
+    to:
+      kind: "ImageStreamTag"
+      name: "react-ui:{{ .Values.image.tag }}"
+  failedBuildsHistoryLimit: 5
+  successfulBuildsHistoryLimit: 5
+  nodeSelector: null
+  postCommit: {}
+  resources: {}
+  runPolicy: SerialLatestOnly
+  source:
+    contextDir: {{ .Values.source.contextDir }}
+    git:
+      ref: {{ .Values.source.gitRef }}
+      uri: {{ .Values.source.gitUri }}
+    type: {{ .Values.source.type }}
+  strategy:
+    type: {{ .Values.strategy.type }}
+    dockerStrategy:
+      env:
+      - name: VITE_CODE_GEN_URL
+        value: https://codegen-react-ui-{{ .Release.Namespace }}.apps.{{ .Values.global.clusterDomain }}/v1/codegen
+      dockerfilePath: {{ .Values.strategy.dockerfilePath }}
+  triggers:
+  - type: ConfigChange

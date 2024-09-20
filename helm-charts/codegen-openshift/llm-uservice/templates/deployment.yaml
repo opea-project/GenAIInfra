@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "llm-uservice.fullname" . }}
+  labels:
+    {{- include "llm-uservice.labels" . | nindent 4 }}
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"llm-tgi:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"llm-tgi-server\")].image"}]'
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "llm-uservice.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "llm-uservice.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext: {}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: TGI_LLM_ENDPOINT
+              value: {{ .Values.TGI_LLM_ENDPOINT | quote}}
+            - name: HUGGINGFACEHUB_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: HUGGING_FACE_HUB_TOKEN
+                  name: hf-token
+            - name: PYTHONPATH
+              value: {{ .Values.PYTHONPATH | quote }}
+            - name: HOME
+              value: {{ .Values.HOME | quote }}
+          securityContext: {}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: llm-uservice
+              containerPort: 9000
+              protocol: TCP
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          volumeMounts:
+          - mountPath: /tmp/home
+            name: local-dir
+          resources: {}
+      volumes:
+      - emptyDir:
+          sizeLimit: 5Gi
+        name: local-dir

@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "tgi.fullname" . }}
+  labels:
+    {{- include "tgi.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: 8080
+      targetPort: {{ .Values.port }}
+      protocol: TCP
+      name: tgi
+  selector:
+    {{- include "tgi.selectorLabels" . | nindent 4 }}

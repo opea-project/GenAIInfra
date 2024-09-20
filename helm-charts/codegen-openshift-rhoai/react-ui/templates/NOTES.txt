@@ -1,0 +1,2 @@
+1. Get the application URL by running this command or opening OpenShift Console apps.
+oc get route -n {{ .Release.Namespace }} {{ include "codegen-react-ui.fullname" . }}

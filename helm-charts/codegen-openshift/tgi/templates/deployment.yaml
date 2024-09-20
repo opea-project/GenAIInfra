@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "tgi.fullname" . }}
+  labels:
+    {{- include "tgi.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "tgi.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "tgi.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext: {}
+      containers:
+        - name: {{ .Chart.Name }}
+          env:
+            - name: MODEL_ID
+              value: "{{ .Values.model.id }}"
+            - name: PORT
+              value: {{ .Values.port | quote }}
+            - name: NUMBA_CACHE_DIR
+              value: /data
+            - name: HF_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: HUGGING_FACE_HUB_TOKEN
+                  name: hf-token
+          securityContext: {}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args:
+            {{- toYaml .Values.args | nindent 12 }}
+          volumeMounts: {{- toYaml .Values.volumeMounts | nindent 10 }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}                  
+      volumes: {{- toYaml .Values.volumes | nindent 6 }}

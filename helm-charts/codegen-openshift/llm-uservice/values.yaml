@@ -1,0 +1,33 @@
+image:
+  repository: "insert-your-image-here"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+source:
+  gitRef: main
+  gitUri: https://github.com/opea-project/GenAIComps.git
+  type: Git
+
+strategy:
+  type: Docker
+  dockerfilePath: comps/llms/text-generation/tgi/Dockerfile
+
+replicaCount: 1
+
+TGI_LLM_ENDPOINT: "http://codegen-tgi:8080"  # if you change it, update also startupProbe@line 26
+PYTHONPATH: /home/user/.local/lib/python3.11/site-packages:/home/user  # don't edit unless you have a good reason
+HOME: /tmp/home
+
+startupProbe:
+  exec:
+    command:
+      - python
+      - -c
+      - 'import requests; req = requests.get("http://codegen-tgi:8080/info"); print(req)'
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 120
+
+service:
+  type: ClusterIP
+  port: 9000

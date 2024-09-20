@@ -1,0 +1,9 @@
+---
+apiVersion: image.openshift.io/v1
+kind: ImageStream
+metadata:
+  name: llm-tgi
+  namespace: {{ .Release.Namespace }}
+spec:
+  lookupPolicy:
+    local: true

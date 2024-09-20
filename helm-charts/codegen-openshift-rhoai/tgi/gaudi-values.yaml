@@ -1,0 +1,41 @@
+global:
+  huggingfacehubApiToken: "insert-your-huggingface-token-here"
+
+image:
+  repository: ghcr.io/huggingface/tgi-gaudi
+  tag: 2.0.4
+
+servingRuntimeName: tgi-codellama-7b-hf-gaudi
+servingRuntimeDisplayName: Text Generation Inference CodeLlama-7b-hf on Gaudi
+
+args:
+  - --model-id
+  - /mnt/models/--meta-llama--CodeLlama-7b-hf/snapshots/b462c3c99b077d341db691ec780a33156f3c1472
+  - --port=8080
+  - --json-output
+  - --max-input-length
+  - "1024"
+  - --max-total-tokens
+  - "2048"
+
+accelerators: '''["habana.ai/gaudi"]'''
+
+resources:
+  limits:
+    habana.ai/gaudi: 1
+  requests:
+    habana.ai/gaudi: 1
+
+volumeMounts:
+  - mountPath: /data
+    name: model-volume
+  - mountPath: /var/log/habana_logs
+    name: logs-volume
+
+volumes:
+  - emptyDir:
+      sizeLimit: 300Gi
+    name: model-volume
+  - emptyDir:
+      sizeLimit: 500Mi
+    name: logs-volume

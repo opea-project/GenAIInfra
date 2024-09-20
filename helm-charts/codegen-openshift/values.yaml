@@ -1,0 +1,47 @@
+global:
+  clusterDomain: "insert-your-cluster-domain-here"
+  huggingfacehubApiToken: "insert-your-huggingface-token-here"
+
+image:
+  repository: "insert-your-image-here"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+source:
+  contextDir: CodeGen
+  gitRef: main
+  gitUri: "https://github.com/opea-project/GenAIExamples.git"
+  type: Git
+
+strategy:
+  type: Docker
+  dockerfilePath: Dockerfile
+
+replicaCount: 1
+
+port: 7778
+
+service:
+  type: ClusterIP
+  port: 7778
+
+tgi:
+  model:
+    id: ise-uiuc/Magicoder-S-DS-6.7B
+  replicaCount: 1
+  port: 8080
+  image:
+    repository: ghcr.io/huggingface/text-generation-inference
+    tag: 2.1.0
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+  resources: {}
+  args: []
+  volumeMounts:
+    - mountPath: /data
+      name: model-volume
+  volumes:
+    - emptyDir:
+        sizeLimit: 50Gi
+      name: model-volume

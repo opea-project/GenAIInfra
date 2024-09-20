@@ -1,0 +1,59 @@
+global:
+  clusterDomain: "insert-your-cluster-domain-here"
+  huggingfacehubApiToken: "insert-your-huggingface-token-here"
+
+image:
+  repository: "insert-your-image-here"
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+source:
+  contextDir: CodeGen
+  gitRef: main
+  gitUri: "https://github.com/opea-project/GenAIExamples.git"
+  type: Git
+
+strategy:
+  type: Docker
+  dockerfilePath: Dockerfile
+
+replicaCount: 1
+
+port: 7778
+
+service:
+  type: ClusterIP
+  port: 7778
+
+tgi:
+  model:
+    id: meta-llama/CodeLlama-7b-hf
+  replicaCount: 1
+  port: 8080
+  image:
+    repository: ghcr.io/huggingface/tgi-gaudi
+    tag: 2.0.4
+    pullPolicy: IfNotPresent
+  service:
+    type: ClusterIP
+  resources:
+    limits:
+      habana.ai/gaudi: 1
+    requests:
+      habana.ai/gaudi: 1
+  args:
+  - "--max-input-length"
+  - "1024"
+  - "--max-total-tokens"
+  - "2048"
+  volumeMounts:
+    - mountPath: /data
+      name: model-volume
+    - mountPath: /var/log/habana_logs
+      name: logs-volume
+  volumes:
+  - emptyDir:
+      sizeLimit: 50Gi
+    name: model-volume
+  - emptyDir:
+    name: logs-volume

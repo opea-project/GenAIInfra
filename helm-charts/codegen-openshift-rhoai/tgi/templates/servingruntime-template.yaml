@@ -1,0 +1,49 @@
+---
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  annotations:
+    opendatahub.io/apiProtocol: REST
+    opendatahub.io/modelServingSupport: '["single"]'
+  labels:
+    opendatahub.io/dashboard: "true"
+  name: {{ .Values.servingRuntimeName }}
+  namespace: redhat-ods-applications
+objects:
+- apiVersion: serving.kserve.io/v1alpha1
+  kind: ServingRuntime
+  labels:
+    opendatahub.io/dashboard: "true"
+  metadata:
+    annotations:
+      openshift.io/display-name: {{ .Values.servingRuntimeDisplayName }}
+      opendatahub.io/recommended-accelerators: {{ .Values.accelerators }}
+    name: {{ .Values.servingRuntimeName }}
+  spec:
+    containers:
+      - args: {{- toYaml .Values.args | nindent 10 }}
+        env:
+          - name: NUMBA_CACHE_DIR
+            value: /tmp/hf_home
+          - name: HF_HOME
+            value: /tmp/hf_home
+          - name: HF_HUB_CACHE
+            value: /mnt/models
+          - name: HUGGING_FACE_HUB_TOKEN
+            valueFrom:
+              secretKeyRef:
+                key: HUGGING_FACE_HUB_TOKEN
+                name: hf-token
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        name: kserve-container
+        ports:
+          - containerPort: 8080
+            protocol: TCP
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        volumeMounts: {{- toYaml .Values.volumeMounts | nindent 10 }}
+    multiModel: false
+    supportedModelFormats:
+      - autoSelect: true
+        name: llm
+    volumes: {{- toYaml .Values.volumes | nindent 6 }}
