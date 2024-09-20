@@ -25,7 +25,17 @@ spec:
             fieldRef:
               fieldPath: spec.nodeName
         - name: NAMESPACE_WHITELIST
-          value: "calico-apiserver,calico-system,kube-system,tigera-operator"
+          value: "kube-system"
+        - name: COLLECTER_INTERVAL
+          value: 1s
+        - name: CONTAINER_METRICS
+          value: "all"
+        - name: CLASS_METRICS
+          value: "none"
+        - name: NODE_METRICS
+          value: "none"
+        - name: WEB_LISTEN_ADDRESS
+          value: ":9100"
         volumeMounts:
         - name: hooks
           mountPath: /etc/containers/oci/hooks.d/
