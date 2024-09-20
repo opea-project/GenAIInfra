@@ -7,11 +7,12 @@ This directory contains helm charts for [GenAIComps](https://github.com/opea-pro
 - [Helm Charts](#helm-charts)
   - [Examples](#examples)
   - [Components](#components)
-- [How to deploy with helm charts](#deploy-with-helm-charts)
+- [Deploy with helm charts](#deploy-with-helm-charts)
+  - [From Source Code](#from-source-code)
+  - [Using Helm Charts repository](#using-helm-charts-repository)
 - [Helm Charts Options](#helm-charts-options)
 - [Using Persistent Volume](#using-persistent-volume)
 - [Using Private Docker Hub](#using-private-docker-hub)
-- [Helm Charts repository](#helm-chart-repository)
 - [Generate manifests from Helm Charts](#generate-manifests-from-helm-charts)
 
 ## Helm Charts
@@ -35,7 +36,9 @@ Components which are building blocks for AI application.
 All components helm charts are put in the ./common directory, and the support list is growing.  
 Refer to [GenAIComps](https://github.com/opea-project/GenAIComps) for details of each component.
 
-## How to deploy with helm charts
+## Deploy with helm charts
+
+### From Source Code
 
 These helm charts are designed to be easy to start, which means you can deploy a workload easily without further options.  
 However, `HUGGINGFACEHUB_API_TOKEN` should be set in most cases for a workload to start up correctly.  
@@ -49,6 +52,27 @@ helm install $myrelease $chartname --set global.HUGGINGFACEHUB_API_TOKEN="insert
 ```
 
 Depends on your environment, you might want to customize some of the options, see [Helm Charts Options](#helm-charts-options) for further information.
+
+### Using Helm Charts repository
+
+The helm charts are released in this [helm chart repository](https://opea-project.github.io/GenAIInfra), you can use it directly.
+
+Add the repo:
+
+`helm repo add opea https://opea-project.github.io/GenAIInfra`
+
+Show all helm charts available in the repo:
+
+```
+helm repo update
+helm search repo opea
+```
+
+Install the chart:
+
+`helm install tgi opea/tgi`
+
+Use `helm --help` to see all commands for helm, and check [Helm Charts Options](#helm-charts-options) for more installation options.
 
 ## Helm Charts Options
 
@@ -142,10 +166,6 @@ To use local docker registry:
 export OPEA_IMAGE_REPO=192.168.0.100:5000/
 find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
 ```
-
-## Helm Charts repository (Experimental)
-
-https://opea-project.github.io/GenAIInfra
 
 ## Generate manifests from Helm Charts
 
