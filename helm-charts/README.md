@@ -23,8 +23,8 @@ List of supported workloads and components.
 
 AI application examples you can run directly on Xeon and Gaudi. You can also refer to these examples to develop your own customized AI application.
 
-| Helm chart               | Link to GenAIExamples                                                                    | Description                                                                                     |
-| ------------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| Helm chart                         | Link to GenAIExamples                                                                              | Description                                                                                     |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
 | [codegen](./codegen/README.md)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/CodeGen/README.md)       | An example of copilot designed for code generation in Visual Studio Code.                       |
 | [codetrans](./codetrans/README.md) | [Code Translation](https://github.com/opea-project/GenAIExamples/tree/main/CodeTrans/README.md)    | An example of programming language code translation.                                            |
 | [chatqna](./chatqna/README.md)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA/README.md)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
