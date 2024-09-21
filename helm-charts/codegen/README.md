@@ -2,7 +2,7 @@
 
 Helm chart for deploying CodeGen service.
 
-CodeGen depends on LLM and tgi microservice, refer to [llm-uservice](../common/llm-uservice) and [tgi](../common/tgi) for more config details.
+CodeGen depends on LLM and tgi microservice, refer to [llm-uservice](../common/llm-uservice/README.md) and [tgi](../common/tgi/README.md) for more config details.
 
 ## Installing the Chart
 

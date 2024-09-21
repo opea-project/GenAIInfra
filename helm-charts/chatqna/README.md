@@ -2,15 +2,15 @@
 
 Helm chart for deploying ChatQnA service. ChatQnA depends on the following services:
 
-- [data-prep](../common/data-prep)
-- [embedding-usvc](../common/embedding-usvc)
-- [tei](../common/tei)
-- [retriever-usvc](../common/retriever-usvc)
-- [redis-vector-db](../common/redis-vector-db)
-- [reranking-usvc](../common/reranking-usvc)
-- [teirerank](../common/teirerank)
-- [llm-uservice](../common/llm-uservice)
-- [tgi](../common/tgi)
+- [data-prep](../common/data-prep/README.md)
+- [embedding-usvc](../common/embedding-usvc/README.md)
+- [tei](../common/tei/README.md)
+- [retriever-usvc](../common/retriever-usvc/README.md)
+- [redis-vector-db](../common/redis-vector-db/README.md)
+- [reranking-usvc](../common/reranking-usvc/README.md)
+- [teirerank](../common/teirerank/README.md)
+- [llm-uservice](../common/llm-uservice/README.md)
+- [tgi](../common/tgi/README.md)
 
 ## Installing the Chart
 

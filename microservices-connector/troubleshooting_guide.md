@@ -17,7 +17,7 @@ After the CR for GMC pipeline has been deployed, correct the CR if you encounter
    The GMCConnector "chatqa" is invalid: spec.nodes.root.steps[0].name: Invalid value: v1alpha3.Step{StepName:"Embedding123", Executor:v1alpha3.Executor{NodeName:"", InternalService:v1alpha3.GMCTarget{ServiceName:"embedding-svc", NameSpace:"", Config:map[string]string{"TEI_EMBEDDING_ENDPOINT":"tei-embedding-svc", "endpoint":"/v1/embeddings"}, IsDownstreamService:false}, ExternalService:""}, Data:"", Condition:"", Dependency:"", ServiceURL:""}: invalid step name: Embedding123 for node root
    ```
 
-   In the CR, the value of StepName in the `spec.nodes.<nodeName>.steps[].name` field should be included in the predefined [list](./api/v1alpha3/validating_webhook.go).
+   In the CR, the value of StepName in the `spec.nodes.<nodeName>.steps[].name` field should be included in the predefined [list](https://github.com/opea-project/GenAIInfra/blob/main/microservices-connector/api/v1alpha3/validating_webhook.go).
 
 3. nodeName existence
 

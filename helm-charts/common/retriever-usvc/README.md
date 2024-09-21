@@ -6,7 +6,7 @@ retriever-usvc depends on redis and tei, you should set these endpoints before s
 
 ## (Option1): Installing the chart separately
 
-First, you need to install the tei and redis-vector-db chart, refer to the [tei](../tei) and [redis-vector-db](../redis-vector-db) for more information.
+First, you need to install the tei and redis-vector-db chart, refer to the [tei](../tei/README.md) and [redis-vector-db](../redis-vector-db/README.md) for more information.
 
 After you've deployed the tei and redis-vector-db chart successfully, run `kubectl get svc` to get the service endpoint and URL respectively, i.e. `http://tei`, `redis://redis-vector-db:6379`.
 

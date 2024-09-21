@@ -6,7 +6,7 @@ asr depends on whisper, you should set ASR_ENDPOINT endpoints before start.
 
 ## (Option1): Installing the chart separately
 
-First, you need to install the whisper chart, please refer to the [whisper](../whisper) chart for more information.
+First, you need to install the whisper chart, please refer to the [whisper](../whisper/README.md) chart for more information.
 
 After you've deployted the whisper chart successfully, please run `kubectl get svc` to get the whisper service endpoint, i.e `http://whisper:7066`.
 
