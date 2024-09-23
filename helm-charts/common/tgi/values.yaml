@@ -27,7 +27,7 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   # `sha-e4201f4-intel-cpu` is the image tag for intel cpu optimized tgi image
-  tag: "latest-intel-cpu"
+  tag: "sha-e4201f4-intel-cpu"
 
 # empty for CPU
 accelDevice: ""
