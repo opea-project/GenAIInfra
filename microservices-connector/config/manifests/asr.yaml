@@ -91,7 +91,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/asr:latest"
+          image: "opea/asr:1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: asr

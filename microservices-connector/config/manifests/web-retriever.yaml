@@ -95,7 +95,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/web-retriever-chroma:latest"
+          image: "opea/web-retriever-chroma:1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: web-retriever

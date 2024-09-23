@@ -12,7 +12,7 @@ image:
   repository: opea/codetrans
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.0"
 
 port: 7777
 service:
@@ -43,7 +43,7 @@ tgi:
 codetrans-ui:
   image:
     repository: opea/codetrans-ui
-    tag: "latest"
+    tag: "1.0"
   BACKEND_SERVICE_ENDPOINT: "/v1/codetrans"
   containerPort: 5173
 

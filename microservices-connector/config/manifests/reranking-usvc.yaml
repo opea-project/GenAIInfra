@@ -91,7 +91,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/reranking-tei:latest"
+          image: "opea/reranking-tei:1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: reranking-usvc

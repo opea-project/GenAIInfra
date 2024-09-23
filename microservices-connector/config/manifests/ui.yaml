@@ -92,7 +92,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/chatqna-conversation-ui:latest"
+          image: "opea/chatqna-conversation-ui:1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: ui

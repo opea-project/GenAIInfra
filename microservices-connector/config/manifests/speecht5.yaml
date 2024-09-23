@@ -85,7 +85,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/speecht5:latest"
+          image: "opea/speecht5:1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: speecht5

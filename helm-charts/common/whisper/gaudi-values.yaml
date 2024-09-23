@@ -7,7 +7,7 @@
 
 image:
   repository: opea/whisper-gaudi
-  tag: "latest"
+  tag: "1.0"
 
 resources:
   limits:

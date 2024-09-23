@@ -97,7 +97,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/retriever-redis:latest"
+          image: "opea/retriever-redis:1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: retriever-usvc
