@@ -9,7 +9,7 @@ accelDevice: "gaudi"
 
 image:
   repository: ghcr.io/huggingface/tgi-gaudi
-  tag: "2.0.1"
+  tag: "2.0.5"
 
 MAX_INPUT_LENGTH: "1024"
 MAX_TOTAL_TOKENS: "2048"

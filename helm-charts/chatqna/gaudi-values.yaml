@@ -17,7 +17,7 @@ tgi:
   accelDevice: "gaudi"
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
-    tag: "2.0.1"
+    tag: "2.0.5"
   resources:
     limits:
       habana.ai/gaudi: 1
