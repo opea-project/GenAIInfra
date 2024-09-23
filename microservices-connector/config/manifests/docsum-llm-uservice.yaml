@@ -93,7 +93,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/llm-docsum-tgi:latest"
+          image: "opea/llm-docsum-tgi:1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: llm-uservice

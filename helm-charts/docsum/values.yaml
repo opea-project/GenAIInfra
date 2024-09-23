@@ -12,7 +12,7 @@ image:
   repository: opea/docsum
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.0"
 
 port: 8888
 service:
@@ -48,7 +48,7 @@ tgi:
 docsum-ui:
   image:
     repository: opea/docsum-ui
-    tag: "latest"
+    tag: "1.0"
   BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
   containerPort: 5173
 

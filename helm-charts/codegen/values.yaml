@@ -11,7 +11,7 @@ image:
   repository: opea/codegen
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.0"
 
 port: 7778
 service:
@@ -42,7 +42,7 @@ tgi:
 codegen-ui:
   image:
     repository: opea/codegen-ui
-    tag: "latest"
+    tag: "1.0"
   BACKEND_SERVICE_ENDPOINT: "/v1/codegen"
   containerPort: 5173
 

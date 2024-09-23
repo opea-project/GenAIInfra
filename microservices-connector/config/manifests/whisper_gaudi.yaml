@@ -85,7 +85,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/whisper-gaudi:latest"
+          image: "opea/whisper-gaudi:1.0"
           imagePullPolicy: IfNotPresent
           ports:
             - name: whisper

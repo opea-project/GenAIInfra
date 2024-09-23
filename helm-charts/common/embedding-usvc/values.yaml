@@ -19,7 +19,7 @@ image:
   repository: opea/embedding-tei
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.0"
 
 imagePullSecrets: []
 nameOverride: ""

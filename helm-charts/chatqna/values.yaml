@@ -11,7 +11,7 @@ image:
   repository: opea/chatqna
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.0"
 
 port: 8888
 service:
@@ -54,7 +54,7 @@ guardrails-usvc:
 # chatqna-ui:
 #   image:
 #     repository: "opea/chatqna-ui"
-#     tag: "latest"
+#     tag: "1.0"
 #   containerPort: "5173"
 
 global:
