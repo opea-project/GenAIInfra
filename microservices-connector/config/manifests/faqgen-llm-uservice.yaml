@@ -6,15 +6,15 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: docsum-llm-uservice-config
+  name: faqgen-llm-uservice-config
   labels:
     helm.sh/chart: llm-uservice-1.0.0
     app.kubernetes.io/name: llm-uservice
-    app.kubernetes.io/instance: docsum-llm-uservice
+    app.kubernetes.io/instance: faqgen-llm-uservice
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
-  TGI_LLM_ENDPOINT: "http://docsum-llm-uservice-tgi"
+  TGI_LLM_ENDPOINT: "http://faqgen-llm-uservice-tgi"
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   HF_HOME: "/tmp/.cache/huggingface"
   http_proxy: ""
@@ -29,11 +29,11 @@ data:
 apiVersion: v1
 kind: Service
 metadata:
-  name: docsum-llm-uservice
+  name: faqgen-llm-uservice
   labels:
     helm.sh/chart: llm-uservice-1.0.0
     app.kubernetes.io/name: llm-uservice
-    app.kubernetes.io/instance: docsum-llm-uservice
+    app.kubernetes.io/instance: faqgen-llm-uservice
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -45,7 +45,7 @@ spec:
       name: llm-uservice
   selector:
     app.kubernetes.io/name: llm-uservice
-    app.kubernetes.io/instance: docsum-llm-uservice
+    app.kubernetes.io/instance: faqgen-llm-uservice
 ---
 # Source: llm-uservice/templates/deployment.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -54,11 +54,11 @@ spec:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: docsum-llm-uservice
+  name: faqgen-llm-uservice
   labels:
     helm.sh/chart: llm-uservice-1.0.0
     app.kubernetes.io/name: llm-uservice
-    app.kubernetes.io/instance: docsum-llm-uservice
+    app.kubernetes.io/instance: faqgen-llm-uservice
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 spec:
@@ -66,20 +66,20 @@ spec:
   selector:
     matchLabels:
       app.kubernetes.io/name: llm-uservice
-      app.kubernetes.io/instance: docsum-llm-uservice
+      app.kubernetes.io/instance: faqgen-llm-uservice
   template:
     metadata:
       labels:
         app.kubernetes.io/name: llm-uservice
-        app.kubernetes.io/instance: docsum-llm-uservice
+        app.kubernetes.io/instance: faqgen-llm-uservice
     spec:
       securityContext:
         {}
       containers:
-        - name: docsum-llm-uservice
+        - name: faqgen-llm-uservice
           envFrom:
             - configMapRef:
-                name: docsum-llm-uservice-config
+                name: faqgen-llm-uservice-config
             - configMapRef:
                 name: extra-env-config
                 optional: true
@@ -93,7 +93,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/llm-docsum-tgi:latest"
+          image: "opea/llm-faqgen-tgi:latest"
           imagePullPolicy: IfNotPresent
           ports:
             - name: llm-uservice
