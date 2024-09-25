@@ -61,7 +61,10 @@ function dump_failed_pod_logs() {
 
 function dump_all_pod_logs() {
     namespace=$1
-    echo "-----DUMP POD STATUS AND LOG in NS $namespace------"
+    echo "-----DUMP POD STATUS AND LOG in NS $namespace-----"
+    echo "------SUMMARY of POD STATUS in NS $namespace------"
+    kubectl get pods -n $namespace -o wide
+    echo "--------------------------------------------------"
 
     pods=$(kubectl get pods -n $namespace -o jsonpath='{.items[*].metadata.name}')
     for pod_name in $pods
