@@ -41,7 +41,7 @@ service:
   port: 6018
 
 # Port 6012 is reused by chathistory, will need to change after https://github.com/opea-project/GenAIComps/pull/740
-# Change this after next release untill latest image updated.
+# Change this after next release until latest image updated.
 port: 6012
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
