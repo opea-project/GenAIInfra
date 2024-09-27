@@ -92,7 +92,8 @@ jobs:
               if [[ "${png_path:0:1}" == "/" ]]; then
                 check_path=${{github.workspace}}$png_path
               elif [[ "$png_path" == *#* ]]; then
-                check_path=${{github.workspace}}/$refer_path
+                relative_path=$(echo "/$png_path" | cut -d '#' -f1)
+                check_path=${{github.workspace}}/$refer_path$relative_path
               else
                 check_path=${{github.workspace}}/$(dirname "$refer_path")/$png_path
               fi
