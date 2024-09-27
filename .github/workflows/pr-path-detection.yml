@@ -92,7 +92,9 @@ jobs:
               if [[ "${png_path:0:1}" == "/" ]]; then
                 check_path=${{github.workspace}}$png_path
               elif [[ "${png_path:0:1}" == "#" ]]; then
+                echo $png_path
                 check_path=${{github.workspace}}/$refer_path
+                echo "check_path is "$check_path
               else
                 check_path=${{github.workspace}}/$(dirname "$refer_path")/$png_path
               fi
