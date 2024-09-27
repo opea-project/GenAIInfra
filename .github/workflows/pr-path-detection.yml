@@ -94,7 +94,7 @@ jobs:
               elif [[ "${png_path:0:1}" == "#" ]]; then
                 echo $png_path
                 check_path=${{github.workspace}}/$refer_path
-                echo "check_path is "$check_path
+                echo "1 check_path is "$check_path
               else
                 check_path=${{github.workspace}}/$(dirname "$refer_path")/$png_path
               fi
@@ -120,7 +120,7 @@ jobs:
                   fi
                 fi
               else
-                echo "$check_path does not exist"
+                echo "2 $check_path $png_line does not exist"
                 fail="TRUE"
               fi
             done
