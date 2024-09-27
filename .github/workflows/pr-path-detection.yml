@@ -91,7 +91,7 @@ jobs:
               png_path=$(echo "$png_line"|cut -d '(' -f2 | cut -d ')' -f1)
               if [[ "${png_path:0:1}" == "/" ]]; then
                 check_path=${{github.workspace}}$png_path
-              elif [[ "${png_path:0:1}" == "#" ]]; then
+              elif [[ "$png_path" == *#* ]]; then
                 echo $png_path
                 check_path=${{github.workspace}}/$refer_path
                 echo "1 check_path is "$check_path
