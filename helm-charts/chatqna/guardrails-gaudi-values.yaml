@@ -27,7 +27,7 @@ tgi:
   accelDevice: "gaudi"
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
-    tag: "2.0.1"
+    tag: "2.0.5"
   resources:
     limits:
       habana.ai/gaudi: 1
@@ -40,7 +40,7 @@ tgi-guardrails:
   LLM_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
-    tag: "2.0.1"
+    tag: "2.0.5"
   resources:
     limits:
       habana.ai/gaudi: 1
