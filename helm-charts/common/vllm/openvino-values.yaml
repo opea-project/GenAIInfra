@@ -6,10 +6,10 @@
 openvino_enabled: true
 
 image:
-  repository: vllm
+  repository: opea/vllm-openvino
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "openvino"
+  tag: "latest"
 
 extraCmdArgs: []
 
