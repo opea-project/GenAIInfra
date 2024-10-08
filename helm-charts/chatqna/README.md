@@ -85,7 +85,7 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 
 helm -f ./chatqna/vllm-openvino-values.yaml install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm.enabled=true
 
-# If you are behind a proxy, please add `--set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy}` in above installation commands. Please make sure `http_proxy` and `https_proxy` environment variables are set in your current shell environment. 
+# If you are behind a proxy, please add `--set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy}` in above installation commands. Please make sure `http_proxy` and `https_proxy` environment variables are set in your current shell environment.
 ```
 
 ### IMPORTANT NOTE
