@@ -20,15 +20,24 @@ function generate_yaml {
      extraparams="--set image.tag=$NEWTAG"
   fi
 
-  helm template $chart ./common/$chart --skip-tests --values ./common/$chart/values.yaml --set global.extraEnvConfig=extra-env-config,global.modelUseHostPath=$MODELPATH,noProbe=true $extraparams > ${outputdir}/$chart.yaml
+  helm template $chart ./common/$chart --skip-tests --values ./common/$chart/values.yaml --set global.extraEnvConfig=extra-env-config,global.modelUseHostPath=$MODELPATH $extraparams > ${outputdir}/$chart.yaml
 
   for f in `ls ./common/$chart/*-values.yaml 2>/dev/null `; do
-    ext=$(basename $f | cut -d'-' -f1)
+    filename=$(basename $f)
+    releasename=$chart
+    if [[ "$filename" =~ ^variant_.*-values.yaml ]]; then
+      ext=$(echo $filename | sed 's/^variant_//' | sed 's/-values.yaml$//')
+      outputfile="$ext-${chart}.yaml"
+      releasename=$ext-$chart
+    else
+      ext=$(echo $filename | sed 's/-values.yaml$//')
+      outputfile="${chart}_${ext}.yaml"
+    fi
     extraparams=""
     if [[ $(grep -c 'tag: "latest"' $f) != 0 ]]; then
        extraparams="--set image.tag=$NEWTAG"
     fi
-    helm template $chart ./common/$chart --skip-tests --values ${f} --set global.extraEnvConfig=extra-env-config,global.modelUseHostPath=$MODELPATH,noProbe=true $extraparams > ${outputdir}/${chart}_${ext}.yaml
+    helm template $releasename ./common/$chart --skip-tests --values ${f} --set global.extraEnvConfig=extra-env-config,global.modelUseHostPath=$MODELPATH $extraparams > ${outputdir}/${outputfile}
   done
 }
 
@@ -41,7 +50,3 @@ do
 	echo "Update manifest for $chartname..."
 	generate_yaml $chartname $OUTPUTDIR
 done
-
-# we need special version of docsum-llm-uservice
-echo "Update manifest for docsum-llm-uservice..."
-helm template docsum ./common/llm-uservice --skip-tests --set global.extraEnvConfig=extra-env-config,global.modelUseHostPath=$MODELPATH,noProbe=true,image.repository=opea/llm-docsum-tgi,image.tag=$NEWTAG> ${OUTPUTDIR}/docsum-llm-uservice.yaml

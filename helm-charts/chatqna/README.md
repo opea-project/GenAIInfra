@@ -2,24 +2,25 @@
 
 Helm chart for deploying ChatQnA service. ChatQnA depends on the following services:
 
-- [data-prep](../common/data-prep)
-- [embedding-usvc](../common/embedding-usvc)
-- [tei](../common/tei)
-- [retriever-usvc](../common/retriever-usvc)
-- [redis-vector-db](../common/redis-vector-db)
-- [reranking-usvc](../common/reranking-usvc)
-- [teirerank](../common/teirerank)
+- [data-prep](../common/data-prep/README.md)
+- [embedding-usvc](../common/embedding-usvc/README.md)
+- [tei](../common/tei/README.md)
+- [retriever-usvc](../common/retriever-usvc/README.md)
+- [redis-vector-db](../common/redis-vector-db/README.md)
+- [reranking-usvc](../common/reranking-usvc/README.md)
+- [teirerank](../common/teirerank/README.md)
 
-Apart from above mentioned services, there are following conditional dependencies (out of which, one are required):
+Apart from above mentioned services, some conditional dependencies are mentioned below (out of which, only one needs to be setup):
 
 1. If we want to use TGI as our inference service, following 2 services will be required:
 
-   - [llm-uservice](../common/llm-uservice)
-   - [tgi](../common/tgi)
+   - [llm-uservice](../common/llm-uservice/README.md)
+   - [tgi](../common/tgi/README.md)
 
-2. If we want to use vLLM inference service, following 2 services would be required:
-   - [llm-ctrl-uservice](../common/llm-ctrl-uservice)
-   - [vllm](../common/vllm)
+2. As an alternative to TGI, if we want to use vLLM inference service, following 2 services would be required instead:
+
+   - [llm-ctrl-uservice](../common/llm-ctrl-uservice/README.md)
+   - [vllm](../common/vllm/README.md)
 
 ## Installing the Chart
 
@@ -128,3 +129,7 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 | tgi.LLM_MODEL_ID                       | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
 | vllm-openvino.LLM_MODEL_ID             | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                |
 | global.horizontalPodAutoscaler.enabled | bool   | false                         | HPA autoscaling for the TGI and TEI service deployments based on metrics they provide. See HPA section in ../README.md before enabling! |
+
+## Troubleshooting
+
+If you encounter any issues, please refer to [ChatQnA Troubleshooting](troubleshooting.md).

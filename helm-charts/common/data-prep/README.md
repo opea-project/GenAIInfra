@@ -6,7 +6,7 @@ data-prep will use redis and tei service, please specify the endpoints.
 
 ## (Option1): Installing the chart separately
 
-First, you need to install the tei and redis-vector-db chart, please refer to the [tei](../tei) and [redis-vector-db](../redis-vector-db) for more information.
+First, you need to install the tei and redis-vector-db chart, please refer to the [tei](../tei/README.md) and [redis-vector-db](../redis-vector-db/README.md) for more information.
 
 After you've deployted the tei and redis-vector-db chart successfully, please run `kubectl get svc` to get the service endpoint and URL respectively, i.e. `http://tei`, `redis://redis-vector-db:6379`.
 

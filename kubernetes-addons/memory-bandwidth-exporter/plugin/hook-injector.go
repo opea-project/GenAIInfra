@@ -193,7 +193,7 @@ func (p *Plugin) Run(isNeed bool) error {
 	}
 
 	ctx := context.Background()
-	dirs := []string{hooks.DefaultDir, hooks.OverrideDir}
+	dirs := []string{hooks.OverrideDir}
 	mgr, err = hooks.New(ctx, dirs, []string{})
 	if err != nil {
 		return fmt.Errorf("failed to set up hook manager: %v", err)

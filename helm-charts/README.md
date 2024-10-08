@@ -7,11 +7,12 @@ This directory contains helm charts for [GenAIComps](https://github.com/opea-pro
 - [Helm Charts](#helm-charts)
   - [Examples](#examples)
   - [Components](#components)
-- [How to deploy with helm charts](#deploy-with-helm-charts)
+- [Deploy with helm charts](#deploy-with-helm-charts)
+  - [From Source Code](#from-source-code)
+  - [Using Helm Charts repository](#using-helm-charts-repository)
 - [Helm Charts Options](#helm-charts-options)
 - [Using Persistent Volume](#using-persistent-volume)
 - [Using Private Docker Hub](#using-private-docker-hub)
-- [Helm Charts repository](#helm-chart-repository)
 - [Generate manifests from Helm Charts](#generate-manifests-from-helm-charts)
 
 ## Helm Charts
@@ -22,12 +23,12 @@ List of supported workloads and components.
 
 AI application examples you can run directly on Xeon and Gaudi. You can also refer to these examples to develop your own customized AI application.
 
-| Helm chart               | Link to GenAIExamples                                                                    | Description                                                                                     |
-| ------------------------ | ---------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| [codegen](./codegen)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/CodeGen)       | An example of copilot designed for code generation in Visual Studio Code.                       |
-| [codetrans](./codetrans) | [Code Translation](https://github.com/opea-project/GenAIExamples/tree/main/CodeTrans)    | An example of programming language code translation.                                            |
-| [chatqna](./chatqna)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
-| [docsum](./docsum)       | [Document Summarization](https://github.com/opea-project/GenAIExamples/tree/main/DocSum) | An example of document summarization.                                                           |
+| Helm chart                         | Link to GenAIExamples                                                                              | Description                                                                                     |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [codegen](./codegen/README.md)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/CodeGen/README.md)       | An example of copilot designed for code generation in Visual Studio Code.                       |
+| [codetrans](./codetrans/README.md) | [Code Translation](https://github.com/opea-project/GenAIExamples/tree/main/CodeTrans/README.md)    | An example of programming language code translation.                                            |
+| [chatqna](./chatqna/README.md)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA/README.md)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
+| [docsum](./docsum/README.md)       | [Document Summarization](https://github.com/opea-project/GenAIExamples/tree/main/DocSum/README.md) | An example of document summarization.                                                           |
 
 ### Components
 
@@ -35,7 +36,9 @@ Components which are building blocks for AI application.
 All components helm charts are put in the ./common directory, and the support list is growing.  
 Refer to [GenAIComps](https://github.com/opea-project/GenAIComps) for details of each component.
 
-## How to deploy with helm charts
+## Deploy with helm charts
+
+### From Source Code
 
 These helm charts are designed to be easy to start, which means you can deploy a workload easily without further options.  
 However, `HUGGINGFACEHUB_API_TOKEN` should be set in most cases for a workload to start up correctly.  
@@ -49,6 +52,27 @@ helm install $myrelease $chartname --set global.HUGGINGFACEHUB_API_TOKEN="insert
 ```
 
 Depends on your environment, you might want to customize some of the options, see [Helm Charts Options](#helm-charts-options) for further information.
+
+### Using Helm Charts repository
+
+The helm charts are released in this [helm chart repository](https://opea-project.github.io/GenAIInfra), you can use it directly.
+
+Add the repo:
+
+`helm repo add opea https://opea-project.github.io/GenAIInfra`
+
+Show all helm charts available in the repo:
+
+```
+helm repo update
+helm search repo opea
+```
+
+Install the chart:
+
+`helm install tgi opea/tgi`
+
+Use `helm --help` to see all commands for helm, and check [Helm Charts Options](#helm-charts-options) for more installation options.
 
 ## Helm Charts Options
 
@@ -142,10 +166,6 @@ To use local docker registry:
 export OPEA_IMAGE_REPO=192.168.0.100:5000/
 find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
 ```
-
-## Helm Charts repository (Experimental)
-
-https://opea-project.github.io/GenAIInfra
 
 ## Generate manifests from Helm Charts
 

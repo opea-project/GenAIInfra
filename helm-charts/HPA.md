@@ -37,7 +37,7 @@ unless rules have been added to pods preventing them from being scheduled on sam
 small requests would be an issue:
 
 - Multiple inferencing instances interfere / slow down each other, especially if there are no
-  [NRI policies](https://github.com/opea-project/GenAIEval/tree/main/doc/platform-optimization)
+  [NRI policies](https://github.com/opea-project/GenAIEval/tree/main/doc/platform-optimization/README.md)
   that provide further isolation
 - Containers can become non-functional when their actual resource usage crosses the specified limits
 

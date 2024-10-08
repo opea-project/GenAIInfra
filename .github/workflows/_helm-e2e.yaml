@@ -66,6 +66,7 @@ jobs:
           echo "RELEASE_NAME=${CHART_NAME}$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "NAMESPACE=${CHART_NAME}-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "ROLLOUT_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
+          echo "TEST_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "KUBECTL_TIMEOUT_SECONDS=60s" >> $GITHUB_ENV
           echo "should_cleanup=false" >> $GITHUB_ENV
           echo "skip_validate=false" >> $GITHUB_ENV
@@ -130,7 +131,7 @@ jobs:
           else
             LOG_PATH=/home/$(whoami)/logs
             chart=${{ env.CHART_NAME }}
-            helm test -n $NAMESPACE $RELEASE_NAME --logs |tee ${LOG_PATH}/charts-${chart}.log
+            helm test -n $NAMESPACE $RELEASE_NAME --logs --timeout "$TEST_TIMEOUT_SECONDS" | tee ${LOG_PATH}/charts-${chart}.log
             exit_code=$?
             if [ $exit_code -ne 0 ]; then
                 echo "Chart ${chart} test failed, please check the logs in ${LOG_PATH}!"
