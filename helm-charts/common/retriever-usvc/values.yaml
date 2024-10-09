@@ -18,7 +18,7 @@ TEI_EMBEDDING_ENDPOINT: ""
 EMBED_MODEL: ""
 
 REDIS_URL: ""
-INDEX_NAME: "rag-redis"
+indexName: "rag-redis"
 
 image:
   repository: opea/retriever-redis
@@ -50,6 +50,7 @@ service:
   type: ClusterIP
   # The default port for retriever service is 7000
   port: 7000
+  containerPort: 7000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

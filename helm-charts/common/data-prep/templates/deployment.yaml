@@ -41,9 +41,15 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.entryCommand }}
+          command: {{ .Values.entryCommand }}
+          args:
+            - "-c"
+            - "sleep 15 && python ingest_videos.py"
+          {{- end }}
           ports:
             - name: data-prep
-              containerPort: 6007
+              containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           volumeMounts:
             - mountPath: /tmp

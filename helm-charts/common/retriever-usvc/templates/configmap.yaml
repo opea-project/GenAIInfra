@@ -8,6 +8,17 @@ metadata:
   labels:
     {{- include "retriever-usvc.labels" . | nindent 4 }}
 data:
+  {{- if .Values.vdmsHost }}
+  VDMS_HOST: {{ .Values.vdmsHost | quote }}
+  {{- else }}
+  VDMS_HOST: "{{ .Release.Name }}-vdms-vector-db"
+  {{- end }}
+  {{- if .Values.vdmsPort }}
+  VDMS_PORT: {{ .Values.vdmsPort | quote }}
+  {{- end }}
+  {{- if .Values.useClip }}
+  USECLIP: {{ .Values.useClip | quote }}
+  {{- end }}
   {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
   TEI_EMBEDDING_ENDPOINT: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote }}
   {{- else if not .Values.EMBED_MODEL }}
@@ -15,16 +26,16 @@ data:
   {{- end }}
   EMBED_MODEL: {{ .Values.EMBED_MODEL | quote }}
   {{- if .Values.REDIS_URL }}
-  REDIS_URL: {{ .Values.REDIS_URL | quote}}
+  REDIS_URL: {{ .Values.REDIS_URL | quote }}
   {{- else }}
   REDIS_URL: "redis://{{ .Release.Name }}-redis-vector-db:6379"
   {{- end }}
-  INDEX_NAME: {{ .Values.INDEX_NAME | quote }}
+  INDEX_NAME: {{ .Values.indexName | quote }}
   EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   {{- if and (not .Values.REDIS_URL) (and (not .Values.TEI_EMBEDDING_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy)) }}
-  no_proxy: "{{ .Release.Name }}-tei,{{ .Release.Name }}-redis-vector-db,{{ .Values.global.no_proxy }}"
+  no_proxy: "{{ .Release.Name }}-tei,{{ .Release.Name }}-redis-vector-db,{{ .Release.Name }}-vdms-vector-db,{{ .Values.global.no_proxy }}"
   {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}

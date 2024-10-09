@@ -1,0 +1,14 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: opea/videoqna-ui:latest
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+backendServiceEndpoint: "/v1/videoqna"
+backendHealthCheckEndpoint: "/v1/health_check"
+
+service:
+  type: ClusterIP
+  port: 5173

@@ -1,0 +1,12 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: opea/reranking-videoqna
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+chunkDuration: ""
+fileServerEndpoint: "/v1/dataprep/get_file"
+getVideoListEndpoint: "/v1/dataprep/get_videos"

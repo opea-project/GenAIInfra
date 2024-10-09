@@ -8,6 +8,12 @@ metadata:
   labels:
     {{- include "ui.labels" . | nindent 4 }}
 data:
+  {{- if .Values.backendHealthCheckEndpoint }}
+  BACKEND_HEALTH_CHECK_ENDPOINT: {{ .Values.backendHealthCheckEndpoint | quote }}
+  {{- end }}
+  {{- if .Values.backendServiceEndpoint }}
+  BACKEND_SERVICE_ENDPOINT: {{ .Values.backendServiceEndpoint | quote }}
+  {{- end }}
   APP_BACKEND_SERVICE_ENDPOINT: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   APP_DATA_PREP_SERVICE_URL: {{ .Values.DATAPREP_SERVICE_ENDPOINT | quote }}
   CHAT_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}

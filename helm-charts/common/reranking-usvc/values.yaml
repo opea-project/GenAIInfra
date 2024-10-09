@@ -45,6 +45,7 @@ service:
   type: ClusterIP
   # The default port for reranking service is 9000
   port: 8000
+  containerPort: 8000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

@@ -1,0 +1,16 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+autodependency:
+  vdms: false
+
+image:
+  repository: opea/dataprep-multimodal-vdm
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+indexName: "mega-videoqna"
+vdmsHost: ""
+vdmsPort: "8001"
+entryCommand: ["/bin/sh"]

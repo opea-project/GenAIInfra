@@ -4,14 +4,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "embedding-usvc.fullname" . }}
+  name: {{ include "videoqna.fullname" . }}
   labels:
-    {{- include "embedding-usvc.labels" . | nindent 4 }}
+    {{- include "videoqna.labels" . | nindent 4 }}
 spec:
+  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      {{- include "embedding-usvc.selectorLabels" . | nindent 6 }}
+      {{- include "videoqna.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,52 +21,42 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "embedding-usvc.selectorLabels" . | nindent 8 }}
+        {{- include "videoqna.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "videoqna.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Release.Name }}
-          envFrom:
-            - configMapRef:
-                name: {{ include "embedding-usvc.fullname" . }}-config
-            {{- if .Values.global.extraEnvConfig }}
-            - configMapRef:
-                name: {{ .Values.global.extraEnvConfig }}
-                optional: true
-            {{- end }}
+        - name: {{ .Chart.Name }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: embedding-usvc
-              containerPort: {{ .Values.service.containerPort }}
+            - name: http
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp
-          {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.readinessProbe }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.startupProbe }}
-          startupProbe:
-            {{- toYaml .Values.startupProbe | nindent 12 }}
-          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
       volumes:
-        - name: tmp
-          emptyDir: {}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -76,13 +68,4 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.evenly_distributed }}
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              {{- include "embedding-usvc.selectorLabels" . | nindent 14 }}
       {{- end }}

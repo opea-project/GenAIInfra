@@ -41,9 +41,15 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.entryCommand }}
+          command: {{ .Values.entryCommand }}
+          args:
+            - "-c"
+            - "sleep 30 && python retriever_vdms.py"
+          {{- end }}
           ports:
             - name: retriever-usvc
-              containerPort: 7000
+              containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           volumeMounts:
             - mountPath: /tmp

@@ -8,6 +8,14 @@ metadata:
   labels:
     {{- include "data-prep.labels" . | nindent 4 }}
 data:
+  {{- if .Values.vdmsHost }}
+  VDMS_HOST: {{ .Values.vdmsHost | quote }}
+  {{- else }}
+  VDMS_HOST: "{{ .Release.Name }}-vdms-vector-db"
+  {{- end }}
+  {{- if .Values.vdmsPort }}
+  VDMS_PORT: {{ .Values.vdmsPort | quote }}
+  {{- end }}
   {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
   TEI_ENDPOINT: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote}}
   {{- else if not .Values.EMBED_MODEL }}
@@ -19,7 +27,7 @@ data:
   {{- else }}
   REDIS_URL: "redis://{{ .Release.Name }}-redis-vector-db:6379"
   {{- end }}
-  INDEX_NAME: {{ .Values.INDEX_NAME | quote }}
+  INDEX_NAME: {{ .Values.indexName | quote }}
   KEY_INDEX_NAME: {{ .Values.KEY_INDEX_NAME | quote }}
   SEARCH_BATCH_SIZE: {{ .Values.SEARCH_BATCH_SIZE | quote }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
@@ -30,7 +38,7 @@ data:
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   {{- if and (not .Values.REDIS_URL) (and (not .Values.TEI_EMBEDDING_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy)) }}
-  no_proxy: "{{ .Release.Name }}-tei,{{ .Release.Name }}-redis-vector-db,{{ .Values.global.no_proxy }}"
+  no_proxy: "{{ .Release.Name }}-tei,{{ .Release.Name }}-redis-vector-db,{{ .Release.Name }}-vdms-vector-db,{{ .Values.global.no_proxy }}"
   {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}
