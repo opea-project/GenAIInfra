@@ -10,17 +10,19 @@ Helm chart for deploying ChatQnA service. ChatQnA depends on the following servi
 - [reranking-usvc](../common/reranking-usvc/README.md)
 - [teirerank](../common/teirerank/README.md)
 
-Apart from above mentioned services, some conditional dependencies are mentioned below (out of which, only one needs to be setup):
+For LLM inference, two more microservices will be required. We can either use [TGI](https://github.com/huggingface/text-generation-inference) or [vLLM](https://github.com/vllm-project/vllm) as our LLM backend. Depending on that, we will have following microservices as part of dependencies for ChatQnA application. 
 
-1. If we want to use TGI as our inference service, following 2 services will be required:
+1. For using **TGI** as an inference service, following 2 microservices will be required:
 
    - [llm-uservice](../common/llm-uservice/README.md)
    - [tgi](../common/tgi/README.md)
 
-2. As an alternative to TGI, if we want to use vLLM inference service, following 2 services would be required instead:
+2. For using **vLLM** as an inference service, following 2 microservices would be required:
 
    - [llm-ctrl-uservice](../common/llm-ctrl-uservice/README.md)
    - [vllm](../common/vllm/README.md)
+
+>__**Note**__: We shouldn't have both inference engine in our setup. We have to setup either of them. For this, conditional flags are added in the chart dependency. We will be switching off flag corresponding to one service and switching on the other, in order to have a proper setup of all ChatQnA dependencies.
 
 ## Installing the Chart
 
@@ -84,8 +86,6 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 # To use OpenVINO optimized vLLM inference engine on XEON device
 
 helm -f ./chatqna/vllm-openvino-values.yaml install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME}
-
-# If you are behind a proxy, please add `--set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy}` in above installation commands. Please make sure `http_proxy` and `https_proxy` environment variables are set in your current shell environment.
 ```
 
 ### IMPORTANT NOTE
