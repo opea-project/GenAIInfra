@@ -79,11 +79,11 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 ```bash
 # To use vLLM inference engine on XEON device
 
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm.enabled=true
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set tgi.enabled=false --set vllm.enabled=true
 
 # To use OpenVINO optimized vLLM inference engine on XEON device
 
-helm -f ./chatqna/vllm-openvino-values.yaml install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set tags.tgi=false --set vllm.enabled=true
+helm -f ./chatqna/vllm-openvino-values.yaml install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} 
 
 # If you are behind a proxy, please add `--set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy}` in above installation commands. Please make sure `http_proxy` and `https_proxy` environment variables are set in your current shell environment.
 ```

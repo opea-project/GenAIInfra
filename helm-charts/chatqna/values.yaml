@@ -51,6 +51,7 @@ horizontalPodAutoscaler:
 # Override values in specific subcharts
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  enabled: true
 
 vllm:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
@@ -58,10 +59,6 @@ vllm:
 
 llm-ctrl-uservice:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
-
-tags:
-  tgi: true
-  vllm: false
 
 # disable guardrails-usvc by default
 # See guardrails-values.yaml for guardrail related options
