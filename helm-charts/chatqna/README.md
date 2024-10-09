@@ -10,7 +10,7 @@ Helm chart for deploying ChatQnA service. ChatQnA depends on the following servi
 - [reranking-usvc](../common/reranking-usvc/README.md)
 - [teirerank](../common/teirerank/README.md)
 
-For LLM inference, two more microservices will be required. We can either use [TGI](https://github.com/huggingface/text-generation-inference) or [vLLM](https://github.com/vllm-project/vllm) as our LLM backend. Depending on that, we will have following microservices as part of dependencies for ChatQnA application. 
+For LLM inference, two more microservices will be required. We can either use [TGI](https://github.com/huggingface/text-generation-inference) or [vLLM](https://github.com/vllm-project/vllm) as our LLM backend. Depending on that, we will have following microservices as part of dependencies for ChatQnA application.
 
 1. For using **TGI** as an inference service, following 2 microservices will be required:
 
@@ -22,7 +22,7 @@ For LLM inference, two more microservices will be required. We can either use [T
    - [llm-ctrl-uservice](../common/llm-ctrl-uservice/README.md)
    - [vllm](../common/vllm/README.md)
 
->__**Note**__: We shouldn't have both inference engine in our setup. We have to setup either of them. For this, conditional flags are added in the chart dependency. We will be switching off flag corresponding to one service and switching on the other, in order to have a proper setup of all ChatQnA dependencies.
+> ****Note****: We shouldn't have both inference engine in our setup. We have to setup either of them. For this, conditional flags are added in the chart dependency. We will be switching off flag corresponding to one service and switching on the other, in order to have a proper setup of all ChatQnA dependencies.
 
 ## Installing the Chart
 
