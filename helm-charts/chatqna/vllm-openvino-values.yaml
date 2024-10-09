@@ -3,7 +3,7 @@
 
 tgi:
   enabled: false
-  
+
 vllm:
   enabled: true
   openvino_enabled: true
@@ -22,4 +22,4 @@ vllm:
   VLLM_OPENVINO_KVCACHE_SPACE: 32
   OMPI_MCA_btl_vader_single_copy_mechanism: none
 
-  ov_command: ["/bin/bash"]   
+  ov_command: ["/bin/bash"]
