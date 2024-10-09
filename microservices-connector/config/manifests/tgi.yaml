@@ -104,22 +104,22 @@ spec:
             failureThreshold: 24
             initialDelaySeconds: 8
             periodSeconds: 8
-            timeoutSeconds: 4
             tcpSocket:
               port: http
+            timeoutSeconds: 4
           readinessProbe:
             initialDelaySeconds: 16
             periodSeconds: 8
-            timeoutSeconds: 4
             tcpSocket:
               port: http
+            timeoutSeconds: 4
           startupProbe:
             failureThreshold: 180
             initialDelaySeconds: 10
             periodSeconds: 5
-            timeoutSeconds: 2
             tcpSocket:
               port: http
+            timeoutSeconds: 2
           resources:
             {}
       volumes:
@@ -133,10 +133,10 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
-      # extra time to finish processing buffered requests before pod is forcibly terminated
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
       terminationGracePeriodSeconds: 120
 ---
-# Source: tgi/templates/horizontalPorAutoscaler.yaml
+# Source: tgi/templates/horizontal-pod-autoscaler.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---
