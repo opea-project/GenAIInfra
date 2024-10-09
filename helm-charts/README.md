@@ -32,16 +32,16 @@ AI application examples you can run directly on Xeon and Gaudi. You can also ref
 
 ### Components
 
-Components which are building blocks for AI application.  
-All components helm charts are put in the ./common directory, and the support list is growing.  
+Components which are building blocks for AI application.
+All components helm charts are put in the ./common directory, and the support list is growing.
 Refer to [GenAIComps](https://github.com/opea-project/GenAIComps) for details of each component.
 
 ## Deploy with helm charts
 
 ### From Source Code
 
-These helm charts are designed to be easy to start, which means you can deploy a workload easily without further options.  
-However, `HUGGINGFACEHUB_API_TOKEN` should be set in most cases for a workload to start up correctly.  
+These helm charts are designed to be easy to start, which means you can deploy a workload easily without further options.
+However, `HUGGINGFACEHUB_API_TOKEN` should be set in most cases for a workload to start up correctly.
 Examples of deploy a workload:
 
 ```
@@ -91,7 +91,7 @@ There are global options(which should be shared across all components of a workl
 
 ## Using Persistent Volume
 
-It's common to use Persistent Volume(PV) for model caches(huggingface hub cache) in a production k8s cluster. We support to pass the PersistentVolumeClaim(PVC) to containers, but it's the user's responsibility to create the PVC depending on your k8s cluster's capability.  
+It's common to use Persistent Volume(PV) for model caches(huggingface hub cache) in a production k8s cluster. We support to pass the PersistentVolumeClaim(PVC) to containers, but it's the user's responsibility to create the PVC depending on your k8s cluster's capability.
 Here is an setup example using NFS on Ubuntu 22.04.
 
 - Export NFS directory from NFS server
@@ -154,10 +154,10 @@ helm install tgi common/tgi --set global.modelUsePVC=model-volume
 
 ## Using Private Docker Hub
 
-By default, we're using docker images from [official docker hub](https://hub.docker.com/u/opea), with docker image version aligned with OPEA releases.  
+By default, we're using docker images from [official docker hub](https://hub.docker.com/u/opea), with docker image version aligned with OPEA releases.
 If you have private hub or would like to use different docker image versions, see the following examples.
 
-To use the latest tag for all images:  
+To use the latest tag for all images:
 `find . -name '*values.yaml' -type f -exec sed -i 's#tag: ""#tag: latest#g' {} \;`
 
 To use local docker registry:
@@ -169,8 +169,8 @@ find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repositor
 
 ## Generate manifests from Helm Charts
 
-Some users may want to use kubernetes manifests(yaml files) for workload deployment, we do not maintain manifests itself, and will generate them using `helm template`.  
-See update_genaiexamples.sh for how the manifests are generated for supported GenAIExamples.  
-See update_manifests.sh for how the manifests are generated for supported GenAIComps.  
-Please note that the above scripts have hardcoded settings to reduce user configuration effort.  
+Some users may want to use kubernetes manifests(yaml files) for workload deployment, we do not maintain manifests itself, and will generate them using `helm template`.
+See update_genaiexamples.sh for how the manifests are generated for supported GenAIExamples.
+See update_manifests.sh for how the manifests are generated for supported GenAIComps.
+Please note that the above scripts have hardcoded settings to reduce user configuration effort.
 They are not supposed to be directly used by users.

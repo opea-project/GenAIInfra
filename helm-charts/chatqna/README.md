@@ -22,7 +22,7 @@ For LLM inference, two more microservices will be required. We can either use [T
    - [llm-ctrl-uservice](../common/llm-ctrl-uservice/README.md)
    - [vllm](../common/vllm/README.md)
 
-> ****Note****: We shouldn't have both inference engine in our setup. We have to setup either of them. For this, conditional flags are added in the chart dependency. We will be switching off flag corresponding to one service and switching on the other, in order to have a proper setup of all ChatQnA dependencies.
+> **__Note :__** We shouldn't have both inference engine in our setup. We have to setup either of them. For this, conditional flags are added in the chart dependency. We will be switching off flag corresponding to one service and switching on the other, in order to have a proper setup of all ChatQnA dependencies.
 
 ## Installing the Chart
 
