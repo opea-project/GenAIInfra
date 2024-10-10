@@ -1,17 +1,17 @@
 # llm-ctrl Microservice
 
-Helm chart for deploying a microservice which facilitates connections and handles responses from OpenVINO vLLM microservice.
+Helm chart for deploying LLM controller microservice which facilitates connections and handles responses from OpenVINO vLLM microservice.
 
-`llm-ctrl-uservice` depends on OpenVINO vLLM. You should properly set `vLLM_ENDPOINT` as the HOST URI of vLLM microservice. If not set, it will consider the default value : `http://<helm-release-name>-vllm-openvino:80`
+`llm-ctrl-uservice` depends on vLLM microservice. You should properly set `vLLM_ENDPOINT` as the HOST URI of vLLM microservice. If not set, it will consider the default value : `http://<helm-release-name>-vllm:80`
 
 As this service depends on vLLM microservice, we can proceed in either of 2 ways:
 
-- Install both microservices separately one after another.
-- Install the vLLM microservice as dependency for the our main `llm-ctrl-uservice` microservice.
+- Install both microservices individually.
+- Install the vLLM microservice as dependency for `llm-ctrl-uservice` microservice.
 
-## (Option 1): Installing the chart separately:
+## (Option 1): Installing the charts individually:
 
-First, you need to install the `vllm-openvino` chart, please refer to the [vllm](../vllm) chart for more information.
+First, you need to install the `vllm` chart, please refer to the [vllm](../vllm) chart for more information.
 
 After you've deployed the `vllm` chart successfully, please run `kubectl get svc` to get the vLLM service name with port. We need to provide this to `llm-ctrl-uservice` as a value for vLLM_ENDPOINT for letting it discover and connect to the vLLM microservice.
 
