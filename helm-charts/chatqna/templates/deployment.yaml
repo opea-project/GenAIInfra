@@ -33,8 +33,13 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           env:
+            {{- if .Values.vllm.enabled }}
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-llm-ctrl-uservice
+            {{- else }}
             - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-uservice
+            {{- end }}
             - name: RERANK_SERVICE_HOST_IP
               value: {{ .Release.Name }}-reranking-usvc
             - name: RETRIEVER_SERVICE_HOST_IP
