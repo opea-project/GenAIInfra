@@ -18,6 +18,14 @@ service:
   type: ClusterIP
   port: 8888
 
+imagePullSecrets: []
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+resources: {}
+
 securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
@@ -43,6 +51,14 @@ horizontalPodAutoscaler:
 # Override values in specific subcharts
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  enabled: true
+
+vllm:
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  enabled: false
+
+llm-ctrl-uservice:
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 # disable guardrails-usvc by default
 # See guardrails-values.yaml for guardrail related options
@@ -62,9 +78,9 @@ global:
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+
   # set modelUseHostPath or modelUsePVC to use model cache.
   modelUseHostPath: ""
-  # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
 
   # Prometheus Helm installation info for subchart serviceMonitors

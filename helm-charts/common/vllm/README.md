@@ -10,23 +10,43 @@ To install the chart, run the following:
 
 Note that you cannot use vllm as the service release name due to [environment variables conflict](https://docs.vllm.ai/en/stable/serving/env_vars.html#environment-variables).
 
-```console
+```bash
 cd GenAIInfra/helm-charts/common
 export MODELDIR=/mnt/opea-models
 export MODELNAME="Intel/neural-chat-7b-v3-3"
 export HFTOKEN="insert-your-huggingface-token-here"
-helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
-# To deploy on Gaudi enabled kubernetes cluster
-# helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values gaudi-values.yaml
+
+# If you are behind a proxy, please export the appropriate proxy values.
+export http_proxy=<your_http_proxy>
+export https_proxy=<your_https_proxy>
+
 ```
 
-By default, the vllm service will downloading the "Intel/neural-chat-7b-v3-3".
+- Deploy on XEON device:
 
-If you already cached the model locally, you can pass it to container like this example:
+```bash
+helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
+```
 
+- To deploy on Gaudi enabled Kubernetes cluster:
+
+```bash
+helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values vllm/gaudi-values.yaml
+```
+
+- To deploy OpenVINO optimized vLLM on XEON device:
+
+```bash
+helm -f vllm/openvino-values.yaml install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy}
+```
+
+By default, the vLLM service will download "Intel/neural-chat-7b-v3-3" model. If you already cached the model locally, you can pass it to container like this example:
+
+```bash
 MODELDIR=/mnt/opea-models
 
 MODELNAME="facebook/opt-125m"
+```
 
 ## Verify
 
