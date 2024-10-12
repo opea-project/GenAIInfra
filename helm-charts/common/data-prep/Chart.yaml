@@ -17,3 +17,7 @@ dependencies:
     version: 1.0.0
     repository: file://../redis-vector-db
     condition: redis-vector-db.enabled
+  - name: milvus
+    version: 4.2.12
+    repository: https://zilliztech.github.io/milvus-helm/
+    condition: milvus.enabled
