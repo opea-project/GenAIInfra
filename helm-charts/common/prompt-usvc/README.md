@@ -25,7 +25,7 @@ helm install prompt-usvc . --set MONGO_HOST=${MONGO_HOST} --set MONGO_PORT=${MON
 ```console
 cd GenAIInfra/helm-charts/common/prompt-usvc
 helm dependency update
-helm install prompt-usvc . --set autodependency.enabled=true
+helm install prompt-usvc . --set mongodb.enabled=true
 ```
 
 ## Verify

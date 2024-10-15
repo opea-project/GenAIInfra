@@ -25,7 +25,7 @@ helm install chathistory-usvc . --set MONGO_HOST=${MONGO_HOST} --set MONGO_PORT=
 ```console
 cd GenAIInfra/helm-charts/common/chathistory-usvc
 helm dependency update
-helm install chathistory-usvc . --set autodependency.enabled=true
+helm install chathistory-usvc . --set mongodb.enabled=true
 ```
 
 ## Verify
