@@ -1,22 +1,10 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-tei:
-  accelDevice: "gaudi"
-  image:
-    repository: ghcr.io/huggingface/tei-gaudi
-    tag: synapse_1.16
-  resources:
-    limits:
-      habana.ai/gaudi: 1
-  securityContext:
-    readOnlyRootFilesystem: false
-  livenessProbe:
-    timeoutSeconds: 1
-  readinessProbe:
-    timeoutSeconds: 1
+# Accelerate inferencing in heaviest components to improve performance
+# by overriding their subchart values
 
-# To override values in subchart tgi
+# TGI: largest bottleneck for ChatQnA
 tgi:
   accelDevice: "gaudi"
   image:
@@ -41,3 +29,36 @@ tgi:
     periodSeconds: 5
     timeoutSeconds: 1
     failureThreshold: 120
+
+# Reranking: second largest bottleneck when reranking is in use
+# (i.e. query context docs have been uploaded with data-prep)
+teirerank:
+  accelDevice: "gaudi"
+  image:
+    repository: opea/tei-gaudi
+    tag: "1.0"
+  resources:
+    limits:
+      habana.ai/gaudi: 1
+  securityContext:
+    readOnlyRootFilesystem: false
+  livenessProbe:
+    timeoutSeconds: 1
+  readinessProbe:
+    timeoutSeconds: 1
+
+# Embedding: Second largest bottleneck without rerank
+tei:
+  accelDevice: "gaudi"
+  image:
+    repository: ghcr.io/huggingface/tei-gaudi
+    tag: synapse_1.16
+  resources:
+    limits:
+      habana.ai/gaudi: 1
+  securityContext:
+    readOnlyRootFilesystem: false
+  livenessProbe:
+    timeoutSeconds: 1
+  readinessProbe:
+    timeoutSeconds: 1
