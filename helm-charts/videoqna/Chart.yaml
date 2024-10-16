@@ -23,12 +23,12 @@ dependencies:
   - name: vdms-vector-db
     version: 1.0.0
     repository: "file://../common/vdms-vector-db"
-  - name: lvm-server
+  - name: lvm-serving
     version: 1.0.0
-    repository: "file://../common/lvm-server"
-  - name: lvm
+    repository: "file://../common/lvm-serving"
+  - name: lvm-uservice
     version: 1.0.0
-    repository: "file://../common/lvm"
+    repository: "file://../common/lvm-uservice"
   - name: ui
     version: 1.0.0
     alias: videoqna-ui

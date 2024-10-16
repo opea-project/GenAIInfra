@@ -1,46 +1,47 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for data-prep.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Default values for lvm-uservice.
 
 autodependency:
   enabled: false
-  vdms: false
 
 replicaCount: 1
 
+lvmEndpoint: ""
 image:
-  repository: opea/dataprep-redis
+  repository: opea/lvm-video-llama
+  # This sets the pull policy for images.
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 imagePullSecrets: []
+# This is to override the chart name.
 nameOverride: ""
 fullnameOverride: ""
 
 podAnnotations: {}
+podLabels: {}
 
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext:
-  readOnlyRootFilesystem: false
-  allowPrivilegeEscalation: false
-  runAsNonRoot: true
-  runAsUser: 1000
+securityContext: {}
   capabilities:
     drop:
     - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
   seccompProfile:
     type: RuntimeDefault
 
 service:
   type: ClusterIP
-  port: 6007
-  containerPort: 6007
+  port: 9000
+  containerPort: 9000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -55,22 +56,19 @@ resources: {}
   #   memory: 128Mi
 
 livenessProbe:
-  httpGet:
-    path: v1/health_check
-    port: data-prep
+  tcpSocket:
+    port: http
   initialDelaySeconds: 5
   periodSeconds: 5
   failureThreshold: 24
 readinessProbe:
-  httpGet:
-    path: v1/health_check
-    port: data-prep
+  tcpSocket:
+    port: http
   initialDelaySeconds: 5
   periodSeconds: 5
 startupProbe:
-  httpGet:
-    path: v1/health_check
-    port: data-prep
+  tcpSocket:
+    port: http
   initialDelaySeconds: 5
   periodSeconds: 5
   failureThreshold: 120
@@ -81,24 +79,18 @@ tolerations: []
 
 affinity: {}
 
-# Set it as a non-null string, such as true, if you want to enable logging facility,
-# otherwise, keep it as "" to disable it.
-LOGFLAG: ""
-
-# text embedding inference service URL, e.g. http://<service-name>:<port>
-TEI_EMBEDDING_ENDPOINT: ""
-
-# local embedder's model
-EMBED_MODEL: ""
-
-# redis DB service URL, e.g. redis://<service-name>:<port>
-REDIS_URL: ""
-indexName: "rag-redis"
-KEY_INDEX_NAME: "file-keys"
-SEARCH_BATCH_SIZE: 10
-
 global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+
+  # Choose where to save your downloaded models
+  # Set modelUseHostPath for local directory, this is good for one node test. Example:
+  # modelUseHostPath: /mnt/opea-models
+  # Set modelUsePVC for PersistentVolumeClaim(PVC), which is suitable for multinode deployment. Example:
+  # modelUsePVC: model-volume
+  # You can only set one of the following var, the behavior is not defined is both are set.
+  # By default, both var are set to empty, the model will be downloaded and saved to a tmp volume.
+  modelUseHostPath: ""
+  modelUsePVC: ""

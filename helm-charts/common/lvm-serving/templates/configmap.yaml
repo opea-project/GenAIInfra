@@ -1,0 +1,14 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "lvm-serving.fullname" . }}-config
+  labels:
+    {{- include "lvm-serving.labels" . | nindent 4 }}
+data:
+  llm_download: {{ .Values.llmDownloadFlag }}
+  http_proxy: {{ .Values.global.http_proxy | quote }}
+  https_proxy: {{ .Values.global.https_proxy | quote }}
+  no_proxy: {{ .Values.global.no_proxy | quote }}

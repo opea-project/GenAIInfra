@@ -4,16 +4,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "videoqna.fullname" . }}
+  name: {{ include "lvm-uservice.fullname" . }}
   labels:
-    {{- include "videoqna.labels" . | nindent 4 }}
+    {{- include "lvm-uservice.labels" . | nindent 4 }}
 spec:
   {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "videoqna.selectorLabels" . | nindent 6 }}
+      {{- include "lvm-uservice.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -21,7 +21,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "videoqna.labels" . | nindent 8 }}
+        {{- include "lvm-uservice.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -30,7 +30,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "videoqna.serviceAccountName" . }}
+      serviceAccountName: {{ include "lvm-uservice.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -39,12 +39,6 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          {{- if .Values.entryCommand }}
-          command: {{ .Values.entryCommand }}
-          args:
-            - "-c"
-            - "sleep 45 && python videoqna.py"
-          {{- end }}
           ports:
             - name: http
               containerPort: {{ .Values.service.containerPort }}
