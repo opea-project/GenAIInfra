@@ -24,7 +24,7 @@ helm install tts . --set TTS_ENDPOINT=${TTS_ENDPOINT}
 ```console
 cd GenAIInfra/helm-charts/common/tts
 helm dependency update
-helm install tts . --set autodependency.enabled=true
+helm install tts . --set speecht5.enabled=true
 ```
 
 ## Verify

@@ -5,7 +5,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-autodependency:
+tei:
+  enabled: false
+redis-vector-db:
   enabled: false
 
 replicaCount: 1

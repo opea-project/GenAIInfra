@@ -25,7 +25,7 @@ helm install retriever-usvc . --set REDIS_URL=${REDIS_URL} --set TEI_EMBEDDING_E
 ```console
 cd GenAIInfra/helm-charts/common/retriever-usvc
 helm dependency update
-helm install retriever-usvc . --set autodependency.enabled=true
+helm install retriever-usvc . --set tei.enabled=true --set redis-vector-db.enabled=true
 ```
 
 ## Verify

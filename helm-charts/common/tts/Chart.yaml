@@ -13,4 +13,4 @@ dependencies:
   - name: speecht5
     version: 1.0.0
     repository: file://../speecht5
-    condition: autodependency.enabled
+    condition: speecht5.enabled
