@@ -9,7 +9,6 @@ on:
     types: [opened, reopened, ready_for_review, synchronize] # added `ready_for_review` since draft is skipped
     paths:
       - helm-charts/**
-      - .github/workflows/chart-e2e.yaml
   workflow_dispatch:
 
 concurrency:
@@ -39,7 +38,7 @@ jobs:
           merged_commit=$(git log -1 --format='%H')
           e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
           grep "^$CHARTS_DIR/" | \
-          grep -vE 'README.md|common|*.sh' | \
+          grep -vE 'README.md|CI.md|common|*.sh' | \
           cut -d'/' -f2 | sort -u )
           common_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
           grep "^$CHARTS_DIR/common" | \
@@ -47,11 +46,8 @@ jobs:
           cut -d'/' -f3 | sort -u )
           run_matrix="{\"include\":["
           for chart in ${e2e_charts}; do
-            for file in "$CHARTS_DIR/$chart"/*values.yaml; do
+            for file in "$CHARTS_DIR/$chart"/ci-*values.yaml; do
               if [ -f "$file" ]; then
-                if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]]; then
-                  continue
-                fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
                   run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
@@ -62,11 +58,8 @@ jobs:
             done
           done
           for chart in ${common_charts}; do
-            for file in "$CHARTS_DIR/common/$chart"/*values.yaml; do
+            for file in "$CHARTS_DIR/common/$chart"/ci-*values.yaml; do
               if [ -f "$file" ]; then
-                if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]]; then
-                  continue
-                fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
                   run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
