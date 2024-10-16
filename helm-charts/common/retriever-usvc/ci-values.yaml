@@ -6,6 +6,6 @@
 # Declare variables to be passed into your templates.
 
 tei:
-  enabled: false
+  enabled: true
 redis-vector-db:
-  enabled: false
+  enabled: true
