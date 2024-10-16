@@ -15,6 +15,21 @@ spec:
     - name: curl
       image: python:3.10.14
       command: ['bash', '-c']
+      {{- if contains "dataprep-multimodal-vdms" .Values.image.repository }}
+      args:
+        - |
+          curl -LO "https://github.com/opea-project/GenAIExamples/raw/refs/heads/main/VideoQnA/docker_compose/intel/cpu/xeon/data/op_1_0320241830.mp4"
+          max_retry=5
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep -sS --fail-with-body \
+            -X POST \
+            -H "Content-Type: multipart/form-data" \
+            -F "files=@./op_1_0320241830.mp4" && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+      {{- else }}
       args:
         - |
           echo "test file" > /tmp/file1.txt;
@@ -28,4 +43,5 @@ spec:
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+      {{- end }}
   restartPolicy: Never

@@ -5,7 +5,7 @@ autodependency:
   vdms: false
 
 image:
-  repository: opea/dataprep-multimodal-vdm
+  repository: opea/dataprep-multimodal-vdms
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"

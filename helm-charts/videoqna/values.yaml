@@ -85,7 +85,6 @@ embedding-usvc:
   image:
     repository: opea/embedding-multimodal-clip
     pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
 
 retriever-usvc:
