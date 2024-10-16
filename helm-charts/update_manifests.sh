@@ -25,6 +25,9 @@ function generate_yaml {
   for f in `ls ./common/$chart/*-values.yaml 2>/dev/null `; do
     filename=$(basename $f)
     releasename=$chart
+    if [[ $filename == ci-* ]]; then
+      continue
+    fi
     if [[ "$filename" =~ ^variant_.*-values.yaml ]]; then
       ext=$(echo $filename | sed 's/^variant_//' | sed 's/-values.yaml$//')
       outputfile="$ext-${chart}.yaml"
