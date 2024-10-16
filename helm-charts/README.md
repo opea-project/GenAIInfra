@@ -1,13 +1,13 @@
 # Helm charts for deploying GenAI Components and Examples
 
-This directory contains helm charts for [GenAIComps](https://github.com/opea-project/GenAIComps) and [GenAIExamples](https://github.com/opea-project/GenAIExamples) deployment on Kubernetes.
+This directory contains Helm charts for [GenAIComps](https://github.com/opea-project/GenAIComps) and [GenAIExamples](https://github.com/opea-project/GenAIExamples) deployment on Kubernetes.
 
 ## Table of Contents
 
 - [Helm Charts](#helm-charts)
   - [Examples](#examples)
   - [Components](#components)
-- [Deploy with helm charts](#deploy-with-helm-charts)
+- [Deploy with Helm charts](#deploy-with-helm-charts)
   - [From Source Code](#from-source-code)
   - [Using Helm Charts repository](#using-helm-charts-repository)
 - [Helm Charts Options](#helm-charts-options)
@@ -32,16 +32,16 @@ AI application examples you can run directly on Xeon and Gaudi. You can also ref
 
 ### Components
 
-Components which are building blocks for AI application.  
-All components helm charts are put in the ./common directory, and the support list is growing.  
+Components which are building blocks for AI application.
+All components Helm charts are put in the ./common directory, and the support list is growing.
 Refer to [GenAIComps](https://github.com/opea-project/GenAIComps) for details of each component.
 
-## Deploy with helm charts
+## Deploy with Helm charts
 
 ### From Source Code
 
-These helm charts are designed to be easy to start, which means you can deploy a workload easily without further options.  
-However, `HUGGINGFACEHUB_API_TOKEN` should be set in most cases for a workload to start up correctly.  
+These Helm charts are designed to be easy to start, which means you can deploy a workload easily without further options.
+However, `HUGGINGFACEHUB_API_TOKEN` should be set in most cases for a workload to start up correctly.
 Examples of deploy a workload:
 
 ```
@@ -51,17 +51,17 @@ helm dependency update $chartname
 helm install $myrelease $chartname --set global.HUGGINGFACEHUB_API_TOKEN="insert-your-huggingface-token-here"
 ```
 
-Depends on your environment, you might want to customize some of the options, see [Helm Charts Options](#helm-charts-options) for further information.
+Depending on your environment, you may want to customize some of the options, see [Helm Charts Options](#helm-charts-options) for further information.
 
 ### Using Helm Charts repository
 
-The helm charts are released in this [helm chart repository](https://opea-project.github.io/GenAIInfra), you can use it directly.
+The Helm charts are released in this [Helm chart repository](https://opea-project.github.io/GenAIInfra), you can use it directly.
 
 Add the repo:
 
 `helm repo add opea https://opea-project.github.io/GenAIInfra`
 
-Show all helm charts available in the repo:
+Show all Helm charts available in the repo:
 
 ```
 helm repo update
@@ -72,27 +72,30 @@ Install the chart:
 
 `helm install tgi opea/tgi`
 
-Use `helm --help` to see all commands for helm, and check [Helm Charts Options](#helm-charts-options) for more installation options.
+Use `helm --help` to see all commands for Helm, and check [Helm Charts Options](#helm-charts-options) for more installation options.
 
 ## Helm Charts Options
 
-Here we list a few important options that user might want to change, for more options, you can read each helm chart's README file and check the values.yaml and gaudi-values.yaml(If applicable).
+Here is a list of a few important options that user may want to change.
 
-There are global options(which should be shared across all components of a workload) and specific options that only apply to one component.
+For more options, read each Helm chart's `README.md` file and check its `values.yaml` or `gaudi-values.yaml` files (if applicable).
+
+There are global options (which should be shared across all components of a workload) and specific options that only apply to one component.
 
 | Helm chart | Options                         | Description                                                                                                                                                                                                                                                                    |
 | ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| global     | HUGGINGFACEHUB_API_TOKEN        | Your own huggingface token, there is no default value. If not set, you might fail to start the component.                                                                                                                                                                      |
+| global     | HUGGINGFACEHUB_API_TOKEN        | Your own HuggingFace token, there is no default value. If not set, you might fail to start the component.                                                                                                                                                                      |
 | global     | http_proxy https_proxy no_proxy | Proxy settings. If you are running the workloads behind the proxy, you'll have to add your proxy settings here.                                                                                                                                                                |
-| global     | modelUsePVC                     | The PersistentVolumeClaim you want to use as huggingface hub cache. Default "" means not using PVC. Only one of modelUsePVC/modelUseHostPath can be set.                                                                                                                       |
-| global     | modelUseHostPath                | If you don't have Persistent Volume in your k8s cluster and want to use local directory as huggingface hub cache, set modelUseHostPath to your local directory name. Note that this can't share across nodes. Default "". Only one of modelUsePVC/modelUseHostPath can be set. |
+| global     | modelUsePVC                     | The PersistentVolumeClaim you want to use as HuggingFace hub cache. Default "" means not using PVC. Only one of modelUsePVC/modelUseHostPath can be set.                                                                                                                       |
+| global     | modelUseHostPath                | If you don't have Persistent Volume in your k8s cluster and want to use local directory as HuggingFace hub cache, set modelUseHostPath to your local directory name. Note that this can't share across nodes. Default "". Only one of modelUsePVC/modelUseHostPath can be set. |
 | chatqna    | horizontalPodAutoscaler.enabled | Enable HPA autoscaling for TGI and TEI service deployments based on metrics they provide. See [Pre-conditions](HPA.md#pre-conditions) and [Gotchas](HPA.md#gotchas) before enabling!                                                                                           |
 | tgi        | LLM_MODEL_ID                    | The model id you want to use for tgi server. Default "Intel/neural-chat-7b-v3-3".                                                                                                                                                                                              |
 
 ## Using Persistent Volume
 
-It's common to use Persistent Volume(PV) for model caches(huggingface hub cache) in a production k8s cluster. We support to pass the PersistentVolumeClaim(PVC) to containers, but it's the user's responsibility to create the PVC depending on your k8s cluster's capability.  
-Here is an setup example using NFS on Ubuntu 22.04.
+It's common to use Persistent Volume (PV) for model caches (HuggingFace hub cache) in a production k8s cluster. PersistentVolumeClaim (PVC) can be passed to containers, but it's the user's responsibility to create the PVC depending on your k8s cluster's capability.
+
+This example setup uses NFS on Ubuntu 22.04.
 
 - Export NFS directory from NFS server
 
@@ -146,7 +149,7 @@ spec:
 EOF
 ```
 
-- Set global.modelUsePVC when doing helm install, or modify the values.yaml
+- Set `global.modelUsePVC` when doing Helm install, or modify the `values.yaml`
 
 ```
 helm install tgi common/tgi --set global.modelUsePVC=model-volume
@@ -154,13 +157,13 @@ helm install tgi common/tgi --set global.modelUsePVC=model-volume
 
 ## Using Private Docker Hub
 
-By default, we're using docker images from [official docker hub](https://hub.docker.com/u/opea), with docker image version aligned with OPEA releases.  
-If you have private hub or would like to use different docker image versions, see the following examples.
+By default, we're using Docker images from [official Docker hub](https://hub.docker.com/u/opea), with Docker image version aligned with OPEA releases.
+If you have private hub or would like to use different Docker image versions, see the following examples.
 
-To use the latest tag for all images:  
+To use the latest tag for all images:
 `find . -name '*values.yaml' -type f -exec sed -i 's#tag: ""#tag: latest#g' {} \;`
 
-To use local docker registry:
+To use local Docker registry:
 
 ```
 export OPEA_IMAGE_REPO=192.168.0.100:5000/
@@ -169,8 +172,8 @@ find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repositor
 
 ## Generate manifests from Helm Charts
 
-Some users may want to use kubernetes manifests(yaml files) for workload deployment, we do not maintain manifests itself, and will generate them using `helm template`.  
-See update_genaiexamples.sh for how the manifests are generated for supported GenAIExamples.  
-See update_manifests.sh for how the manifests are generated for supported GenAIComps.  
-Please note that the above scripts have hardcoded settings to reduce user configuration effort.  
+Some users may want to use Kubernetes manifests (YAML files) for workload deployment, we do not maintain manifests itself, and will generate them using `helm template`.
+See `update_genaiexamples.sh` for how the manifests are generated for supported _GenAIExamples_.
+See `update_manifests.sh` for how the manifests are generated for supported _GenAIComps_.
+Please note that the above scripts have hardcoded settings to reduce user configuration effort.
 They are not supposed to be directly used by users.
