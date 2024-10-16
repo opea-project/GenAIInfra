@@ -1,0 +1,24 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for teirerank.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+accelDevice: "gaudi"
+
+image:
+  repository: opea/tei-gaudi
+  tag: "1.0"
+
+securityContext:
+  readOnlyRootFilesystem: false
+
+resources:
+  limits:
+    habana.ai/gaudi: 1
+
+livenessProbe:
+  timeoutSeconds: 1
+readinessProbe:
+  timeoutSeconds: 1
