@@ -107,7 +107,7 @@ jobs:
                 real_path=$(realpath $check_path)
                 if [[ "$png_line" == *#* ]]; then
                   if [ -n "changed_files" ] && echo "$changed_files" | grep -q "^${refer_path}$"; then
-                    url_dev=$branch$(echo "$real_path" | sed 's|.*/GenAIComps||')$png_path
+                    url_dev=$branch$(echo "$real_path" | sed 's|.*/GenAIInfra||')$png_path
                     response=$(curl -I -L -s -o /dev/null -w "%{http_code}" "$url_dev")
                     if [ "$response" -ne 200 ]; then
                       echo "**********Validation failed, try again**********"
