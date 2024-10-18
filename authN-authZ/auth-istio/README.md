@@ -14,7 +14,7 @@ Here we use the chatQnA pipeline as an example.
 
 **Istio installation**
 
-Before composing an OPEA pipeline with authN & authZ, user need to install Istio to support this feature. 
+Before composing an OPEA pipeline with authN & authZ, user need to install Istio to support this feature.
 
 ```bash
 curl -L https://istio.io/downloadIstio | sh -
@@ -28,11 +28,14 @@ You can refer to [Istio installation](https://istio.io/latest/docs/setup/install
 **Deploy chatQnA pipeline and enable Istio sidecar injection**
 
 Create a new namespace and you can enable istio sidecar injection for the namespace directly.
+
 ```sh
 kubectl create ns chatqa
 kubectl label namespace chatqa istio-injection=enabled
 ```
+
 Deploy ChatQnA pipeline. You can either leverage GMC, manifest or helm chart.
+
 ```bash
 # Option 1: GMC
 # leverage GMC custom resource for ChatQnA deployment.
@@ -67,13 +70,16 @@ kubectl patch deployment -n chatqa <deployment-name> --patch '{
 
 **Ingress Gateway**
 
-The istio ingress gateway will be used to access the chatQnA service in different setups. 
+The istio ingress gateway will be used to access the chatQnA service in different setups.
 
 First export the router service through istio ingress gateway.
+
 ```bash
 kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway.yaml
 ```
- Determine the ingress IP and ports and expose them as environment variables.
+
+Determine the ingress IP and ports and expose them as environment variables.
+
 ```bash
 export INGRESS_NAME=istio-ingressgateway
 export INGRESS_NS=istio-system
@@ -81,8 +87,8 @@ export INGRESS_NS=istio-system
 #run the following to determine if your Kubernetes cluster is in an environment that supports external load balancers:
 kubectl get svc "$INGRESS_NAME" -n "$INGRESS_NS"
 
-# Case1: If your EXTERNAL-IP value is <none> (or perpetually <pending>), your environment does not provide an external load balancer for the ingress gateway. 
-# set the INGRESS_HOST to your host ip, 
+# Case1: If your EXTERNAL-IP value is <none> (or perpetually <pending>), your environment does not provide an external load balancer for the ingress gateway.
+# set the INGRESS_HOST to your host ip,
 export INGRESS_HOST=${host_ip}
 # set the INGRESS_PORT to the istio-ingressgateway svc port
 export INGRESS_PORT=${gateway_svc_port}
@@ -200,15 +206,17 @@ The user management is done via Keycloak and the configuration steps look like t
 
 5. Turn off the all the 'Required actions' under the 'Authentication' section in Keycloak
 
-**Trouble Shooting: https required** 
+**Trouble Shooting: https required**
 
 If you meet "https required" issue when you open the console, you can fix with the following steps:
+
 ```bash
 kubectl exec -it ${keycloak_pods_id} -- /bin/bash
 cd /opt/keycloak/bin/
 ./kcadm.sh config credentials --server ${KEYCLOAK_ADDR} --realm master --user admin ## need to type in password set before
 ./kcadm.sh update realms/master -s sslRequired=NONE --server ${KEYCLOAK_ADDR}
 ```
+
 Then after open the console and create `istio` realm, go to "Realm setting", set "Require SSL" to "None"
 
 **Apply authentication and authorization policies to the pipeline endpoint based on OIDC provider**
@@ -389,11 +397,14 @@ Open browser with address `"chatqna-ui.com:${INGRESS_PORT}"` if using GMC based 
 
 Login with user `bob` and its credentials shall return a 403 error. Login with user `mary` and its credentials shall able to access the ChatQnA service.
 
-## Uninstall Istio ##
+## Uninstall Istio
+
 After testing, you can uninstall Istio with following commands:
+
 ```bash
 istioctl uninstall --purge -y
 kubectl delete namespace istio-system
 kubectl label namespace chatqa istio-injection-
 ```
+
 Can refer to [Istio unistal](https://istio.io/latest/docs/setup/getting-started/#uninstall) for more information.
