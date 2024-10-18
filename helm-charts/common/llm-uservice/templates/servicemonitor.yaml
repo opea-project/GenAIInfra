@@ -5,14 +5,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "teirerank.fullname" . }}
+  name: {{ include "llm-uservice.fullname" . }}
   labels:
     release: {{ .Values.global.prometheusRelease }}
 spec:
   selector:
     matchLabels:
-      {{- include "teirerank.selectorLabels" . | nindent 6 }}
+      {{- include "llm-uservice.selectorLabels" . | nindent 6 }}
   endpoints:
-  - port: teirerank
+  - port: llm-uservice
     interval: 5s
 {{- end }}
