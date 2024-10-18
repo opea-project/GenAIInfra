@@ -12,23 +12,46 @@ Here we use the chatQnA pipeline as an example.
 
 ## Prerequisite
 
-Before composing an OPEA pipeline with authN & authZ, user need to install Istio to support this feature. Please follow the steps [here](https://istio.io/latest/docs/setup/install/istioctl/) for Istio installation.
+**Istio installation**
+
+Before composing an OPEA pipeline with authN & authZ, user need to install Istio to support this feature.
+
+```bash
+curl -L https://istio.io/downloadIstio | sh -
+cd istio-1.23.2 ## change to your downloaded version
+export PATH=$PWD/bin:$PATH
+istioctl install
+```
+
+You can refer to [Istio installation](https://istio.io/latest/docs/setup/install/istioctl/) for detailed information.
 
 **Deploy chatQnA pipeline and enable Istio sidecar injection**
 
-```sh
+(Optional) Create a new namespace and you can enable istio sidecar injection for the namespace directly.
 
-# deploy ChatQnA pipeline. You can either leverage GMC or the ChatQnA helm chart.
+```sh
 kubectl create ns chatqa
-# here's the command to leverage GMC custom resource for ChatQnA deployment.
+kubectl label namespace chatqa istio-injection=enabled
+```
+
+Deploy ChatQnA pipeline. You can either leverage GMC, manifest or helm chart.
+
+```bash
+# Option 1: GMC
+# leverage GMC custom resource for ChatQnA deployment.
 kubectl apply -f $(pwd)/../../microservices-connector/config/samples/ChatQnA/chatQnA_dataprep_xeon.yaml
-# please refer the doc https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/chatqna for deployment with helm chart.
-# and install under `chatqa` namespace
+
+# Option 2: helm chart
+# please refer the doc https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/chatqna for deployment with helm chart and install under `chatqa` namespace
+
+# Option 3: manifest
+# Please refer to https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA/kubernetes/intel for deployment with manifest and install under `chatqa` namespace
 
 # expose an environment variable to set the deployment method
-# which will affect the configuration we use for authentication and authorization
+# which will affect the configuration we use for authentication and authorization. If you use manifest, can also set to "helm-chart-based"
 export DEPLOY_METHOD=<your deploy method, valid values: "gmc-based" and "helm-chart-based">
 
+# If you didn't  enable istio sidecar injection for "chatqna" namespace, here we
 # patch the deployment to enable istio sidecar injection
 # for GMC based deployment, set the `deployment-name` to `router-service-deployment`
 # for helm chart based deployment, set the `deployment-name` to `chatqna`
@@ -128,7 +151,7 @@ In this sample, we are going to test with the scenario that only privileged user
 Install Keycloak in the kubernetes cluster for user management. **Note:** Replace the admin password as your own in the command.
 
 ```bash
-# make sure running under authN-authZ/auth-istio folder
+# make sure running under authN-authZ folder
 kubectl apply -f $(pwd)/keycloak_install.yaml
 
 # get the ip and port to access keycloak.
@@ -151,18 +174,63 @@ The user management is done via Keycloak and the configuration steps look like t
 
 4. Create a new user name as `mary` and another user as `bob`. Set passwords for both users (set 'Temporary' to 'Off'). Select Role mapping on the top, assign the `user` role to `mary` and assign the `viewer` role to `bob`.
 
+5. Turn off all 'Required actions' buttons under the 'Authentication' section in Keycloak
+
+**Trouble Shooting: https required**
+
+If you meet "https required" issue when you open the console, you can fix with the following steps:
+
+```bash
+kubectl exec -it ${keycloak_pods_id} -- /bin/bash
+cd /opt/keycloak/bin/
+./kcadm.sh config credentials --server ${KEYCLOAK_ADDR} --realm master --user admin ## need to type in password set before
+./kcadm.sh update realms/master -s sslRequired=NONE --server ${KEYCLOAK_ADDR}
+```
+
+Then goto the Keycloak console and find the "Realm setting" for `apisix` realm, set "Require SSL" to "None".
+
+**Export the router service through istio ingress gateway**
+
+For authentication safegard, we should add a gateway for the service. Here we show how to set up the istio ingress gateway to control access to the chatQnA service.
+
+First export the router service through istio ingress gateway.
+
+```bash
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway.yaml
+```
+
+Determine the ingress IP and ports and expose them as environment variables.
+
+```bash
+export INGRESS_NAME=istio-ingressgateway
+export INGRESS_NS=istio-system
+
+#run the following to determine if your Kubernetes cluster is in an environment that supports external load balancers:
+kubectl get svc "$INGRESS_NAME" -n "$INGRESS_NS"
+
+# Case1: If your EXTERNAL-IP value is <none> (or perpetually <pending>), your environment does not provide an external load balancer for the ingress gateway.
+# set the INGRESS_HOST to your host ip,
+export INGRESS_HOST=${host_ip}
+# set the INGRESS_PORT to the istio-ingressgateway svc port
+export INGRESS_PORT=${gateway_svc_port}
+
+#Case2: If your environment supports external load balancers
+export INGRESS_HOST=$(kubectl -n "$INGRESS_NS" get service "$INGRESS_NAME" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+export INGRESS_PORT=$(kubectl -n "$INGRESS_NS" get service "$INGRESS_NAME" -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+```
+
+You can refter to the [istio ingress gateway guide](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) for more details about ingress gateway ip and ports.
+
 **Apply authentication and authorization policies to the pipeline endpoint based on OIDC provider**
 
 Use the commands to apply the authentication and authorization rules.
 
 ```bash
-# export the router service through istio ingress gateway
-kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway.yaml
-
-# 'envsubst' is used to substitute envs in yaml.
+# 'envsubst' is used to substitute envs in yaml if you launch with kubectl commands.
 # use 'sudo apt-get install gettext-base' to install envsubst if it does not exist on your machine
 # apply the authentication and authorization rule
 # these files will restrict user access with valid token (with valid issuer, username and realm role)
+export REALM=istio
 envsubst < $(pwd)/$DEPLOY_METHOD/chatQnA_authN_keycloak.yaml | kubectl -n chatqa apply -f -
 envsubst < $(pwd)/$DEPLOY_METHOD/chatQnA_authZ_keycloak.yaml | kubectl -n chatqa apply -f -
 ```
@@ -181,7 +249,7 @@ export TOKENA=$(curl -X POST 'http://${KEYCLOAK_ADDR}/realms/istio/protocol/open
 export TOKENB=$(curl -X POST 'http://${KEYCLOAK_ADDR}/realms/istio/protocol/openid-connect/token' -H 'Content-Type: application/x-www-form-urlencoded' --data-urlencode 'grant_type=password' --data-urlencode 'client_id=istio' --data-urlencode 'username=bob' -d 'password=${PASSWORD}' -d 'scope=openid' -d 'response_type=id_token' | jq -r .access_token)
 ```
 
-Access the istio ingress gateway to reach the chatQnA service with different tokens. Follow the istio guide [here](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) to determine the ingress IP and ports.
+Access the istio ingress gateway to reach the chatQnA service with different tokens.
 
 ```bash
 # follow the guide above to fetch the $INGRESS_HOST and $INGRESS_PORT
@@ -210,7 +278,7 @@ We are using a similar scenario here that only privileged users can access our c
 Here we take Keycloak as the sample OIDC Provider to use in the example. Follow the steps to install and configure Keycloak.
 
 ```bash
-# make sure running under authN-authZ/auth-istio folder
+# make sure running under authN-authZ folder
 kubectl apply -f $(pwd)/keycloak_install.yaml
 
 # get the ip and port to access keycloak.
@@ -330,3 +398,15 @@ sudo sed -i '1i\127.0.0.1       chatqna-ui.com' /etc/hosts
 Open browser with address `"chatqna-ui.com:${INGRESS_PORT}"` if using GMC based deployment. Otherwise, open the browser with address `"chatqna-service.com:${INGRESS_PORT}"`.
 
 Login with user `bob` and its credentials shall return a 403 error. Login with user `mary` and its credentials shall able to access the ChatQnA service.
+
+## Uninstall Istio
+
+After testing, you can uninstall Istio with following commands:
+
+```bash
+istioctl uninstall --purge -y
+kubectl delete namespace istio-system
+kubectl label namespace chatqa istio-injection-
+```
+
+Can refer to [Istio uninstal](https://istio.io/latest/docs/setup/getting-started/#uninstall) for more information.

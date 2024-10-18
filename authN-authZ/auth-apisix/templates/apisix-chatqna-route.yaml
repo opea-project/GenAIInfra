@@ -28,7 +28,7 @@ spec:
         introspection_endpoint_auth_method: client_secret_basic
         scope: openid profile email
         bearer_only: true
-        realm: myrealm
+        realm: {{ .Values.oidc.realm }}
     - name: proxy-rewrite
       enable: true
       config:
