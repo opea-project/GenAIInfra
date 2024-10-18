@@ -57,6 +57,8 @@ The user management is done via Keycloak and the configuration steps look like t
 
 4. Create a new user name as `mary`, set passwords for her (set 'Temporary' to 'Off'). Select Role mapping on the top, assign the `user` role to `mary`.
 
+5. Turn off the all the 'Required actions' under the 'Authentication' section in Keycloak
+
 Then set some environment variables.
 ```bash
 export USER='mary'
@@ -110,7 +112,7 @@ export NODE_PORT=$(kubectl get --namespace auth-apisix -o jsonpath="{.spec.ports
 export NODE_IP=$(kubectl get nodes --namespace auth-apisix -o jsonpath="{.items[0].status.addresses[0].address}")
 
 # the authenticated endpoint published in APISIX gateway can be accessed as: http://$NODE_IP:$NODE_PORT/<published endpoint uri>
-export accessUrl=http://$NODE_IP:$NODE_PORT/<your published endpoint uri>
+export accessUrl="http://$NODE_IP:$NODE_PORT/chatqna-oidc"
 ```
 
 While accessing the published APIs, the HTTP Authorization header of the request should contain the Access token provided by Identity provider as 'Bearer &ltAccess Token>'. </br></br>
@@ -121,9 +123,6 @@ Below steps can be followed to get access token from keycloak and access the API
 ```sh
 #Invoke Keycloak's OIDC token endpoint to get access token, refresh token and expirt times. (Only Access token is used in the example below)
 export TOKEN=$(curl -X POST http://${KEYCLOAK_ADDR}/realms/${KEYCLOAK_REALM}/protocol/openid-connect/token -H 'Content-Type: application/x-www-form-urlencoded' -d "grant_type=password&client_id=${KEYCLOAK_CLIENT_ID}&client_secret=${KEYCLOAK_CLIENT_SECRET}&username=${USER}&password=${PASSWORD}" | jq -r .access_token)
-
-# follow instructions above to fetch the NODE_IP and NODE_PORT
-export accessUrl="http://$NODE_IP:$NODE_PORT/chatqna-oidc"
 
 # try without token. Shall get response: "Authorization required 401 error"
 curl -X POST $accessUrl -d '{"messages": "What is the revenue of Nike in 2023?", "max_new_tokens":17, "do_sample": true}' -sS -H 'Content-Type: application/json' -w " %{http_code}\n"

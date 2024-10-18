@@ -11,7 +11,7 @@ spec:
   - name: chatqna-query
     match:
       paths:
-      - /v1/chatqna
+      - /chatqna-oidc
     backends:
     - serviceName: chatqna
       servicePort: 8888
@@ -27,3 +27,7 @@ spec:
         scope: openid profile email
         bearer_only: true
         realm: ${KEYCLOAK_REALM}
+    - name: proxy-rewrite
+      enable: true
+      config:
+        uri: "/v1/chatqna"

@@ -198,6 +198,8 @@ The user management is done via Keycloak and the configuration steps look like t
 
 4. Create a new user name as `mary` and another user as `bob`. Set passwords for both users (set 'Temporary' to 'Off'). Select Role mapping on the top, assign the `user` role to `mary` and assign the `viewer` role to `bob`.
 
+5. Turn off the all the 'Required actions' under the 'Authentication' section in Keycloak
+
 **Trouble Shooting: https required** 
 
 If you meet "https required" issue when you open the console, you can fix with the following steps:
