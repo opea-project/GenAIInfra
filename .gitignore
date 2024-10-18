@@ -1,7 +1,9 @@
 **/bin/
 *.out
+*.swp
 **/Chart.lock
 **/charts/*.tgz
 
 bazel-*
 compile_commands.json
+.gitconfig
