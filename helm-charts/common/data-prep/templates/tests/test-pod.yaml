@@ -27,5 +27,9 @@ spec:
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
+          curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep/delete_file -sS \
+          -X POST \
+          -H "Content-Type: application/json" \
+          -d '{"file_path": "file1.txt"}';
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
   restartPolicy: Never

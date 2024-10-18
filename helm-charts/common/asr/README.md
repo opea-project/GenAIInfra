@@ -24,7 +24,7 @@ helm install asr . --set ASR_ENDPOINT=${ASR_ENDPOINT}
 ```console
 cd GenAIInfra/helm-charts/common/asr
 helm dependency update
-helm install asr . --set autodependency.enabled=true
+helm install asr . --set whisper.enabled=true
 ```
 
 ## Verify

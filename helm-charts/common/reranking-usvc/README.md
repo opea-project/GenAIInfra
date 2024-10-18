@@ -24,7 +24,7 @@ helm install reranking-usvc . --set TEI_RERANKING_ENDPOINT=${TEI_RERANKING_ENDPO
 ```console
 cd GenAIInfra/helm-charts/common/reranking-usvc
 helm dependency update
-helm install reranking-usvc . --set autodependency.enabled=true
+helm install reranking-usvc . --set teirerank.enabled=true
 ```
 
 ## Verify

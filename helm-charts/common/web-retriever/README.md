@@ -28,7 +28,7 @@ cd GenAIInfra/helm-charts/common/web-retriever
 helm dependency update
 export GOOGLE_API_KEY="yourownkey"
 export GOOGLE_CSE_ID="yourownid"
-helm install web-retriever . --set autodependency.enabled=true --set GOOGLE_API_KEY=${GOOGLE_API_KEY} --set GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
+helm install web-retriever . --set tei.enabled=true --set GOOGLE_API_KEY=${GOOGLE_API_KEY} --set GOOGLE_CSE_ID=${GOOGLE_CSE_ID}
 ```
 
 ## Verify

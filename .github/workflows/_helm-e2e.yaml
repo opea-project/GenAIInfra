@@ -111,7 +111,6 @@ jobs:
           helm-charts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER }}
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
-              --set autodependency.enabled=true \
               --set GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY}} \
               --set GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID}} \
               --values ${{ env.CHART_FOLDER }}/${value_file} \

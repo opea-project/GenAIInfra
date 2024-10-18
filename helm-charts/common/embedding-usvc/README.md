@@ -24,7 +24,7 @@ helm install embedding-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPO
 ```console
 cd GenAIInfra/helm-charts/common/embedding-usvc
 helm dependency update
-helm install embedding-usvc . --set autodependency.enabled=true
+helm install embedding-usvc . --set tei.enabled=true
 ```
 
 ## Verify

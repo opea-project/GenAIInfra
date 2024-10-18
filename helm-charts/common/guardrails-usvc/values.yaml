@@ -5,8 +5,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-autodependency:
+tgi:
   enabled: false
+  LLM_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
 
 replicaCount: 1
 
@@ -17,9 +18,6 @@ SAFETY_GUARD_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
 # Set it as a non-null string, such as true, if you want to enable logging facility,
 # otherwise, keep it as "" to disable it.
 LOGFLAG: ""
-
-tgi:
-  LLM_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
 
 image:
   repository: opea/guardrails-tgi

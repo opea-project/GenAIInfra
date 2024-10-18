@@ -26,7 +26,7 @@ helm install llm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --s
 cd GenAIInfra/helm-charts/common/llm-uservice
 export HFTOKEN="insert-your-huggingface-token-here"
 helm dependency update
-helm install llm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set autodependency.enabled=true --wait
+helm install llm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set tgi.enabled=true --wait
 ```
 
 ## Verify
