@@ -1,0 +1,33 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apisix.apache.org/v2
+kind: ApisixRoute
+metadata:
+  name: chatqna-authenticated-endpoints
+  namespace: default
+spec:
+  http:
+  - name: chatqna-query
+    match:
+      paths:
+      - /chatqna-oidc
+    backends:
+    - serviceName: chatqna
+      servicePort: 8888
+    plugins:
+    - name: openid-connect
+      enable: true
+      config:
+        client_id: ${KEYCLOAK_CLIENT_ID}
+        client_secret: ${KEYCLOAK_CLIENT_SECRET}
+        discovery: http://${KEYCLOAK_ADDR}/realms/${KEYCLOAK_CLIENT_ID}/.well-known/openid-configuration
+        introspection_endpoint: http://${KEYCLOAK_ADDR}/realms/${KEYCLOAK_CLIENT_ID}/protocol/openid-connect/token/introspect
+        introspection_endpoint_auth_method: client_secret_basic
+        scope: openid profile email
+        bearer_only: true
+        realm: ${KEYCLOAK_REALM}
+    - name: proxy-rewrite
+      enable: true
+      config:
+        uri: "/v1/chatqna"
