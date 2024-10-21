@@ -7,6 +7,8 @@
 
 tei:
   enabled: false
+milvus:
+  enabled: false
 redis-vector-db:
   enabled: false
 
@@ -38,6 +40,7 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+port: 6007
 service:
   type: ClusterIP
   port: 6007
@@ -89,13 +92,20 @@ LOGFLAG: ""
 TEI_EMBEDDING_ENDPOINT: ""
 
 # local embedder's model
-EMBED_MODEL: ""
+LOCAL_EMBEDDING_MODEL: ""
 
 # redis DB service URL, e.g. redis://<service-name>:<port>
 REDIS_URL: ""
 INDEX_NAME: "rag-redis"
 KEY_INDEX_NAME: "file-keys"
 SEARCH_BATCH_SIZE: 10
+
+# milvus DB configurations
+MILVUS_HOST: ""
+MILVUS_PORT: ""
+COLLECTION_NAME: ""
+MOSEC_EMBEDDING_ENDPOINT: ""
+MOSEC_EMBEDDING_MODEL: ""
 
 global:
   http_proxy: ""

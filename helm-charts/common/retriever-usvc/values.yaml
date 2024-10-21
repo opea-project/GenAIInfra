@@ -7,6 +7,8 @@
 
 tei:
   enabled: false
+milvus:
+  enabled: false
 redis-vector-db:
   enabled: false
 
@@ -17,7 +19,7 @@ replicaCount: 1
 LOGFLAG: ""
 
 TEI_EMBEDDING_ENDPOINT: ""
-EMBED_MODEL: ""
+LOCAL_EMBEDDING_MODEL: ""
 
 REDIS_URL: ""
 INDEX_NAME: "rag-redis"
@@ -48,6 +50,7 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+port: 7000
 service:
   type: ClusterIP
   # The default port for retriever service is 7000
@@ -91,6 +94,13 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+# milvus DB configurations
+MILVUS_HOST: ""
+MILVUS_PORT: ""
+COLLECTION_NAME: ""
+MOSEC_EMBEDDING_ENDPOINT: ""
+MOSEC_EMBEDDING_MODEL: ""
 
 global:
   http_proxy: ""
