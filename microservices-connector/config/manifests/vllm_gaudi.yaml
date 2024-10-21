@@ -1,0 +1,149 @@
+---
+# Source: vllm/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: vllm-config
+  labels:
+    helm.sh/chart: vllm-1.0.0
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/instance: vllm
+    app.kubernetes.io/version: "0.5"
+    app.kubernetes.io/managed-by: Helm
+data:
+  HF_TOKEN: "insert-your-huggingface-token-here"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HABANA_LOGS: "/tmp/habana_logs"
+  NUMBA_CACHE_DIR: "/tmp"
+  HF_HOME: "/tmp/.cache/huggingface"
+  # https://github.com/outlines-dev/outlines/blob/main/outlines/caching.py#L14-L29
+  OUTLINES_CACHE_DIR: "/tmp/.cache/outlines"
+  VLLM_CPU_KVCACHE_SPACE: "40"
+---
+# Source: vllm/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: vllm
+  labels:
+    helm.sh/chart: vllm-1.0.0
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/instance: vllm
+    app.kubernetes.io/version: "0.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 2080
+      protocol: TCP
+      name: vllm
+  selector:
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/instance: vllm
+---
+# Source: vllm/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: vllm
+  labels:
+    helm.sh/chart: vllm-1.0.0
+    app.kubernetes.io/name: vllm
+    app.kubernetes.io/instance: vllm
+    app.kubernetes.io/version: "0.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: vllm
+      app.kubernetes.io/instance: vllm
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: vllm
+        app.kubernetes.io/instance: vllm
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: vllm
+          envFrom:
+            - configMapRef:
+                name: vllm-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            {}
+          image: "opea/llm-vllm-hpu:latest"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "/bin/bash"
+            - "-c"
+            - "python3 -m vllm.entrypoints.openai.api_server --enforce-eager --model Intel/neural-chat-7b-v3-3 --tensor-parallel-size 1 --host 0.0.0.0 --port 2080 --download-dir /data --block-size 128 --max-num-seqs 256 --max-seq_len-to-capture 2048"
+            - "--model"
+            - "Intel/neural-chat-7b-v3-3"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "2080"
+            - "--download-dir"
+            - "/data"
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /dev/shm
+              name: shm
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: http
+              containerPort: 2080
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            limits:
+              habana.ai/gaudi: 1
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        - name: tmp
+          emptyDir: {}
