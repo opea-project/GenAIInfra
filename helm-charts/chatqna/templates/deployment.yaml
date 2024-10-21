@@ -37,18 +37,24 @@ spec:
               value: {{ .Release.Name }}-tgi
             - name: LLM_SERVER_PORT
               value: "80"
+            - name: LLM_MODEL
+              value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
             - name: RERANK_SERVER_HOST_IP
               value: {{ .Release.Name }}-teirerank
             - name: RERANK_SERVER_PORT
               value: "80"
             - name: RETRIEVER_SERVICE_HOST_IP
               value: {{ .Release.Name }}-retriever-usvc
+            - name: RETRIEVER_SERVICE_PORT
+              value: "7000"
             - name: EMBEDDING_SERVER_HOST_IP
               value: {{ .Release.Name }}-tei
             - name: EMBEDDING_SERVER_PORT
               value: "80"
             - name: GUARDRAIL_SERVICE_HOST_IP
               value: {{ .Release.Name }}-guardrails-usvc
+            - name: GUARDRAIL_SERVICE_PORT
+              value: "9090"
             {{- if .Values.LOGFLAG }}
             - name: LOGFLAG
               value: {{ .Values.LOGFLAG | quote }}
