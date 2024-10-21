@@ -71,6 +71,7 @@ const (
 	SpeechT5Gaudi            = "SpeechT5Gaudi"
 	Whisper                  = "Whisper"
 	WhisperGaudi             = "WhisperGaudi"
+	UI                       = "UI"
 )
 
 var yamlDict = map[string]string{
@@ -95,6 +96,7 @@ var yamlDict = map[string]string{
 	Whisper:           yaml_dir + "whisper.yaml",
 	WhisperGaudi:      yaml_dir + "whisper_gaudi.yaml",
 	DataPrep:          yaml_dir + "data-prep.yaml",
+	UI:                yaml_dir + "ui.yaml",
 }
 
 var (
