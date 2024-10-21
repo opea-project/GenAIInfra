@@ -43,12 +43,16 @@ spec:
               value: "80"
             - name: RETRIEVER_SERVICE_HOST_IP
               value: {{ .Release.Name }}-retriever-usvc
+            - name: RETRIEVER_SERVICE_PORT
+              value: "7000"
             - name: EMBEDDING_SERVER_HOST_IP
               value: {{ .Release.Name }}-tei
             - name: EMBEDDING_SERVER_PORT
               value: "80"
             - name: GUARDRAIL_SERVICE_HOST_IP
               value: {{ .Release.Name }}-guardrails-usvc
+            - name: GUARDRAIL_SERVICE_PORT
+              value: "9090"
             {{- if .Values.LOGFLAG }}
             - name: LOGFLAG
               value: {{ .Values.LOGFLAG | quote }}
