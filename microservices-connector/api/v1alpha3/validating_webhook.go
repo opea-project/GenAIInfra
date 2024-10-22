@@ -46,6 +46,7 @@ var (
 		"Whisper",
 		"WhisperGaudi",
 		"DataPrep",
+		"UI",
 	}
 )
 
