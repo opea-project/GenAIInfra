@@ -28,9 +28,9 @@ securityContext:
   capabilities:
     drop:
     - ALL
-  readOnlyRootFilesystem: true
-  runAsNonRoot: true
-  runAsUser: 1000
+  readOnlyRootFilesystem: false
+  runAsNonRoot: false
+  runAsUser: 0
   allowPrivilegeEscalation: false
   seccompProfile:
     type: RuntimeDefault
@@ -38,7 +38,7 @@ securityContext:
 service:
   type: ClusterIP
   port: 8001
-  targetPort: 55555
+  containerPort: 55555
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

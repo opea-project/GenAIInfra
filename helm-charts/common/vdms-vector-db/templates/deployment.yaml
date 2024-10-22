@@ -42,7 +42,7 @@ spec:
               protocol: TCP
           startupProbe:
             tcpSocket:
-              port: {{ .Values.service.containerPort }} # Probe the Redis port
+              port: {{ .Values.service.containerPort }}
             initialDelaySeconds: 5
             periodSeconds: 5
             failureThreshold: 120
