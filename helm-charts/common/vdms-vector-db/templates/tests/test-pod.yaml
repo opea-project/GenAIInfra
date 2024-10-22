@@ -11,12 +11,9 @@ metadata:
     "helm.sh/hook": test
 spec:
   containers:
-    - name: curl
-      image: alpine/curl
-      command: ['sh', '-c']
-      args:
-        - |
-          curl http://{{ include "vdms-vector-db.fullname" . }}:{{ .Values.service.port }} -sS --fail-with-body \
-          -X HEAD
+    - name: wget
+      image: busybox
+      command: ['nc']
+      args: ['-vw', '20', '{{ include "vdms-vector-db.fullname" . }}:{{ .Values.service.port }}']
 
   restartPolicy: Never
