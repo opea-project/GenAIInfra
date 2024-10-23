@@ -9,7 +9,7 @@ accelDevice: "gaudi"
 
 image:
   repository: opea/tei-gaudi
-  tag: "1.0"
+  tag: "latest"
 
 securityContext:
   readOnlyRootFilesystem: false
