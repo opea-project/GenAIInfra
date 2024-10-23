@@ -4,7 +4,7 @@ go 1.23.2
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
-	github.com/containerd/nri v0.6.1
+	github.com/containerd/nri v0.7.0
 	github.com/containers/common v0.60.4
 	github.com/go-kit/log v0.2.1
 	github.com/opencontainers/runtime-spec v1.2.0
@@ -19,7 +19,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/containerd/log v0.1.0 // indirect
-	github.com/containerd/ttrpc v1.2.5 // indirect
+	github.com/containerd/ttrpc v1.2.6-0.20240827082320-b5cd6e4b3287 // indirect
 	github.com/containers/storage v1.55.1 // indirect
 	github.com/coreos/go-systemd/v22 v22.5.0 // indirect
 	github.com/fsnotify/fsnotify v1.7.0 // indirect
