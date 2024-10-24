@@ -36,7 +36,6 @@ service:
   port: 8888
   containerPort: 8888
 
-
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
@@ -55,25 +54,31 @@ tolerations: []
 
 affinity: {}
 
+embeddingServiceHost: ""
+retrieverServiceHost: ""
+rerankServiceHost: ""
+lvmServiceHost: ""
+
 entryCommand: ["/bin/sh"]
 extraArgs: ["-c", "sleep 45 && python videoqna.py"]
 
-ui:
+videoqna-ui:
   image:
-    repository: opea/videoqna-ui:latest
+    repository: opea/videoqna-ui
     pullPolicy: IfNotPresent
     tag: "latest"
 
   videoqnaBackendService: "/v1/videoqna"
   videoqnaBackendHealthCheck: "/v1/health_check"
 
+  containerPort: 5173
   service:
     type: ClusterIP
     port: 5173
 
 data-prep:
   image:
-    repository: opea/dataprep-multimodal-vdm
+    repository: opea/dataprep-multimodal-vdms
     pullPolicy: IfNotPresent
     tag: "latest"
 
@@ -88,6 +93,9 @@ embedding-usvc:
     repository: opea/embedding-multimodal-clip
     pullPolicy: IfNotPresent
     tag: "latest"
+
+  securityContext:
+    readOnlyRootFilesystem: false
 
 retriever-usvc:
   image:

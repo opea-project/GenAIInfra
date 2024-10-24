@@ -1,9 +1,6 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-vdms:
-  enabled: false
-
 image:
   repository: opea/dataprep-multimodal-vdms
   pullPolicy: IfNotPresent

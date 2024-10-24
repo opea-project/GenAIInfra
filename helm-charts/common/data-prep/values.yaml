@@ -7,7 +7,9 @@
 
 autodependency:
   enabled: false
-  vdms: false
+
+vdms:
+  enabled: false
 
 replicaCount: 1
 

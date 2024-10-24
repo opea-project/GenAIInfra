@@ -4,7 +4,7 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "lvm-serving.fullname" . }}-test-pod"
+  name: "{{ include "lvm-serving.fullname" . }}-testpod"
   labels:
     {{- include "lvm-serving.labels" . | nindent 4 }}
   annotations:

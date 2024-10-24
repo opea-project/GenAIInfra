@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 image:
-  repository: opea/videoqna-ui:latest
+  repository: opea/videoqna-ui
   pullPolicy: IfNotPresent
   tag: "latest"
 
@@ -11,6 +11,7 @@ videoqnaBackendService: "/v1/videoqna"
 # Endpoint for VideoQnA Backend Service health check
 videoqnaBackendHealthCheck: "/v1/health_check"
 
+containerPort: 5173
 service:
   type: ClusterIP
   port: 5173
