@@ -86,7 +86,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "ghcr.io/huggingface/tei-gaudi:synapse_1.16"
+          image: "ghcr.io/huggingface/tei-gaudi:1.5.0"
           imagePullPolicy: IfNotPresent
           args:
             - "--auto-truncate"
