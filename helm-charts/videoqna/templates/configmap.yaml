@@ -1,0 +1,37 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "videoqna.fullname" . }}-config
+  labels:
+    {{- include "videoqna.labels" . | nindent 4 }}
+data:
+  {{- if .Values.embeddingServiceHost }}
+  EMBEDDING_SERVICE_HOST_IP: {{ .Values.embeddingServiceHost | quote }}
+  {{- else }}
+  EMBEDDING_SERVICE_HOST_IP: "{{ .Release.Name }}-embedding-usvc"
+  {{- end }}
+  {{- if .Values.retrieverServiceHost }}
+  RETRIEVER_SERVICE_HOST_IP: {{ .Values.retrieverServiceHost | quote }}
+  {{- else }}
+  RETRIEVER_SERVICE_HOST_IP: "{{ .Release.Name }}-retriever-usvc"
+  {{- end }}
+  {{- if .Values.rerankServiceHost }}
+  RERANK_SERVICE_HOST_IP: {{ .Values.rerankServiceHost | quote }}
+  {{- else }}
+  RERANK_SERVICE_HOST_IP: "{{ .Release.Name }}-reranking-usvc"
+  {{- end }}
+  {{- if .Values.lvmServiceHost }}
+  LVM_SERVICE_HOST_IP: {{ .Values.lvmServiceHost | quote }}
+  {{- else }}
+  LVM_SERVICE_HOST_IP: "{{ .Release.Name }}-lvm-uservice"
+  {{- end }}
+  http_proxy: {{ .Values.global.http_proxy | quote }}
+  https_proxy: {{ .Values.global.https_proxy | quote }}
+  {{- if and (not .Values.lvmServiceHost) (or .Values.global.http_proxy .Values.global.https_proxy) }}
+  no_proxy: "{{ .Release.Name }}-embedding-usvc,{{ .Release.Name }}-retriever-usvc,{{ .Release.Name }}-lvm-uservice,{{ .Release.Name }}-reranking-usvc,{{ .Values.global.no_proxy }}"
+  {{- else }}
+  no_proxy: {{ .Values.global.no_proxy | quote }}
+  {{- end }}

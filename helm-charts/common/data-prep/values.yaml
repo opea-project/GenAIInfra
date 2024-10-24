@@ -12,6 +12,9 @@ milvus:
 redis-vector-db:
   enabled: false
 
+vdms:
+  enabled: false
+
 replicaCount: 1
 
 image:
@@ -44,6 +47,7 @@ port: 6007
 service:
   type: ClusterIP
   port: 6007
+  containerPort: 6007
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
@@ -96,7 +100,7 @@ LOCAL_EMBEDDING_MODEL: ""
 
 # redis DB service URL, e.g. redis://<service-name>:<port>
 REDIS_URL: ""
-INDEX_NAME: "rag-redis"
+indexName: "rag-redis"
 KEY_INDEX_NAME: "file-keys"
 SEARCH_BATCH_SIZE: 10
 

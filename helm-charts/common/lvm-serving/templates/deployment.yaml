@@ -4,14 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "embedding-usvc.fullname" . }}
+  name: {{ include "lvm-serving.fullname" . }}
   labels:
-    {{- include "embedding-usvc.labels" . | nindent 4 }}
+    {{- include "lvm-serving.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "embedding-usvc.selectorLabels" . | nindent 6 }}
+      {{- include "lvm-serving.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "embedding-usvc.selectorLabels" . | nindent 8 }}
+        {{- include "lvm-serving.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -31,43 +34,61 @@ spec:
         - name: {{ .Release.Name }}
           envFrom:
             - configMapRef:
-                name: {{ include "embedding-usvc.fullname" . }}-config
+                name: {{ include "lvm-serving.fullname" . }}-config
             {{- if .Values.global.extraEnvConfig }}
             - configMapRef:
                 name: {{ .Values.global.extraEnvConfig }}
                 optional: true
             {{- end }}
           securityContext:
+            {{- if .Values.global.modelUseHostPath }}
+            {}
+            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
-            - name: embedding-usvc
+            - name: http
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           volumeMounts:
+            - mountPath: /home/user/model
+              name: model-volume
             {{- if .Values.global.cacheUseHostPath }}
             - mountPath: /home/user/.cache/huggingface/hub
               name: cache-volume
               subPath: huggingface/hub
+            - mountPath: /home/user/.cache/torch/hub
+              name: cache-volume
+              subPath: torch/hub
             {{- end }}
             - mountPath: /tmp
               name: tmp
-          {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.readinessProbe }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.startupProbe }}
           startupProbe:
-            {{- toYaml .Values.startupProbe | nindent 12 }}
-          {{- end }}
+            {{- if .Values.llmDownload }}
+            {{- .Values.startupProbeWithLlmDownload | toYaml | nindent 12 }}
+            {{- else }}
+            {{- .Values.startupProbe | toYaml | nindent 12 }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        - name: model-volume
+          {{- if .Values.global.modelUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
+          {{- else if .Values.global.modelUseHostPath }}
+          hostPath:
+            path: {{ .Values.global.modelUseHostPath }}
+            type: Directory
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         {{- if .Values.global.cacheUseHostPath }}
         - name: cache-volume
           hostPath:
@@ -87,13 +108,4 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.evenly_distributed }}
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              {{- include "embedding-usvc.selectorLabels" . | nindent 14 }}
       {{- end }}

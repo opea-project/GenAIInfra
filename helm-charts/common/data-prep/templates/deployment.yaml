@@ -41,11 +41,28 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.entryCommand }}
+          command: {{ .Values.entryCommand }}
+          {{- end }}
+          {{- if .Values.extraArgs }}
+          args:
+            {{- range .Values.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
           ports:
             - name: data-prep
-              containerPort: {{ .Values.port }}
+              containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           volumeMounts:
+            {{- if .Values.global.cacheUseHostPath }}
+            - mountPath: /home/user/.cache/clip
+              name: cache-volume
+              subPath: clip
+            - mountPath: /home/user/.cache/huggingface/hub
+              name: cache-volume
+              subPath: huggingface/hub
+            {{- end }}
             - mountPath: /tmp
               name: tmp
           {{- if .Values.livenessProbe }}
@@ -63,6 +80,12 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        {{- if .Values.global.cacheUseHostPath }}
+        - name: cache-volume
+          hostPath:
+            path: {{ .Values.global.cacheUseHostPath }}
+            type: Directory
+        {{- end }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}

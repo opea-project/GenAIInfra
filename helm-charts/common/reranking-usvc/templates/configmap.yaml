@@ -8,6 +8,15 @@ metadata:
   labels:
     {{- include "reranking-usvc.labels" . | nindent 4 }}
 data:
+  {{- if .Values.chunkDuration }}
+  CHUNK_DURATION: {{ .Values.chunkDuration | quote }}
+  {{- end }}
+  {{- if .Values.fileServerEndpoint }}
+  FILE_SERVER_ENDPOINT: {{ .Values.fileServerEndpoint | quote }}
+  {{- end }}
+  {{- if .Values.getVideoListEndpoint }}
+  DATAPREP_GET_VIDEO_LIST_ENDPOINT: {{ .Values.getVideoListEndpoint | quote }}
+  {{- end }}
   {{- if .Values.TEI_RERANKING_ENDPOINT }}
   TEI_RERANKING_ENDPOINT: {{ .Values.TEI_RERANKING_ENDPOINT | quote }}
   {{- else }}

@@ -4,14 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "embedding-usvc.fullname" . }}
+  name: {{ include "videoqna.fullname" . }}
   labels:
-    {{- include "embedding-usvc.labels" . | nindent 4 }}
+    {{- include "videoqna.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "embedding-usvc.selectorLabels" . | nindent 6 }}
+      {{- include "videoqna.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,10 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "embedding-usvc.selectorLabels" . | nindent 8 }}
+        {{- include "videoqna.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -31,7 +34,7 @@ spec:
         - name: {{ .Release.Name }}
           envFrom:
             - configMapRef:
-                name: {{ include "embedding-usvc.fullname" . }}-config
+                name: {{ include "videoqna.fullname" . }}-config
             {{- if .Values.global.extraEnvConfig }}
             - configMapRef:
                 name: {{ .Values.global.extraEnvConfig }}
@@ -41,41 +44,33 @@ spec:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- if .Values.entryCommand }}
+          command: {{ .Values.entryCommand }}
+          {{- end }}
+          {{- if .Values.extraArgs }}
+          args:
+            {{- range .Values.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
           ports:
-            - name: embedding-usvc
+            - name: http
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
-          volumeMounts:
-            {{- if .Values.global.cacheUseHostPath }}
-            - mountPath: /home/user/.cache/huggingface/hub
-              name: cache-volume
-              subPath: huggingface/hub
-            {{- end }}
-            - mountPath: /tmp
-              name: tmp
-          {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.readinessProbe }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.startupProbe }}
-          startupProbe:
-            {{- toYaml .Values.startupProbe | nindent 12 }}
-          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
       volumes:
-        {{- if .Values.global.cacheUseHostPath }}
-        - name: cache-volume
-          hostPath:
-            path: {{ .Values.global.cacheUseHostPath }}
-            type: Directory
-        {{- end }}
-        - name: tmp
-          emptyDir: {}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -87,13 +82,4 @@ spec:
       {{- with .Values.tolerations }}
       tolerations:
         {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- if .Values.evenly_distributed }}
-      topologySpreadConstraints:
-        - maxSkew: 1
-          topologyKey: kubernetes.io/hostname
-          whenUnsatisfiable: ScheduleAnyway
-          labelSelector:
-            matchLabels:
-              {{- include "embedding-usvc.selectorLabels" . | nindent 14 }}
       {{- end }}

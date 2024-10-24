@@ -1,0 +1,9 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: vdms-vector-db
+description: A Helm chart for Intel VDMS Vector DB
+type: application
+version: 1.0.0
+appVersion: "v2.8.0"
