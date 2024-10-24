@@ -1,0 +1,52 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asr-deploy
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: asr-deploy
+  template:
+    metadata:
+      annotations:
+        sidecar.istio.io/rewriteAppHTTPProbers: 'true'
+      labels:
+        app: asr-deploy
+    spec:
+      topologySpreadConstraints:
+      - maxSkew: 1
+        topologyKey: kubernetes.io/hostname
+        whenUnsatisfiable: ScheduleAnyway
+        labelSelector:
+          matchLabels:
+            app: asr-deploy
+      hostIPC: true
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: audio-qna-config
+        image: opea/asr:latest
+        imagePullPolicy: IfNotPresent
+        name: asr-deploy
+        args: null
+        ports:
+        - containerPort: 9099
+      serviceAccountName: default
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: asr-svc
+spec:
+  type: ClusterIP
+  selector:
+    app: asr-deploy
+  ports:
+  - name: service
+    port: 3001
+    targetPort: 9099
