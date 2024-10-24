@@ -11,6 +11,7 @@ This directory contains Helm charts for [GenAIComps](https://github.com/opea-pro
   - [From Source Code](#from-source-code)
   - [Using Helm Charts repository](#using-helm-charts-repository)
 - [Helm Charts Options](#helm-charts-options)
+- [Using HPA (autoscaling)](#using-hpa-autoscaling)
 - [Using Persistent Volume](#using-persistent-volume)
 - [Using Private Docker Hub](#using-private-docker-hub)
 - [Generate manifests from Helm Charts](#generate-manifests-from-helm-charts)
@@ -88,8 +89,12 @@ There are global options (which should be shared across all components of a work
 | global     | http_proxy https_proxy no_proxy | Proxy settings. If you are running the workloads behind the proxy, you'll have to add your proxy settings here.                                                                                                                                                                |
 | global     | modelUsePVC                     | The PersistentVolumeClaim you want to use as HuggingFace hub cache. Default "" means not using PVC. Only one of modelUsePVC/modelUseHostPath can be set.                                                                                                                       |
 | global     | modelUseHostPath                | If you don't have Persistent Volume in your k8s cluster and want to use local directory as HuggingFace hub cache, set modelUseHostPath to your local directory name. Note that this can't share across nodes. Default "". Only one of modelUsePVC/modelUseHostPath can be set. |
-| chatqna    | horizontalPodAutoscaler.enabled | Enable HPA autoscaling for TGI and TEI service deployments based on metrics they provide. See [Pre-conditions](HPA.md#pre-conditions) and [Gotchas](HPA.md#gotchas) before enabling!                                                                                           |
+| global     | monitoring                      | Enable monitoring for (ChatQnA) service components. See [Pre-conditions](monitoring.md#pre-conditions) before enabling!                                                                                                                                                        |
 | tgi        | LLM_MODEL_ID                    | The model id you want to use for tgi server. Default "Intel/neural-chat-7b-v3-3".                                                                                                                                                                                              |
+
+## Using HPA (autoscaling)
+
+See [HPA instructions](HPA.md) on how to enable horizontal pod autoscaling for service components, based on their usage metrics.
 
 ## Using Persistent Volume
 

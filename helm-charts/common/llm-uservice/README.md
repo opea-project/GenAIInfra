@@ -52,3 +52,4 @@ curl http://localhost:9000/v1/chat/completions \
 | image.repository                | string | `"opea/llm-tgi"` |                                 |
 | service.port                    | string | `"9000"`         |                                 |
 | TGI_LLM_ENDPOINT                | string | `""`             | LLM endpoint                    |
+| global.monitoring               | bop;   | false            | Service usage metrics           |

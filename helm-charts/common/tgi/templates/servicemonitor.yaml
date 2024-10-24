@@ -6,7 +6,7 @@
 # Metric descriptions:
 # - https://github.com/huggingface/text-generation-inference/discussions/1127#discussioncomment-7240527
 
-{{- if .Values.horizontalPodAutoscaler.enabled }}
+{{- if .Values.global.monitoring }}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -18,7 +18,6 @@ spec:
     matchLabels:
       {{- include "tgi.selectorLabels" . | nindent 6 }}
   endpoints:
-  - interval: 4s
-    port: tgi
-    scheme: http
+  - port: tgi
+    interval: 5s
 {{- end }}

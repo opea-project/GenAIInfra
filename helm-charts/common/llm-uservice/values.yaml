@@ -90,3 +90,9 @@ global:
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+
+  # Install Prometheus serviceMonitor for service
+  monitoring: false
+
+  # Prometheus Helm install release name for serviceMonitor
+  prometheusRelease: prometheus-stack
