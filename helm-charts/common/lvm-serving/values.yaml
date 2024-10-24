@@ -102,5 +102,5 @@ global:
   modelUseHostPath: ""
   modelUsePVC: ""
 
-  # Set cacheUseHostPath to for caching encoding/embedding models and other data
+  # Set cacheUseHostPath to for caching encoding/embedding models and other related data
   cacheUseHostPath: ""

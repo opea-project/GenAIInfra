@@ -41,9 +41,12 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.entryCommand }}
           command: {{ .Values.entryCommand }}
+          {{- end }}
+          {{- if .Values.extraArgs }}
           args:
-            - "-c"
-            - "sleep 45 && python videoqna.py"
+            {{- range .Values.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
           {{- end }}
           ports:
             - name: http

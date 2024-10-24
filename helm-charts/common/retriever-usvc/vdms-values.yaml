@@ -15,6 +15,7 @@ vdmsHost: ""
 vdmsPort: "8001"
 useClip: "1"
 entryCommand: ["/bin/sh"]
+extraArgs: ["-c", "sleep 30 && python retriever_vdms.py"]
 
 # Set cacheUseHostPath to for caching encoding/embedding models and other related data
 global:

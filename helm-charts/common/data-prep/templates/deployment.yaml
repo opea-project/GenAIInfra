@@ -43,9 +43,12 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- if .Values.entryCommand }}
           command: {{ .Values.entryCommand }}
+          {{- end }}
+          {{- if .Values.extraArgs }}
           args:
-            - "-c"
-            - "sleep 15 && python ingest_videos.py"
+            {{- range .Values.extraArgs }}
+            - {{ . | quote }}
+            {{- end }}
           {{- end }}
           ports:
             - name: data-prep

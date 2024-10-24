@@ -22,7 +22,7 @@ podLabels: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
   capabilities:
     drop:
     - ALL
@@ -56,6 +56,7 @@ tolerations: []
 affinity: {}
 
 entryCommand: ["/bin/sh"]
+extraArgs: ["-c", "sleep 45 && python videoqna.py"]
 
 ui:
   image:
@@ -63,8 +64,8 @@ ui:
     pullPolicy: IfNotPresent
     tag: "latest"
 
-  backendServiceEndpoint: "/v1/videoqna"
-  backendHealthCheckEndpoint: "/v1/health_check"
+  videoqnaBackendService: "/v1/videoqna"
+  videoqnaBackendHealthCheck: "/v1/health_check"
 
   service:
     type: ClusterIP
@@ -80,6 +81,7 @@ data-prep:
   vdmsHost: ""
   vdmsPort: "8001"
   entryCommand: ["/bin/sh"]
+  extraArgs: ["-c", "sleep 15 && python ingest_videos.py"]
 
 embedding-usvc:
   image:
@@ -98,6 +100,7 @@ retriever-usvc:
   vdmsPort: "8001"
   useClip: "1"
   entryCommand: ["/bin/sh"]
+  extraArgs: ["-c", "sleep 30 && python retriever_vdms.py"]
 
 reranking-usvc:
   image:

@@ -14,6 +14,7 @@ indexName: "mega-videoqna"
 vdmsHost: ""
 vdmsPort: "8001"
 entryCommand: ["/bin/sh"]
+extraArgs: ["-c", "sleep 15 && python ingest_videos.py"]
 
 # Set cacheUseHostPath to for caching encoding/embedding models and other related data
 global:
