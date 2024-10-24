@@ -6,8 +6,10 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
-backendServiceEndpoint: "/v1/videoqna"
-backendHealthCheckEndpoint: "/v1/health_check"
+# Endpoint for VideoQnA Backend
+videoqnaBackendService: "/v1/videoqna"
+# Endpoint for VideoQnA Backend Service health check
+videoqnaBackendHealthCheck: "/v1/health_check"
 
 service:
   type: ClusterIP

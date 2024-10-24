@@ -1,8 +1,8 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-autodependency:
-  vdms: false
+vdms:
+  enabled: false
 
 image:
   repository: opea/dataprep-multimodal-vdms
@@ -14,3 +14,7 @@ indexName: "mega-videoqna"
 vdmsHost: ""
 vdmsPort: "8001"
 entryCommand: ["/bin/sh"]
+
+# Set cacheUseHostPath to for caching encoding/embedding models and other related data
+global:
+  cacheUseHostPath: ""

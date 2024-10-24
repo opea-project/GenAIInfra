@@ -8,9 +8,7 @@ metadata:
   labels:
     {{- include "lvm-serving.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "lvm-serving.selectorLabels" . | nindent 6 }}
@@ -30,13 +28,24 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "lvm-serving.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "lvm-serving.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
           securityContext:
+            {{- if .Values.global.modelUseHostPath }}
+            {}
+            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
+            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
@@ -44,18 +53,32 @@ spec:
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           volumeMounts:
-            - mountPath: /data
-              name: video-llama-model
+            - mountPath: /home/user/model
+              name: model-volume
+            {{- if .Values.global.cacheUseHostPath }}
+            - mountPath: /home/user/.cache/huggingface/hub
+              name: cache-volume
+              subPath: huggingface/hub
+            - mountPath: /home/user/.cache/torch/hub
+              name: cache-volume
+              subPath: torch/hub
+            {{- end }}
             - mountPath: /tmp
               name: tmp
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
           readinessProbe:
             {{- toYaml .Values.readinessProbe | nindent 12 }}
+          startupProbe:
+            {{- if .Values.llmDownload }}
+            {{- .Values.startupProbeWithLlmDownload | toYaml | nindent 12 }}
+            {{- else }}
+            {{- .Values.startupProbe | toYaml | nindent 12 }}
+            {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        - name: video-llama-model
+        - name: model-volume
           {{- if .Values.global.modelUsePVC }}
           persistentVolumeClaim:
             claimName: {{ .Values.global.modelUsePVC }}
@@ -66,6 +89,12 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
+        {{- if .Values.global.cacheUseHostPath }}
+        - name: cache-volume
+          hostPath:
+            path: {{ .Values.global.cacheUseHostPath }}
+            type: Directory
+        {{- end }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}

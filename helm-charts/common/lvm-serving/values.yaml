@@ -5,7 +5,7 @@
 
 replicaCount: 1
 
-llmDownloadFlag: "True"
+llmDownload: true
 
 image:
   repository: opea/video-llama-lvm-server
@@ -25,11 +25,11 @@ podLabels: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
   capabilities:
     drop:
     - ALL
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -65,11 +65,19 @@ readinessProbe:
     port: http
   initialDelaySeconds: 5
   periodSeconds: 5
+# Video-Llama Server may take upto 15 mins to startup completely.
 startupProbe:
   tcpSocket:
     port: http
   initialDelaySeconds: 5
-  periodSeconds: 5
+  periodSeconds: 10
+  failureThreshold: 90
+# When LLM download is taking place, startup may take upto 60 mins.
+startupProbeWithLlmDownload:
+  tcpSocket:
+    port: http
+  initialDelaySeconds: 5
+  periodSeconds: 30
   failureThreshold: 120
 
 nodeSelector: {}
@@ -93,3 +101,6 @@ global:
   # By default, both var are set to empty, the model will be downloaded and saved to a tmp volume.
   modelUseHostPath: ""
   modelUsePVC: ""
+
+  # Set cacheUseHostPath to for caching encoding/embedding models and other data
+  cacheUseHostPath: ""

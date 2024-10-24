@@ -11,4 +11,4 @@ dependencies:
   - name: lvm-serving
     version: 1.0.0
     repository: file://../lvm-serving
-    condition: autodependency.enabled
+    condition: lvm-serving.enabled

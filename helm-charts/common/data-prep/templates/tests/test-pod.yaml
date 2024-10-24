@@ -18,7 +18,7 @@ spec:
       {{- if contains "dataprep-multimodal-vdms" .Values.image.repository }}
       args:
         - |
-          curl -LO "https://github.com/opea-project/GenAIExamples/raw/refs/heads/main/VideoQnA/docker_compose/intel/cpu/xeon/data/op_1_0320241830.mp4"
+          https_proxy={{ .Values.global.https_proxy }} curl -svLO "https://github.com/opea-project/GenAIExamples/raw/refs/heads/main/VideoQnA/docker_compose/intel/cpu/xeon/data/op_1_0320241830.mp4"
           max_retry=5
           for ((i=1; i<=max_retry; i++)); do
             curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep -sS --fail-with-body \

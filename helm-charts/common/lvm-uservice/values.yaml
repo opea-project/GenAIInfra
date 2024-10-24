@@ -3,12 +3,13 @@
 
 # Default values for lvm-uservice.
 
-autodependency:
+lvm-serving:
   enabled: false
-
-replicaCount: 1
+  llmDownload: true
 
 lvmEndpoint: ""
+
+replicaCount: 1
 image:
   repository: opea/lvm-video-llama
   # This sets the pull policy for images.
@@ -27,7 +28,7 @@ podLabels: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
+securityContext:
   capabilities:
     drop:
     - ALL

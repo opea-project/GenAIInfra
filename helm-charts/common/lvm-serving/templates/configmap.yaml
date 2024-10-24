@@ -8,7 +8,7 @@ metadata:
   labels:
     {{- include "lvm-serving.labels" . | nindent 4 }}
 data:
-  llm_download: {{ .Values.llmDownloadFlag }}
+  llm_download: {{ .Values.llmDownload | quote | title }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   no_proxy: {{ .Values.global.no_proxy | quote }}

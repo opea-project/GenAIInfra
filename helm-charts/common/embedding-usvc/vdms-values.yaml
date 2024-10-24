@@ -6,3 +6,10 @@ image:
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
+
+securityContext:
+  readOnlyRootFilesystem: false
+
+# Set cacheUseHostPath to for caching encoding/embedding models and other related data
+global:
+  cacheUseHostPath: ""

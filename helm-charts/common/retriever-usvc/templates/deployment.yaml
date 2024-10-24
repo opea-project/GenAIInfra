@@ -52,6 +52,11 @@ spec:
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           volumeMounts:
+            {{- if .Values.global.cacheUseHostPath }}
+            - mountPath: /home/user/.cache/huggingface/hub
+              name: cache-volume
+              subPath: huggingface/hub
+            {{- end }}
             - mountPath: /tmp
               name: tmp
           {{- if .Values.livenessProbe }}
@@ -69,6 +74,12 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        {{- if .Values.global.cacheUseHostPath }}
+        - name: cache-volume
+          hostPath:
+            path: {{ .Values.global.cacheUseHostPath }}
+            type: Directory
+        {{- end }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}

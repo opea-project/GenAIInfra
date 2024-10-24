@@ -114,7 +114,10 @@ global:
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
-  # set modelUseHostPath or modelUsePVC to use model cache.
+
+  # Set modelUseHostPath or modelUsePVC to use model cache.
   modelUseHostPath: ""
-  # modelUseHostPath: /mnt/opea-models
-  # modelUsePVC: model-volume
+  # modelUsePVC: ""
+
+  # Set cacheUseHostPath to for caching encoding/embedding models and other related data
+  cacheUseHostPath: ""

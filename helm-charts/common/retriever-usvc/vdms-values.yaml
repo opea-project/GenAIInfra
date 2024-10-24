@@ -1,8 +1,8 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-autodependency:
-  vdms: false
+vdms:
+  enabled: false
 
 image:
   repository: opea/retriever-vdms
@@ -15,3 +15,7 @@ vdmsHost: ""
 vdmsPort: "8001"
 useClip: "1"
 entryCommand: ["/bin/sh"]
+
+# Set cacheUseHostPath to for caching encoding/embedding models and other related data
+global:
+  cacheUseHostPath: ""
