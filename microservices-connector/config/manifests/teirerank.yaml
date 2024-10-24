@@ -63,8 +63,6 @@ metadata:
     app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
-  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: teirerank
@@ -137,10 +135,10 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
-      # extra time to finish processing buffered requests before pod is forcibly terminated
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
       terminationGracePeriodSeconds: 60
 ---
-# Source: teirerank/templates/horizontalPodAutoscaler.yaml
+# Source: teirerank/templates/horizontal-pod-autoscaler.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---

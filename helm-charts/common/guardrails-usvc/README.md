@@ -27,7 +27,7 @@ helm install guardrails-usvc . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} 
 cd GenAIInfra/helm-charts/common/guardrails-usvc
 export HFTOKEN="insert-your-huggingface-token-here"
 helm dependency update
-helm install guardrails-usvc . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set autodependency.enabled=true --wait
+helm install guardrails-usvc . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set tgi.enabled=true --wait
 ```
 
 ## Verify

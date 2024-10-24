@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 source /GenAIInfra/.github/workflows/scripts/change_color
-pip install bandit==1.7.8
+pip install --no-cache-dir bandit==1.7.8
 log_dir=/GenAIInfra/.github/workflows/scripts/codeScan
 python -m bandit -r -lll -iii /GenAIInfra 2>&1 | tee ${log_dir}/bandit.log
 exit_code=$?

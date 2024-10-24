@@ -25,7 +25,8 @@ helm install data-prep . --set REDIS_URL=${REDIS_URL} --set TEI_EMBEDDING_ENDPOI
 ```console
 cd GenAIInfra/helm-charts/common/data-prep
 helm dependency update
-helm install data-prep . --set autodependency.enabled=true
+helm install data-prep . --set redis-vector-db.enabled=true --set tei.enabled=true
+
 ```
 
 ## Verify
@@ -51,3 +52,7 @@ curl http://localhost:6007/v1/dataprep  \
 | service.port           | string | `"6007"`                |             |
 | REDIS_URL              | string | `""`                    |             |
 | TEI_EMBEDDING_ENDPOINT | string | `""`                    |             |
+
+## Milvus support
+
+Refer to the milvus-values.yaml for milvus configurations.
