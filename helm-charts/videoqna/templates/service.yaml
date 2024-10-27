@@ -16,3 +16,4 @@ spec:
       name: http
   selector:
     {{- include "videoqna.selectorLabels" . | nindent 4 }}
+    app: {{ include "videoqna.fullname" . }}
