@@ -12,10 +12,10 @@ data:
   CHUNK_DURATION: {{ .Values.chunkDuration | quote }}
   {{- end }}
   {{- if .Values.fileServerEndpoint }}
-  FILE_SERVER_ENDPOINT: {{ .Values.fileServerEndpoint | quote }}
+  FILE_SERVER_ENDPOINT: {{ tpl .Values.fileServerEndpoint . | quote }}
   {{- end }}
   {{- if .Values.getVideoListEndpoint }}
-  DATAPREP_GET_VIDEO_LIST_ENDPOINT: {{ .Values.getVideoListEndpoint | quote }}
+  DATAPREP_GET_VIDEO_LIST_ENDPOINT: {{ tpl .Values.getVideoListEndpoint . | quote }}
   {{- end }}
   {{- if .Values.TEI_RERANKING_ENDPOINT }}
   TEI_RERANKING_ENDPOINT: {{ .Values.TEI_RERANKING_ENDPOINT | quote }}

@@ -71,11 +71,9 @@ videoqna-ui:
   # Overriding videoqna-ui chart name to avoid repetitive videoqna in the fullname.
   nameOverride: "ui"
 
-  # Following template value will be resolved in videoqna-ui subchart's context. For this,
-  # nginx.fullname definition is added to videoqna-ui template (as UI subchart
-  # can not access the templates of parent chart).
-  videoqnaBackendService: http://{{ include "nginx.fullname" . }}/v1/videoqna
-  videoqnaBackendHealthCheck: http://{{ include "nginx.fullname" . }}/v1/health_check
+  # Following template value will be resolved in videoqna-ui ConfigMap
+  videoqnaBackendService: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/videoqna
+  videoqnaBackendHealthCheck: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/health_check
 
   containerPort: 5173
   service:
@@ -123,8 +121,10 @@ reranking-usvc:
     tag: "latest"
 
   chunkDuration: ""
-  fileServerEndpoint: "/v1/dataprep/get_file"
-  getVideoListEndpoint: "/v1/dataprep/get_videos"
+
+  # Following template value will be resolved in rearanking-usvc ConfigMap
+  fileServerEndpoint: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/dataprep/get_file
+  getVideoListEndpoint: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/dataprep/get_videos
 
 global:
   http_proxy: ""

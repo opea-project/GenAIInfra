@@ -40,29 +40,47 @@ data:
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
         }
+
+        location /v1/dataprep/get_file {
+            proxy_pass http://{{ include "data-prep.fullname" (index .Subcharts "data-prep") }}:{{ index .Values "data-prep" "service" "port" }};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+        location /v1/dataprep/get_videos {
+            proxy_pass http://{{ include "data-prep.fullname" (index .Subcharts "data-prep") }}:{{ index .Values "data-prep" "service" "port" }};
+            proxy_set_header Host $host;
+            proxy_set_header X-Real-IP $remote_addr;
+            proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+            proxy_set_header X-Forwarded-Proto $scheme;
+        }
+
+
     }
 
 kind: ConfigMap
 metadata:
-  name: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}-config
+  name: {{ include "nginx.fullname" . }}-config
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
+  name: {{ include "nginx.fullname" . }}
   labels:
     {{- include "videoqna.labels" . | nindent 4 }}
-    app: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
+    app: {{ include "nginx.fullname" . }}
 spec:
   selector:
     matchLabels:
       {{- include "videoqna.selectorLabels" . | nindent 6 }}
-      app: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
+      app: {{ include "nginx.fullname" . }}
   template:
     metadata:
       labels:
         {{- include "videoqna.selectorLabels" . | nindent 8 }}
-        app: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
+        app: {{ include "nginx.fullname" . }}
     spec:
       containers:
       - image: nginx:1.27.1
@@ -75,7 +93,7 @@ spec:
       volumes:
       - configMap:
           defaultMode: 420
-          name: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}-config
+          name: {{ include "nginx.fullname" . }}-config
         name: nginx-config-volume
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -93,7 +111,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
+  name: {{ include "nginx.fullname" . }}
 spec:
   ports:
   - port: 80
@@ -102,5 +120,5 @@ spec:
     nodePort: 30881
   selector:
     {{- include "videoqna.selectorLabels" . | nindent 4 }}
-    app: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
+    app: {{ include "nginx.fullname" . }}
   type: NodePort

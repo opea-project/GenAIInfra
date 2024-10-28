@@ -60,3 +60,10 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Define the name for nginx Chart.
+*/}}
+{{- define "nginx.fullname" -}}
+{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx
+{{- end }}
