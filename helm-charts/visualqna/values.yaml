@@ -1,0 +1,81 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for visualqna.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: opea/visualqna
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+nginx:
+  service:
+    type: NodePort
+port: 8888
+service:
+  type: ClusterIP
+  port: 8888
+
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# This is just to avoid Helm errors when HPA is NOT used
+# (use hpa-values.yaml files to actually enable HPA).
+horizontalPodAutoscaler:
+  enabled: false
+
+# Override values in specific subcharts
+tgi:
+  MAX_INPUT_LENGTH: "4096"
+  MAX_TOTAL_TOKENS: "8192"
+  LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
+
+visualqna-ui:
+  image:
+    repository: opea/visualqna-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/visualqna"
+  containerPort: 5173
+
+# If you would like to switch to traditional UI image
+# Uncomment the following lines
+# visualqna-ui:
+#   image:
+#     repository: "opea/visualqna-ui"
+#     tag: "latest"
+#   containerPort: "5173"
+
+global:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # set modelUseHostPath or modelUsePVC to use model cache.
+  modelUseHostPath: ""
+  # modelUseHostPath: /mnt/opea-models
+  # modelUsePVC: model-volume
+
+  # Install Prometheus serviceMonitors for service components
+  monitoring: false
+
+  # Prometheus Helm install release name needed for serviceMonitors
+  prometheusRelease: prometheus-stack

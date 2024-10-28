@@ -1,0 +1,15 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: lvm-uservice
+description: The Helm chart for deploying lvm as microservice
+type: application
+version: 1.0.0
+# The lvm microservice server version
+appVersion: "v1.0"
+dependencies:
+  - name: tgi
+    version: 1.0.0
+    repository: file://../tgi
+    condition: tgi.enabled
