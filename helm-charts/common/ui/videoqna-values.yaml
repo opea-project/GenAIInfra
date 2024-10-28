@@ -6,10 +6,10 @@ image:
   pullPolicy: IfNotPresent
   tag: "latest"
 
-# Endpoint for VideoQnA Backend
-videoqnaBackendService: "/v1/videoqna"
-# Endpoint for VideoQnA Backend Service health check
-videoqnaBackendHealthCheck: "/v1/health_check"
+# Endpoint for VideoQnA Backend. Test Value - Override it with actual Backend endpoint
+videoqnaBackendService: "http://localhost:8888/v1/videoqna"
+# Endpoint for VideoQnA Backend Service health check. Test Value - Override it with actual Backend endpoint
+videoqnaBackendHealthCheck: "http://localhost:8888/v1/health_check"
 
 containerPort: 5173
 service:

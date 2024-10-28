@@ -44,25 +44,25 @@ data:
 
 kind: ConfigMap
 metadata:
-  name: {{ include "videoqna.fullname" . }}-nginx-config
+  name: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}-config
 ---
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "videoqna.fullname" . }}-nginx
+  name: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
   labels:
     {{- include "videoqna.labels" . | nindent 4 }}
-    app: {{ include "videoqna.fullname" . }}-nginx
+    app: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
 spec:
   selector:
     matchLabels:
       {{- include "videoqna.selectorLabels" . | nindent 6 }}
-      app: {{ include "videoqna.fullname" . }}-nginx
+      app: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
   template:
     metadata:
       labels:
         {{- include "videoqna.selectorLabels" . | nindent 8 }}
-        app: {{ include "videoqna.fullname" . }}-nginx
+        app: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
     spec:
       containers:
       - image: nginx:1.27.1
@@ -75,7 +75,7 @@ spec:
       volumes:
       - configMap:
           defaultMode: 420
-          name: {{ include "videoqna.fullname" . }}-nginx-config
+          name: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}-config
         name: nginx-config-volume
       {{- with .Values.nodeSelector }}
       nodeSelector:
@@ -93,7 +93,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "videoqna.fullname" . }}-nginx
+  name: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
 spec:
   ports:
   - port: 80
@@ -102,5 +102,5 @@ spec:
     nodePort: 30881
   selector:
     {{- include "videoqna.selectorLabels" . | nindent 4 }}
-    app: {{ include "videoqna.fullname" . }}-nginx
+    app: {{ include "nginx.fullname" (index .Subcharts "videoqna-ui") }}
   type: NodePort

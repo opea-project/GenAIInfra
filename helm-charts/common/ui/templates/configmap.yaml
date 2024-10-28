@@ -9,10 +9,10 @@ metadata:
     {{- include "ui.labels" . | nindent 4 }}
 data:
   {{- if .Values.videoqnaBackendHealthCheck }}
-  BACKEND_HEALTH_CHECK_ENDPOINT: {{ .Values.videoqnaBackendHealthCheck | quote }}
+  BACKEND_HEALTH_CHECK_ENDPOINT: {{ tpl .Values.videoqnaBackendHealthCheck . | quote }}
   {{- end }}
   {{- if .Values.videoqnaBackendService }}
-  BACKEND_SERVICE_ENDPOINT: {{ .Values.videoqnaBackendService | quote }}
+  BACKEND_SERVICE_ENDPOINT: {{ tpl .Values.videoqnaBackendService . | quote }}
   {{- end }}
   APP_BACKEND_SERVICE_ENDPOINT: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   APP_DATA_PREP_SERVICE_URL: {{ .Values.DATAPREP_SERVICE_ENDPOINT | quote }}

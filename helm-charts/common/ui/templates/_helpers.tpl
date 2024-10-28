@@ -60,3 +60,10 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Define the name for nginx Chart. Nginx service is needed by Videoqna Streamlit UI.
+*/}}
+{{- define "nginx.fullname" -}}
+{{ include "ui.fullname" . | trimSuffix "-ui" }}-nginx
+{{- end }}

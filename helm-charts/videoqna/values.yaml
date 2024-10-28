@@ -68,8 +68,14 @@ videoqna-ui:
     pullPolicy: IfNotPresent
     tag: "latest"
 
-  videoqnaBackendService: "/v1/videoqna"
-  videoqnaBackendHealthCheck: "/v1/health_check"
+  # Overriding videoqna-ui chart name to avoid repetitive videoqna in the fullname.
+  nameOverride: "ui"
+
+  # Following template value will be resolved in videoqna-ui subchart's context. For this,
+  # nginx.fullname definition is added to videoqna-ui template (as UI subchart
+  # can not access the templates of parent chart).
+  videoqnaBackendService: http://{{ include "nginx.fullname" . }}/v1/videoqna
+  videoqnaBackendHealthCheck: http://{{ include "nginx.fullname" . }}/v1/health_check
 
   containerPort: 5173
   service:
