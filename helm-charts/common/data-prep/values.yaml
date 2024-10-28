@@ -11,8 +11,7 @@ milvus:
   enabled: false
 redis-vector-db:
   enabled: false
-
-vdms:
+vdms-vector-db:
   enabled: false
 
 replicaCount: 1

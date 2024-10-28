@@ -9,6 +9,20 @@ image:
 
 chunkDuration: ""
 
-# Test values - Replace with actual Endpoint URLs
-fileServerEndpoint: "http://localhost:6007/v1/dataprep/get_file"
-getVideoListEndpoint: "http://localhost:6007/v1/dataprep/get_videos"
+# Replace with actual Endpoint URLs
+fileServerEndpoint: ""
+getVideoListEndpoint: ""
+
+# As reranking depends on Data-prep service, enable data-prep dependency and
+# override the values for multimodal setup.
+data-prep:
+  image:
+    repository: opea/dataprep-multimodal-vdms
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  indexName: "mega-videoqna"
+  vdmsHost: ""
+  vdmsPort: "8001"
+  entryCommand: ["/bin/sh"]
+  extraArgs: ["-c", "sleep 15 && python ingest_videos.py"]

@@ -20,7 +20,7 @@ dependencies:
   - name: vdms-vector-db
     version: 1.0.0
     repository: file://../vdms-vector-db
-    condition: vdms.enabled
+    condition: vdms-vector-db.enabled
   - name: milvus
     version: 4.2.12
     repository: https://zilliztech.github.io/milvus-helm/

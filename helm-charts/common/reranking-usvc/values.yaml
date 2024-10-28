@@ -8,6 +8,9 @@
 teirerank:
   enabled: false
 
+data-prep:
+  enabled: false
+
 replicaCount: 1
 
 # Set it as a non-null string, such as true, if you want to enable logging facility,

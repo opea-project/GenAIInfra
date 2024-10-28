@@ -14,8 +14,14 @@ data:
   {{- if .Values.fileServerEndpoint }}
   FILE_SERVER_ENDPOINT: {{ tpl .Values.fileServerEndpoint . | quote }}
   {{- end }}
+  {{- else }}
+  FILE_SERVER_ENDPOINT: http://{{ .Release.Name }}-data-prep:6007/v1/dataprep/get_file"
+  {{- end }}
   {{- if .Values.getVideoListEndpoint }}
   DATAPREP_GET_VIDEO_LIST_ENDPOINT: {{ tpl .Values.getVideoListEndpoint . | quote }}
+  {{- end }}
+  {{- else }}
+  DATAPREP_GET_VIDEO_LIST_ENDPOINT: http://{{ .Release.Name }}-data-prep:6007/v1/dataprep/get_videos"
   {{- end }}
   {{- if .Values.TEI_RERANKING_ENDPOINT }}
   TEI_RERANKING_ENDPOINT: {{ .Values.TEI_RERANKING_ENDPOINT | quote }}
