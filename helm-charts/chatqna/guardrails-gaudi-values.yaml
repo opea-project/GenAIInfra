@@ -16,12 +16,31 @@ tei:
   accelDevice: "gaudi"
   image:
     repository: ghcr.io/huggingface/tei-gaudi
-    tag: synapse_1.16
+    tag: 1.5.0
   resources:
     limits:
       habana.ai/gaudi: 1
   securityContext:
     readOnlyRootFilesystem: false
+  livenessProbe:
+    timeoutSeconds: 1
+  readinessProbe:
+    timeoutSeconds: 1
+
+teirerank:
+  accelDevice: "gaudi"
+  image:
+    repository: opea/tei-gaudi
+    tag: "latest"
+  resources:
+    limits:
+      habana.ai/gaudi: 1
+  securityContext:
+    readOnlyRootFilesystem: false
+  livenessProbe:
+    timeoutSeconds: 1
+  readinessProbe:
+    timeoutSeconds: 1
 
 tgi:
   accelDevice: "gaudi"
@@ -34,6 +53,19 @@ tgi:
   MAX_INPUT_LENGTH: "1024"
   MAX_TOTAL_TOKENS: "2048"
   CUDA_GRAPHS: ""
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+  startupProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 120
 
 tgi-guardrails:
   accelDevice: "gaudi"
@@ -47,3 +79,16 @@ tgi-guardrails:
   MAX_INPUT_LENGTH: "1024"
   MAX_TOTAL_TOKENS: "2048"
   CUDA_GRAPHS: ""
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+  startupProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 120

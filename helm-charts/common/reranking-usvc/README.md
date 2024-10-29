@@ -24,7 +24,7 @@ helm install reranking-usvc . --set TEI_RERANKING_ENDPOINT=${TEI_RERANKING_ENDPO
 ```console
 cd GenAIInfra/helm-charts/common/reranking-usvc
 helm dependency update
-helm install reranking-usvc . --set autodependency.enabled=true
+helm install reranking-usvc . --set teirerank.enabled=true
 ```
 
 ## Verify
@@ -49,3 +49,4 @@ curl http://localhost:8000/v1/reranking \
 | image.repository       | string | `"opea/reranking-tgi"` |             |
 | TEI_RERANKING_ENDPOINT | string | `""`                   |             |
 | service.port           | string | `"8000"`               |             |
+| global.monitoring      | bop;   | false                  |             |

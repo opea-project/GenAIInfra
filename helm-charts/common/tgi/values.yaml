@@ -72,20 +72,23 @@ resources: {}
 livenessProbe:
   tcpSocket:
     port: http
-  initialDelaySeconds: 5
-  periodSeconds: 5
+  initialDelaySeconds: 8
+  periodSeconds: 8
+  timeoutSeconds: 4
   failureThreshold: 24
 readinessProbe:
   tcpSocket:
     port: http
-  initialDelaySeconds: 5
-  periodSeconds: 5
+  initialDelaySeconds: 16
+  periodSeconds: 8
+  timeoutSeconds: 4
 startupProbe:
   tcpSocket:
     port: http
-  initialDelaySeconds: 5
+  initialDelaySeconds: 10
   periodSeconds: 5
-  failureThreshold: 120
+  failureThreshold: 180
+  timeoutSeconds: 2
 #livenessProbe:
 #  httpGet:
 #    path: /health
@@ -135,5 +138,8 @@ global:
   modelUseHostPath: ""
   modelUsePVC: ""
 
-  # Prometheus Helm installation info for serviceMonitor
+  # Install Prometheus serviceMonitor for service
+  monitoring: false
+
+  # Prometheus Helm install release name for serviceMonitor
   prometheusRelease: prometheus-stack

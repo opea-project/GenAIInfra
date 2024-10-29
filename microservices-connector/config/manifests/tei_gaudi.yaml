@@ -64,8 +64,6 @@ metadata:
     app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
-  # use explicit replica counts only of HorizontalPodAutoscaler is disabled
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: tei
@@ -88,7 +86,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "ghcr.io/huggingface/tei-gaudi:synapse_1.16"
+          image: "ghcr.io/huggingface/tei-gaudi:1.5.0"
           imagePullPolicy: IfNotPresent
           args:
             - "--auto-truncate"
@@ -110,12 +108,14 @@ spec:
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 1
           readinessProbe:
             httpGet:
               path: /health
               port: http
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 1
           startupProbe:
             failureThreshold: 120
             httpGet:
@@ -138,7 +138,7 @@ spec:
         - name: tmp
           emptyDir: {}
 ---
-# Source: tei/templates/horizontalPodAutoscaler.yaml
+# Source: tei/templates/horizontal-pod-autoscaler.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---

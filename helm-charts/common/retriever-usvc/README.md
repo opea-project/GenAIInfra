@@ -25,7 +25,7 @@ helm install retriever-usvc . --set REDIS_URL=${REDIS_URL} --set TEI_EMBEDDING_E
 ```console
 cd GenAIInfra/helm-charts/common/retriever-usvc
 helm dependency update
-helm install retriever-usvc . --set autodependency.enabled=true
+helm install retriever-usvc . --set tei.enabled=true --set redis-vector-db.enabled=true
 ```
 
 ## Verify
@@ -52,3 +52,8 @@ curl http://localhost:7000/v1/retrieval  \
 | service.port           | string | `"7000"`               |             |
 | REDIS_URL              | string | `""`                   |             |
 | TEI_EMBEDDING_ENDPOINT | string | `""`                   |             |
+| global.monitoring      | bop;   | false                  |             |
+
+## Milvus support
+
+Refer to the milvus-values.yaml for milvus configurations.

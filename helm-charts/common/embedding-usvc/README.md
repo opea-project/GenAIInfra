@@ -24,7 +24,7 @@ helm install embedding-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPO
 ```console
 cd GenAIInfra/helm-charts/common/embedding-usvc
 helm dependency update
-helm install embedding-usvc . --set autodependency.enabled=true
+helm install embedding-usvc . --set tei.enabled=true
 ```
 
 ## Verify
@@ -49,3 +49,4 @@ curl http://localhost:6000/v1/embeddings \
 | image.repository       | string | `"opea/embedding-tei"` |             |
 | service.port           | string | `"6000"`               |             |
 | TEI_EMBEDDING_ENDPOINT | string | `""`                   |             |
+| global.monitoring      | bop;   | false                  |             |

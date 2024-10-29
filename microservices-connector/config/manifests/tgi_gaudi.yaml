@@ -107,17 +107,20 @@ spec:
             periodSeconds: 5
             tcpSocket:
               port: http
+            timeoutSeconds: 1
           readinessProbe:
             initialDelaySeconds: 5
             periodSeconds: 5
             tcpSocket:
               port: http
+            timeoutSeconds: 1
           startupProbe:
             failureThreshold: 120
             initialDelaySeconds: 5
             periodSeconds: 5
             tcpSocket:
               port: http
+            timeoutSeconds: 1
           resources:
             limits:
               habana.ai/gaudi: 1
@@ -133,7 +136,7 @@ spec:
         - name: tmp
           emptyDir: {}
 ---
-# Source: tgi/templates/horizontalPorAutoscaler.yaml
+# Source: tgi/templates/horizontal-pod-autoscaler.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---

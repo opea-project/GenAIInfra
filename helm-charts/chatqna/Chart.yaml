@@ -34,15 +34,9 @@ dependencies:
   - name: tei
     version: 1.0.0
     repository: "file://../common/tei"
-  - name: embedding-usvc
-    version: 1.0.0
-    repository: "file://../common/embedding-usvc"
   - name: teirerank
     version: 1.0.0
     repository: "file://../common/teirerank"
-  - name: reranking-usvc
-    version: 1.0.0
-    repository: "file://../common/reranking-usvc"
   - name: redis-vector-db
     version: 1.0.0
     repository: "file://../common/redis-vector-db"
