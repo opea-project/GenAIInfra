@@ -50,7 +50,7 @@ export http_proxy=<your_http_proxy>
 export https_proxy=<your_https_proxy>
 
 helm dependency update
-helm install llm-ctrl-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set autodependency.enabled=true --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
+helm install llm-ctrl-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set vllm.enabled=true --set global.http_proxy=${http_proxy} --set global.https_proxy=${https_proxy} --wait
 ```
 
 `--wait` flag in above installation command will make sure that all the dependencies are resolved and all services are deployed.
