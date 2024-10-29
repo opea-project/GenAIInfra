@@ -90,4 +90,4 @@ spec:
   selector:
     {{- include "codetrans.selectorLabels" . | nindent 4 }}
     app: {{ include "codetrans.fullname" . }}-nginx
-  type: NodePort
+  type: {{ .Values.nginx.service.type }}

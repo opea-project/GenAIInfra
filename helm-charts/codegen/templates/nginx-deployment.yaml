@@ -90,4 +90,4 @@ spec:
   selector:
     {{- include "codegen.selectorLabels" . | nindent 4 }}
     app: {{ include "codegen.fullname" . }}-nginx
-  type: NodePort
+  type: {{ .Values.nginx.service.type }}
