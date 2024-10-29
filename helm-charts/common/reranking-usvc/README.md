@@ -117,4 +117,3 @@ curl http://localhost:8000/v1/reranking \
 | vdms-values:image.repository     | string | `"opea/reranking-videoqna"` |             |
 | vdms-values:fileServerEndpoint   | string | `""`                        |             |
 | vdms-values:getVideoListEndpoint | string | `""`                        |             |
-
