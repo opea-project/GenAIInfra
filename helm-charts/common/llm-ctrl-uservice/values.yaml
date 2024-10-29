@@ -5,14 +5,10 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-vllm:
-  enabled: false
-
 replicaCount: 1
 vLLM_ENDPOINT: ""
 HF_HUB_DISABLE_PROGRESS_BARS: 1
 HF_HUB_ENABLE_HF_TRANSFER: 0
-
 
 image:
   repository: opea/llm-vllm
@@ -92,6 +88,7 @@ LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
 
 # Overriding the Model ID being used by vllm-openvino service.(As llm-vllm microservice depends on vllm-openvino, these 2 values should be same.)
 vllm:
+  enabled: false
   LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
 
 global:

@@ -1,11 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-tgi:
-  enabled: false
-
 vllm:
-  enabled: true
   openvino_enabled: true
   image:
     repository: opea/vllm-openvino

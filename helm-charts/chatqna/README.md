@@ -85,7 +85,7 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 
 # To use OpenVINO optimized vLLM inference engine on XEON device
 
-helm -f ./chatqna/vllm-openvino-values.yaml install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME}
+helm install -f ./chatqna/vllm-openvino-values.yaml chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-ctrl-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} --set tgi.enabled=false --set vllm.enabled=true
 ```
 
 ### IMPORTANT NOTE
