@@ -18,6 +18,10 @@ service:
   type: ClusterIP
   port: 8888
 
+nginx:
+  service:
+    type: NodePort
+
 securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
