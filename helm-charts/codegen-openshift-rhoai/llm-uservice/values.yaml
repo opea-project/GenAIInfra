@@ -1,4 +1,7 @@
-image: 
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
   repository: "insert-your-image-here"  # image-registry.openshift-image-registry.svc:5000/<namespace>/llm-tgi
   tag: "latest"
   pullPolicy: IfNotPresent

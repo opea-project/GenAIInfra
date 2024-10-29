@@ -1,10 +1,13 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: {{ include "codegen.fullname" . }}
   labels:
     {{- include "codegen.labels" . | nindent 4 }}
-    app: {{ include "codegen.fullname" . }}  
+    app: {{ include "codegen.fullname" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:

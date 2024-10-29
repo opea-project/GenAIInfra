@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -46,9 +49,9 @@ spec:
           httpGet:
             path: /
             port: http
-        resources: 
+        resources:
           {{- toYaml .Values.resources | nindent 10 }}
-        securityContext: 
+        securityContext:
           {{- toYaml .Values.securityContext | nindent 10 }}
         volumeMounts:
           - mountPath: /var/cache/nginx/
@@ -63,10 +66,10 @@ spec:
         - name: nginx-cache-dir
           emptyDir: {}
         - name: default-conf
-          configMap: 
+          configMap:
             name: {{ include "codegen-react-ui.fullname" . }}-default-conf
         - name: nginx-conf
-          configMap: 
+          configMap:
             name: {{ include "codegen-react-ui.fullname" . }}-nginx-conf
       {{- with .Values.nodeSelector }}
       nodeSelector:

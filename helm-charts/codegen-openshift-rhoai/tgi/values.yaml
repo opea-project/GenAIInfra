@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 global:
   huggingfacehubApiToken: "insert-your-huggingface-token-here"
 
@@ -25,7 +28,7 @@ resources: {}
 volumes:
   - emptyDir:
       sizeLimit: 300Gi
-    name: model-volume  
+    name: model-volume
 
 volumeMounts:
   - mountPath: /data

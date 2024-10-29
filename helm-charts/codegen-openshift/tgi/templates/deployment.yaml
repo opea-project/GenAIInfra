@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -40,5 +43,5 @@ spec:
               containerPort: {{ .Values.port }}
               protocol: TCP
           resources:
-            {{- toYaml .Values.resources | nindent 12 }}                  
+            {{- toYaml .Values.resources | nindent 12 }}
       volumes: {{- toYaml .Values.volumes | nindent 6 }}

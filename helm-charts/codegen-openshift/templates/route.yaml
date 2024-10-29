@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
@@ -17,4 +20,3 @@ spec:
     name: codegen
     weight: 100
   wildcardPolicy: None
-

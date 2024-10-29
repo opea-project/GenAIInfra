@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -7,7 +10,7 @@ data:
     #!/bin/bash
     EXISTS=$(oc get secret --ignore-not-found rhoai-ca-bundle)
 
-    if [[ -z "${EXISTS}" ]]; then    
+    if [[ -z "${EXISTS}" ]]; then
       oc create secret generic -n {{ .Release.Namespace }} rhoai-ca-bundle --from-literal=tls.crt="$(oc extract secret/knative-serving-cert -n istio-system --to=- --keys=tls.crt)"
     else
       echo "oc get secret --ignore-not-found rhoai-ca-bundle returned non-empty string, not creating a secret"

@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v2
 name: llm-uservice
 description: A Helm chart for deploying llm-uservice on Red Hat OpenShift with Red Hat OpenShift AI

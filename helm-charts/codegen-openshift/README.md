@@ -3,9 +3,10 @@
 Helm chart for deploying CodeGen service on Red Hat OpenShift.
 
 # Prerequisites
+
 1. Red Hat OpenShift Cluster with dynamic StorageClass to provision PersistentVolumes e.g. OpenShift Data Foundation)
 2. Image registry to push there docker images (https://docs.openshift.com/container-platform/4.16/registry/securing-exposing-registry.html).
-3. Account on https://huggingface.co/, access to model *ise-uiuc/Magicoder-S-DS-6.7B* (for Xeon) or *meta-llama/CodeLlama-7b-hf* (for Gaudi) and token with Read permissions.
+3. Account on https://huggingface.co/, access to model _ise-uiuc/Magicoder-S-DS-6.7B_ (for Xeon) or _meta-llama/CodeLlama-7b-hf_ (for Gaudi) and token with Read permissions.
 
 ## Installing the Chart
 
@@ -29,7 +30,8 @@ helm install codegen codegen-openshift --set image.repository=image-registry.ope
 
 ## Verify
 
-To verify the installation, run the command `oc get pods` to make sure all pods are running. Wait about 5 minutes for building images. When 3 pods achieve *Completed* status, the rest with services should go to *Running*.
+To verify the installation, run the command `oc get pods` to make sure all pods are running. Wait about 5 minutes for building images. When 3 pods achieve _Completed_ status, the rest with services should go to _Running_.
 
 ## Launch the UI
-To access the frontend, find the route for *react-ui* with command `oc get routes` and open it in the browser.
+
+To access the frontend, find the route for _react-ui_ with command `oc get routes` and open it in the browser.

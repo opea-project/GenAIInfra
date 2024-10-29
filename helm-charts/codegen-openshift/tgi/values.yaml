@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 model:
   id: ise-uiuc/Magicoder-S-DS-6.7B
 
@@ -9,7 +12,7 @@ image:
   repository: ghcr.io/huggingface/text-generation-inference
   tag: 2.1.0
   pullPolicy: IfNotPresent
-  
+
 service:
   type: ClusterIP
 

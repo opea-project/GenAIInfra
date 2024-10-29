@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v2
 name: react-ui
 description: A Helm chart deploying OPEA CodeGen React UI

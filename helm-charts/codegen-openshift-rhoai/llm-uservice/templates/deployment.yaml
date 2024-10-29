@@ -1,3 +1,6 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -14,7 +17,7 @@ spec:
   template:
     metadata:
       labels:
-        {{- include "llm-uservice.selectorLabels" . | nindent 8 }}      
+        {{- include "llm-uservice.selectorLabels" . | nindent 8 }}
     spec:
       securityContext: {}
       containers:
