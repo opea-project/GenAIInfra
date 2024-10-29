@@ -14,11 +14,17 @@ cd GenAIInfra/helm-charts/
 helm dependency update codetrans
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
-export MODELNAME="HuggingFaceH4/mistral-7b-grok"
+export MODELNAME="mistralai/Mistral-7B-Instruct-v0.3"
 helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device
 # helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values codetrans/gaudi-values.yaml
 ```
+
+### IMPORTANT NOTE
+
+1. To use model `mistralai/Mistral-7B-Instruct-v0.3`, you should first goto the [huggingface model card](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) to apply for the model access first. You need to make sure your huggingface token has at least read access to that model.
+
+2. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
 
 ## Verify
 
@@ -51,8 +57,8 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 
 ## Values
 
-| Key              | Type   | Default                           | Description                                                              |
-| ---------------- | ------ | --------------------------------- | ------------------------------------------------------------------------ |
-| image.repository | string | `"opea/codetrans"`                |                                                                          |
-| service.port     | string | `"7777"`                          |                                                                          |
-| tgi.LLM_MODEL_ID | string | `"HuggingFaceH4/mistral-7b-grok"` | Models id from https://huggingface.co/, or predownloaded model directory |
+| Key              | Type   | Default                                | Description                                                              |
+| ---------------- | ------ | -------------------------------------- | ------------------------------------------------------------------------ |
+| image.repository | string | `"opea/codetrans"`                     |                                                                          |
+| service.port     | string | `"7777"`                               |                                                                          |
+| tgi.LLM_MODEL_ID | string | `"mistralai/Mistral-7B-Instruct-v0.3"` | Models id from https://huggingface.co/, or predownloaded model directory |

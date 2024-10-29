@@ -42,7 +42,7 @@ affinity: {}
 
 # To override values in subchart tgi
 tgi:
-  LLM_MODEL_ID: HuggingFaceH4/mistral-7b-grok
+  LLM_MODEL_ID: mistralai/Mistral-7B-Instruct-v0.3
 
 codetrans-ui:
   image:
