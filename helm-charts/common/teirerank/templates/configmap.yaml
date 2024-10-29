@@ -19,3 +19,4 @@ data:
   {{- if .Values.global.HF_ENDPOINT }}
   HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
   {{- end }}
+  MAX_WARMUP_SEQUENCE_LENGTH: "512"

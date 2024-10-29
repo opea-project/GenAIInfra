@@ -138,5 +138,8 @@ global:
   modelUseHostPath: ""
   modelUsePVC: ""
 
-  # Prometheus Helm installation info for serviceMonitor
+  # Install Prometheus serviceMonitor for service
+  monitoring: false
+
+  # Prometheus Helm install release name for serviceMonitor
   prometheusRelease: prometheus-stack

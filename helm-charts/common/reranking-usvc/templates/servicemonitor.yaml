@@ -5,14 +5,14 @@
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: {{ include "teirerank.fullname" . }}
+  name: {{ include "reranking-usvc.fullname" . }}
   labels:
     release: {{ .Values.global.prometheusRelease }}
 spec:
   selector:
     matchLabels:
-      {{- include "teirerank.selectorLabels" . | nindent 6 }}
+      {{- include "reranking-usvc.selectorLabels" . | nindent 6 }}
   endpoints:
-  - port: teirerank
+  - port: reranking-usvc
     interval: 5s
 {{- end }}

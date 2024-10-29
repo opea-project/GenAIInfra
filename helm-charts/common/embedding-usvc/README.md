@@ -73,4 +73,5 @@ curl http://localhost:6000/v1/embeddings \
 | image.repository             | string | `"opea/embedding-tei"`             |             |
 | service.port                 | string | `"6000"`                           |             |
 | TEI_EMBEDDING_ENDPOINT       | string | `""`                               |             |
+| global.monitoring            | bop;   | `false`                            |             |
 | vdms-values:image.repository | string | `"opea/embedding-multimodal-clip"` |             |

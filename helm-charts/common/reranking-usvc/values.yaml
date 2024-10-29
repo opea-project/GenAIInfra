@@ -93,3 +93,9 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
+
+  # Install Prometheus serviceMonitor for service
+  monitoring: false
+
+  # Prometheus Helm install release name for serviceMonitor
+  prometheusRelease: prometheus-stack
