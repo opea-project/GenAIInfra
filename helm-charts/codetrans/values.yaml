@@ -19,6 +19,10 @@ service:
   type: ClusterIP
   port: 7777
 
+nginx:
+  service:
+    type: NodePort
+
 securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false

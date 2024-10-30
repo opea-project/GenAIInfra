@@ -114,4 +114,4 @@ spec:
   selector:
     {{- include "chatqna.selectorLabels" . | nindent 4 }}
     app: {{ include "chatqna.fullname" . }}-nginx
-  type: NodePort
+  type: {{ .Values.nginx.service.type }}
