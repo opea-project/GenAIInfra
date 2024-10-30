@@ -72,8 +72,8 @@ videoqna-ui:
   nameOverride: "ui"
 
   # Following template value will be resolved in videoqna-ui ConfigMap
-  videoqnaBackendService: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/videoqna
-  videoqnaBackendHealthCheck: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/health_check
+  BACKEND_SERVICE_ENDPOINT: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/videoqna
+  BACKEND_HEALTH_CHECK_ENDPOINT: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/health_check
 
   containerPort: 5173
   service:
