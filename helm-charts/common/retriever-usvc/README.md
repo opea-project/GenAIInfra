@@ -58,7 +58,7 @@ export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install retriever-usvc . -f ./vdms-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.cacheUseHostPath=${CACHEDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
+helm install retriever-usvc . -f ./variant_videoqna-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.cacheUseHostPath=${CACHEDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
 
 ```
 
@@ -76,7 +76,7 @@ export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install retriever-usvc . -f ./vdms-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.cacheUseHostPath=${CACHEDIR} --set vdms-vector-db.enabled=true --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
+helm install retriever-usvc . -f ./variant_videoqna-values.yaml --set vdms-vector-db.enabled=true --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.cacheUseHostPath=${CACHEDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
 ```
 
 ## Verify

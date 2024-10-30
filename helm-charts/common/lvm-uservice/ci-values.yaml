@@ -1,1 +1,7 @@
-values.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for lvm-uservice.
+
+lvm-serving:
+  enabled: true

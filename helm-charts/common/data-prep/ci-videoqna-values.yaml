@@ -1,1 +1,21 @@
-variant_videoqna-values.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+vdms-vector-db:
+  enabled: true
+
+image:
+  repository: opea/dataprep-multimodal-vdms
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+indexName: "mega-videoqna"
+vdmsHost: ""
+vdmsPort: "8001"
+entryCommand: ["/bin/sh"]
+extraArgs: ["-c", "sleep 15 && python ingest_videos.py"]
+
+# Set cacheUseHostPath to for caching encoding/embedding models and other related data
+global:
+  cacheUseHostPath: ""
