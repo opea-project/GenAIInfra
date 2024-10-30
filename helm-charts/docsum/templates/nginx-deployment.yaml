@@ -90,4 +90,4 @@ spec:
   selector:
     {{- include "docsum.selectorLabels" . | nindent 4 }}
     app: {{ include "docsum.fullname" . }}-nginx
-  type: NodePort
+  type: {{ .Values.nginx.service.type }}
