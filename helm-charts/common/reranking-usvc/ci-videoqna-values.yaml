@@ -19,9 +19,6 @@ getVideoListEndpoint: ""
 data-prep:
   enabled: true
 
-  vdms-vector-db:
-    enabled: true
-
   image:
     repository: opea/dataprep-multimodal-vdms
     pullPolicy: IfNotPresent

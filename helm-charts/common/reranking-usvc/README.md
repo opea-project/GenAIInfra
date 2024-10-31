@@ -68,7 +68,7 @@ export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install reranking-usvc . -f ./variant_videoqna-values.yaml --set data-prep.enabled=true --set data-prep.vdms-vector-db.enabled=true --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
+helm install reranking-usvc . -f ./variant_videoqna-values.yaml --set data-prep.enabled=true --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
 ```
 
 ## Verify
