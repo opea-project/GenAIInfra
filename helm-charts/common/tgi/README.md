@@ -4,25 +4,12 @@ Helm chart for deploying Hugging Face Text Generation Inference service.
 
 ## Installing the Chart
 
-To install the chart, run the following:
-
+Before installation, you need to export `HFTOKEN`.
 ```console
-cd GenAIInfra/helm-charts/common
-export MODELDIR=/mnt/opea-models
-export MODELNAME="bigscience/bloom-560m"
 export HFTOKEN="insert-your-huggingface-token-here"
-helm install tgi tgi --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
-# To deploy on Gaudi enabled kubernetes cluster
-# helm install tgi tgi --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values gaudi-values.yaml
+helm repo add opea https://opea-project.github.io/GenAIInfra
+helm install my-tgi opea/tgi --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 ```
-
-By default, the tgi service will downloading the "bigscience/bloom-560m" which is about 1.1GB.
-
-If you already cached the model locally, you can pass it to container like this example:
-
-MODELDIR=/mnt/opea-models
-
-MODELNAME="/data/models--bigscience--bloom-560m"
 
 ## Verify
 
@@ -48,5 +35,5 @@ curl http://localhost:2080/generate \
 | global.modelUseHostPath         | string | `"/mnt/opea-models"`                              | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
 | image.repository                | string | `"ghcr.io/huggingface/text-generation-inference"` |                                                                                                                                                                                                                       |
 | image.tag                       | string | `"1.4"`                                           |                                                                                                                                                                                                                       |
-| horizontalPodAutoscaler.enabled | bop;   | false                                             | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                 |
-| global.monitoring               | bop;   | false                                             | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                           |
+| horizontalPodAutoscaler.enabled | bool   | false                                             | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                 |
+| global.monitoring               | bool   | false                                             | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                           |
