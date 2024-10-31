@@ -5,6 +5,7 @@ Helm chart for deploying Hugging Face Text Generation Inference service.
 ## Installing the Chart
 
 Before installation, you need to export `HFTOKEN`.
+
 ```console
 export HFTOKEN="insert-your-huggingface-token-here"
 helm repo add opea https://opea-project.github.io/GenAIInfra
