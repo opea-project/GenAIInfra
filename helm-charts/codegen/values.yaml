@@ -41,7 +41,7 @@ affinity: {}
 
 # To override values in subchart tgi
 tgi:
-  LLM_MODEL_ID: meta-llama/CodeLlama-7b-hf
+  LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
 codegen-ui:
   image:
