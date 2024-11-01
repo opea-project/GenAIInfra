@@ -2,6 +2,24 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+saved_errexit=False
+
+function turnoff_and_save_errexit() {
+    if [[ "$-" =~ e ]]; then
+        saved_errexit=True
+        set +e
+    fi
+}
+
+
+function resume_errexit() {
+    if [ "$saved_errexit" = "True" ]; then
+        saved_errexit=False
+        set -e
+    fi
+}
+
+
 function wait_until_pod_ready() {
     echo "Waiting for the $1 to be ready..."
     max_retries=60
@@ -53,6 +71,7 @@ function wait_until_all_pod_ready() {
   namespace=$1
   timeout=$2
 
+  turnoff_and_save_errexit
   echo "Wait for all pods in NS $namespace to be ready..."
   pods=$(kubectl get pods -n $namespace --no-headers | grep -v "Terminating" | awk '{print $1}')
   # Loop through each pod
@@ -68,6 +87,7 @@ function wait_until_all_pod_ready() {
       exit 1
     fi
   done
+  resume_errexit
 }
 
 function check_gmc_status() {
