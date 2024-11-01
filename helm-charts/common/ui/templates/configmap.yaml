@@ -36,7 +36,7 @@ data:
   VITE_FAQ_GEN_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if contains "videoqna-ui" .Values.image.repository }}
   BACKEND_SERVICE_ENDPOINT: {{ tpl .Values.BACKEND_SERVICE_ENDPOINT . | quote }}
-  BACKEND_HEALTH_CHECK_ENDPOINT: {{ tpl .Values.BACKEND_HEALTH_CHECK_ENDPOINT . | quote }}
+  BACKEND_HEALTH_CHECK_ENDPOINT: {{ tpl .Values.BACKEND_SERVICE_ENDPOINT . | replace "videoqna" "health_check" | quote }}
   {{- else }}
     {{- fail "Unsupported ui image: " .Values.image.repository }}
   {{- end }}
