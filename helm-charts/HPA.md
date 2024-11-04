@@ -15,7 +15,7 @@
 
 ## Introduction
 
-`horizontalPodAutoscaler` option enables HPA scaling for relevant service components:
+`autoscaling` option enables HPA scaling for relevant service components:
 https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
 
 Autoscaling is based on custom application metrics provided through [Prometheus](https://prometheus.io/).

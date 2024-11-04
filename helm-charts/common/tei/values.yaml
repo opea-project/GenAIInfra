@@ -11,7 +11,7 @@ replicaCount: 1
 # - Ignore above replica count, as it will be controlled by HPA
 # - Add example HPA scaling rules with thresholds suitable for Xeon deployments
 # - Require custom metrics ConfigMap available in the main application chart
-horizontalPodAutoscaler:
+autoscaling:
   maxReplicas: 2
   enabled: false
 
