@@ -83,11 +83,12 @@ helm install lvm-uservice . -f ./variant_videoqna-values.yaml --set global.HUGGI
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
 
 ### For TGI based lvm-uservice
+
 Run the command `kubectl port-forward svc/lvm-uservice 9399:9399` to expose the lvm-uservice service for access.
 
 ### For lvm-serving based lvm-uservice
-Run the command `kubectl port-forward svc/lvm-uservice 9000:9000` to expose the lvm-uservice service for access.
 
+Run the command `kubectl port-forward svc/lvm-uservice 9000:9000` to expose the lvm-uservice service for access.
 
 Open another terminal and run the following command to verify the service if working:
 
@@ -111,11 +112,11 @@ curl http://localhost:9399/v1/chat/completions \
 
 ## Values
 
-| Key                             | Type   | Default          | Description                     |
-| ------------------------------- | ------ | ---------------- | ------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`             | Your own Hugging Face API token |
-| image.repository                | string | `"opea/lvm-tgi"` |                                 |
-| videoqna: image.repository      | string | `"opea/lvm-video-llama"` |                         |
-| service.port                    | string | `"9000"`         |                                 |
-| LVM_ENDPOINT                    | string | `""`             | LVM endpoint                    |
-| global.monitoring               | bop;   | false            | Service usage metrics           |
+| Key                             | Type   | Default                  | Description                     |
+| ------------------------------- | ------ | ------------------------ | ------------------------------- |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                     | Your own Hugging Face API token |
+| image.repository                | string | `"opea/lvm-tgi"`         |                                 |
+| videoqna: image.repository      | string | `"opea/lvm-video-llama"` |                                 |
+| service.port                    | string | `"9000"`                 |                                 |
+| LVM_ENDPOINT                    | string | `""`                     | LVM endpoint                    |
+| global.monitoring               | bop;   | false                    | Service usage metrics           |
