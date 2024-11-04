@@ -53,8 +53,9 @@ curl http://localhost:3008/v1/audioqna \
 
 ## Values
 
-| Key              | Type   | Default                     | Description                                                              |
-| ---------------- | ------ | --------------------------- | ------------------------------------------------------------------------ |
-| image.repository | string | `"opea/audioqna"`           |                                                                          |
-| service.port     | string | `"3008"`                    |                                                                          |
-| tgi.LLM_MODEL_ID | string | `Intel/neural-chat-7b-v3-3` | Models id from https://huggingface.co/, or predownloaded model directory |
+| Key               | Type   | Default                     | Description                                                                            |
+| ----------------- | ------ | --------------------------- | -------------------------------------------------------------------------------------- |
+| image.repository  | string | `"opea/audioqna"`           |                                                                                        |
+| service.port      | string | `"3008"`                    |                                                                                        |
+| tgi.LLM_MODEL_ID  | string | `Intel/neural-chat-7b-v3-3` | Models id from https://huggingface.co/, or predownloaded model directory               |
+| global.monitoring | bool   | `false`                     | Enable usage metrics for the service components. See ../monitoring.md before enabling! |
