@@ -125,6 +125,20 @@ reranking-usvc:
   fileServerEndpoint: http://{{ printf "%s-nginx" .Release.Name | trunc 63 | trimSuffix "-" }}/v1/dataprep/get_file
   getVideoListEndpoint: http://{{ printf "%s-nginx" .Release.Name | trunc 63 | trimSuffix "-" }}/v1/dataprep/get_videos
 
+lvm-uservice:
+  image:
+    repository: opea/lvm-video-llama
+    # This sets the pull policy for images.
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    port: 9000
+    containerPort: 9000
+
+
 global:
   http_proxy: ""
   https_proxy: ""
