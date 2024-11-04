@@ -2,6 +2,37 @@
 
 **Helm chart for deploying lvm-uservice microservice.**
 
+There are two versions of `lvm-uservice`. First version runs with `tgi` service and another one runs with `lvm-serving` service. We will try to learn both setups in following sections.
+
+## 1. Installing lvm-uservice to be used with tgi microservice
+
+In this setup, lvm-uservice depends on TGI, you should set LVM_ENDPOINT as tgi endpoint.
+
+### (Option1): Installing the chart separately
+
+First, you need to install the tgi chart, please refer to the [tgi](../tgi) chart for more information.
+
+After you've deployted the tgi chart successfully, please run `kubectl get svc` to get the tgi service endpoint, i.e. `http://tgi`.
+
+To install the chart, run the following:
+
+```bash
+cd GenAIInfra/helm-charts/common/lvm-uservice
+export HFTOKEN="insert-your-huggingface-token-here"
+export LVM_ENDPOINT="http://tgi"
+helm dependency update
+helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
+```
+
+### (Option2): Installing the chart with dependencies automatically (with auto-installing tgi)
+
+```bash
+cd GenAIInfra/helm-charts/common/lvm-uservice
+export HFTOKEN="insert-your-huggingface-token-here"
+helm dependency update
+helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set tgi.enabled=true --wait
+```
+
 ## 2. Installing lvm-uservice to be used with lvm-serving microservice (serving VideoLlama-7B)
 
 This setup of `lvm-uservice` is utilized in some of the examples like [VideoQnA](https://github.com/opea-project/GenAIExamples/tree/main/VideoQnA). Here, `lvm-uservice` helps communicate to `lvm-serving` microservice. It facilitates sending queries and receiving response from `lvm-serving` microservice. Hence, it depends on lvm-serving microservice and you should make sure that `lvmEndpoint` value is set properly.
@@ -23,10 +54,10 @@ export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install lvm-uservice . --set lvmEndpoint=${LVM_ENDPOINT} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy} --wait
+helm install lvm-uservice . -f ./variant_videoqna-values.yaml --set lvmEndpoint=${LVM_ENDPOINT} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy} --wait
 ```
 
-### (Option2): Installing the chart with dependencies automatically (lvm-serving dependency)
+### (Option2): Installing the chart with dependencies automatically (with auto-installing lvm-serving dependency)
 
 ```bash
 cd GenAIInfra/helm-charts/common/lvm-uservice
@@ -44,16 +75,23 @@ export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set lvm-serving.enabled=true --set lvm-serving.llmDownload=${LLM_DOWNLOAD} --set global.modelUseHostPath=${MODELDIR} --set global.cacheUseHostPath=${CACHEDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy} --wait
+helm install lvm-uservice . -f ./variant_videoqna-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set lvm-serving.enabled=true --set lvm-serving.llmDownload=${LLM_DOWNLOAD} --set global.modelUseHostPath=${MODELDIR} --set global.cacheUseHostPath=${CACHEDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy} --wait
 ```
 
 ## Verify
 
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
 
-Then run the command `kubectl port-forward svc/lvm-uservice 9000:9000` to expose the lvm-uservice service for access.
+### For TGI based lvm-uservice
+Run the command `kubectl port-forward svc/lvm-uservice 9399:9399` to expose the lvm-uservice service for access.
+
+### For lvm-serving based lvm-uservice
+Run the command `kubectl port-forward svc/lvm-uservice 9000:9000` to expose the lvm-uservice service for access.
+
 
 Open another terminal and run the following command to verify the service if working:
+
+### Verify lvm-uservice running with lvm-serving (Video-Llama 7B) service
 
 ```bash
 curl http://localhost:9000/v1/lvm \
@@ -62,11 +100,22 @@ curl http://localhost:9000/v1/lvm \
   -H 'Content-Type: application/json'
 ```
 
+### Verify lvm-uservice running with TGI service
+
+```bash
+curl http://localhost:9399/v1/chat/completions \
+    -X POST \
+    -d '{"query":"What is Deep Learning?","max_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
+    -H 'Content-Type: application/json'
+```
+
 ## Values
 
-| Key                             | Type   | Default                  | Description                     |
-| ------------------------------- | ------ | ------------------------ | ------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                     | Your own Hugging Face API token |
-| image.repository                | string | `"opea/lvm-video-llama"` |                                 |
-| service.port                    | string | `"9000"`                 |                                 |
-| lvmEndpoint                     | string | `""`                     | LVM Serving endpoint            |
+| Key                             | Type   | Default          | Description                     |
+| ------------------------------- | ------ | ---------------- | ------------------------------- |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`             | Your own Hugging Face API token |
+| image.repository                | string | `"opea/lvm-tgi"` |                                 |
+| videoqna: image.repository      | string | `"opea/lvm-video-llama"` |                         |
+| service.port                    | string | `"9000"`         |                                 |
+| LVM_ENDPOINT                    | string | `""`             | LVM endpoint                    |
+| global.monitoring               | bop;   | false            | Service usage metrics           |

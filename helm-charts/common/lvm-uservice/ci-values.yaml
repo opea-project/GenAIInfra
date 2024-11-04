@@ -3,5 +3,5 @@
 
 # Default values for lvm-uservice.
 
-lvm-serving:
+tgi:
   enabled: true

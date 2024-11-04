@@ -9,6 +9,7 @@ metadata:
     {{- include "lvm-uservice.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": test
+    #"helm.sh/hook-delete-policy": "hook-succeeded, hook-failure"
 spec:
   containers:
     - name: curl

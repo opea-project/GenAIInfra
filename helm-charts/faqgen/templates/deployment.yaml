@@ -4,14 +4,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "lvm-uservice.fullname" . }}
+  name: {{ include "faqgen.fullname" . }}
   labels:
-    {{- include "lvm-uservice.labels" . | nindent 4 }}
+    {{- include "faqgen.labels" . | nindent 4 }}
+    app: {{ include "faqgen.fullname" . }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "lvm-uservice.selectorLabels" . | nindent 6 }}
+      {{- include "faqgen.selectorLabels" . | nindent 6 }}
+      app: {{ include "faqgen.fullname" . }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +21,8 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "lvm-uservice.selectorLabels" . | nindent 8 }}
+        {{- include "faqgen.selectorLabels" . | nindent 8 }}
+        app: {{ include "faqgen.fullname" . }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -29,37 +32,22 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
-          envFrom:
-            - configMapRef:
-                name: {{ include "lvm-uservice.fullname" . }}-config
-            {{- if .Values.global.extraEnvConfig }}
-            - configMapRef:
-                name: {{ .Values.global.extraEnvConfig }}
-                optional: true
-            {{- end }}
+          env:
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-llm-uservice
+            #- name: MEGA_SERVICE_PORT
+            #  value: {{ .Values.port }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          ports:
-            - name: lvm-uservice
-              containerPort: {{ .Values.service.containerPort }}
-              protocol: TCP
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-          {{- if .Values.livenessProbe }}
-          livenessProbe:
-            {{- toYaml .Values.livenessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.readinessProbe }}
-          readinessProbe:
-            {{- toYaml .Values.readinessProbe | nindent 12 }}
-          {{- end }}
-          {{- if .Values.startupProbe }}
-          startupProbe:
-            {{- toYaml .Values.startupProbe | nindent 12 }}
-          {{- end }}
+          ports:
+            - name: faqgen
+              containerPort: {{ .Values.port }}
+              protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
@@ -84,5 +72,6 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              {{- include "lvm-uservice.selectorLabels" . | nindent 14 }}
+              {{- include "faqgen.selectorLabels" . | nindent 14 }}
+              app: {{ include "faqgen.fullname" . }}
       {{- end }}

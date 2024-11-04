@@ -1,0 +1,62 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for audioqna.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: opea/audioqna
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+port: 8888
+service:
+  type: ClusterIP
+  port: 3008
+
+nginx:
+  service:
+    type: NodePort
+
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# To override values in subchart tgi
+tgi:
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+# Uncomment the following to enable UI when the UI image is ready on DockerHub
+# audioqna-ui:
+#  image:
+#    repository: opea/audioqna-ui
+#    tag: "latest"
+#  BACKEND_SERVICE_ENDPOINT: "/v1/audioqna"
+#  containerPort: 5173
+
+global:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # set modelUseHostPath or modelUsePVC to use model cache.
+  modelUseHostPath: ""
+  # modelUseHostPath: /mnt/opea-models
+  # modelUsePVC: model-volume
