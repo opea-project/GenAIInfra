@@ -72,7 +72,7 @@ videoqna-ui:
   nameOverride: "ui"
 
   # Following template value will be resolved in videoqna-ui ConfigMap
-  BACKEND_SERVICE_ENDPOINT: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/videoqna
+  BACKEND_SERVICE_ENDPOINT: http://{{ printf "%s-nginx" .Release.Name | trunc 63 | trimSuffix "-" }}/v1/videoqna
 
   containerPort: 5173
   service:
@@ -122,8 +122,8 @@ reranking-usvc:
   chunkDuration: ""
 
   # Following template value will be resolved in rearanking-usvc ConfigMap
-  fileServerEndpoint: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/dataprep/get_file
-  getVideoListEndpoint: http://{{ .Release.Name | trunc 57 | trimSuffix "-" }}-nginx/v1/dataprep/get_videos
+  fileServerEndpoint: http://{{ printf "%s-nginx" .Release.Name | trunc 63 | trimSuffix "-" }}/v1/dataprep/get_file
+  getVideoListEndpoint: http://{{ printf "%s-nginx" .Release.Name | trunc 63 | trimSuffix "-" }}/v1/dataprep/get_videos
 
 global:
   http_proxy: ""

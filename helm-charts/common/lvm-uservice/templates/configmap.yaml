@@ -8,9 +8,11 @@ metadata:
   labels:
     {{- include "lvm-uservice.labels" . | nindent 4 }}
 data:
-  {{- if .Values.lvmEndpoint }}
-  LVM_ENDPOINT: {{ .Values.lvmEndpoint }}
-  {{- else }}
+  {{- if .Values.LVM_ENDPOINT }}
+  LVM_ENDPOINT: {{ .Values.LVM_ENDPOINT }}
+  {{- else if contains "lvm-tgi" .Values.image.repository }}
+  LVM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
+  {{- else if contains "lvm-video-llama" .Values.image.repository }}
   LVM_ENDPOINT: "http://{{ .Release.Name }}-lvm-serving"
   {{- end }}
   http_proxy: {{ .Values.global.http_proxy | quote }}

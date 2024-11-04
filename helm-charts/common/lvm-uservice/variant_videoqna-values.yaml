@@ -1,0 +1,19 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Values file for VideoQnA Application for lvm-uservice
+
+lvm-serving:
+  llmDownload: true
+
+image:
+  repository: opea/lvm-video-llama
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+service:
+  type: ClusterIP
+  port: 9000
+  containerPort: 9000

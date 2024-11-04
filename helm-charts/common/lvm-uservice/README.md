@@ -2,9 +2,11 @@
 
 **Helm chart for deploying lvm-uservice microservice.**
 
-`lvm-uservice` helps communicate to `lvm-serving` microservice. It facilitates sending queries and receiving response from `lvm-serving` microservice. Hence, it depends on lvm-serving microservice and you should make sure that `lvmEndpoint` value is set properly.
+## 2. Installing lvm-uservice to be used with lvm-serving microservice (serving VideoLlama-7B)
 
-## (Option1): Installing the chart separately
+This setup of `lvm-uservice` is utilized in some of the examples like [VideoQnA](https://github.com/opea-project/GenAIExamples/tree/main/VideoQnA). Here, `lvm-uservice` helps communicate to `lvm-serving` microservice. It facilitates sending queries and receiving response from `lvm-serving` microservice. Hence, it depends on lvm-serving microservice and you should make sure that `lvmEndpoint` value is set properly.
+
+### (Option1): Installing the chart separately
 
 First, you need to install the `lvm-serving` chart. Please refer to the [lvm-serving](../lvm-serving) chart for more information.
 
@@ -24,7 +26,7 @@ helm dependency update
 helm install lvm-uservice . --set lvmEndpoint=${LVM_ENDPOINT} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy} --wait
 ```
 
-## (Option2): Installing the chart with dependencies automatically
+### (Option2): Installing the chart with dependencies automatically (lvm-serving dependency)
 
 ```bash
 cd GenAIInfra/helm-charts/common/lvm-uservice

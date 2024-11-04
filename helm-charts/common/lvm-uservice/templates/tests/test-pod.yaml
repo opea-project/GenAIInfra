@@ -14,6 +14,7 @@ spec:
     - name: curl
       image: python:3.10.14
       command: ['bash', '-c']
+      {{- if contains "lvm-video-llama" .Values.image.repository }}
       args:
         - |
           max_retry=20
@@ -26,4 +27,18 @@ spec:
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+      {{- else if contains "lvm-tgi" .Values.image.repository }}
+      args:
+        - |
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ include "lvm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/lvm -sS --fail-with-body \
+              -X POST \
+              -d '{"image":"iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8/5+hnoEIwDiqkL4KAcT9GO0U4BxoAAAAAElFTkSuQmCC","prompt":"What is this?"}' \
+              -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+      {{- end }}
   restartPolicy: Never
