@@ -25,9 +25,9 @@ istioctl install
 
 You can refer to [Istio installation](https://istio.io/latest/docs/setup/install/istioctl/) for detail information.
 
-**(Optional) Deploy chatQnA pipeline and enable Istio sidecar injection**
+**Deploy chatQnA pipeline and enable Istio sidecar injection**
 
-Create a new namespace and you can enable istio sidecar injection for the namespace directly.
+(Optional) Create a new namespace and you can enable istio sidecar injection for the namespace directly.
 
 ```sh
 kubectl create ns chatqa
