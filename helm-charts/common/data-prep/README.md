@@ -2,7 +2,7 @@
 
 Helm chart for deploying data-prep microservice. Data-Prep is consumed by several reference applications present in [GenAIExample](https://github.com/opea-project/GenAIExamples/tree/main).
 
-There are 2 versions of Data-Prep microservice. First version is unimodal based on redis-vector-db and TEI. It performs data preparation for textual data. An alternative multimodal version based on `vdms-values.yaml` file, performs data preparation for visual data input. Follow along to select and install the version which suites your use case.
+There are 2 versions of Data-Prep microservice. First version is unimodal based on redis-vector-db and TEI. It performs data preparation for textual data. An alternative multimodal version based on `videoqna-values.yaml` file, performs data preparation for visual data input. Follow along to select and install the version which suites your use case.
 
 Data-Prep uses redis-vector-db and tei. The multimodal version uses vdms-vector-db service. Endpoints for these dependencies should be set properly before installing the chart.
 
@@ -59,7 +59,7 @@ export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install data-prep . -f ../variant_videoqna-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.modelUseHostPath=${MODELDIR} --set vdmsHost=${VDMS_HOST} --set vdmsPort=${VDMS_PORT} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
+helm install data-prep . -f ../variant_videoqna-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set INDEX_NAME=${INDEX_NAME} --set global.modelUseHostPath=${MODELDIR} --set vdmsHost=${VDMS_HOST} --set vdmsPort=${VDMS_PORT} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
 ```
 
 ### (Option2): Installing the chart with dependencies automatically
@@ -76,7 +76,7 @@ export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install data-prep . -f ./variant_videoqna-values.yaml --set vdms-vector-db.enabled=true --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.modelUseHostPath=${MODELDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
+helm install data-prep . -f ./variant_videoqna-values.yaml --set vdms-vector-db.enabled=true --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set INDEX_NAME=${INDEX_NAME} --set global.modelUseHostPath=${MODELDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
 ```
 
 ## Verify
@@ -111,16 +111,16 @@ curl -X POST http://localhost:6007/v1/dataprep \
 
 ## Values
 
-| Key                          | Type   | Default                           | Description |
-| ---------------------------- | ------ | --------------------------------- | ----------- |
-| image.repository             | string | `"opea/dataprep-redis"`           |             |
-| service.port                 | string | `"6007"`                          |             |
-| REDIS_URL                    | string | `""`                              |             |
-| TEI_EMBEDDING_ENDPOINT       | string | `""`                              |             |
-| vdms-values:image.repository | string | `"opea/dataprep-multimodal-vdms"` |             |
-| vdms-values:vdmsHost         | string | `""`                              |             |
-| vdms-values:vdmsPort         | string | `"8001"`                          |             |
-| vdms-values:indexName        | string | `"mega-videoqna"`                 |             |
+| Key                              | Type   | Default                           | Description |
+| -------------------------------- | ------ | --------------------------------- | ----------- |
+| image.repository                 | string | `"opea/dataprep-redis"`           |             |
+| service.port                     | string | `"6007"`                          |             |
+| REDIS_URL                        | string | `""`                              |             |
+| TEI_EMBEDDING_ENDPOINT           | string | `""`                              |             |
+| videoqna-values:image.repository | string | `"opea/dataprep-multimodal-vdms"` |             |
+| videoqna-values:vdmsHost         | string | `""`                              |             |
+| videoqna-values:vdmsPort         | string | `"8001"`                          |             |
+| videoqna-values:INDEX_NAME       | string | `"mega-videoqna"`                 |             |
 
 ## Milvus support
 

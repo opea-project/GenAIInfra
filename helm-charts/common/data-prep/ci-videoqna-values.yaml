@@ -10,7 +10,7 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-indexName: "mega-videoqna"
+INDEX_NAME: "mega-videoqna"
 vdmsHost: ""
 vdmsPort: "8001"
 entryCommand: ["/bin/sh"]

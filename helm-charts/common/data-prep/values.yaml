@@ -99,7 +99,7 @@ LOCAL_EMBEDDING_MODEL: ""
 
 # redis DB service URL, e.g. redis://<service-name>:<port>
 REDIS_URL: ""
-indexName: "rag-redis"
+INDEX_NAME: "rag-redis"
 KEY_INDEX_NAME: "file-keys"
 SEARCH_BATCH_SIZE: 10
 

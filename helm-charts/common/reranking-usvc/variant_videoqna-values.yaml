@@ -21,7 +21,7 @@ data-prep:
     pullPolicy: IfNotPresent
     tag: "latest"
 
-  indexName: "mega-videoqna"
+  INDEX_NAME: "mega-videoqna"
   vdmsHost: ""
   vdmsPort: "8001"
   entryCommand: ["/bin/sh"]

@@ -36,7 +36,7 @@ data:
   {{- else }}
   REDIS_URL: "redis://{{ .Release.Name }}-redis-vector-db:6379"
   {{- end }}
-  INDEX_NAME: {{ .Values.indexName | quote }}
+  INDEX_NAME: {{ .Values.INDEX_NAME | quote }}
   {{- if .Values.MILVUS_HOST }}
   MILVUS_HOST: {{ .Values.MILVUS_HOST | quote }}
   {{- else }}

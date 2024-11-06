@@ -24,7 +24,7 @@ TEI_EMBEDDING_ENDPOINT: ""
 LOCAL_EMBEDDING_MODEL: ""
 
 REDIS_URL: ""
-indexName: "rag-redis"
+INDEX_NAME: "rag-redis"
 
 image:
   repository: opea/retriever-redis
