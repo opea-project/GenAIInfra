@@ -37,6 +37,7 @@ Then install keycloak.
 helm install keycloak oci://registry-1.docker.io/bitnamicharts/keycloak --version 22.1.0 --set auth.adminUser=admin --set auth.adminPassword=admin
 
 #(Option 2) install keycloak with kubectl and configuration file
+cd ..
 kubectl apply -f ./keycloak_install.yaml
 ```
 

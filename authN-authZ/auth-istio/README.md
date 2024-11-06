@@ -181,7 +181,7 @@ In this sample, we are going to test with the scenario that only privileged user
 Install Keycloak in the kubernetes cluster for user management. **Note:** Replace the admin password as your own in the command.
 
 ```bash
-# make sure running under authN-authZ/auth-istio folder
+# make sure running under authN-authZ folder
 kubectl apply -f $(pwd)/keycloak_install.yaml
 
 # get the ip and port to access keycloak.
@@ -276,7 +276,7 @@ We are using a similar scenario here that only privileged users can access our c
 Here we take Keycloak as the sample OIDC Provider to use in the example. Follow the steps to install and configure Keycloak.
 
 ```bash
-# make sure running under authN-authZ/auth-istio folder
+# make sure running under authN-authZ folder
 kubectl apply -f $(pwd)/keycloak_install.yaml
 
 # get the ip and port to access keycloak.
