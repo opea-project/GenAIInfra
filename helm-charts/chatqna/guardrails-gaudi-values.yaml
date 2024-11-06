@@ -50,8 +50,8 @@ tgi:
   resources:
     limits:
       habana.ai/gaudi: 1
-  MAX_INPUT_LENGTH: "1024"
-  MAX_TOTAL_TOKENS: "2048"
+  MAX_INPUT_LENGTH: "2048"
+  MAX_TOTAL_TOKENS: "4096"
   CUDA_GRAPHS: ""
   livenessProbe:
     initialDelaySeconds: 5
@@ -76,8 +76,8 @@ tgi-guardrails:
   resources:
     limits:
       habana.ai/gaudi: 1
-  MAX_INPUT_LENGTH: "1024"
-  MAX_TOTAL_TOKENS: "2048"
+  MAX_INPUT_LENGTH: "2048"
+  MAX_TOTAL_TOKENS: "4096"
   CUDA_GRAPHS: ""
   livenessProbe:
     initialDelaySeconds: 5
