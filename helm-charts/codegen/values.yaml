@@ -59,3 +59,9 @@ global:
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
+
+  # Install Prometheus serviceMonitors for service components
+  monitoring: false
+
+  # Prometheus Helm install release name needed for serviceMonitors
+  prometheusRelease: prometheus-stack

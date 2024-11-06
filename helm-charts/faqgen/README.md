@@ -35,8 +35,9 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 
 ## Values
 
-| Key              | Type   | Default                                 | Description                                                              |
-| ---------------- | ------ | --------------------------------------- | ------------------------------------------------------------------------ |
-| image.repository | string | `"opea/faqgen"`                         |                                                                          |
-| service.port     | string | `"8888"`                                |                                                                          |
-| tgi.LLM_MODEL_ID | string | `"meta-llama/Meta-Llama-3-8B-Instruct"` | Models id from https://huggingface.co/, or predownloaded model directory |
+| Key               | Type   | Default                                 | Description                                                                            |
+| ----------------- | ------ | --------------------------------------- | -------------------------------------------------------------------------------------- |
+| image.repository  | string | `"opea/faqgen"`                         |                                                                                        |
+| service.port      | string | `"8888"`                                |                                                                                        |
+| tgi.LLM_MODEL_ID  | string | `"meta-llama/Meta-Llama-3-8B-Instruct"` | Models id from https://huggingface.co/, or predownloaded model directory               |
+| global.monitoring | bool   | `false`                                 | Enable usage metrics for the service components. See ../monitoring.md before enabling! |
