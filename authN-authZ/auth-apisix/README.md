@@ -8,9 +8,9 @@ Please refer to [GenAIExamples ChatQnA](https://github.com/opea-project/GenAIExa
 
 ## Start Keycloak and configuration
 
-In this step, we run keycloak, setup a realm with OIDC based authentication. 
+In this step, we run keycloak, setup a realm with OIDC based authentication.
 
-In this case, we add a realm called `apisix` and add a user called `mary` with password. In the authentication step, only the user from `apisix` realm can access the chatQnA pipeline. 
+In this case, we add a realm called `apisix` and add a user called `mary` with password. In the authentication step, only the user from `apisix` realm can access the chatQnA pipeline.
 
 Steps to start keycloak.
 
