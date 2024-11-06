@@ -18,7 +18,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  CHARTS_DIR: "helm-charts"
+  CHARTS_DIRS: "helm-charts,helm-charts/common"
 
 jobs:
   charts-validate:
@@ -45,7 +45,7 @@ jobs:
       - name: Run chart-testing (list-changed)
         id: list-changed
         run: |
-          changed=$(ct list-changed --chart-dirs ${{ env.CHARTS_DIR }} --target-branch ${{ github.event.repository.default_branch }})
+          changed=$(ct list-changed --chart-dirs ${{ env.CHARTS_DIRS }} --target-branch ${{ github.event.repository.default_branch }})
           if [[ -n "$changed" ]]; then
             echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
@@ -53,4 +53,4 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         run: |
           helm-charts/update_dependency.sh
-          ct lint --check-version-increment=false --validate-maintainers=false --chart-dirs ${{ env.CHARTS_DIR }} --target-branch ${{ github.event.repository.default_branch }}
+          ct lint --check-version-increment=false --validate-maintainers=false --chart-dirs ${{ env.CHARTS_DIRS }} --target-branch ${{ github.event.repository.default_branch }}
