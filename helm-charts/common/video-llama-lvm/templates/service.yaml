@@ -4,9 +4,9 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "lvm-serving.fullname" . }}
+  name: {{ include "video-llama-lvm.fullname" . }}
   labels:
-    {{- include "lvm-serving.labels" . | nindent 4 }}
+    {{- include "video-llama-lvm.labels" . | nindent 4 }}
 spec:
   type: {{ .Values.service.type }}
   ports:
@@ -15,4 +15,4 @@ spec:
       protocol: TCP
       name: http
   selector:
-    {{- include "lvm-serving.selectorLabels" . | nindent 4 }}
+    {{- include "video-llama-lvm.selectorLabels" . | nindent 4 }}

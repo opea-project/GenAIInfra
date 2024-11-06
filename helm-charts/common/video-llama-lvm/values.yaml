@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for lvm-serving.
+# Default values for video-llama-lvm.
 
 replicaCount: 1
 
@@ -101,6 +101,3 @@ global:
   # By default, both var are set to empty, the model will be downloaded and saved to a tmp volume.
   modelUseHostPath: ""
   modelUsePVC: ""
-
-  # Set cacheUseHostPath to for caching encoding/embedding models and other related data
-  cacheUseHostPath: ""

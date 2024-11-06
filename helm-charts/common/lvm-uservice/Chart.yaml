@@ -13,7 +13,7 @@ dependencies:
     version: 1.0.0
     repository: file://../tgi
     condition: tgi.enabled
-  - name: lvm-serving
+  - name: video-llama-lvm
     version: 1.0.0
-    repository: file://../lvm-serving
-    condition: lvm-serving.enabled
+    repository: file://../video-llama-lvm
+    condition: video-llama-lvm.enabled

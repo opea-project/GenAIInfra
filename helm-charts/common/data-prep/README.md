@@ -52,14 +52,14 @@ export VDMS_PORT="8001"
 export INDEX_NAME="mega-videoqna"
 export HFTOKEN=<your huggingface token>
 # Set a directory to cache emdedding models
-export CACHEDIR="/home/$USER/.cache"
+export MODELDIR=/mnt/opea-models
 
 # Export the proxy variables. Assign empty string if no proxy setup required.
 export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install data-prep . -f ../variant_videoqna-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.cacheUseHostPath=${CACHEDIR} --set vdmsHost=${VDMS_HOST} --set vdmsPort=${VDMS_PORT} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
+helm install data-prep . -f ../variant_videoqna-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.modelUseHostPath=${MODELDIR} --set vdmsHost=${VDMS_HOST} --set vdmsPort=${VDMS_PORT} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
 ```
 
 ### (Option2): Installing the chart with dependencies automatically
@@ -69,14 +69,14 @@ cd GenAIInfra/helm-charts/common/data-prep
 export INDEX_NAME="mega-videoqna"
 export HFTOKEN=<your huggingface token>
 # Set a directory to cache emdedding models
-export CACHEDIR="/home/$USER/.cache"
+export MODELDIR=/mnt/opea-models
 
 # Export the proxy variables. Assign empty string if no proxy setup required.
 export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install data-prep . -f ./variant_videoqna-values.yaml --set vdms-vector-db.enabled=true --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.cacheUseHostPath=${CACHEDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
+helm install data-prep . -f ./variant_videoqna-values.yaml --set vdms-vector-db.enabled=true --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set indexName=${INDEX_NAME} --set global.modelUseHostPath=${MODELDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
 ```
 
 ## Verify

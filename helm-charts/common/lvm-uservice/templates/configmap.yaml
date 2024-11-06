@@ -13,7 +13,7 @@ data:
   {{- else if contains "lvm-tgi" .Values.image.repository }}
   LVM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
   {{- else if contains "lvm-video-llama" .Values.image.repository }}
-  LVM_ENDPOINT: "http://{{ .Release.Name }}-lvm-serving"
+  LVM_ENDPOINT: "http://{{ .Release.Name }}-video-llama-lvm"
   {{- end }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
@@ -23,7 +23,7 @@ data:
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   {{- if and (not .Values.LVM_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy) }}
-  no_proxy: "{{ .Release.Name }}-tgi,{{ .Release.Name }}-lvm-serving,{{ .Values.global.no_proxy }}"
+  no_proxy: "{{ .Release.Name }}-tgi,{{ .Release.Name }}-video-llama-lvm,{{ .Values.global.no_proxy }}"
   {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}

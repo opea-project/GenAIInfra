@@ -3,7 +3,7 @@
 
 # Values file for VideoQnA Application for lvm-uservice
 
-lvm-serving:
+video-llama-lvm:
   llmDownload: true
 
 image:

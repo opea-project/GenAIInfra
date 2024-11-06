@@ -7,7 +7,7 @@ Helm chart for deploying VideoQnA service. VideoQnA depends on the following oth
 - [retriever-usvc](../common/retriever-usvc/README.md)
 - [reranking-usvc](../common/reranking-usvc/README.md)
 - [vdms-vector-db](../common/vdms-vector-db/README.md)
-- [lvm-serving](../common/lvm-serving/README.md)
+- [video-llama-lvm](../common/video-llama-lvm/README.md)
 - [lvm-uservice](../common/lvm-uservice/README.md)
 
 ## Installing the Chart
@@ -30,12 +30,12 @@ export INDEX_NAME="mega-videoqna"
 export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
-helm install videoqna videoqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set global.cacheUseHostPath=${CACHEDIR} --set lvm-serving.llmDownload=${LLM_DOWNLOAD} --set data-prep.indexName=${INDEX_NAME} --set retriever-usvc.indexName=${INDEX_NAME} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy} --wait
+helm install videoqna videoqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set global.cacheUseHostPath=${CACHEDIR} --set video-llama-lvm.llmDownload=${LLM_DOWNLOAD} --set data-prep.indexName=${INDEX_NAME} --set retriever-usvc.indexName=${INDEX_NAME} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy} --wait
 ```
 
 ### IMPORTANT NOTE
 
-1. Make sure your `MODELDIR` and `CACHEDIR` exists on the node where your workload is schedueled. These dirs are used to cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` and `global.cacheUseHostPath` to 'null' if you don't want to cache the models.
+1. Make sure your `MODELDIR` and `CACHEDIR` exists on the node where your workload is scheduled. These directories are used to cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` and `global.cacheUseHostPath` to 'null' if you don't want to cache the models.
 
 ## Verify
 
@@ -69,11 +69,11 @@ Open a browser and head to `http://<k8s-node-ip-address>:${port}` to use VideoQn
 
 ## Values
 
-| Key                                           | Type    | Default                | Description                                                                                                                      |
-| --------------------------------------------- | ------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| image.repository                              | string  | `"opea/videoqna"`      |                                                                                                                                  |
-| service.port                                  | string  | `"8888"`               |                                                                                                                                  |
-| global.modelUseHostPath                       | string  | `"/mnt/opea-models"`   | A directory to where model dir for lvm-serving service is mounted.                                                               |
-| global.cacheUseHostPath                       | string  | `"/home/$USER/.cache"` | A directory to where cache dir for several services are mounted.                                                                 |
-| lvm-serving.llmDownload                       | boolean | `true`                 | This value when true, makes lvm-serving download a model. Change it to false for stopping lvm-serving from re-downloading model. |
-| data-prep.indexName, retriever-usvc.indexName | string  | `"mega-videoqna"`      | This value when true, makes lvm-serving download a model. Change it to false for stopping lvm-serving from re-downloading model. |
+| Key                                           | Type    | Default                | Description                                                                                                                              |
+| --------------------------------------------- | ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| image.repository                              | string  | `"opea/videoqna"`      |                                                                                                                                          |
+| service.port                                  | string  | `"8888"`               |                                                                                                                                          |
+| global.modelUseHostPath                       | string  | `"/mnt/opea-models"`   | A directory to where model dir for video-llama-lvm service is mounted.                                                                   |
+| global.cacheUseHostPath                       | string  | `"/home/$USER/.cache"` | A directory to where cache dir for several services are mounted.                                                                         |
+| video-llama-lvm.llmDownload                   | boolean | `true`                 | This value when true, makes video-llama-lvm download a model. Change it to false for stopping video-llama-lvm from re-downloading model. |
+| data-prep.indexName, retriever-usvc.indexName | string  | `"mega-videoqna"`      | This value when true, makes video-llama-lvm download a model. Change it to false for stopping video-llama-lvm from re-downloading model. |

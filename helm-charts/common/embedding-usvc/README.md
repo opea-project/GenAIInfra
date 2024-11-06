@@ -41,14 +41,14 @@ To install the multimodal embedding-usvc chart, run the following:
 cd GenAIInfra/helm-charts/common/embedding-usvc
 
 # Set a directory to cache emdedding models
-export CACHEDIR="/home/$USER/.cache"
+export MODELDIR=/mnt/opea-models
 
 # Export the proxy variables. Assign empty string if no proxy setup required.
 export https_proxy="your_http_proxy"
 export http_proxy="your_https_proxy"
 
 helm dependency update
-helm install embedding-usvc . -f ./vdms-values.yaml --set global.cacheUseHostPath=${CACHEDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
+helm install embedding-usvc . -f ./variant_videoqna-values.yaml --set global.modelUseHostPath=${MODELDIR} --set global.https_proxy=${https_proxy} --set global.http_proxy=${http_proxy}
 ```
 
 ## Verify

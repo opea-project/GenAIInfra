@@ -15,4 +15,5 @@ extraArgs: ["-c", "sleep 15 && python ingest_videos.py"]
 
 # Set cacheUseHostPath to for caching encoding/embedding models and other related data
 global:
-  cacheUseHostPath: ""
+  modelUseHostPath: ""
+  modelUsePVC: ""

@@ -4,14 +4,14 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "lvm-serving.fullname" . }}
+  name: {{ include "video-llama-lvm.fullname" . }}
   labels:
-    {{- include "lvm-serving.labels" . | nindent 4 }}
+    {{- include "video-llama-lvm.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      {{- include "lvm-serving.selectorLabels" . | nindent 6 }}
+      {{- include "video-llama-lvm.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -19,7 +19,7 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "lvm-serving.labels" . | nindent 8 }}
+        {{- include "video-llama-lvm.labels" . | nindent 8 }}
         {{- with .Values.podLabels }}
         {{- toYaml . | nindent 8 }}
         {{- end }}
@@ -34,7 +34,7 @@ spec:
         - name: {{ .Release.Name }}
           envFrom:
             - configMapRef:
-                name: {{ include "lvm-serving.fullname" . }}-config
+                name: {{ include "video-llama-lvm.fullname" . }}-config
             {{- if .Values.global.extraEnvConfig }}
             - configMapRef:
                 name: {{ .Values.global.extraEnvConfig }}
@@ -55,14 +55,12 @@ spec:
           volumeMounts:
             - mountPath: /home/user/model
               name: model-volume
-            {{- if .Values.global.cacheUseHostPath }}
             - mountPath: /home/user/.cache/huggingface/hub
-              name: cache-volume
+              name: model-volume
               subPath: huggingface/hub
             - mountPath: /home/user/.cache/torch/hub
-              name: cache-volume
+              name: model-volume
               subPath: torch/hub
-            {{- end }}
             - mountPath: /tmp
               name: tmp
           livenessProbe:
@@ -89,12 +87,6 @@ spec:
           {{- else }}
           emptyDir: {}
           {{- end }}
-        {{- if .Values.global.cacheUseHostPath }}
-        - name: cache-volume
-          hostPath:
-            path: {{ .Values.global.cacheUseHostPath }}
-            type: Directory
-        {{- end }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}

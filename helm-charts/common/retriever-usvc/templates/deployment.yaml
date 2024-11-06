@@ -55,9 +55,9 @@ spec:
               containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           volumeMounts:
-            {{- if .Values.global.cacheUseHostPath }}
+            {{- if .Values.global.modelUseHostPath }}
             - mountPath: /home/user/.cache/huggingface/hub
-              name: cache-volume
+              name: model-volume
               subPath: huggingface/hub
             {{- end }}
             - mountPath: /tmp
@@ -77,11 +77,15 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        {{- if .Values.global.cacheUseHostPath }}
-        - name: cache-volume
+        {{- if .Values.global.modelUseHostPath }}
+        - name: model-volume
           hostPath:
-            path: {{ .Values.global.cacheUseHostPath }}
+            path: {{ .Values.global.modelUseHostPath }}
             type: Directory
+        {{- else if .Values.global.modelUsePVC }}
+        - name: model-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
         {{- end }}
         - name: tmp
           emptyDir: {}

@@ -12,4 +12,5 @@ securityContext:
 
 # Set cacheUseHostPath to for caching encoding/embedding models and other related data
 global:
-  cacheUseHostPath: ""
+  modelUseHostPath: ""
+  modelUsePVC: ""

@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
-name: lvm-serving
+name: video-llama-lvm
 description: A Helm chart for serving LVM
 type: application
 version: 1.0.0
