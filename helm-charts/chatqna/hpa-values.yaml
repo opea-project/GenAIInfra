@@ -9,21 +9,21 @@
 # Default upstream configMap is in:
 #  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
 
-horizontalPodAutoscaler:
+autoscaling:
   enabled: true
 
 # Override values in specific subcharts
 
-# Enabling "horizontalPodAutoscaler" for any of the subcharts requires enabling it also above!
+# Enabling "autoscaling" for any of the subcharts requires enabling it also above!
 tgi:
-  horizontalPodAutoscaler:
+  autoscaling:
     maxReplicas: 4
     enabled: true
 teirerank:
-  horizontalPodAutoscaler:
+  autoscaling:
     maxReplicas: 3
     enabled: true
 tei:
-  horizontalPodAutoscaler:
+  autoscaling:
     maxReplicas: 2
     enabled: true

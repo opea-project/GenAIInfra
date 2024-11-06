@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if and .Values.global.monitoring .Values.horizontalPodAutoscaler.enabled }}
+{{- if and .Values.global.monitoring .Values.autoscaling.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -13,7 +13,7 @@ metadata:
 data:
   config.yaml: |
     rules:
-    {{- if .Values.tgi.horizontalPodAutoscaler.enabled }}
+    {{- if .Values.tgi.autoscaling.enabled }}
     # check metric with:
     # kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/<metric> | jq
     #
@@ -41,7 +41,7 @@ data:
           namespace: {resource: "namespace"}
           service:   {resource: "service"}
     {{- end }}
-    {{- if .Values.teirerank.horizontalPodAutoscaler.enabled }}
+    {{- if .Values.teirerank.autoscaling.enabled }}
     {{- if .Values.teirerank.accelDevice }}
     - seriesQuery: '{__name__="te_queue_size",service="{{ include "teirerank.fullname" .Subcharts.teirerank }}"}'
       # TEI instances queue_size sum
@@ -62,7 +62,7 @@ data:
           namespace: {resource: "namespace"}
           service:   {resource: "service"}
     {{- end }}
-    {{- if .Values.tei.horizontalPodAutoscaler.enabled }}
+    {{- if .Values.tei.autoscaling.enabled }}
     {{- if .Values.tei.accelDevice }}
     - seriesQuery: '{__name__="te_queue_size",service="{{ include "tei.fullname" .Subcharts.tei }}"}'
       # TEI instances queue_size sum
