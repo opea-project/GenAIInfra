@@ -7,7 +7,7 @@
 
 tei:
   enabled: true
-redis-vector-db:
-  enabled: true
 milvus:
   enabled: false
+redis-vector-db:
+  enabled: true

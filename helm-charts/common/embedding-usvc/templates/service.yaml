@@ -11,7 +11,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 6000
+      targetPort: {{ .Values.service.containerPort }}
       protocol: TCP
       name: embedding-usvc
   selector:

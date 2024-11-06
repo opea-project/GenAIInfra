@@ -8,6 +8,17 @@ metadata:
   labels:
     {{- include "retriever-usvc.labels" . | nindent 4 }}
 data:
+  {{- if .Values.vdmsHost }}
+  VDMS_HOST: {{ .Values.vdmsHost | quote }}
+  {{- else }}
+  VDMS_HOST: "{{ .Release.Name }}-vdms-vector-db"
+  {{- end }}
+  {{- if .Values.vdmsPort }}
+  VDMS_PORT: {{ .Values.vdmsPort | quote }}
+  {{- end }}
+  {{- if .Values.useClip }}
+  USECLIP: {{ .Values.useClip | quote }}
+  {{- end }}
   {{- if .Values.MOSEC_EMBEDDING_ENDPOINT }}
   MOSEC_EMBEDDING_ENDPOINT: {{ .Values.MOSEC_EMBEDDING_ENDPOINT | quote}}
   MOSEC_EMBEDDING_MODEL: {{ .Values.MOSEC_EMBEDDING_MODEL | quote}}
@@ -21,7 +32,7 @@ data:
   LOCAL_EMBEDDING_MODEL: {{ .Values.LOCAL_EMBEDDING_MODEL | quote }}
   {{- end }}
   {{- if .Values.REDIS_URL }}
-  REDIS_URL: {{ .Values.REDIS_URL | quote}}
+  REDIS_URL: {{ .Values.REDIS_URL | quote }}
   {{- else }}
   REDIS_URL: "redis://{{ .Release.Name }}-redis-vector-db:6379"
   {{- end }}
@@ -40,7 +51,7 @@ data:
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   {{- if and (not .Values.REDIS_URL) (and (not .Values.TEI_EMBEDDING_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy)) }}
-  no_proxy: "{{ .Release.Name }}-tei,{{ .Release.Name }}-redis-vector-db,{{ .Values.global.no_proxy }}"
+  no_proxy: "{{ .Release.Name }}-tei,{{ .Release.Name }}-redis-vector-db,{{ .Release.Name }}-vdms-vector-db,{{ .Values.global.no_proxy }}"
   {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}

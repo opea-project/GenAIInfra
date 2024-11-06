@@ -1,0 +1,28 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: opea/reranking-videoqna
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+chunkDuration: ""
+
+# Replace with actual Endpoint URLs
+fileServerEndpoint: ""
+getVideoListEndpoint: ""
+
+# As reranking depends on Data-prep service, enable data-prep dependency and
+# override the values for multimodal setup.
+data-prep:
+  image:
+    repository: opea/dataprep-multimodal-vdms
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  INDEX_NAME: "mega-videoqna"
+  vdmsHost: ""
+  vdmsPort: "8001"
+  entryCommand: ["/bin/sh"]
+  extraArgs: ["-c", "sleep 15 && python ingest_videos.py"]

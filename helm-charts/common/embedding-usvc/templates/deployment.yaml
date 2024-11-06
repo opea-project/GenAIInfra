@@ -43,9 +43,14 @@ spec:
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - name: embedding-usvc
-              containerPort: 6000
+              containerPort: {{ .Values.service.containerPort }}
               protocol: TCP
           volumeMounts:
+            {{- if .Values.global.modelUseHostPath }}
+            - mountPath: /home/user/.cache/huggingface/hub
+              name: model-volume
+              subPath: huggingface/hub
+            {{- end }}
             - mountPath: /tmp
               name: tmp
           {{- if .Values.livenessProbe }}
@@ -63,6 +68,16 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        {{- if .Values.global.modelUseHostPath }}
+        - name: model-volume
+          hostPath:
+            path: {{ .Values.global.modelUseHostPath }}
+            type: Directory
+        {{- else if .Values.global.modelUsePVC }}
+        - name: model-volume
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
+        {{- end }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}

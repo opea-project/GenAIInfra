@@ -1,0 +1,29 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "video-llama-lvm.fullname" . }}-testpod"
+  labels:
+    {{- include "video-llama-lvm.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: curl
+      image: python:3.10.14
+      command: ['bash', '-c']
+      args:
+        - |
+          max_retry=20
+          for ((i=1; i<=max_retry; i++)); do
+            curl -v 'http://{{ include "video-llama-lvm.fullname" . }}:{{ .Values.service.port }}/generate?video_url=https%3A%2F%2Fgithub.com%2FDAMO-NLP-SG%2FVideo-LLaMA%2Fraw%2Fmain%2Fexamples%2Fsilence_girl.mp4&start=0.0&duration=9&prompt=What%20is%20the%20person%20doing%3F&max_new_tokens=150' -sS --fail-with-body \
+            -X POST \
+            -H 'accept: */*' \
+            -d '' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+  restartPolicy: Never

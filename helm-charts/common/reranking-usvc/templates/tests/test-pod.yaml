@@ -15,6 +15,28 @@ spec:
     - name: curl
       image: python:3.10.14
       command: ['bash', '-c']
+      {{- if contains "reranking-videoqna" .Values.image.repository }}
+      args:
+        - |
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ include "reranking-usvc.fullname" . }}:{{ .Values.service.port }}/v1/reranking -sS --fail-with-body \
+            -X 'POST' \
+            -H 'accept: application/json' \
+            -H 'Content-Type: application/json' \
+            -d '{
+              "retrieved_docs": [{"doc": [{"text": "this is the retrieved text"}]}],
+              "initial_query": "this is the query",
+              "top_n": 1,
+              "metadata": [
+                  {"other_key": "value", "video":"top_video_name", "timestamp":"20"}
+              ]
+            }' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+      {{- else }}
       args:
         - |
           max_retry=20;
@@ -27,4 +49,5 @@ spec:
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+      {{- end }}
   restartPolicy: Never

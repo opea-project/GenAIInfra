@@ -11,6 +11,8 @@ milvus:
   enabled: false
 redis-vector-db:
   enabled: false
+vdms-vector-db:
+  enabled: false
 
 replicaCount: 1
 
@@ -55,6 +57,7 @@ service:
   type: ClusterIP
   # The default port for retriever service is 7000
   port: 7000
+  containerPort: 7000
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

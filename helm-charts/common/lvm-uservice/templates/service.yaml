@@ -11,7 +11,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: 9399
+      targetPort: {{ .Values.service.containerPort }}
       protocol: TCP
       name: lvm-uservice
   selector:

@@ -11,6 +11,8 @@ milvus:
   enabled: false
 redis-vector-db:
   enabled: false
+vdms-vector-db:
+  enabled: false
 
 replicaCount: 1
 
@@ -44,6 +46,7 @@ port: 6007
 service:
   type: ClusterIP
   port: 6007
+  containerPort: 6007
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

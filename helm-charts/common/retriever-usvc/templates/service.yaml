@@ -11,7 +11,7 @@ spec:
   type: {{ .Values.service.type }}
   ports:
     - port: {{ .Values.service.port }}
-      targetPort: {{ .Values.port }}
+      targetPort: {{ .Values.service.containerPort }}
       protocol: TCP
       name: retriever-usvc
   selector:

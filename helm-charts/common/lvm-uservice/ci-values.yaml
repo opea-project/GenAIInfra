@@ -2,8 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # Default values for lvm-uservice.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
 
 tgi:
   enabled: true

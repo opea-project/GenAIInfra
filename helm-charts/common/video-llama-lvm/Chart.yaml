@@ -1,0 +1,9 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: video-llama-lvm
+description: A Helm chart for serving LVM
+type: application
+version: 1.0.0
+appVersion: "v1.0"

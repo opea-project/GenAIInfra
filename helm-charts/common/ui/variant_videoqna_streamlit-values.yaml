@@ -1,0 +1,15 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: opea/videoqna-ui
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+# Endpoint for VideoQnA Backend. Test Value - Override it with actual Backend endpoint
+BACKEND_SERVICE_ENDPOINT: "http://localhost:8888/v1/videoqna"
+
+containerPort: 5173
+service:
+  type: ClusterIP
+  port: 5173

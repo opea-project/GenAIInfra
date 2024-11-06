@@ -13,3 +13,11 @@ dependencies:
     version: 1.0.0
     repository: file://../teirerank
     condition: teirerank.enabled
+  - name: data-prep
+    version: 1.0.0
+    repository: file://../data-prep
+    condition: data-prep.enabled
+  - name: vdms-vector-db
+    version: 1.0.0
+    repository: file://../vdms-vector-db
+    condition: data-prep.enabled

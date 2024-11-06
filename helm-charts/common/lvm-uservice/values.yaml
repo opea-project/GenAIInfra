@@ -10,6 +10,9 @@ tgi:
   LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
   MAX_INPUT_LENGTH: "4096"
   MAX_TOTAL_TOKENS: "8192"
+video-llama-lvm:
+  enabled: false
+  llmDownload: true
 
 replicaCount: 1
 LVM_ENDPOINT: ""
@@ -48,6 +51,7 @@ service:
   type: ClusterIP
   # The default port for lvm service is 9399
   port: 9399
+  containerPort: 9399
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

@@ -1,0 +1,35 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: videoqna
+description: A Helm chart to deploy VideoQnA Application Suite
+type: application
+dependencies:
+  - name: data-prep
+    version: 1.0.0
+    repository: "file://../common/data-prep"
+  - name: embedding-usvc
+    version: 1.0.0
+    repository: "file://../common/embedding-usvc"
+  - name: reranking-usvc
+    version: 1.0.0
+    repository: "file://../common/reranking-usvc"
+  - name: retriever-usvc
+    version: 1.0.0
+    repository: "file://../common/retriever-usvc"
+  - name: vdms-vector-db
+    version: 1.0.0
+    repository: "file://../common/vdms-vector-db"
+  - name: video-llama-lvm
+    version: 1.0.0
+    repository: "file://../common/video-llama-lvm"
+  - name: lvm-uservice
+    version: 1.0.0
+    repository: "file://../common/lvm-uservice"
+  - name: ui
+    version: 1.0.0
+    alias: videoqna-ui
+    repository: "file://../common/ui"
+version: 1.0.0
+appVersion: "v1.0"

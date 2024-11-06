@@ -1,0 +1,150 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for videoqna.
+replicaCount: 1
+
+image:
+  repository: opea/videoqna
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 8888
+  containerPort: 8888
+
+resources: {}
+  # We usually recommend not to specify default resources and to leave this as a conscious
+  # choice for the user. This also increases chances charts run on environments with little
+  # resources, such as Minikube. If you do want to specify resources, uncomment the following
+  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  # requests:
+  #   cpu: 100m
+  #   memory: 128Mi
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+embeddingServiceHost: ""
+retrieverServiceHost: ""
+rerankServiceHost: ""
+lvmServiceHost: ""
+
+entryCommand: ["/bin/sh"]
+extraArgs: ["-c", "sleep 45 && python videoqna.py"]
+
+videoqna-ui:
+  image:
+    repository: opea/videoqna-ui
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  # Overriding videoqna-ui chart name to avoid repetitive videoqna in the fullname.
+  nameOverride: "ui"
+
+  # Following template value will be resolved in videoqna-ui ConfigMap
+  BACKEND_SERVICE_ENDPOINT: http://{{ printf "%s-nginx" .Release.Name | trunc 63 | trimSuffix "-" }}/v1/videoqna
+
+  containerPort: 5173
+  service:
+    type: ClusterIP
+    port: 5173
+
+data-prep:
+  image:
+    repository: opea/dataprep-multimodal-vdms
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  indexName: "mega-videoqna"
+  vdmsHost: ""
+  vdmsPort: "8001"
+  entryCommand: ["/bin/sh"]
+  extraArgs: ["-c", "sleep 15 && python ingest_videos.py"]
+
+embedding-usvc:
+  image:
+    repository: opea/embedding-multimodal-clip
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  securityContext:
+    readOnlyRootFilesystem: false
+
+retriever-usvc:
+  image:
+    repository: opea/retriever-vdms
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  indexName: "mega-videoqna"
+  vdmsHost: ""
+  vdmsPort: "8001"
+  useClip: "1"
+  entryCommand: ["/bin/sh"]
+  extraArgs: ["-c", "sleep 30 && python retriever_vdms.py"]
+
+reranking-usvc:
+  image:
+    repository: opea/reranking-videoqna
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  chunkDuration: ""
+
+  # Following template value will be resolved in rearanking-usvc ConfigMap
+  fileServerEndpoint: http://{{ printf "%s-nginx" .Release.Name | trunc 63 | trimSuffix "-" }}/v1/dataprep/get_file
+  getVideoListEndpoint: http://{{ printf "%s-nginx" .Release.Name | trunc 63 | trimSuffix "-" }}/v1/dataprep/get_videos
+
+lvm-uservice:
+  image:
+    repository: opea/lvm-video-llama
+    # This sets the pull policy for images.
+    pullPolicy: IfNotPresent
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+
+  service:
+    type: ClusterIP
+    port: 9000
+    containerPort: 9000
+
+
+global:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+
+  # Set modelUseHostPath or modelUsePVC to use model cache.
+  modelUseHostPath: ""
+  modelUsePVC: ""
