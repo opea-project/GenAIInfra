@@ -18,6 +18,19 @@ dependencies:
   - name: tgi
     version: 1.0.0
     repository: "file://../common/tgi"
+    condition: tgi.enabled
+  - name: vllm
+    version: 1.0.0
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
+  - name: llm-uservice
+    version: 1.0.0
+    repository: "file://../common/llm-uservice"
+    condition: tgi.enabled
+  - name: llm-ctrl-uservice
+    version: 1.0.0
+    repository: "file://../common/llm-ctrl-uservice"
+    condition: vllm.enabled
   - name: tei
     version: 1.0.0
     repository: "file://../common/tei"

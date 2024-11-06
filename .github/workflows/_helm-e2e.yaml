@@ -65,7 +65,7 @@ jobs:
           echo "CHART_NAME=$CHART_NAME" >> $GITHUB_ENV
           echo "RELEASE_NAME=${CHART_NAME}$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
           echo "NAMESPACE=${CHART_NAME}-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "ROLLOUT_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
+          echo "ROLLOUT_TIMEOUT_SECONDS=1200s" >> $GITHUB_ENV
           echo "TEST_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "KUBECTL_TIMEOUT_SECONDS=60s" >> $GITHUB_ENV
           echo "should_cleanup=false" >> $GITHUB_ENV

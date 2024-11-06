@@ -33,12 +33,25 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           env:
+            {{- if .Values.vllm.enabled }}
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-llm-ctrl-uservice
+            - name: LLM_SERVER_HOST_IP
+              value: {{ .Release.Name }}-vllm
+            - name: LLM_MODEL
+              value: {{ .Values.vllm.LLM_MODEL_ID | quote }}
+            {{- else }}
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-llm-uservice
             - name: LLM_SERVER_HOST_IP
               value: {{ .Release.Name }}-tgi
-            - name: LLM_SERVER_PORT
-              value: "80"
             - name: LLM_MODEL
               value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
+            {{- end }}
+            - name: RERANK_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-reranking-usvc
+            - name: LLM_SERVER_PORT
+              value: "80"
             - name: RERANK_SERVER_HOST_IP
               value: {{ .Release.Name }}-teirerank
             - name: RERANK_SERVER_PORT

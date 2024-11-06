@@ -1,0 +1,14 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: llm-ctrl-uservice
+description: A Helm chart for LLM controller microservice which connects with vLLM microservice to provide inferences.
+type: application
+version: 1.0.0
+appVersion: "v1.0"
+dependencies:
+  - name: vllm
+    version: 1.0.0
+    repository: file://../vllm
+    condition: vllm.enabled
