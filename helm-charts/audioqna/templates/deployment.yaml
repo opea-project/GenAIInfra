@@ -1,0 +1,85 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "audioqna.fullname" . }}
+  labels:
+    {{- include "audioqna.labels" . | nindent 4 }}
+    app: {{ include "audioqna.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "audioqna.selectorLabels" . | nindent 6 }}
+      app: {{ include "audioqna.fullname" . }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "audioqna.selectorLabels" . | nindent 8 }}
+        app: {{ include "audioqna.fullname" . }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") }}
+            - name: LLM_SERVICE_PORT
+              value: {{ index .Values "llm-uservice" "service" "port" | quote }}
+            - name: ASR_SERVICE_HOST_IP
+              value: {{ include "asr.fullname" (index .Subcharts "asr") }}
+            - name: ASR_SERVICE_PORT
+              value: {{ index .Values "asr" "service" "port" | quote }}
+            - name: TTS_SERVICE_HOST_IP
+              value: {{ include "tts.fullname" (index .Subcharts "tts") }}
+            - name: TTS_SERVICE_PORT
+              value: {{ index .Values "tts" "service" "port" | quote }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: audioqna
+              containerPort: {{ .Values.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.evenly_distributed }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "audioqna.selectorLabels" . | nindent 14 }}
+              app: {{ include "audioqna.fullname" . }}
+      {{- end }}
