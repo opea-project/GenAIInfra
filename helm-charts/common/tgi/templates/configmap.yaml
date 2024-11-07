@@ -29,3 +29,25 @@ data:
   {{- if .Values.CUDA_GRAPHS }}
   CUDA_GRAPHS: {{ .Values.CUDA_GRAPHS | quote }}
   {{- end }}
+  {{- if .Values.HF_HUB_DISABLE_PROGRESS_BARS }}
+  HF_HUB_DISABLE_PROGRESS_BARS: {{ .Values.HF_HUB_DISABLE_PROGRESS_BARS | quote }}
+  {{- end }}
+  {{- if .Values.HF_HUB_ENABLE_HF_TRANSFER }}
+  HF_HUB_ENABLE_HF_TRANSFER: {{ .Values.HF_HUB_ENABLE_HF_TRANSFER | quote }}
+  {{- end }}
+  # More options for HPU
+  {{- if .Values.OMPI_MCA_btl_vader_single_copy_mechanism }}
+  OMPI_MCA_btl_vader_single_copy_mechanism: {{ .Values.OMPI_MCA_btl_vader_single_copy_mechanism | quote }}
+  {{- end }}
+  {{- if .Values.ENABLE_HPU_GRAPH }}
+  ENABLE_HPU_GRAPH: {{ .Values.ENABLE_HPU_GRAPH | quote }}
+  {{- end }}
+  {{- if .Values.LIMIT_HPU_GRAPH }}
+  LIMIT_HPU_GRAPH: {{ .Values.LIMIT_HPU_GRAPH | quote }}
+  {{- end }}
+  {{- if .Values.USE_FLASH_ATTENTION }}
+  USE_FLASH_ATTENTION: {{ .Values.USE_FLASH_ATTENTION | quote }}
+  {{- end }}
+  {{- if .Values.FLASH_ATTENTION_RECOMPUTE }}
+  FLASH_ATTENTION_RECOMPUTE: {{ .Values.FLASH_ATTENTION_RECOMPUTE | quote }}
+  {{- end }}
