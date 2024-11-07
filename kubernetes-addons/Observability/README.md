@@ -1,6 +1,8 @@
 # How-To Setup Observability for OPEA Workload in Kubernetes
 
-This guide provides a step-by-step approach to setting up observability for the OPEA workload in a Kubernetes environment. We will cover the setup of Prometheus and Grafana, as well as the collection of metrics for Gaudi hardware, OPEA/chatqna including TGI,TEI-Embedding,TEI-Reranking and other microservies, and PCM.
+This guide provides a step-by-step approach to setting up observability for the OPEA workload in a Kubernetes environment. We will cover the setup of Prometheus and Grafana, as well as the collection of metrics for Gaudi hardware, OPEA/chatqna including TGI, TEI-Embedding, TEI-Reranking and other microservices, and PCM.
+
+For monitoring Helm installed OPEA applications, see [Helm monitoring option](../../helm-charts/monitoring.md).
 
 ## Prepare
 

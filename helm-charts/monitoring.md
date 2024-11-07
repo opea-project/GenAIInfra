@@ -16,6 +16,10 @@ which can be visualized e.g. in [Grafana](https://grafana.com/).
 
 Scaling the services automatically based on their usage with [HPA](HPA.md) also relies on these metrics.
 
+[Observability documentation](../kubernetes-addons/Observability/README.md)
+explains how to install additional monitoring for node and device metrics,
+and Grafana for visualizing those metrics.
+
 ## Pre-conditions
 
 ### Prometheus install
