@@ -95,7 +95,7 @@ To enable HPA, add `-f chatqna/hpa-values.yaml` option to your `helm install` co
 
 If **CPU** versions of TGI (and TEI) services are being scaled, resource requests and probe timings
 suitable for CPU usage need to be used. `chatqna/cpu-values.yaml` provides example of such constraints
-which can be added (with `-f` option) to your Helm install.  As those values depend on the underlying HW,
+which can be added (with `-f` option) to your Helm install. As those values depend on the underlying HW,
 used model, data type and image versions, the specified resource values may need to be updated.
 
 ### Post-install
