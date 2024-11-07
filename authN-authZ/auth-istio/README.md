@@ -18,7 +18,7 @@ Before composing an OPEA pipeline with authN & authZ, user need to install Istio
 
 ```bash
 curl -L https://istio.io/downloadIstio | sh -
-cd istio-1.23.2
+cd istio-1.23.2 ## change to your downloaded version
 export PATH=$PWD/bin:$PATH
 istioctl install
 ```
@@ -68,9 +68,9 @@ kubectl patch deployment -n chatqa <deployment-name> --patch '{
 }'
 ```
 
-**Ingress Gateway**
+**(Optional) Ingress Gateway**
 
-The istio ingress gateway will be used to access the chatQnA service in different setups.
+For authentication safegard, we should add a gateway for the service. Here we the istio ingress gateway will be used to access the chatQnA service in different setups.
 
 First export the router service through istio ingress gateway.
 
