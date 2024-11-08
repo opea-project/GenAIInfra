@@ -1,7 +1,8 @@
 hf_token = ""
 project_id = ""
 region = "europe-west4"
-cluster_name = "opea-chatqna"
+cluster_name = "opea"
+app_name = "chatqna"
 namespace = "chatqna"
 cpu_pool = [ {
   name: "cpu-pool"

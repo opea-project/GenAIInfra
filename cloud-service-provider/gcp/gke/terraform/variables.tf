@@ -38,6 +38,11 @@ variable "namespace" {
   default     = "default"
 }
 
+variable "app_name" {
+  description = "OPEA application name"
+  type        = string
+}
+
 variable "cpu_pool" {
   type = list(map(any))
 }
