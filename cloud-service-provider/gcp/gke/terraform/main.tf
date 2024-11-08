@@ -1,5 +1,5 @@
 data "google_client_config" "default" {}
-data "google_project" "current" {}
+data "google_project" "current" { project_id = var.project_id }
 
 provider "kubernetes" {
   host                   = "https://${module.gke.endpoint}"
@@ -21,10 +21,10 @@ resource "google_compute_network" "default" {
 }
 
 resource "google_compute_subnetwork" "default" {
-  name             = "example-subnetwork"
-  region           = var.region
-  ip_cidr_range    = "10.0.0.0/16"
-  stack_type       = "IPV4_ONLY"
+  name          = "example-subnetwork"
+  region        = var.region
+  ip_cidr_range = "10.0.0.0/16"
+  stack_type    = "IPV4_ONLY"
 
   network = google_compute_network.default.id
   secondary_ip_range {
@@ -139,6 +139,7 @@ resource "kubernetes_persistent_volume" "model" {
         volume_handle = google_storage_bucket.model.name
       }
     }
+    mount_options = [ "implicit-dirs", "uid=1000", "gid=1000" ]
   }
   depends_on = [ null_resource.kubectl ]
 }
@@ -147,7 +148,7 @@ resource "helm_release" "app" {
   chart = "../../../../helm-charts/chatqna"
   repository = "chatqna"
   name = "chatqna"
-  namespace = "chatqna"
+  namespace = var.namespace
 
   values = [ file("./custom-values.yaml") ]
 
@@ -167,5 +168,6 @@ resource "helm_release" "app" {
     name = "nginx.service.type"
     value = "LoadBalancer"
   }
+  timeout = 600
   depends_on = [ null_resource.kubectl ]
 }
