@@ -18,6 +18,9 @@ autoscaling:
 port: 2082
 shmSize: 1Gi
 RERANK_MODEL_ID: "BAAI/bge-reranker-base"
+HF_HUB_DISABLE_PROGRESS_BARS: "1"
+HF_HUB_ENABLE_HF_TRANSFER: "0"
+
 image:
   repository: ghcr.io/huggingface/text-embeddings-inference
   pullPolicy: IfNotPresent
