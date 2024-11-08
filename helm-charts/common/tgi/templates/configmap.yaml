@@ -39,6 +39,9 @@ data:
   {{- if .Values.OMPI_MCA_btl_vader_single_copy_mechanism }}
   OMPI_MCA_btl_vader_single_copy_mechanism: {{ .Values.OMPI_MCA_btl_vader_single_copy_mechanism | quote }}
   {{- end }}
+  {{- if .Values.PT_HPU_ENABLE_LAZY_COLLECTIVES }}
+  PT_HPU_ENABLE_LAZY_COLLECTIVES: {{ .Values.PT_HPU_ENABLE_LAZY_COLLECTIVES | quote }}
+  {{- end }}
   {{- if .Values.ENABLE_HPU_GRAPH }}
   ENABLE_HPU_GRAPH: {{ .Values.ENABLE_HPU_GRAPH | quote }}
   {{- end }}

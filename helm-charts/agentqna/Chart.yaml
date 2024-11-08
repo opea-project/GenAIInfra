@@ -1,0 +1,43 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: agentqna
+description: The Helm chart to deploy AgentQnA
+type: application
+dependencies:
+  - name: agent
+    version: 1.0.0
+    alias: worker
+    repository: "file://../common/agent"
+  - name: agent
+    version: 1.0.0
+    alias: supervisor
+    repository: "file://../common/agent"
+  - name: tgi
+    version: 1.0.0
+    repository: "file://../common/tgi"
+    condition: tgi.enabled
+  - name: tei
+    version: 1.0.0
+    repository: "file://../common/tei"
+  - name: embedding-usvc
+    version: 1.0.0
+    repository: "file://../common/embedding-usvc"
+  - name: teirerank
+    version: 1.0.0
+    repository: "file://../common/teirerank"
+  - name: reranking-usvc
+    version: 1.0.0
+    repository: "file://../common/reranking-usvc"
+  - name: redis-vector-db
+    version: 1.0.0
+    repository: "file://../common/redis-vector-db"
+  - name: retriever-usvc
+    version: 1.0.0
+    repository: "file://../common/retriever-usvc"
+  - name: data-prep
+    version: 1.0.0
+    repository: "file://../common/data-prep"
+version: 1.0.0
+appVersion: "v1.0"
