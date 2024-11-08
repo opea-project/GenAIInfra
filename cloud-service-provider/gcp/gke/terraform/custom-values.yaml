@@ -1,0 +1,9 @@
+tgi:
+  podAnnotations:
+    gke-gcsfuse/volumes: "true"
+tei:
+  podAnnotations:
+    gke-gcsfuse/volumes: "true"
+teirerank:
+  podAnnotations:
+    gke-gcsfuse/volumes: "true"
