@@ -564,10 +564,7 @@
       "id": 5,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max"
-          ],
+          "calcs": ["min", "max"],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -679,10 +676,7 @@
       "id": 1,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max"
-          ],
+          "calcs": ["min", "max"],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -794,10 +788,7 @@
       "id": 3,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max"
-          ],
+          "calcs": ["min", "max"],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -909,10 +900,7 @@
       "id": 2,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max"
-          ],
+          "calcs": ["min", "max"],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -1054,10 +1042,7 @@
       "id": 15,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max"
-          ],
+          "calcs": ["min", "max"],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -1169,10 +1154,7 @@
       "id": 14,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max"
-          ],
+          "calcs": ["min", "max"],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -1271,10 +1253,7 @@
       "id": 13,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max"
-          ],
+          "calcs": ["min", "max"],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
@@ -1373,10 +1352,7 @@
       "id": 11,
       "options": {
         "legend": {
-          "calcs": [
-            "min",
-            "max"
-          ],
+          "calcs": ["min", "max"],
           "displayMode": "list",
           "placement": "bottom",
           "showLegend": true
