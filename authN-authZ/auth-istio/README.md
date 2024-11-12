@@ -67,6 +67,7 @@ kubectl patch deployment -n chatqa <deployment-name> --patch '{
   }
 }'
 ```
+
 The istio ingress gateway will be used to access the chatQnA service in different setups. Follow the istio guide [here](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) to determine the ingress IP and ports and expose them as environment variables.
 
 ## Perform authentication and authorization via Bearer JWT tokens and curl
