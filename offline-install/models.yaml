@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: copy-model-daemonset
+spec:
+  selector:
+    matchLabels:
+      name: copy-model
+  template:
+    metadata:
+      labels:
+        name: copy-model
+    spec:
+      initContainers:
+      - name: copy-model
+        image: registry:5000/opea/models:latest
+        volumeMounts:
+        - name: local-model
+          mountPath: /mnt/opea-models
+        command: ["/bin/sh", "-c", "cp -r /data/* /mnt/opea-models/ && echo CopyDone"]
+      containers:
+      - name: pause
+        image: registry:5000/google_containers/pause:3.1
+        resources:
+          requests:
+            cpu: "0"
+            memory: "0"
+          limits:
+            cpu: "0"
+            memory: "0"
+        volumeMounts:
+        - name: local-model
+          mountPath: /mnt/opea-models
+      restartPolicy: Always
+      volumes:
+      - name: local-model
+        hostPath:
+          path: /mnt/opea-models
+          type: DirectoryOrCreate
+  updateStrategy:
+    type: RollingUpdate
