@@ -67,38 +67,7 @@ kubectl patch deployment -n chatqa <deployment-name> --patch '{
   }
 }'
 ```
-
-**(Optional) Ingress Gateway**
-
-For authentication safegard, we should add a gateway for the service. Here we the istio ingress gateway will be used to access the chatQnA service in different setups.
-
-First export the router service through istio ingress gateway.
-
-```bash
-kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway.yaml
-```
-
-Determine the ingress IP and ports and expose them as environment variables.
-
-```bash
-export INGRESS_NAME=istio-ingressgateway
-export INGRESS_NS=istio-system
-
-#run the following to determine if your Kubernetes cluster is in an environment that supports external load balancers:
-kubectl get svc "$INGRESS_NAME" -n "$INGRESS_NS"
-
-# Case1: If your EXTERNAL-IP value is <none> (or perpetually <pending>), your environment does not provide an external load balancer for the ingress gateway.
-# set the INGRESS_HOST to your host ip,
-export INGRESS_HOST=${host_ip}
-# set the INGRESS_PORT to the istio-ingressgateway svc port
-export INGRESS_PORT=${gateway_svc_port}
-
-#Case2: If your environment support external load balancers
-export INGRESS_HOST=$(kubectl -n "$INGRESS_NS" get service "$INGRESS_NAME" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-export INGRESS_PORT=$(kubectl -n "$INGRESS_NS" get service "$INGRESS_NAME" -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
-```
-
-You can refter to the [istio ingress gateway guide](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) for more details about ingress gateway ip and ports.
+The istio ingress gateway will be used to access the chatQnA service in different setups. Follow the istio guide [here](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) to determine the ingress IP and ports and expose them as environment variables.
 
 ## Perform authentication and authorization via Bearer JWT tokens and curl
 
@@ -218,6 +187,38 @@ cd /opt/keycloak/bin/
 ```
 
 Then after open the console and create `istio` realm, go to "Realm setting", set "Require SSL" to "None"
+
+**Export the router service through istio ingress gateway**
+
+For authentication safegard, we should add a gateway for the service. Here we the istio ingress gateway will be used to access the chatQnA service in different setups.
+
+First export the router service through istio ingress gateway.
+
+```bash
+kubectl apply -f $(pwd)/$DEPLOY_METHOD/chatQnA_router_gateway.yaml
+```
+
+Determine the ingress IP and ports and expose them as environment variables.
+
+```bash
+export INGRESS_NAME=istio-ingressgateway
+export INGRESS_NS=istio-system
+
+#run the following to determine if your Kubernetes cluster is in an environment that supports external load balancers:
+kubectl get svc "$INGRESS_NAME" -n "$INGRESS_NS"
+
+# Case1: If your EXTERNAL-IP value is <none> (or perpetually <pending>), your environment does not provide an external load balancer for the ingress gateway.
+# set the INGRESS_HOST to your host ip,
+export INGRESS_HOST=${host_ip}
+# set the INGRESS_PORT to the istio-ingressgateway svc port
+export INGRESS_PORT=${gateway_svc_port}
+
+#Case2: If your environment support external load balancers
+export INGRESS_HOST=$(kubectl -n "$INGRESS_NS" get service "$INGRESS_NAME" -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+export INGRESS_PORT=$(kubectl -n "$INGRESS_NS" get service "$INGRESS_NAME" -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
+```
+
+You can refter to the [istio ingress gateway guide](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) for more details about ingress gateway ip and ports.
 
 **Apply authentication and authorization policies to the pipeline endpoint based on OIDC provider**
 
