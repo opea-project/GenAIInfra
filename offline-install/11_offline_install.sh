@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 registry="registry:5000"
 
 cd GenAIInfra/helm-charts/
@@ -26,4 +29,4 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
     --set redis-vector-db.image.repository=$registry/redis/redis-stack,redis-vector-db.image.tag=7.2.0-v9 \
     --set retriever-usvc.image.repository=$registry/opea/retriever-redis,retriever-usvc.image.tag=latest \
     --set chatqna-ui.image.repository=$registry/opea/chatqna-ui,chatqna-ui.image.tag=latest,chatqna-ui.containerPort=5173 \
-    --set data-prep.image.repository=$registry/opea/dataprep-redis,data-prep.image.tag=latest 
+    --set data-prep.image.repository=$registry/opea/dataprep-redis,data-prep.image.tag=latest

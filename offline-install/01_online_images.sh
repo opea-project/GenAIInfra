@@ -1,6 +1,9 @@
 #!/bin/bash
 
 
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 registry=registry:5000
 
 # Define the images to pull and push
@@ -22,7 +25,7 @@ for image in "${images[@]}"; do
   # Extract the image name and tag
   image_name=$(echo "$image" | awk -F ':' '{print $1}' | awk -F '/' ' { for (i=2; i<=NF-1; i++) printf $i "/";  print $(NF) }')
   image_tag=$(echo "$image" | awk -F: '{print $2}')
-  
+
   # If no tag is specified, default to latest
   if [ -z "$image_tag" ]; then
     image_tag="latest"
@@ -30,12 +33,12 @@ for image in "${images[@]}"; do
 
   echo "Pulling image: $image"
   docker pull "$image"
-  
+
   # Tag the image for the new registry with the correct tag
   new_image="$registry/$image_name:$image_tag"
   echo "Tagging image: $image as $new_image"
   docker tag "$image" "$new_image"
-  
+
   # Push the image to the new registry
   echo "Pushing image: $new_image"
   docker push "$new_image"

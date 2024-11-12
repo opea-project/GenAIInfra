@@ -1,4 +1,4 @@
-Note: The script is only for DEMO instead of production. It is risky to run this script in production enviorement.
+Note: The script is only for DEMO instead of production. It is risky to run this script in production environment.
 The script is tesed in ubuntu 22.04.
 
 1. 00_online_pkg.sh

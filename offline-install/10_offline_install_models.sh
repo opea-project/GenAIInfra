@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 registry="registry:5000"
 
 sed -i "s|image:.*models.*|image: $registry/opea/models:latest|" models.yaml
