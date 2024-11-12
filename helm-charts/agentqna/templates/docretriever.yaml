@@ -1,0 +1,112 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-docretriever
+  labels:
+    {{- include "agentqna.labels" . | nindent 4 }}
+    app: {{ .Release.Name }}-docretriever
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "agentqna.selectorLabels" . | nindent 6 }}
+      app: {{ .Release.Name }}-docretriever
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "agentqna.selectorLabels" . | nindent 8 }}
+        app: {{ .Release.Name }}-docretriever
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            #- name: MEGA_SERVICE_PORT
+            #  value: "8889"
+            - name: RERANK_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-reranking-usvc
+            - name: EMBEDDING_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-embedding-usvc
+            - name: RETRIEVER_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-retriever-usvc
+            - name: RETRIEVER_SERVICE_PORT
+              value: "7000"
+            - name: RERANK_SERVER_HOST_IP
+              value: {{ .Release.Name }}-teirerank
+            - name: RERANK_SERVER_PORT
+              value: "80"
+            - name: EMBEDDING_SERVER_HOST_IP
+              value: {{ .Release.Name }}-tei
+            - name: EMBEDDING_SERVER_PORT
+              value: "80"
+            {{- if .Values.LOGFLAG }}
+            - name: LOGFLAG
+              value: {{ .Values.LOGFLAG | quote }}
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.docretriever.image.repository }}:{{ .Values.docretriever.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.docretriever.image.pullPolicy }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: docretriever
+              containerPort: 8889
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.evenly_distributed }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "agentqna.selectorLabels" . | nindent 14 }}
+              app: {{ .Release.Name }}-docretriever
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-docretriever
+  labels:
+    {{- include "agentqna.labels" . | nindent 4 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8889
+      targetPort: 8889
+      protocol: TCP
+      name: docretriever
+  selector:
+    {{- include "agentqna.selectorLabels" . | nindent 4 }}
+    app: {{ .Release.Name }}-docretriever
