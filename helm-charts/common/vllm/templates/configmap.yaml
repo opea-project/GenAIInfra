@@ -23,3 +23,6 @@ data:
   {{- if .Values.VLLM_CPU_KVCACHE_SPACE }}
   VLLM_CPU_KVCACHE_SPACE: {{ .Values.VLLM_CPU_KVCACHE_SPACE | quote}}
   {{- end }}
+  {{- if .Values.OMPI_MCA_btl_vader_single_copy_mechanism }}
+  OMPI_MCA_btl_vader_single_copy_mechanism: {{ .Values.OMPI_MCA_btl_vader_single_copy_mechanism | quote}}
+  {{- end }}

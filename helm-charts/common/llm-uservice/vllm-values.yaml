@@ -1,0 +1,17 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for llm-uservice.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+tgi:
+  enabled: false
+vllm:
+  enabled: true
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+vLLM_ENDPOINT: ""
+LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+image:
+  repository: opea/llm-vllm
+  tag: "latest"

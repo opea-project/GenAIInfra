@@ -13,6 +13,14 @@ data:
   {{- else }}
   TGI_LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
   {{- end }}
+  {{- if .Values.vLLM_ENDPOINT }}
+  vLLM_ENDPOINT: {{ .Values.vLLM_ENDPOINT | quote}}
+  {{- else }}
+  vLLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
+  {{- end }}
+  {{- if .Values.LLM_MODEL_ID }}
+  LLM_MODEL: {{ .Values.LLM_MODEL_ID | quote}}
+  {{- end }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.global.HF_ENDPOINT }}
@@ -20,8 +28,8 @@ data:
   {{- end }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
-  {{- if and (not .Values.TGI_LLM_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy) }}
-  no_proxy: "{{ .Release.Name }}-tgi,{{ .Values.global.no_proxy }}"
+  {{- if or .Values.global.http_proxy .Values.global.https_proxy }}
+  no_proxy: "{{ .Release.Name }}-tgi,{{ .Release.Name }}-vllm,{{ .Values.global.no_proxy }}"
   {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}
