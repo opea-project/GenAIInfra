@@ -6,7 +6,6 @@
 - [Pre-conditions](#pre-conditions)
   - [Prometheus install](#prometheus-install)
   - [Helm options](#helm-options)
-- [Gotchas](#gotchas)
 - [Install](#install)
 - [Verify](#verify)
 
@@ -16,6 +15,10 @@ Monitoring provides service component usage metrics for [Prometheus](https://pro
 which can be visualized e.g. in [Grafana](https://grafana.com/).
 
 Scaling the services automatically based on their usage with [HPA](HPA.md) also relies on these metrics.
+
+[Observability documentation](../kubernetes-addons/Observability/README.md)
+explains how to install additional monitoring for node and device metrics,
+and Grafana for visualizing those metrics.
 
 ## Pre-conditions
 
@@ -41,12 +44,6 @@ If Prometheus is installed under some other release name than `prometheus-stack`
 provide that as `global.prometheusRelease` value for the OPEA service Helm install,
 or in its `values.yaml` file. Otherwise Prometheus ignores the installed
 `serviceMonitor` objects.
-
-## Gotchas
-
-By default Prometheus adds [k8s RBAC rules](https://github.com/prometheus-operator/kube-prometheus/blob/main/manifests/prometheus-roleBindingSpecificNamespaces.yaml)
-for detecting `serviceMonitor`s and querying metrics from `default`, `kube-system` and `monitoring` namespaces.
-If Helm is asked to install OPEA service to some other namespace, those rules need to be updated accordingly.
 
 ## Install
 

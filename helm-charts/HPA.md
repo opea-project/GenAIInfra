@@ -26,7 +26,7 @@ Read [post-install](#post-install) steps before installation!
 
 ### Resource requests
 
-HPA controlled CPU pods SHOULD have appropriate resource requests or affinity rules (enabled in their
+HPA controlled _CPU_ pods SHOULD have appropriate resource requests or affinity rules (enabled in their
 subcharts and tested to work) so that k8s scheduler does not schedule too many of them on the same
 node(s). Otherwise they never reach ready state.
 
@@ -79,7 +79,7 @@ Why HPA is opt-in:
 - Top level chart name needs to conform to Prometheus metric naming conventions,
   as it is also used as a metric name prefix (with dashes converted to underscores)
 - Unless pod resource requests, affinity rules, scheduling topology constraints and/or cluster NRI
-  policies are used to better isolate service inferencing pods from each other, instances
+  policies are used to better isolate _CPU_ inferencing pods from each other, service instances
   scaled up on same node may never get to ready state
 - Current HPA rules are just examples, for efficient scaling they need to be fine-tuned for given setup
   performance (underlying HW, used models and data types, OPEA version etc)
@@ -94,8 +94,9 @@ ChatQnA includes pre-configured values files for scaling the services.
 To enable HPA, add `-f chatqna/hpa-values.yaml` option to your `helm install` command line.
 
 If **CPU** versions of TGI (and TEI) services are being scaled, resource requests and probe timings
-suitable for CPU usage need to be used. Add `-f chatqna/cpu-values.yaml` option to your `helm install`
-line. If you need to change model specified there, update the resource requests accordingly.
+suitable for CPU usage need to be used. `chatqna/cpu-values.yaml` provides example of such constraints
+which can be added (with `-f` option) to your Helm install. As those values depend on the underlying HW,
+used model, data type and image versions, the specified resource values may need to be updated.
 
 ### Post-install
 
