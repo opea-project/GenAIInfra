@@ -4,6 +4,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 registry=registry:5000
+hf_token="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"
+http_proxy=""
+https_proxy=""
 
 # Function to run a Docker container
 run_docker_container() {
@@ -16,7 +19,7 @@ run_docker_container() {
   # Run the Docker container
   docker stop "$name" 2>/dev/null
   docker rm "$name" 2>/dev/null
-  docker run --name "$name" -d -p "$port":80 -e HF_TOKEN=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 -v "$volume" "$image" --model-id "$model_id"
+  docker run --name "$name" -d -p "$port":80 -e HF_TOKEN=$hf_token -e http_proxy=$http_proxy -e https_proxy=$https_proxy -v "$volume" "$image" --model-id "$model_id"
 }
 
 # Function to check if the service is up
