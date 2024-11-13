@@ -119,6 +119,7 @@ Here are few Grafana dashboards for monitoring different aspects of OPEA applica
 - [`opea-scaling.json`](./opea-apps/opea-scaling.json): scaling, request rates and failures for OPEA application megaservice, TEI-reranking, TEI-embedding, and TGI
 
 You can either:
+
 - Import them manually to Grafana,
 - Use [`update-dashboards.sh`](./update-dashboards.sh) script to add them to Kubernetes as Grafana dashboard configMaps
   - (Script assumes Prometheus / Grafana to be installed according to above instructions)
