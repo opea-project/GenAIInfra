@@ -94,7 +94,7 @@ promhttp_metric_handler_requests_total{code="503"} 0
 ### Step 5: Import the dashboard into Grafana
 
 Manually import the [`Dashboard-Gaudi-HW.json`](./habana/Dashboard-Gaudi-HW.json) file into Grafana
-![alt text](image-1.png)
+![Gaudi HW dashboard](./assets/habana.png)
 
 ## 3. Metrics for OPEA applications
 
@@ -128,7 +128,7 @@ Note: when dashboard is imported to Grafana, you can directly save changes to it
 
 Whereas with dashboard configMaps, Grafana saves changes to a selected file, but you need to remember to re-apply them to Kubernetes / Grafana, for your changes to be there when that dashboard is reloaded.
 
-![alt text](image-2.png)
+![TGI dashboard](./assets/tgi.png)
 ![Scaling dashboard](./assets/opea-scaling.png)
 
 ## 4. Metrics for PCM (Intel® Performance Counter Monitor)
@@ -154,7 +154,7 @@ kubectl apply -f pcm/pcm-serviceMonitor.yaml
 ### Step 4: Install the PCM dashboard
 
 manually import the [`pcm-dashboard.json`](./pcm/pcm-dashboard.json) file into the Grafana
-![alt text](image.png)
+![PCM dashboard](./assets/pcm.png)
 
 ## More dashboards
 
