@@ -26,7 +26,7 @@ Should you desire to use the Gaudi accelerator, two alternate images are used fo
 For Gaudi:
 
 - tei-embedding-service: ghcr.io/huggingface/tei-gaudi:1.5.0
-- tgi-service: ghcr.io/huggingface/tgi-gaudi:2.0.5
+- tgi-service: ghcr.io/huggingface/tgi-gaudi:2.0.6
 
 ## Deploy ChatQnA pipeline
 
