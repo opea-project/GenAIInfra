@@ -13,3 +13,7 @@ dependencies:
     version: 1.0.0
     repository: file://../tgi
     condition: tgi.enabled
+  - name: vllm
+    version: 1.0.0
+    repository: file://../vllm
+    condition: vllm.enabled
