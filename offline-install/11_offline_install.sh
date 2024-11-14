@@ -5,8 +5,7 @@
 
 registry="registry:5000"
 
-cd GenAIInfra/helm-charts/
-git reset --hard
+cd ../helm-charts/
 helm uninstall chatqna || true
 
 sed -i "s|image: .*nginx:1.27.1|image: $registry/nginx:1.27.1|g" chatqna/templates/nginx-deployment.yaml
@@ -18,10 +17,9 @@ sed -i "s/^data:/data:\n  HF_HUB_OFFLINE: 'True'/"   common/teirerank/templates/
 
 ./update_dependency.sh
 helm dependency update chatqna
-export HFTOKEN="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"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="Intel/neural-chat-7b-v3-3"
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} \
+helm install chatqna chatqna --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} \
     --set image.repository=$registry/opea/chatqna,image.tag=latest \
     --set tgi.image.repository=$registry/huggingface/text-generation-inference,tgi.image.tag=2.4.0-intel-cpu \
     --set tei.image.repository=$registry/huggingface/text-embeddings-inference,tei.image.tag=cpu-1.5 \
