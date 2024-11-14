@@ -14,7 +14,7 @@ data:
   BASIC_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if contains "codetrans-ui" .Values.image.repository }}
   BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
-  {{- else if or (contains "docsum-ui" .Values.image.repository) (contains "faqgen-ui" .Values.image.repository) }}
+  {{- else if (contains "docsum-ui" .Values.image.repository) }}
   DOC_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if (contains "docsum-react-ui" .Values.image.repository) }}
   VITE_DOC_SUM_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
@@ -34,6 +34,8 @@ data:
   CHAT_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if contains "faqgen-react-ui" .Values.image.repository }}
   VITE_FAQ_GEN_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  {{- else if contains "faqgen-ui" .Values.image.repository }}
+  FAQ_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else }}
     {{- fail "Unsupported ui image: " .Values.image.repository }}
   {{- end }}
