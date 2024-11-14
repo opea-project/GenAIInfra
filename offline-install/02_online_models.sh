@@ -59,5 +59,5 @@ check_service "teirank" "http://localhost:$port2/rerank" '{"query": "What is Dee
 check_service "tgi" "http://localhost:$port3/v1/chat/completions" '{"messages": [{"role": "user", "content": "Say this is a test!"}]}'
 
 
-#docker build . -t $registry/opea/models:latest
-#docker push $registry/opea/models:latest
+docker build . -t $registry/opea/models:latest
+docker push $registry/opea/models:latest
