@@ -18,7 +18,6 @@ data:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
   HF_HOME: "/tmp/.cache/huggingface"
   # https://github.com/outlines-dev/outlines/blob/main/outlines/caching.py#L14-L29
