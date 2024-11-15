@@ -22,7 +22,9 @@ data:
   NUMBA_CACHE_DIR: "/tmp"
   TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
-  MAX_WARMUP_SEQUENCE_LENGTH: "512"
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  HF_HUB_ENABLE_HF_TRANSFER: "0"
+  # More options for HPU
 ---
 # Source: tei/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
