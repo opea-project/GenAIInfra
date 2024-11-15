@@ -20,7 +20,6 @@ data:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
   HF_HOME: "/tmp/.cache/huggingface"
   HF_HUB_DISABLE_PROGRESS_BARS: "1"

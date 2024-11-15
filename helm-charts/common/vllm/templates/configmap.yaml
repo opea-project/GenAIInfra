@@ -15,7 +15,9 @@ data:
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
+  {{- if contains "opea/vllm-hpu" .Values.image.repository }}
   HABANA_LOGS: "/tmp/habana_logs"
+  {{- end }}
   NUMBA_CACHE_DIR: "/tmp"
   HF_HOME: "/tmp/.cache/huggingface"
   # https://github.com/outlines-dev/outlines/blob/main/outlines/caching.py#L14-L29
