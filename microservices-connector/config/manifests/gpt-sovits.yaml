@@ -1,0 +1,120 @@
+---
+# Source: gpt-sovits/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: gpt-sovits-config
+  labels:
+    helm.sh/chart: gpt-sovits-1.1.0
+    app.kubernetes.io/name: gpt-sovits
+    app.kubernetes.io/instance: gpt-sovits
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  NUMBA_CACHE_DIR: "/tmp/.cache/numba"
+  HF_HOME: "/tmp/.cache/huggingface"
+  XDG_CACHE_HOME: "/tmp/.cache"
+---
+# Source: gpt-sovits/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: gpt-sovits
+  labels:
+    helm.sh/chart: gpt-sovits-1.1.0
+    app.kubernetes.io/name: gpt-sovits
+    app.kubernetes.io/instance: gpt-sovits
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9880
+      targetPort: 9880
+      protocol: TCP
+      name: gpt-sovits
+  selector:
+    app.kubernetes.io/name: gpt-sovits
+    app.kubernetes.io/instance: gpt-sovits
+---
+# Source: gpt-sovits/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gpt-sovits
+  labels:
+    helm.sh/chart: gpt-sovits-1.1.0
+    app.kubernetes.io/name: gpt-sovits
+    app.kubernetes.io/instance: gpt-sovits
+    app.kubernetes.io/version: "1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: gpt-sovits
+      app.kubernetes.io/instance: gpt-sovits
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: gpt-sovits
+        app.kubernetes.io/instance: gpt-sovits
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: gpt-sovits
+          envFrom:
+            - configMapRef:
+                name: gpt-sovits-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            {}
+          image: "opea/gpt-sovits:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: gpt-sovits
+              containerPort: 9880
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          livenessProbe:
+            failureThreshold: 24
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: gpt-sovits
+            timeoutSeconds: 4
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: gpt-sovits
+            timeoutSeconds: 4
+          startupProbe:
+            failureThreshold: 120
+            initialDelaySeconds: 10
+            periodSeconds: 5
+            tcpSocket:
+              port: gpt-sovits
+            timeoutSeconds: 2
+          resources:
+            {}
+      volumes:
+        - name: tmp
+          emptyDir: {}

@@ -1,113 +1,99 @@
 ---
-# Source: vllm/templates/configmap.yaml
+# Source: teirerank/templates/configmap.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: vllm-config
+  name: teirerank-config
   labels:
-    helm.sh/chart: vllm-1.0.0
-    app.kubernetes.io/name: vllm
-    app.kubernetes.io/instance: vllm
-    app.kubernetes.io/version: "0.5"
+    helm.sh/chart: teirerank-1.0.0
+    app.kubernetes.io/name: teirerank
+    app.kubernetes.io/instance: teirerank
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 data:
-  HF_TOKEN: "insert-your-huggingface-token-here"
+  MODEL_ID: "BAAI/bge-reranker-base"
+  PORT: "2082"
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
+  TRANSFORMERS_CACHE: "/tmp/transformers_cache"
   HF_HOME: "/tmp/.cache/huggingface"
-  # https://github.com/outlines-dev/outlines/blob/main/outlines/caching.py#L14-L29
-  OUTLINES_CACHE_DIR: "/tmp/.cache/outlines"
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  HF_HUB_ENABLE_HF_TRANSFER: "0"
+  # More options for HPU
   OMPI_MCA_btl_vader_single_copy_mechanism: "none"
+  MAX_WARMUP_SEQUENCE_LENGTH: "512"
 ---
-# Source: vllm/templates/service.yaml
+# Source: teirerank/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: vllm
+  name: teirerank
   labels:
-    helm.sh/chart: vllm-1.0.0
-    app.kubernetes.io/name: vllm
-    app.kubernetes.io/instance: vllm
-    app.kubernetes.io/version: "0.5"
+    helm.sh/chart: teirerank-1.0.0
+    app.kubernetes.io/name: teirerank
+    app.kubernetes.io/instance: teirerank
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
   ports:
     - port: 80
-      targetPort: 2080
+      targetPort: 2082
       protocol: TCP
-      name: vllm
+      name: teirerank
   selector:
-    app.kubernetes.io/name: vllm
-    app.kubernetes.io/instance: vllm
+    app.kubernetes.io/name: teirerank
+    app.kubernetes.io/instance: teirerank
 ---
-# Source: vllm/templates/deployment.yaml
+# Source: teirerank/templates/deployment.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: vllm
+  name: teirerank
   labels:
-    helm.sh/chart: vllm-1.0.0
-    app.kubernetes.io/name: vllm
-    app.kubernetes.io/instance: vllm
-    app.kubernetes.io/version: "0.5"
+    helm.sh/chart: teirerank-1.0.0
+    app.kubernetes.io/name: teirerank
+    app.kubernetes.io/instance: teirerank
+    app.kubernetes.io/version: "cpu-1.5"
     app.kubernetes.io/managed-by: Helm
 spec:
-  replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: vllm
-      app.kubernetes.io/instance: vllm
+      app.kubernetes.io/name: teirerank
+      app.kubernetes.io/instance: teirerank
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: vllm
-        app.kubernetes.io/instance: vllm
+        app.kubernetes.io/name: teirerank
+        app.kubernetes.io/instance: teirerank
     spec:
       securityContext:
         {}
       containers:
-        - name: vllm
+        - name: teirerank
           envFrom:
             - configMapRef:
-                name: vllm-config
+                name: teirerank-config
             - configMapRef:
                 name: extra-env-config
                 optional: true
           securityContext:
             {}
-          image: "opea/vllm-hpu:latest"
+          image: "ghcr.io/huggingface/tei-gaudi:1.5.0"
           imagePullPolicy: IfNotPresent
           args:
-            - "--enforce-eager"
-            - "--tensor-parallel-size"
-            - "1"
-            - "--block-size"
-            - "128"
-            - "--max-num-seqs"
-            - "256"
-            - "--max-seq_len-to-capture"
-            - "2048"
-            - "--model"
-            - "Intel/neural-chat-7b-v3-3"
-            - "--host"
-            - "0.0.0.0"
-            - "--port"
-            - "2080"
-            - "--download-dir"
-            - "/data"
+            - "--auto-truncate"
           volumeMounts:
             - mountPath: /data
               name: model-volume
@@ -117,21 +103,23 @@ spec:
               name: tmp
           ports:
             - name: http
-              containerPort: 2080
+              containerPort: 2082
               protocol: TCP
           livenessProbe:
             failureThreshold: 24
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 8
+            periodSeconds: 8
+            timeoutSeconds: 1
           readinessProbe:
             httpGet:
               path: /health
               port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
+            initialDelaySeconds: 8
+            periodSeconds: 8
+            timeoutSeconds: 1
           startupProbe:
             failureThreshold: 120
             httpGet:
@@ -153,3 +141,11 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
+---
+# Source: teirerank/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: teirerank/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

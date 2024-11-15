@@ -15,9 +15,11 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_EMBEDDING_ENDPOINT: "http://retriever-usvc-tei"
-  EMBED_MODEL: ""
   REDIS_URL: "redis://retriever-usvc-redis-vector-db:6379"
   INDEX_NAME: "rag-redis"
+  MILVUS_HOST: "retriever-usvc-milvus"
+  MILVUS: ""
+  MILVUS_PORT: ""
   EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
   http_proxy: ""
   https_proxy: ""
@@ -131,3 +133,7 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: retriever-usvc/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

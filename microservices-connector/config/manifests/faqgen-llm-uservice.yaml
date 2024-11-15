@@ -15,6 +15,7 @@ metadata:
     app.kubernetes.io/managed-by: Helm
 data:
   TGI_LLM_ENDPOINT: "http://faqgen-llm-uservice-tgi"
+  vLLM_ENDPOINT: "http://faqgen-llm-uservice-vllm"
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   HF_HOME: "/tmp/.cache/huggingface"
   http_proxy: ""
@@ -127,3 +128,7 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: llm-uservice/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
