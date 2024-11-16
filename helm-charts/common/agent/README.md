@@ -6,19 +6,17 @@ agent depends on LLM service, you should set llm_endpoint_url as LLM endpoint.
 
 ## Deploy
 
-helm repo add opea https://opea-project.github.io/GenAIInfra
-
 ### Use external LLM endpoint
 
-helm install agent opea/agent --set llm_endpoint_url=${YOUR_LLM_ENDPOINT}
+helm install agent oci://ghcr.io/opea-project/charts/agent --set llm_endpoint_url=${YOUR_LLM_ENDPOINT}
 
 ### Deploy with tgi
 
-helm install agent opea/agent --set tgi.enabled=True
+helm install agent oci://ghcr.io/opea-project/charts/agent --set tgi.enabled=True
 
 ### Deploy with vllm
 
-helm install agent opea/agent --set vllm.enabled=True
+helm install agent oci://ghcr.io/opea-project/charts/agent --set vllm.enabled=True
 
 ## Verify
 
