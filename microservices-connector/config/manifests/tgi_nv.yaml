@@ -20,9 +20,11 @@ data:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
   HF_HOME: "/tmp/.cache/huggingface"
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  HF_HUB_ENABLE_HF_TRANSFER: "0"
+  # More options for HPU
 ---
 # Source: tgi/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation

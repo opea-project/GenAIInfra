@@ -1,6 +1,8 @@
 # How-To Setup Observability for OPEA Workload in Kubernetes
 
-This guide provides a step-by-step approach to setting up observability for the OPEA workload in a Kubernetes environment. We will cover the setup of Prometheus and Grafana, as well as the collection of metrics for Gaudi hardware, OPEA/chatqna including TGI,TEI-Embedding,TEI-Reranking and other microservies, and PCM.
+This guide provides a step-by-step approach to setting up observability for the OPEA workload in a Kubernetes environment. We will cover the setup of Prometheus and Grafana, as well as the collection of metrics for Gaudi hardware, OPEA/chatqna including TGI, TEI-Embedding, TEI-Reranking and other microservices, and PCM.
+
+For monitoring Helm installed OPEA applications, see [Helm monitoring option](../../helm-charts/monitoring.md).
 
 ## Prepare
 
@@ -38,7 +40,7 @@ kubectl port-forward service/grafana 3000:80
 
 Open your browser and navigate to http://localhost:3000. Use "admin/prom-operator" as the username and the password to login.
 
-## 2. Metric for Gaudi Hardware(v1.16.2)
+## 2. Metrics for Gaudi Hardware (v1.16.2)
 
 To monitor Gaudi hardware metrics, you can use the following steps:
 
@@ -61,8 +63,6 @@ kubectl apply -f ./habana/metric-exporter-serviceMonitor.yaml
 ```
 
 ### Step 4: Verify the metrics
-
-The metric endpoints for habana will be a headless service, so we need to get endpoint to verify
 
 ```
 # To get the metric endpoints, e.g. to get first endpoint to test
@@ -93,58 +93,70 @@ promhttp_metric_handler_requests_total{code="503"} 0
 
 ### Step 5: Import the dashboard into Grafana
 
-Manually import ./habana/Dashboard-Gaudi-HW.json into Grafana
-![alt text](image-1.png)
+Manually import the [`Dashboard-Gaudi-HW.json`](./habana/Dashboard-Gaudi-HW.json) file into Grafana
+![Gaudi HW dashboard](./assets/habana.png)
 
-## 3. Metric for OPEA/chatqna
+## 3. Metrics for OPEA applications
 
-To monitor ChatQnA metrics including TGI-gaudi,TEI,TEI-Reranking and other micro services, you can use the following steps:
+To monitor OPEA application metrics including TGI-gaudi, TEI, TEI-Reranking and other micro services, you can use the following steps:
 
-### Step 1: Install ChatQnA by Helm
+### Step 1: Install application with Helm
 
 Install Helm (version >= 3.15) first. Refer to the [Helm Installation Guide](https://helm.sh/docs/intro/install/) for more information.
 
-Refer to the [ChatQnA helm chart](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/chatqna/README.md) for instructions on deploying ChatQnA into Kubernetes on Xeon & Gaudi.
+Install OPEA application as described in [Helm charts README](../../helm-charts/README.md).
 
-### Step 2: Install all the serviceMonitor
+For example, to install ChatQnA, follow [ChatQnA helm chart](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/chatqna/README.md) for instructions on deploying it to Kubernetes.
 
-> NOTE:
-> If the chatQnA installed into another instance instead of chatqna(Default instance name),you should modify the
-> matchLabels app.kubernetes.io/instance:${instanceName} with proper instanceName
+Make sure to enable [Helm monitoring option](../../helm-charts/monitoring.md).
 
-```
-kubectl apply -f chatqna/
-```
+### Step 2: Install dashboards
 
-### Step 3: Install the dashboard
+Here are few Grafana dashboards for monitoring different aspects of OPEA applications:
 
-- manually import tgi_grafana.json into the Grafana to monitor the tgi-gaudi utilization
-- manually import queue_size_embedding_rerank_tgi.json into the Grafana to monitor the queue size of TGI-gaudi,TEI-Embedding,TEI-reranking
-- OR you could create dashboard to monitor all the services in ChatQnA by yourself
+- [`queue_size_embedding_rerank_tgi.json`](./chatqna/dashboard/queue_size_embedding_rerank_tgi.json): queue size of TGI-gaudi, TEI-Embedding, TEI-reranking
+- [`tgi_grafana.json`](./chatqna/dashboard/tgi_grafana.json): `tgi-gaudi` text generation inferencing service utilization
+- [`opea-scaling.json`](./opea-apps/opea-scaling.json): scaling, request rates and failures for OPEA application megaservice, TEI-reranking, TEI-embedding, and TGI
 
-![alt text](image-2.png)
+You can either:
 
-## 4. Metric for PCM(Intel® Performance Counter Monitor)
+- Import them manually to Grafana,
+- Use [`update-dashboards.sh`](./update-dashboards.sh) script to add them to Kubernetes as Grafana dashboard configMaps
+  - (Script assumes Prometheus / Grafana to be installed according to above instructions)
+- Or create your own dashboards based on them
+
+Note: when dashboard is imported to Grafana, you can directly save changes to it, but those dashboards go away if Grafana is removed / re-installed.
+
+Whereas with dashboard configMaps, Grafana saves changes to a selected file, but you need to remember to re-apply them to Kubernetes / Grafana, for your changes to be there when that dashboard is reloaded.
+
+![TGI dashboard](./assets/tgi.png)
+![Scaling dashboard](./assets/opea-scaling.png)
+
+## 4. Metrics for PCM (Intel® Performance Counter Monitor)
 
 ### Step 1: Install PCM
 
-Please refer this repo to install [Intel® PCM](https://github.com/intel/pcm)
+Please refer to this repo to install [Intel® PCM](https://github.com/intel/pcm)
 
 ### Step 2: Modify & Install pcm-service
 
-modify the pcm/pcm-service.yaml to set the addresses
+modify the `pcm/pcm-service.yaml` file to set the addresses
 
 ```
 kubectl apply -f pcm/pcm-service.yaml
 ```
 
-### Step 3: Install pcm serviceMonitor
+### Step 3: Install PCM serviceMonitor
 
 ```
 kubectl apply -f pcm/pcm-serviceMonitor.yaml
 ```
 
-### Step 4: Install the pcm dashboard
+### Step 4: Install the PCM dashboard
 
-manually import the pcm/pcm-dashboard.json into the Grafana
-![alt text](image.png)
+manually import the [`pcm-dashboard.json`](./pcm/pcm-dashboard.json) file into the Grafana
+![PCM dashboard](./assets/pcm.png)
+
+## More dashboards
+
+GenAIEval repository includes additional [dashboards](https://github.com/opea-project/GenAIEval/tree/main/evals/benchmark/grafana).

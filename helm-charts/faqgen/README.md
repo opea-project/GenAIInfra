@@ -18,8 +18,10 @@ Open another terminal and run the following command to verify the service if wor
 
 ```console
 curl http://localhost:8888/v1/faqgen \
-    -H "Content-Type: application/json" \
-    -d '{"messages": "Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}'
+      -H "Content-Type: multipart/form-data" \
+      -F "messages=Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5." \
+      -F "max_tokens=32" \
+      -F "stream=false"
 ```
 
 ### Verify the workload through UI

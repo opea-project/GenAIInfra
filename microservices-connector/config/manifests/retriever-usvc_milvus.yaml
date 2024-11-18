@@ -1,0 +1,1011 @@
+---
+# Source: retriever-usvc/charts/milvus/charts/minio/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: "retriever-usvc-minio"
+  namespace: "default"
+  labels:
+    app: minio
+    chart: minio-8.0.17
+    release: "retriever-usvc"
+---
+# Source: retriever-usvc/charts/milvus/charts/minio/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: retriever-usvc-minio
+  labels:
+    app: minio
+    chart: minio-8.0.17
+    release: retriever-usvc
+    heritage: Helm
+type: Opaque
+data:
+  accesskey: "bWluaW9hZG1pbg=="
+  secretkey: "bWluaW9hZG1pbg=="
+---
+# Source: retriever-usvc/charts/milvus/charts/minio/templates/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: retriever-usvc-minio
+  labels:
+    app: minio
+    chart: minio-8.0.17
+    release: retriever-usvc
+    heritage: Helm
+data:
+  initialize: |-
+    #!/bin/sh
+    set -e ; # Have script exit in the event of a failed command.
+    MC_CONFIG_DIR="/etc/minio/mc/"
+    MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
+    
+    # connectToMinio
+    # Use a check-sleep-check loop to wait for Minio service to be available
+    connectToMinio() {
+      SCHEME=$1
+      ATTEMPTS=0 ; LIMIT=29 ; # Allow 30 attempts
+      set -e ; # fail if we can't read the keys.
+      ACCESS=$(cat /config/accesskey) ; SECRET=$(cat /config/secretkey) ;
+      set +e ; # The connections to minio are allowed to fail.
+      echo "Connecting to Minio server: $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT" ;
+      MC_COMMAND="${MC} config host add myminio $SCHEME://$MINIO_ENDPOINT:$MINIO_PORT $ACCESS $SECRET" ;
+      $MC_COMMAND ;
+      STATUS=$? ;
+      until [ $STATUS = 0 ]
+      do
+        ATTEMPTS=`expr $ATTEMPTS + 1` ;
+        echo \"Failed attempts: $ATTEMPTS\" ;
+        if [ $ATTEMPTS -gt $LIMIT ]; then
+          exit 1 ;
+        fi ;
+        sleep 2 ; # 1 second intervals between attempts
+        $MC_COMMAND ;
+        STATUS=$? ;
+      done ;
+      set -e ; # reset `e` as active
+      return 0
+    }
+    
+    # checkBucketExists ($bucket)
+    # Check if the bucket exists, by using the exit code of `mc ls`
+    checkBucketExists() {
+      BUCKET=$1
+      CMD=$(${MC} ls myminio/$BUCKET > /dev/null 2>&1)
+      return $?
+    }
+    
+    # createBucket ($bucket, $policy, $purge)
+    # Ensure bucket exists, purging if asked to
+    createBucket() {
+      BUCKET=$1
+      POLICY=$2
+      PURGE=$3
+      VERSIONING=$4
+    
+      # Purge the bucket, if set & exists
+      # Since PURGE is user input, check explicitly for `true`
+      if [ $PURGE = true ]; then
+        if checkBucketExists $BUCKET ; then
+          echo "Purging bucket '$BUCKET'."
+          set +e ; # don't exit if this fails
+          ${MC} rm -r --force myminio/$BUCKET
+          set -e ; # reset `e` as active
+        else
+          echo "Bucket '$BUCKET' does not exist, skipping purge."
+        fi
+      fi
+    
+      # Create the bucket if it does not exist
+      if ! checkBucketExists $BUCKET ; then
+        echo "Creating bucket '$BUCKET'"
+        ${MC} mb myminio/$BUCKET
+      else
+        echo "Bucket '$BUCKET' already exists."
+      fi
+    
+    
+      # set versioning for bucket
+      if [ ! -z $VERSIONING ] ; then
+        if [ $VERSIONING = true ] ; then
+            echo "Enabling versioning for '$BUCKET'"
+            ${MC} version enable myminio/$BUCKET
+        elif [ $VERSIONING = false ] ; then
+            echo "Suspending versioning for '$BUCKET'"
+            ${MC} version suspend myminio/$BUCKET
+        fi
+      else
+          echo "Bucket '$BUCKET' versioning unchanged."
+      fi
+    
+      # At this point, the bucket should exist, skip checking for existence
+      # Set policy on the bucket
+      echo "Setting policy of bucket '$BUCKET' to '$POLICY'."
+      ${MC} policy set $POLICY myminio/$BUCKET
+    }
+    
+    # Try connecting to Minio instance
+    scheme=http
+    connectToMinio $scheme
+---
+# Source: retriever-usvc/charts/milvus/templates/configmap.yaml
+# If customConfigMap is not set, this ConfigMap will be redendered.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: retriever-usvc-milvus
+  namespace: default
+data:
+  default.yaml: |+
+    # Copyright (C) 2019-2021 Zilliz. All rights reserved.
+    #
+    # Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance
+    # with the License. You may obtain a copy of the License at
+    #
+    # http://www.apache.org/licenses/LICENSE-2.0
+    #
+    # Unless required by applicable law or agreed to in writing, software distributed under the License
+    # is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+    # or implied. See the License for the specific language governing permissions and limitations under the License.
+    
+    etcd:
+      endpoints:
+      - retriever-usvc-etcd-0.retriever-usvc-etcd-headless.default.svc.cluster.local:2379
+    
+    metastore:
+      type: etcd
+    
+    minio:
+      address: retriever-usvc-minio
+      port: 9000
+      accessKeyID: minioadmin
+      secretAccessKey: minioadmin
+      useSSL: false
+      bucketName: milvus-bucket
+      rootPath: file
+      useIAM: false
+      useVirtualHost: false
+    
+    mq:
+      type: rocksmq
+    
+    messageQueue: rocksmq
+    
+    rootCoord:
+      address: localhost
+      port: 53100
+      enableActiveStandby: false  # Enable rootcoord active-standby
+    
+    proxy:
+      port: 19530
+      internalPort: 19529
+    
+    queryCoord:
+      address: localhost
+      port: 19531
+    
+      enableActiveStandby: false  # Enable querycoord active-standby
+    
+    queryNode:
+      port: 21123
+      enableDisk: true # Enable querynode load disk index, and search on disk index
+    
+    indexCoord:
+      address: localhost
+      port: 31000
+      enableActiveStandby: false  # Enable indexcoord active-standby
+    
+    indexNode:
+      port: 21121
+      enableDisk: true # Enable index node build disk vector index
+    
+    dataCoord:
+      address: localhost
+      port: 13333
+      enableActiveStandby: false  # Enable datacoord active-standby
+    
+    dataNode:
+      port: 21124
+    
+    log:
+      level: info
+      file:
+        rootPath: ""
+        maxSize: 300
+        maxAge: 10
+        maxBackups: 20
+      format: text
+  user.yaml: |-
+    #    For example enable rest http for milvus proxy
+    #    proxy:
+    #      http:
+    #        enabled: true
+    #      maxUserNum: 100
+    #      maxRoleNum: 10
+    ##  Enable tlsMode and set the tls cert and key
+    #  tls:
+    #    serverPemPath: /etc/milvus/certs/tls.crt
+    #    serverKeyPath: /etc/milvus/certs/tls.key
+    #   common:
+    #     security:
+    #       tlsMode: 1
+---
+# Source: retriever-usvc/charts/tei/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: retriever-usvc-tei-config
+  labels:
+    helm.sh/chart: tei-1.0.0
+    app.kubernetes.io/name: tei
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/managed-by: Helm
+data:
+  MODEL_ID: "BAAI/bge-base-en-v1.5"
+  PORT: "2081"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  NUMBA_CACHE_DIR: "/tmp"
+  TRANSFORMERS_CACHE: "/tmp/transformers_cache"
+  HF_HOME: "/tmp/.cache/huggingface"
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  HF_HUB_ENABLE_HF_TRANSFER: "0"
+  # More options for HPU
+---
+# Source: retriever-usvc/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: retriever-usvc-config
+  labels:
+    helm.sh/chart: retriever-usvc-1.0.0
+    app.kubernetes.io/name: retriever-usvc
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  TEI_EMBEDDING_ENDPOINT: "http://retriever-usvc-tei"
+  REDIS_URL: "redis://retriever-usvc-redis-vector-db:6379"
+  INDEX_NAME: "rag-redis"
+  MILVUS_HOST: "retriever-usvc-milvus"
+  MILVUS: ""
+  MILVUS_PORT: "19530"
+  COLLECTION_NAME: "rag_milvus"
+  EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HF_HOME: "/tmp/.cache/huggingface"
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  LOGFLAG: ""
+---
+# Source: retriever-usvc/charts/milvus/charts/minio/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: retriever-usvc-minio
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    app: minio
+    chart: minio-8.0.17
+    release: retriever-usvc
+    heritage: Helm
+spec:
+  accessModes:
+    - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: "500Gi"
+---
+# Source: retriever-usvc/charts/milvus/templates/pvc.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: retriever-usvc-milvus
+  namespace: default
+  annotations:
+    helm.sh/resource-policy: keep
+  labels:
+    helm.sh/chart: milvus-4.2.12
+    app.kubernetes.io/name: milvus
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "2.4.12"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  accessModes:
+  - "ReadWriteOnce"
+  resources:
+    requests:
+      storage: 50Gi
+---
+# Source: retriever-usvc/charts/milvus/charts/etcd/templates/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: retriever-usvc-etcd-headless
+  namespace: default
+  labels:
+    app.kubernetes.io/name: etcd
+    helm.sh/chart: etcd-6.3.3
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  publishNotReadyAddresses: true
+  ports:
+    - name: "client"
+      port: 2379
+      targetPort: client
+    - name: "peer"
+      port: 2380
+      targetPort: peer
+  selector:
+    app.kubernetes.io/name: etcd
+    app.kubernetes.io/instance: retriever-usvc
+---
+# Source: retriever-usvc/charts/milvus/charts/etcd/templates/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: retriever-usvc-etcd
+  namespace: default
+  labels:
+    app.kubernetes.io/name: etcd
+    helm.sh/chart: etcd-6.3.3
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/managed-by: Helm
+  annotations:
+spec:
+  type: ClusterIP
+  ports:
+    - name: "client"
+      port: 2379
+      targetPort: client
+      nodePort: null
+    - name: "peer"
+      port: 2380
+      targetPort: peer
+      nodePort: null
+  selector:
+    app.kubernetes.io/name: etcd
+    app.kubernetes.io/instance: retriever-usvc
+---
+# Source: retriever-usvc/charts/milvus/charts/minio/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: retriever-usvc-minio
+  labels:
+    app: minio
+    chart: minio-8.0.17
+    release: retriever-usvc
+    heritage: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - name: http
+      port: 9000
+      protocol: TCP
+      targetPort: 9000
+  selector:
+    app: minio
+    release: retriever-usvc
+---
+# Source: retriever-usvc/charts/milvus/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: retriever-usvc-milvus
+  namespace: default
+  labels:
+    helm.sh/chart: milvus-4.2.12
+    app.kubernetes.io/name: milvus
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "2.4.12"
+    app.kubernetes.io/managed-by: Helm
+    component: "standalone"
+spec:
+  type: ClusterIP
+  ports:
+    - name: milvus
+      port: 19530
+      protocol: TCP
+      targetPort: milvus
+    - name: metrics
+      protocol: TCP
+      port: 9091
+      targetPort: metrics
+  selector:
+    app.kubernetes.io/name: milvus
+    app.kubernetes.io/instance: retriever-usvc
+    component: "standalone"
+---
+# Source: retriever-usvc/charts/tei/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: retriever-usvc-tei
+  labels:
+    helm.sh/chart: tei-1.0.0
+    app.kubernetes.io/name: tei
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 2081
+      protocol: TCP
+      name: tei
+  selector:
+    app.kubernetes.io/name: tei
+    app.kubernetes.io/instance: retriever-usvc
+---
+# Source: retriever-usvc/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: retriever-usvc
+  labels:
+    helm.sh/chart: retriever-usvc-1.0.0
+    app.kubernetes.io/name: retriever-usvc
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7000
+      targetPort: 7000
+      protocol: TCP
+      name: retriever-usvc
+  selector:
+    app.kubernetes.io/name: retriever-usvc
+    app.kubernetes.io/instance: retriever-usvc
+---
+# Source: retriever-usvc/charts/milvus/charts/minio/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retriever-usvc-minio
+  labels:
+    app: minio
+    chart: minio-8.0.17
+    release: retriever-usvc
+    heritage: Helm
+spec:
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 100%
+      maxUnavailable: 0
+  selector:
+    matchLabels:
+      app: minio
+      release: retriever-usvc
+  template:
+    metadata:
+      name: retriever-usvc-minio
+      labels:
+        app: minio
+        release: retriever-usvc
+      annotations:
+        checksum/secrets: a67e3e6c2d8da15e83e0deeac32445ec2add93a6d3394b8e051de4379538b677
+        checksum/config: 00fcd70c298e23f1a7eb32e4d92853e108b72b0b0be203369d5446a4363a2d91
+    spec:
+      serviceAccountName: "retriever-usvc-minio"
+      securityContext:
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: minio
+          image: "minio/minio:RELEASE.2023-03-20T20-16-18Z"
+          imagePullPolicy: IfNotPresent
+          command:
+            - "/bin/sh"
+            - "-ce"
+            - "/usr/bin/docker-entrypoint.sh minio -S /etc/minio/certs/ server /export"
+          volumeMounts:
+            - name: export
+              mountPath: /export            
+          ports:
+            - name: http
+              containerPort: 9000
+          livenessProbe:
+            httpGet:
+              path: /minio/health/live
+              port: http
+              scheme: HTTP
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 5
+          startupProbe:
+            tcpSocket:
+              port: http
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 60
+          env:
+            - name: MINIO_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: retriever-usvc-minio
+                  key: accesskey
+            - name: MINIO_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: retriever-usvc-minio
+                  key: secretkey
+          resources:
+            requests:
+              memory: 2Gi      
+      volumes:
+        - name: export
+          persistentVolumeClaim:
+            claimName: retriever-usvc-minio
+        - name: minio-user
+          secret:
+            secretName: retriever-usvc-minio
+---
+# Source: retriever-usvc/charts/milvus/templates/standalone-deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retriever-usvc-milvus-standalone
+  namespace: default
+  labels:
+    helm.sh/chart: milvus-4.2.12
+    app.kubernetes.io/name: milvus
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "2.4.12"
+    app.kubernetes.io/managed-by: Helm
+    component: "standalone"
+    
+  annotations:
+    
+
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: milvus
+      app.kubernetes.io/instance: retriever-usvc
+      component: "standalone"
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: milvus
+        app.kubernetes.io/instance: retriever-usvc
+        component: "standalone"
+        
+      annotations:
+        checksum/config: c64f310ccf37a8352d7173b167eb7c35eb173893e0c7141d3fb6a434d0759025
+        
+    spec:
+      serviceAccountName: default
+      initContainers:
+      containers:
+      - name: standalone
+        image: "milvusdb/milvus:v2.4.12"
+        imagePullPolicy: IfNotPresent
+        args: [ "milvus", "run", "standalone" ]
+        ports:
+          - name: milvus
+            containerPort: 19530
+            protocol: TCP
+          - name: metrics
+            containerPort: 9091
+            protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: metrics
+          initialDelaySeconds: 90
+          periodSeconds: 30
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        readinessProbe:
+          httpGet:
+            path: /healthz
+            port: metrics
+          initialDelaySeconds: 90
+          periodSeconds: 10
+          timeoutSeconds: 5
+          successThreshold: 1
+          failureThreshold: 5
+        resources:
+          {}
+        env:
+        volumeMounts:
+        - mountPath: /milvus/tools
+          name: tools
+        - name: milvus-config
+          mountPath: /milvus/configs/default.yaml
+          subPath: default.yaml
+          readOnly: true
+        - name: milvus-config
+          mountPath: /milvus/configs/user.yaml
+          subPath: user.yaml
+          readOnly: true
+        - name: milvus-data-disk
+          mountPath: "/var/lib/milvus"
+          subPath: 
+        - mountPath: /var/lib/milvus/data
+          name: disk
+
+      volumes:
+      - emptyDir: {}
+        name: tools
+      - name: milvus-config
+        configMap:
+          name: retriever-usvc-milvus
+      - name: milvus-data-disk
+        persistentVolumeClaim:
+          claimName: retriever-usvc-milvus
+      - name: disk
+        emptyDir: {}
+---
+# Source: retriever-usvc/charts/tei/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retriever-usvc-tei
+  labels:
+    helm.sh/chart: tei-1.0.0
+    app.kubernetes.io/name: tei
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tei
+      app.kubernetes.io/instance: retriever-usvc
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tei
+        app.kubernetes.io/instance: retriever-usvc
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: tei
+          envFrom:
+            - configMapRef:
+                name: retriever-usvc-tei-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            {}
+          image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "--auto-truncate"
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /dev/shm
+              name: shm
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: http
+              containerPort: 2081
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {}
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        - name: tmp
+          emptyDir: {}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
+      terminationGracePeriodSeconds: 60
+---
+# Source: retriever-usvc/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: retriever-usvc
+  labels:
+    helm.sh/chart: retriever-usvc-1.0.0
+    app.kubernetes.io/name: retriever-usvc
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: retriever-usvc
+      app.kubernetes.io/instance: retriever-usvc
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: retriever-usvc
+        app.kubernetes.io/instance: retriever-usvc
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: retriever-usvc
+          envFrom:
+            - configMapRef:
+                name: retriever-usvc-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/retriever-milvus:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: retriever-usvc
+              containerPort: 7000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: v1/health_check
+              port: retriever-usvc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: retriever-usvc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: retriever-usvc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Source: retriever-usvc/charts/milvus/charts/etcd/templates/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: retriever-usvc-etcd
+  namespace: default
+  labels:
+    app.kubernetes.io/name: etcd
+    helm.sh/chart: etcd-6.3.3
+    app.kubernetes.io/instance: retriever-usvc
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: etcd
+      app.kubernetes.io/instance: retriever-usvc
+  serviceName: retriever-usvc-etcd-headless
+  podManagementPolicy: Parallel
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: etcd
+        helm.sh/chart: etcd-6.3.3
+        app.kubernetes.io/instance: retriever-usvc
+        app.kubernetes.io/managed-by: Helm
+      annotations:
+    spec:
+      
+      affinity:
+        podAffinity:
+          
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: etcd
+                    app.kubernetes.io/instance: retriever-usvc
+                namespaces:
+                  - "default"
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+          
+      securityContext:
+        fsGroup: 1001
+      serviceAccountName: "default"
+      containers:
+        - name: etcd
+          image: docker.io/milvusdb/etcd:3.5.14-r1
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1001
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: MY_POD_IP
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+            - name: MY_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: ETCDCTL_API
+              value: "3"
+            - name: ETCD_ON_K8S
+              value: "yes"
+            - name: ETCD_START_FROM_SNAPSHOT
+              value: "no"
+            - name: ETCD_DISASTER_RECOVERY
+              value: "no"
+            - name: ETCD_NAME
+              value: "$(MY_POD_NAME)"
+            - name: ETCD_DATA_DIR
+              value: "/bitnami/etcd/data"
+            - name: ETCD_LOG_LEVEL
+              value: "info"
+            - name: ALLOW_NONE_AUTHENTICATION
+              value: "yes"
+            - name: ETCD_ADVERTISE_CLIENT_URLS
+              value: "http://$(MY_POD_NAME).retriever-usvc-etcd-headless.default.svc.cluster.local:2379"
+            - name: ETCD_LISTEN_CLIENT_URLS
+              value: "http://0.0.0.0:2379"
+            - name: ETCD_INITIAL_ADVERTISE_PEER_URLS
+              value: "http://$(MY_POD_NAME).retriever-usvc-etcd-headless.default.svc.cluster.local:2380"
+            - name: ETCD_LISTEN_PEER_URLS
+              value: "http://0.0.0.0:2380"
+            - name: ETCD_AUTO_COMPACTION_MODE
+              value: "revision"
+            - name: ETCD_AUTO_COMPACTION_RETENTION
+              value: "1000"
+            - name: ETCD_QUOTA_BACKEND_BYTES
+              value: "4294967296"
+            - name: ETCD_HEARTBEAT_INTERVAL
+              value: "500"
+            - name: ETCD_ELECTION_TIMEOUT
+              value: "2500"
+          envFrom:
+          ports:
+            - name: client
+              containerPort: 2379
+              protocol: TCP
+            - name: peer
+              containerPort: 2380
+              protocol: TCP
+          livenessProbe:
+            exec:
+              command:
+                - /opt/bitnami/scripts/etcd/healthcheck.sh
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            exec:
+              command:
+                - /opt/bitnami/scripts/etcd/healthcheck.sh
+            initialDelaySeconds: 60
+            periodSeconds: 20
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 5
+          resources:
+            limits: {}
+            requests: {}
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/etcd
+      volumes:
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "10Gi"
+---
+# Source: retriever-usvc/charts/tei/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: retriever-usvc/charts/tei/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: retriever-usvc/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
