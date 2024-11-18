@@ -4,9 +4,7 @@ Helm chart for deploying AgentQnA service.
 
 ## Deploy
 
-helm repo add opea https://opea-project.github.io/GenAIInfra
-
-helm install agentqna opea/agentqna --set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN} --set tgi.enabled=True
+helm install agentqna oci://ghcr.io/opea-project/charts/agentqna --set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN} --set tgi.enabled=True
 
 ## Verify
 
