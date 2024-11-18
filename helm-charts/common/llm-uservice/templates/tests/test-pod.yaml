@@ -23,13 +23,13 @@ spec:
           # Try with docsum endpoint
             curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/docsum -sS --fail-with-body \
               -X POST \
-              -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}' \
+              -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5.","max_tokens":17}' \
               -H 'Content-Type: application/json' && break;
           {{- else if contains "llm-faqgen-tgi" .Values.image.repository }}
           # Try with faqgen endpoint
             curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/faqgen -sS --fail-with-body \
               -X POST \
-              -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}' \
+              -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5.","max_tokens":17}' \
               -H 'Content-Type: application/json' && break;
           {{- else }}
             curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \

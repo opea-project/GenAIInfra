@@ -13,12 +13,14 @@ repos:
       - id: requirements-txt-fixer
       - id: trailing-whitespace
         files: (.*\.(py|rst|cmake|yaml|yml|json|ts|js|html|svelte|sh))$
+        exclude: (microservices-connector/config/manifests/.*\.yaml)$
 
   - repo: https://github.com/Lucas-C/pre-commit-hooks
     rev: v1.5.5
     hooks:
       - id: insert-license
         files: (.*\.(py|yaml|yml|sh))$
+        exclude: (microservices-connector/config/manifests/.*\.yaml)$
         args:
           [
             --license-filepath=.github/license_template.txt,

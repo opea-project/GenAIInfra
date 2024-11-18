@@ -26,15 +26,15 @@ securityContext: {}
   # Currently comment the securityContext settings
   # as the inappropriate settings within Conversational UI (need root privilege)
   # issue: https://github.com/opea-project/GenAIExamples/issues/517
-  #readOnlyRootFilesystem: true
-  #allowPrivilegeEscalation: false
-  #runAsNonRoot: true
-  #runAsUser: 1000
-  #capabilities:
-  #  drop:
-  #  - ALL
-  #seccompProfile:
-  #  type: RuntimeDefault
+  # readOnlyRootFilesystem: true
+  # allowPrivilegeEscalation: false
+  # runAsNonRoot: true
+  # runAsUser: 1000
+  # capabilities:
+  #   drop:
+  #   - ALL
+  # seccompProfile:
+  #   type: RuntimeDefault
 
 # internal container port
 # conventional ui container port: 5173, conversational ui container port: 80
@@ -43,6 +43,27 @@ containerPort: 80
 service:
   type: ClusterIP
   port: 5174
+
+livenessProbe:
+  httpGet:
+    path: /
+    port: ui
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 24
+readinessProbe:
+  httpGet:
+    path: /
+    port: ui
+  initialDelaySeconds: 5
+  periodSeconds: 5
+startupProbe:
+  httpGet:
+    path: /
+    port: ui
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 120
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious

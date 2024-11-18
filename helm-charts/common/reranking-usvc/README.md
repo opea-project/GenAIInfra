@@ -49,4 +49,4 @@ curl http://localhost:8000/v1/reranking \
 | image.repository       | string | `"opea/reranking-tgi"` |             |
 | TEI_RERANKING_ENDPOINT | string | `""`                   |             |
 | service.port           | string | `"8000"`               |             |
-| global.monitoring      | bop;   | false                  |             |
+| global.monitoring      | bool   | `false`                |             |

@@ -11,7 +11,7 @@ replicaCount: 1
 # - Ignore above replica count, as it will be controlled by HPA
 # - Add example HPA scaling rules with thresholds suitable for Xeon deployments
 # - Require custom metrics ConfigMap available in the main application chart
-horizontalPodAutoscaler:
+autoscaling:
   maxReplicas: 4
   enabled: false
 
@@ -26,8 +26,7 @@ image:
   repository: ghcr.io/huggingface/text-generation-inference
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  # `sha-e4201f4-intel-cpu` is the image tag for intel cpu optimized tgi image
-  tag: "sha-e4201f4-intel-cpu"
+  tag: "2.4.0-intel-cpu"
 
 # empty for CPU
 accelDevice: ""
@@ -89,26 +88,26 @@ startupProbe:
   periodSeconds: 5
   failureThreshold: 180
   timeoutSeconds: 2
-#livenessProbe:
-#  httpGet:
-#    path: /health
-#    port: http
-#  initialDelaySeconds: 5
-#  periodSeconds: 5
-#  failureThreshold: 24
-#readinessProbe:
-#  httpGet:
-#    path: /health
-#    port: http
-#  initialDelaySeconds: 5
-#  periodSeconds: 5
-#startupProbe:
-#  httpGet:
-#    path: /health
-#    port: http
-#  initialDelaySeconds: 5
-#  periodSeconds: 5
-#  failureThreshold: 120
+# livenessProbe:
+#   httpGet:
+#     path: /health
+#     port: http
+#   initialDelaySeconds: 5
+#   periodSeconds: 5
+#   failureThreshold: 24
+# readinessProbe:
+#   httpGet:
+#     path: /health
+#     port: http
+#   initialDelaySeconds: 5
+#   periodSeconds: 5
+# startupProbe:
+#   httpGet:
+#     path: /health
+#     port: http
+#   initialDelaySeconds: 5
+#   periodSeconds: 5
+#   failureThreshold: 120
 
 nodeSelector: {}
 
@@ -121,6 +120,8 @@ LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 MAX_INPUT_LENGTH: ""
 MAX_TOTAL_TOKENS: ""
 CUDA_GRAPHS: "0"
+HF_HUB_DISABLE_PROGRESS_BARS: "1"
+HF_HUB_ENABLE_HF_TRANSFER: "0"
 
 global:
   http_proxy: ""

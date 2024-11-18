@@ -14,7 +14,7 @@ cd GenAIInfra/helm-charts/
 helm dependency update codegen
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
-export MODELNAME="meta-llama/CodeLlama-7b-hf"
+export MODELNAME="Qwen/Qwen2.5-Coder-7B-Instruct"
 # To run on Xeon
 helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
 # To run on Gaudi
@@ -23,9 +23,7 @@ helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 
 ### IMPORTANT NOTE
 
-1. To use model `meta-llama/CodeLlama-7b-hf`, you should first goto the [huggingface model card](https://huggingface.co/meta-llama/CodeLlama-7b-hf) to apply for the model access first. You need to make sure your huggingface token has at least read access to that model.
-
-2. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
+1. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
 
 ## Verify
 
@@ -58,8 +56,9 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 
 ## Values
 
-| Key              | Type   | Default                        | Description                                                              |
-| ---------------- | ------ | ------------------------------ | ------------------------------------------------------------------------ |
-| image.repository | string | `"opea/codegen"`               |                                                                          |
-| service.port     | string | `"7778"`                       |                                                                          |
-| tgi.LLM_MODEL_ID | string | `"meta-llama/CodeLlama-7b-hf"` | Models id from https://huggingface.co/, or predownloaded model directory |
+| Key               | Type   | Default                            | Description                                                                            |
+| ----------------- | ------ | ---------------------------------- | -------------------------------------------------------------------------------------- |
+| image.repository  | string | `"opea/codegen"`                   |                                                                                        |
+| service.port      | string | `"7778"`                           |                                                                                        |
+| tgi.LLM_MODEL_ID  | string | `"Qwen/Qwen2.5-Coder-7B-Instruct"` | Models id from https://huggingface.co/, or predownloaded model directory               |
+| global.monitoring | bool   | `false`                            | Enable usage metrics for the service components. See ../monitoring.md before enabling! |

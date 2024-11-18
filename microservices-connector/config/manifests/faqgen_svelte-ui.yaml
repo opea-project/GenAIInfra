@@ -1,0 +1,118 @@
+---
+# Source: ui/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: faqgen-svelte-ui-config
+  labels:
+    helm.sh/chart: ui-1.0.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: faqgen-svelte-ui
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  FAQ_BASE_URL: "/v1/faqgen"
+---
+# Source: ui/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: faqgen-svelte-ui
+  labels:
+    helm.sh/chart: ui-1.0.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: faqgen-svelte-ui
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5174
+      targetPort: ui
+      protocol: TCP
+      name: ui
+  selector:
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: faqgen-svelte-ui
+---
+# Source: ui/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: faqgen-svelte-ui
+  labels:
+    helm.sh/chart: ui-1.0.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: faqgen-svelte-ui
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ui
+      app.kubernetes.io/instance: faqgen-svelte-ui
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: ui-1.0.0
+        app.kubernetes.io/name: ui
+        app.kubernetes.io/instance: faqgen-svelte-ui
+        app.kubernetes.io/version: "v1.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      securityContext:
+        {}
+      containers:
+        - name: ui
+          envFrom:
+            - configMapRef:
+                name: faqgen-svelte-ui-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            {}
+          image: "opea/faqgen-ui:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: ui
+              containerPort: 5173
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: /
+              port: ui
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: ui
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: /
+              port: ui
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            {}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}

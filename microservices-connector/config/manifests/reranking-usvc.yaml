@@ -125,3 +125,7 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: reranking-usvc/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

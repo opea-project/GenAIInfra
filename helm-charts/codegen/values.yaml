@@ -18,6 +18,10 @@ service:
   type: ClusterIP
   port: 7778
 
+nginx:
+  service:
+    type: NodePort
+
 securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
@@ -37,7 +41,7 @@ affinity: {}
 
 # To override values in subchart tgi
 tgi:
-  LLM_MODEL_ID: meta-llama/CodeLlama-7b-hf
+  LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
 codegen-ui:
   image:
@@ -55,3 +59,9 @@ global:
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
+
+  # Install Prometheus serviceMonitors for service components
+  monitoring: false
+
+  # Prometheus Helm install release name needed for serviceMonitors
+  prometheusRelease: prometheus-stack

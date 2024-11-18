@@ -56,24 +56,12 @@ Depending on your environment, you may want to customize some of the options, se
 
 ### Using Helm Charts repository
 
-The Helm charts are released in this [Helm chart repository](https://opea-project.github.io/GenAIInfra), you can use it directly.
-
-Add the repo:
-
-`helm repo add opea https://opea-project.github.io/GenAIInfra`
-
-Show all Helm charts available in the repo:
+The Helm charts are released to https://github.com/orgs/opea-project/packages. You can check the list there and deploy with
 
 ```
-helm repo update
-helm search repo opea
+export chartname=chatqna
+helm install myrelease oci://ghcr.io/opea-project/charts/${chartname}
 ```
-
-Install the chart:
-
-`helm install tgi opea/tgi`
-
-Use `helm --help` to see all commands for Helm, and check [Helm Charts Options](#helm-charts-options) for more installation options.
 
 ## Helm Charts Options
 

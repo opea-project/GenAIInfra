@@ -52,7 +52,7 @@ curl http://localhost:7000/v1/retrieval  \
 | service.port           | string | `"7000"`               |             |
 | REDIS_URL              | string | `""`                   |             |
 | TEI_EMBEDDING_ENDPOINT | string | `""`                   |             |
-| global.monitoring      | bop;   | false                  |             |
+| global.monitoring      | bool   | `false`                |             |
 
 ## Milvus support
 
