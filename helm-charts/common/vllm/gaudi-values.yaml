@@ -6,7 +6,7 @@
 # Declare variables to be passed into your templates.
 
 image:
-  repository: opea/vllm-hpu
+  repository: opea/vllm-gaudi
   tag: "latest"
 
 # VLLM_CPU_KVCACHE_SPACE: "40"

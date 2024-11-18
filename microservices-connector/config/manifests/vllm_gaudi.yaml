@@ -88,7 +88,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/vllm-hpu:latest"
+          image: "opea/vllm-gaudi:latest"
           imagePullPolicy: IfNotPresent
           args:
             - "--enforce-eager"
