@@ -15,7 +15,7 @@ data:
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
-  {{- if contains "opea/vllm-hpu" .Values.image.repository }}
+  {{- if contains "opea/vllm-gaudi" .Values.image.repository }}
   HABANA_LOGS: "/tmp/habana_logs"
   {{- end }}
   NUMBA_CACHE_DIR: "/tmp"
