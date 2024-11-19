@@ -121,13 +121,19 @@ Here are few Grafana dashboards for monitoring different aspects of OPEA applica
 You can either:
 
 - Import them manually to Grafana,
-- Use [`update-dashboards.sh`](./update-dashboards.sh) script to add them to Kubernetes as Grafana dashboard configMaps
-  - (Script assumes Prometheus / Grafana to be installed according to above instructions)
+- Use [`update-dashboards.sh`](./update-dashboards.sh) script to add them to Kubernetes as (more persistent) Grafana dashboard `configMap`s
+  - Script uses `$USER-<file name>` as dashboard `configMap` names, overwrites any pre-existing `configMap` with the same name, and _restarts Grafana_ so that it notices `configMap` updates
 - Or create your own dashboards based on them
 
-Note: when dashboard is imported to Grafana, you can directly save changes to it, but those dashboards go away if Grafana is removed / re-installed.
+When dashboard is imported to Grafana, you can directly save changes to it, but such dashboards go away if Grafana is removed / re-installed. When dashboard is in `configMap`, Grafana saves its changes to a (selected) file, but you need to re-apply those files to Kubernetes with the script, for your changes to be there when that Grafana dashboard page is reloaded in browser.
 
-Whereas with dashboard configMaps, Grafana saves changes to a selected file, but you need to remember to re-apply them to Kubernetes / Grafana, for your changes to be there when that dashboard is reloaded.
+Gotchas for dashboard `configMap` script usage:
+
+- If you change dashboard file name, you need to change also its 'uid' field (at end of the file), otherwise Grafana will see multiple `configMap`s for the same dashboard ID
+  - If there's no `uid` specified for the dashboard, Grafana will generate one on `configMap` load. Meaning that dashboard ID, and Grafana URL to it, will change on every reload
+- Script assumes Prometheus / Grafana to be installed according to above instructions. If not, list of `labels` within script need to be updated to match Prometheus / Grafana installation
+
+NOTE: Services provide metrics only after they have processed at least one query, before that dashboards can be empty!
 
 ![TGI dashboard](./assets/tgi.png)
 ![Scaling dashboard](./assets/opea-scaling.png)
