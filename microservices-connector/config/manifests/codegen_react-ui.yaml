@@ -83,7 +83,7 @@ spec:
           securityContext:
             {}
           image: "opea/codegen-react-ui:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: ui
               containerPort: 80

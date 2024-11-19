@@ -96,7 +96,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/web-retriever-chroma:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: web-retriever
               containerPort: 7077

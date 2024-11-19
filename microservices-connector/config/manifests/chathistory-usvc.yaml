@@ -95,7 +95,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/chathistory-mongo-server:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: port
               containerPort: 6012

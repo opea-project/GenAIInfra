@@ -95,7 +95,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/llm-faqgen-tgi:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: llm-uservice
               containerPort: 9000

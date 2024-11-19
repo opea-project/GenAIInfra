@@ -720,7 +720,7 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           args:
             - "--auto-truncate"
           volumeMounts:
@@ -819,7 +819,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/retriever-milvus:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: retriever-usvc
               containerPort: 7000

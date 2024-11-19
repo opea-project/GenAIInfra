@@ -31,7 +31,6 @@ LOGFLAG: "True"
 
 image:
   repository: opea/agent-langchain
-  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 

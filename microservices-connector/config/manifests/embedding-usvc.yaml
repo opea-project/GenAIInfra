@@ -92,7 +92,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/embedding-tei:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: embedding-usvc
               containerPort: 6000

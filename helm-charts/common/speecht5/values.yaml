@@ -12,7 +12,6 @@ TTS_MODEL_PATH: "microsoft/speecht5_tts"
 
 image:
   repository: opea/speecht5
-  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 

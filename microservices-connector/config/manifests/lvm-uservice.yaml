@@ -94,7 +94,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/lvm-tgi:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: lvm-uservice
               containerPort: 9399

@@ -86,7 +86,7 @@ spec:
           securityContext:
             {}
           image: "opea/chatqna-ui:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: ui
               containerPort: 5173

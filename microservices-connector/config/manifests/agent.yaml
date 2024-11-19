@@ -104,7 +104,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/agent-langchain:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: agent
               containerPort: 9090

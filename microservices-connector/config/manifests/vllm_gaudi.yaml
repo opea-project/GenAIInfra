@@ -89,7 +89,7 @@ spec:
           securityContext:
             {}
           image: "opea/vllm-gaudi:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           args:
             - "--enforce-eager"
             - "--tensor-parallel-size"

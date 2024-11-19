@@ -92,7 +92,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/tts:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: tts
               containerPort: 9088

@@ -92,7 +92,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/reranking-tei:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: reranking-usvc
               containerPort: 8000

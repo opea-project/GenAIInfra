@@ -86,7 +86,7 @@ spec:
           securityContext:
             {}
           image: "opea/whisper:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: whisper
               containerPort: 7066

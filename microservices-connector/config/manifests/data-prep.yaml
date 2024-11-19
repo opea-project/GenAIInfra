@@ -101,7 +101,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/dataprep-redis:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: data-prep
               containerPort: 6007

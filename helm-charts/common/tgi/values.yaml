@@ -24,7 +24,6 @@ shmSize: 1Gi
 
 image:
   repository: ghcr.io/huggingface/text-generation-inference
-  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "2.4.0-intel-cpu"
 

@@ -87,7 +87,7 @@ spec:
           securityContext:
             {}
           image: "opea/vllm:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           args:
             - "--enforce-eager"
             - "--dtype"

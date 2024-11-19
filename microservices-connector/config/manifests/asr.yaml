@@ -92,7 +92,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/asr:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: asr
               containerPort: 9099

@@ -721,7 +721,7 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           args:
             - "--auto-truncate"
           volumeMounts:
@@ -820,7 +820,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/dataprep-milvus:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: data-prep
               containerPort: 6010

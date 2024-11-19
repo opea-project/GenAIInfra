@@ -10,7 +10,6 @@ LLM_SERVICE_HOST_IP: ""
 
 image:
   repository: opea/codetrans
-  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 

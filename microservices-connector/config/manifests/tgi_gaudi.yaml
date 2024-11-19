@@ -97,7 +97,7 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/huggingface/tgi-gaudi:2.0.6"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           volumeMounts:
             - mountPath: /data
               name: model-volume

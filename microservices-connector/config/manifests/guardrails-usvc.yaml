@@ -95,7 +95,7 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/guardrails-tgi:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: guardrails-usvc
               containerPort: 9090

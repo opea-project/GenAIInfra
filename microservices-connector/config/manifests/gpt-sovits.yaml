@@ -85,7 +85,7 @@ spec:
           securityContext:
             {}
           image: "opea/gpt-sovits:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: gpt-sovits
               containerPort: 9880

@@ -20,7 +20,6 @@ LOGFLAG: ""
 
 image:
   repository: opea/lvm-tgi
-  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 

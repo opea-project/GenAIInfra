@@ -32,7 +32,6 @@ horizontalPodAutoscaler:
 docretriever:
   image:
     repository: opea/doc-index-retriever
-    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
 
@@ -42,7 +41,6 @@ worker:
     port: 9095
   image:
     repository: opea/agent-langchain
-    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
   strategy: rag_agent_llama
@@ -63,7 +61,6 @@ supervisor:
     port: 9090
   image:
     repository: opea/agent-langchain
-    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
   strategy: react_llama
@@ -82,7 +79,6 @@ supervisor:
 crag:
   image:
     repository: aicrowd/kdd-cup-24-crag-mock-api
-    pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
     tag: "v0"
 

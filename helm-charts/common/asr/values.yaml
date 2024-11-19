@@ -18,7 +18,6 @@ ASR_ENDPOINT: ""
 
 image:
   repository: opea/asr
-  pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 

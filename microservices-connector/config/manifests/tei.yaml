@@ -89,7 +89,7 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           args:
             - "--auto-truncate"
           volumeMounts:

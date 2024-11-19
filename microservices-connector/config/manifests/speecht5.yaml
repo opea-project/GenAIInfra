@@ -86,7 +86,7 @@ spec:
           securityContext:
             {}
           image: "opea/speecht5:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           ports:
             - name: speecht5
               containerPort: 7055

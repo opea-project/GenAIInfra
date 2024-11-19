@@ -7,17 +7,17 @@ on:
   workflow_dispatch:
     inputs:
       oldversion:
-        default: "1.1-dev"
+        default: "0-latest"
         description: "Old helm version to be replaced"
         required: true
         type: string
       newversion:
-        default: "1.1.0"
+        default: "1.2.0"
         description: "New helm version to replace"
         required: true
         type: string
       imageversion:
-        default: "1.1"
+        default: "1.2"
         description: "New image version to replace"
         required: true
         type: string

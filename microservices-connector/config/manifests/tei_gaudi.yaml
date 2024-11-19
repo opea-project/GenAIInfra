@@ -91,7 +91,7 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/huggingface/tei-gaudi:1.5.0"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: 
           args:
             - "--auto-truncate"
           volumeMounts:
