@@ -98,7 +98,7 @@ jobs:
     uses: ./.github/workflows/_helm-e2e.yaml
     with:
       tag: ${{ inputs.tag }}
-      workload: ${{ matrix.example }}
+      workload: ${{ matrix.directory }}/${{ matrix.example }}
       hardware: ${{ matrix.hardware }}
       valuefile: ${{ matrix.valuefile }}
     secrets: inherit
