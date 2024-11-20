@@ -21,6 +21,7 @@ spec:
           for ((i=1; i<=max_retry; i++)); do
             curl http://{{ include "docsum.fullname" . }}:{{ .Values.service.port }}/v1/docsum -sS --fail-with-body \
             -H 'Content-Type: multipart/form-data' \
+            -H "type=text" \
             -F "messages=Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5." \
             -F "max_tokens=32" && break;
             curlcode=$?
