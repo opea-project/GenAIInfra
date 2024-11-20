@@ -4,16 +4,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "docsum.fullname" . }}
+  name: {{ .Release.Name }}-m2t
   labels:
     {{- include "docsum.labels" . | nindent 4 }}
-    app: {{ include "docsum.fullname" . }}
+    app: {{ .Release.Name }}-m2t
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
       {{- include "docsum.selectorLabels" . | nindent 6 }}
-      app: {{ include "docsum.fullname" . }}
+      app: {{ .Release.Name }}-m2t
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -22,7 +22,7 @@ spec:
       {{- end }}
       labels:
         {{- include "docsum.selectorLabels" . | nindent 8 }}
-        app: {{ include "docsum.fullname" . }}
+        app: {{ .Release.Name }}-m2t
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
@@ -31,26 +31,22 @@ spec:
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Release.Name }}-m2t
           env:
-            - name: LLM_SERVICE_HOST_IP
-              {{- if .Values.LLM_SERVICE_HOST_IP }}
-              value: {{ .Values.LLM_SERVICE_HOST_IP | quote}}
-              {{- else }}
-              value: {{ .Release.Name }}-llm-uservice
-              {{- end }}
-            - name: DATA_SERVICE_HOST_IP
-              value: {{ .Release.Name }}-m2t
+            - name: V2A_ENDPOINT
+              value: {{ .Release.Name }}-v2a:{{ .Values.v2a.service.port }}
+            - name: A2T_ENDPOINT
+              value: {{ .Release.Name }}-whisper:{{ .Values.whisper.service.port }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.m2t.image.repository }}:{{ .Values.m2t.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp
           ports:
-            - name: docsum
-              containerPort: {{ .Values.port }}
+            - name: m2t
+              containerPort: {{ .Values.m2t.port }}
               protocol: TCP
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
@@ -77,5 +73,22 @@ spec:
           labelSelector:
             matchLabels:
               {{- include "docsum.selectorLabels" . | nindent 14 }}
-              app: {{ include "docsum.fullname" . }}
+              app: {{ .Release.Name }}-m2t
       {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-m2t
+  labels:
+    {{- include "docsum.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.m2t.service.type }}
+  ports:
+    - port: {{ .Values.m2t.service.port }}
+      targetPort: {{ .Values.m2t.port }}
+      protocol: TCP
+      name: m2t
+  selector:
+    {{- include "docsum.selectorLabels" . | nindent 4 }}
+    app: {{ .Release.Name }}-m2t
