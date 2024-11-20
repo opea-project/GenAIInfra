@@ -17,7 +17,7 @@ spec:
       command: ['bash', '-c']
       args:
         - |
-          max_retry=20;
+          max_retry=50;
           for ((i=1; i<=max_retry; i++)); do
             curl http://{{ include "docsum.fullname" . }}:{{ .Values.service.port }}/v1/docsum -sS --fail-with-body \
             -H 'Content-Type: multipart/form-data' \
