@@ -86,7 +86,7 @@ function validate_docsum() {
     # Curl the DocSum LLM Service
     curl http://${ip_address}:${port}/v1/chat/docsum \
       -X POST \
-      -d '{"type": "text", "message":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}' \
+      -d '{"type": "text", "messages":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5."}' \
       -H 'Content-Type: application/json' > $LOG_PATH/curl_docsum.log
     exit_code=$?
     if [ $exit_code -ne 0 ]; then
