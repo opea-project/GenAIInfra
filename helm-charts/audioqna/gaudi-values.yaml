@@ -29,7 +29,7 @@ tgi:
 whisper:
   image:
     repository: opea/whisper-gaudi
-    tag: "latest"
+    tag: "1.1"
   resources:
     limits:
       habana.ai/gaudi: 1
@@ -37,7 +37,7 @@ whisper:
 speecht5:
   image:
     repository: opea/speecht5-gaudi
-    tag: "latest"
+    tag: "1.1"
   resources:
     limits:
       habana.ai/gaudi: 1

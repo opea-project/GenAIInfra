@@ -3,7 +3,7 @@
 
 image:
   repository: opea/docsum-ui
-  tag: "latest"
+  tag: "1.1"
 
 containerPort: 5173
 

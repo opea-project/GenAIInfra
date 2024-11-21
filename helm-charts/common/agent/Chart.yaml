@@ -5,15 +5,15 @@ apiVersion: v2
 name: agent
 description: The Helm chart for deploying agent microservice
 type: application
-version: 1.0.0
+version: 1.1.0
 # The llm microservice server version
 appVersion: "v1.0"
 dependencies:
   - name: tgi
-    version: 1.0.0
+    version: 1.1.0
     repository: file://../tgi
     condition: tgi.enabled
   - name: vllm
-    version: 1.0.0
+    version: 1.1.0
     repository: file://../vllm
     condition: vllm.enabled

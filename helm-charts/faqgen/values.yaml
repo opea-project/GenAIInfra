@@ -11,7 +11,7 @@ image:
   repository: opea/faqgen
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.1"
 
 port: 8888
 service:
@@ -51,7 +51,7 @@ tgi:
 faqgen-ui:
   image:
     repository: opea/faqgen-ui
-    tag: "latest"
+    tag: "1.1"
   BACKEND_SERVICE_ENDPOINT: "/v1/faqgen"
   containerPort: 5173
 

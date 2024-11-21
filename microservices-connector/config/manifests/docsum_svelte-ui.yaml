@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: docsum-svelte-ui-config
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-1.1.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: docsum-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -26,7 +26,7 @@ kind: Service
 metadata:
   name: docsum-svelte-ui
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-1.1.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: docsum-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -51,7 +51,7 @@ kind: Deployment
 metadata:
   name: docsum-svelte-ui
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-1.1.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: docsum-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -65,7 +65,7 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: ui-1.0.0
+        helm.sh/chart: ui-1.1.0
         app.kubernetes.io/name: ui
         app.kubernetes.io/instance: docsum-svelte-ui
         app.kubernetes.io/version: "v1.0"
@@ -83,7 +83,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/docsum-ui:latest"
+          image: "opea/docsum-ui:1.1"
           imagePullPolicy: IfNotPresent
           ports:
             - name: ui

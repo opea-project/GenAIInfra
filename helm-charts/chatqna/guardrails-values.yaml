@@ -3,7 +3,7 @@
 
 image:
   repository: opea/chatqna-guardrails
-  tag: "latest"
+  tag: "1.1"
 
 # guardrails related config
 guardrails-usvc:

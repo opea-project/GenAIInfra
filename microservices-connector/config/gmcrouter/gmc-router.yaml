@@ -20,7 +20,7 @@ spec:
       serviceAccountName: default
       containers:
       - name: router-server
-        image: opea/gmcrouter:latest
+        image: opea/gmcrouter:1.1
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080

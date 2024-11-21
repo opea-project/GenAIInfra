@@ -5,11 +5,11 @@ apiVersion: v2
 name: chathistory-usvc
 description: The Helm chart for deploying chat history as microservice
 type: application
-version: 1.0.0
+version: 1.1.0
 # The chat history microservice server version
 appVersion: "v1.0"
 dependencies:
   - name: mongodb
-    version: 1.0.0
+    version: 1.1.0
     repository: file://../mongodb
     condition: mongodb.enabled

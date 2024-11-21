@@ -3,7 +3,7 @@
 
 image:
   repository: opea/llm-faqgen-tgi
-  tag: "latest"
+  tag: "1.1"
 
 tgi:
   LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct

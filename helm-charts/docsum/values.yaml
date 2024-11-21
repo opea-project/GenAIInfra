@@ -12,12 +12,12 @@ image:
   repository: opea/docsum
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.1"
 v2a:
   image:
     repository: opea/dataprep-video2audio
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "1.1"
   port: 7078
   service:
     type: ClusterIP
@@ -26,7 +26,7 @@ m2t:
   image:
     repository: opea/dataprep-multimedia2text
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "1.1"
   port: 7079
   service:
     type: ClusterIP
@@ -70,7 +70,7 @@ tgi:
 docsum-ui:
   image:
     repository: opea/docsum-ui
-    tag: "latest"
+    tag: "1.1"
   BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
   containerPort: 5173
 

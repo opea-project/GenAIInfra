@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: vllm-config
   labels:
-    helm.sh/chart: vllm-1.0.0
+    helm.sh/chart: vllm-1.1.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: vllm
   labels:
-    helm.sh/chart: vllm-1.0.0
+    helm.sh/chart: vllm-1.1.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
@@ -57,7 +57,7 @@ kind: Deployment
 metadata:
   name: vllm
   labels:
-    helm.sh/chart: vllm-1.0.0
+    helm.sh/chart: vllm-1.1.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
@@ -86,7 +86,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/vllm:latest"
+          image: "opea/vllm:1.1"
           imagePullPolicy: IfNotPresent
           args:
             - "--enforce-eager"

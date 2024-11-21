@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: gpt-sovits-config
   labels:
-    helm.sh/chart: gpt-sovits-1.0.0
+    helm.sh/chart: gpt-sovits-1.1.0
     app.kubernetes.io/name: gpt-sovits
     app.kubernetes.io/instance: gpt-sovits
     app.kubernetes.io/version: "1.0"
@@ -30,7 +30,7 @@ kind: Service
 metadata:
   name: gpt-sovits
   labels:
-    helm.sh/chart: gpt-sovits-1.0.0
+    helm.sh/chart: gpt-sovits-1.1.0
     app.kubernetes.io/name: gpt-sovits
     app.kubernetes.io/instance: gpt-sovits
     app.kubernetes.io/version: "1.0"
@@ -55,7 +55,7 @@ kind: Deployment
 metadata:
   name: gpt-sovits
   labels:
-    helm.sh/chart: gpt-sovits-1.0.0
+    helm.sh/chart: gpt-sovits-1.1.0
     app.kubernetes.io/name: gpt-sovits
     app.kubernetes.io/instance: gpt-sovits
     app.kubernetes.io/version: "1.0"
@@ -84,7 +84,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/gpt-sovits:latest"
+          image: "opea/gpt-sovits:1.1"
           imagePullPolicy: IfNotPresent
           ports:
             - name: gpt-sovits

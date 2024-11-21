@@ -11,7 +11,7 @@ image:
   repository: opea/visualqna
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.1"
 
 nginx:
   service:
@@ -52,7 +52,7 @@ tgi:
 visualqna-ui:
   image:
     repository: opea/visualqna-ui
-    tag: "latest"
+    tag: "1.1"
   BACKEND_SERVICE_ENDPOINT: "/v1/visualqna"
   containerPort: 5173
 
@@ -61,7 +61,7 @@ visualqna-ui:
 # visualqna-ui:
 #   image:
 #     repository: "opea/visualqna-ui"
-#     tag: "latest"
+#     tag: "1.1"
 #   containerPort: "5173"
 
 global:

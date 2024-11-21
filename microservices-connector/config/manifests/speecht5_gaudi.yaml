@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: speecht5-config
   labels:
-    helm.sh/chart: speecht5-1.0.0
+    helm.sh/chart: speecht5-1.1.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
     app.kubernetes.io/version: "v1.0"
@@ -31,7 +31,7 @@ kind: Service
 metadata:
   name: speecht5
   labels:
-    helm.sh/chart: speecht5-1.0.0
+    helm.sh/chart: speecht5-1.1.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
     app.kubernetes.io/version: "v1.0"
@@ -56,7 +56,7 @@ kind: Deployment
 metadata:
   name: speecht5
   labels:
-    helm.sh/chart: speecht5-1.0.0
+    helm.sh/chart: speecht5-1.1.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
     app.kubernetes.io/version: "v1.0"
@@ -85,7 +85,7 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/speecht5-gaudi:latest"
+          image: "opea/speecht5-gaudi:1.1"
           imagePullPolicy: IfNotPresent
           ports:
             - name: speecht5

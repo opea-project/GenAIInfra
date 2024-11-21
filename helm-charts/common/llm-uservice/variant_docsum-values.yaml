@@ -3,4 +3,4 @@
 
 image:
   repository: opea/llm-docsum-tgi
-  tag: "latest"
+  tag: "1.1"

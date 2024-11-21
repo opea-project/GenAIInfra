@@ -34,7 +34,7 @@ docretriever:
     repository: opea/doc-index-retriever
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "1.1"
 
 worker:
   toolPath: "/mnt/tools"
@@ -44,7 +44,7 @@ worker:
     repository: opea/agent-langchain
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "1.1"
   strategy: rag_agent_llama
   recursion_limit: "12"
   llm_engine: tgi
@@ -65,7 +65,7 @@ supervisor:
     repository: opea/agent-langchain
     pullPolicy: IfNotPresent
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "1.1"
   strategy: react_llama
   recursion_limit: 10
   llm_engine: tgi

@@ -3,7 +3,7 @@
 
 image:
   repository: opea/llm-faqgen-tgi
-  tag: "latest"
+  tag: "1.1"
 
 tgi:
   enabled: true

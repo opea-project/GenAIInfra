@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: chathistory-usvc-config
   labels:
-    helm.sh/chart: chathistory-usvc-1.0.0
+    helm.sh/chart: chathistory-usvc-1.1.0
     app.kubernetes.io/name: chathistory-usvc
     app.kubernetes.io/instance: chathistory-usvc
     app.kubernetes.io/version: "v1.0"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: chathistory-usvc
   labels:
-    helm.sh/chart: chathistory-usvc-1.0.0
+    helm.sh/chart: chathistory-usvc-1.1.0
     app.kubernetes.io/name: chathistory-usvc
     app.kubernetes.io/instance: chathistory-usvc
     app.kubernetes.io/version: "v1.0"
@@ -57,7 +57,7 @@ kind: Deployment
 metadata:
   name: chathistory-usvc
   labels:
-    helm.sh/chart: chathistory-usvc-1.0.0
+    helm.sh/chart: chathistory-usvc-1.1.0
     app.kubernetes.io/name: chathistory-usvc
     app.kubernetes.io/instance: chathistory-usvc
     app.kubernetes.io/version: "v1.0"
@@ -94,7 +94,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/chathistory-mongo-server:latest"
+          image: "opea/chathistory-mongo-server:1.1"
           imagePullPolicy: IfNotPresent
           ports:
             - name: port
