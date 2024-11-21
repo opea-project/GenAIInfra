@@ -30,7 +30,7 @@ helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 
 1. If you want to cache the downloaded model for later reuse, please set the bash environment variable `MODELDIR` to an existing directory on the node, then append `--set global.modelUseHostPath=${MODELDIR}` to the `helm install` commands.
 
-2. Make sure your `${MODELDIR}/.locks` is writable to all the users if you want to use the cached downloaded models, i.e. `$ sudo chmod +w ${MODELDIR}/.locks`.
+2. Make sure your `${MODELDIR}` and `${MODELDIR}/.locks` is writable to all the users if you want to use the cached downloaded models, i.e. `$ sudo chmod 0777 ${MODELDIR} && sudo chmod 0777 ${MODELDIR}/.locks `.
 
 ## Verify
 
