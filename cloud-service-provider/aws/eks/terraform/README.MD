@@ -23,13 +23,6 @@ Initialize the Terraform environment.
 terraform init
 ```
 
-Add OPEA Helm chart repository.
-
-```bash
-helm repo add opea https://opea-project.github.io/GenAIInfra
-helm repo update
-```
-
 ## EKS cluster
 
 By default, 1-node cluster is created which is suitable for running the OPEA application. See `variables.tf` and `opea-<application-name>.tfvars` if you want to tune the cluster properties, e.g., number of nodes, instance types or disk size.
@@ -56,7 +49,7 @@ Now you should have access to the cluster via the `kubectl` command.
 Deploy ChatQnA Application with Helm
 
 ```bash
-helm install -n chatqna --create-namespace chatqna opea/chatqna --set service.type=LoadBalancer --set global.modelUsePVC=model-volume --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
+helm install -n chatqna --create-namespace chatqna oci://ghcr.io/opea-project/charts/chatqna --set service.type=LoadBalancer --set global.modelUsePVC=model-volume --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 ```
 
 Create the PVC as mentioned [above](#-persistent-volume-claim)
