@@ -113,3 +113,9 @@ global:
   # By default, both var are set to empty, the model will be downloaded and saved to a tmp volume.
   modelUseHostPath: ""
   modelUsePVC: ""
+
+  # Install Prometheus serviceMonitor for service
+  monitoring: false
+
+  # Prometheus Helm install release name for serviceMonitor
+  prometheusRelease: prometheus-stack

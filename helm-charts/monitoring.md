@@ -75,7 +75,16 @@ $ prom_url=http://$(kubectl -n $prom_ns get -o jsonpath="{.spec.clusterIP}:{.spe
 $ curl --no-progress-meter $prom_url/metrics | grep scrape_pool_targets.*$chart
 ```
 
-Check that Prometheus metrics from TGI inference component are available:
+Then check that Prometheus metrics from a relevant LLM inferencing service are available.
+
+For vLLM:
+
+```console
+$ curl --no-progress-meter $prom_url/api/v1/query? \
+  --data-urlencode 'query=vllm:cache_config_info{service="'$chart'-vllm"}' | jq
+```
+
+Or TGI:
 
 ```console
 $ curl --no-progress-meter $prom_url/api/v1/query? \
@@ -83,4 +92,4 @@ $ curl --no-progress-meter $prom_url/api/v1/query? \
 ```
 
 **NOTE**: services provide metrics only after they've processed their first request.
-And reranking service will be used only after context data has been uploaded!
+And ChatQnA uses (TEI) reranking service only after query context data has been uploaded!
