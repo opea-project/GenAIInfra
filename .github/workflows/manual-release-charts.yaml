@@ -84,7 +84,7 @@ jobs:
            echo "Publish charts version ${{ inputs.version }}to ghcr"
            echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u test --password-stdin
            for chart in *-${{ inputs.version }}.tgz; do
-             echo "Publishing ${chart}\n"
+             echo "Publishing ${chart}"
              helm push ${chart} oci://ghcr.io/opea-project/charts
            done
           fi
