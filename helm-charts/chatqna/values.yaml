@@ -57,7 +57,7 @@ guardrails-usvc:
 # Uncomment the following lines
 # chatqna-ui:
 #   image:
-#     repository: "opea/chatqna-ui"
+#     repository: opea/chatqna-ui
 #     tag: "latest"
 #   containerPort: "5173"
 
