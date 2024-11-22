@@ -26,10 +26,14 @@ AI application examples you can run directly on Xeon and Gaudi. You can also ref
 
 | Helm chart                         | Link to GenAIExamples                                                                              | Description                                                                                     |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [chatqna](./chatqna/README.md)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA/README.md)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
+| [agentqna](./agentqna/README.md)   | [Agent QnA](https://github.com/opea-project/GenAIExamples/tree/main/AgentQnA/README.md)            | A hierarchical multi-agent system for question-answering applications.                          |
+| [audioqna](./audioqna/README.md)   | [Audio QnA](https://github.com/opea-project/GenAIExamples/tree/main/AudioQnA/README.md)            | An example of chatbot for question and answering with audio file support.                       |
 | [codegen](./codegen/README.md)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/CodeGen/README.md)       | An example of copilot designed for code generation in Visual Studio Code.                       |
 | [codetrans](./codetrans/README.md) | [Code Translation](https://github.com/opea-project/GenAIExamples/tree/main/CodeTrans/README.md)    | An example of programming language code translation.                                            |
-| [chatqna](./chatqna/README.md)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA/README.md)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
 | [docsum](./docsum/README.md)       | [Document Summarization](https://github.com/opea-project/GenAIExamples/tree/main/DocSum/README.md) | An example of document summarization.                                                           |
+| [faqgen](./faqgen/README.md)       | [FAQ generator](https://github.com/opea-project/GenAIExamples/tree/main/FaqGen/README.md)          | An example to generate FAQs.                                                                    |
+| [visualqna](./audioqna/README.md)  | [Visual QnA](https://github.com/opea-project/GenAIExamples/tree/main/VisualQnA/README.md)          | An example of answering open-ended questions based on an image.                                 |
 
 ### Components
 
@@ -151,10 +155,7 @@ helm install tgi common/tgi --set global.modelUsePVC=model-volume
 ## Using Private Docker Hub
 
 By default, we're using Docker images from [official Docker hub](https://hub.docker.com/u/opea), with Docker image version aligned with OPEA releases.
-If you have private hub or would like to use different Docker image versions, see the following examples.
-
-To use the latest tag for all images:
-`find . -name '*values.yaml' -type f -exec sed -i 's#tag: ""#tag: latest#g' {} \;`
+If you have private hub, see the following examples.
 
 To use local Docker registry:
 
