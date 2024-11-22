@@ -56,14 +56,6 @@ visualqna-ui:
   BACKEND_SERVICE_ENDPOINT: "/v1/visualqna"
   containerPort: 5173
 
-# If you would like to switch to traditional UI image
-# Uncomment the following lines
-# visualqna-ui:
-#   image:
-#     repository: "opea/visualqna-ui"
-#     tag: "latest"
-#   containerPort: "5173"
-
 global:
   http_proxy: ""
   https_proxy: ""

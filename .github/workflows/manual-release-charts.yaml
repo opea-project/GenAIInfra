@@ -71,9 +71,9 @@ jobs:
           #   # Insert copyright to avoid warnings
           #   sed -i '1s/^/# Copyright (C) 2024 Intel Corporation\n# SPDX-License-Identifier: Apache-2.0\n\n/' index.yaml
 
-          #   git config --global user.name "NeuralChatBot"
-          #   git config --global user.email "grp_neural_chat_bot@intel.com"
-          #   git remote set-url origin https://NeuralChatBot:"${{ secrets.ACTION_TOKEN }}"@github.com/opea-project/GenAIInfra.git
+          #   git config --global user.name "CICD-at-OPEA"
+          #   git config --global user.email "CICD@opea.dev"
+          #   git remote set-url origin https://CICD-at-OPEA:"${{ secrets.ACTION_TOKEN }}"@github.com/opea-project/GenAIInfra.git
 
           #   git status
           #   git add .
@@ -84,7 +84,7 @@ jobs:
            echo "Publish charts version ${{ inputs.version }}to ghcr"
            echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u test --password-stdin
            for chart in *-${{ inputs.version }}.tgz; do
-             echo "Publishing ${chart}\n"
+             echo "Publishing ${chart}"
              helm push ${chart} oci://ghcr.io/opea-project/charts
            done
           fi

@@ -10,6 +10,11 @@ on:
         required: false
         type: string
         description: "workloads to test, empty for testing all helm charts"
+      dockerhub:
+        default: "false"
+        required: false
+        type: string
+        description: "Set to true if you want to use released docker images at dockerhub. By default using internal docker registry."
       tag:
         default: "latest"
         description: "Image tag to be tested"
@@ -98,6 +103,7 @@ jobs:
     uses: ./.github/workflows/_helm-e2e.yaml
     with:
       tag: ${{ inputs.tag }}
+      dockerhub: ${{ inputs.dockerhub }}
       workload: ${{ matrix.directory }}/${{ matrix.example }}
       hardware: ${{ matrix.hardware }}
       valuefile: ${{ matrix.valuefile }}
