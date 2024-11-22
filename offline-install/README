@@ -12,7 +12,7 @@ this script is to pull opea container images to push to your local registry. the
 ghcr.io. you need to change docker registry.
 
 
-3. 02_online_models.sh
+3. 02.a_online_models.sh
 
 this script is to download model images. you need to change proxy and token.
 
@@ -24,10 +24,10 @@ i. mkdir in k8s nodes
   sudo rm -rf /mnt/opea-models/; sudo mkdir /mnt/opea-models/; sudo chmod 777 /mnt/opea-models/
 
 ii. scp to k8s nodes
-  example: scp -r data/* vagrant@192.168.1.22:/mnt/opea-models/
+  example: scp -r cli.data/* vagrant@192.168.1.22:/mnt/opea-models/
 
 4.b k8s daemonset (slow)
   10_offline_install_models.sh
 
-5. 11_offline_install.sh
+5. 11.a_offline_install.sh
   this script is to offline install opea chaqna in k8s. you need to change docker registry
