@@ -67,7 +67,25 @@ autoscaling:
 
 # Override values in specific subcharts
 tgi:
+  enabled: true
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+vllm:
+  enabled: false
+  # TODO: manifest in GenAIExamples uses "meta-llama/Meta-Llama-3-8B-Instruct" instead?
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  # TODO: these are non-redundant/non-broken options used by Agent component,
+  # but I think their values should be handled inside vLLM component, with
+  # deployment applying numbers set in configMap, based on values YAML file
+  # variables.
+  extraCmdArgs: [
+    "--enforce-eager",
+    "--tensor-parallel-size", "1",
+    "--dtype", "auto",
+    "--block-size", "128",
+    "--max-num-seqs", "256",
+    "--max-seq_len-to-capture", "2048",
+    "--gpu-memory-utilization", "0.5"
+  ]
 
 # disable guardrails-usvc by default
 # See guardrails-values.yaml for guardrail related options
