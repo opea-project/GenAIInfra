@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: agent-tgi-config
   labels:
-    helm.sh/chart: tgi-1.0.0
+    helm.sh/chart: tgi-1.1.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "2.1.0"
@@ -44,7 +44,7 @@ kind: ConfigMap
 metadata:
   name: agent-config
   labels:
-    helm.sh/chart: agent-1.0.0
+    helm.sh/chart: agent-1.1.0
     app.kubernetes.io/name: agent
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "v1.0"
@@ -77,7 +77,7 @@ kind: Service
 metadata:
   name: agent-tgi
   labels:
-    helm.sh/chart: tgi-1.0.0
+    helm.sh/chart: tgi-1.1.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "2.1.0"
@@ -102,7 +102,7 @@ kind: Service
 metadata:
   name: agent
   labels:
-    helm.sh/chart: agent-1.0.0
+    helm.sh/chart: agent-1.1.0
     app.kubernetes.io/name: agent
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "v1.0"
@@ -127,7 +127,7 @@ kind: Deployment
 metadata:
   name: agent-tgi
   labels:
-    helm.sh/chart: tgi-1.0.0
+    helm.sh/chart: tgi-1.1.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "2.1.0"
@@ -217,7 +217,7 @@ kind: Deployment
 metadata:
   name: agent
   labels:
-    helm.sh/chart: agent-1.0.0
+    helm.sh/chart: agent-1.1.0
     app.kubernetes.io/name: agent
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "v1.0"

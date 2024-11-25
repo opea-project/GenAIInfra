@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: codetrans-svelte-ui-config
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-1.1.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: codetrans-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -25,7 +25,7 @@ kind: Service
 metadata:
   name: codetrans-svelte-ui
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-1.1.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: codetrans-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -50,7 +50,7 @@ kind: Deployment
 metadata:
   name: codetrans-svelte-ui
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-1.1.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: codetrans-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -64,7 +64,7 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: ui-1.0.0
+        helm.sh/chart: ui-1.1.0
         app.kubernetes.io/name: ui
         app.kubernetes.io/instance: codetrans-svelte-ui
         app.kubernetes.io/version: "v1.0"

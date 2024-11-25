@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: asr-config
   labels:
-    helm.sh/chart: asr-1.0.0
+    helm.sh/chart: asr-1.1.0
     app.kubernetes.io/name: asr
     app.kubernetes.io/instance: asr
     app.kubernetes.io/version: "v1.0"
@@ -29,7 +29,7 @@ kind: Service
 metadata:
   name: asr
   labels:
-    helm.sh/chart: asr-1.0.0
+    helm.sh/chart: asr-1.1.0
     app.kubernetes.io/name: asr
     app.kubernetes.io/instance: asr
     app.kubernetes.io/version: "v1.0"
@@ -54,7 +54,7 @@ kind: Deployment
 metadata:
   name: asr
   labels:
-    helm.sh/chart: asr-1.0.0
+    helm.sh/chart: asr-1.1.0
     app.kubernetes.io/name: asr
     app.kubernetes.io/instance: asr
     app.kubernetes.io/version: "v1.0"
