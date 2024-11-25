@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: lvm-uservice-config
   labels:
-    helm.sh/chart: lvm-uservice-1.0.0
+    helm.sh/chart: lvm-uservice-1.1.0
     app.kubernetes.io/name: lvm-uservice
     app.kubernetes.io/instance: lvm-uservice
     app.kubernetes.io/version: "v1.0"
@@ -31,7 +31,7 @@ kind: Service
 metadata:
   name: lvm-uservice
   labels:
-    helm.sh/chart: lvm-uservice-1.0.0
+    helm.sh/chart: lvm-uservice-1.1.0
     app.kubernetes.io/name: lvm-uservice
     app.kubernetes.io/instance: lvm-uservice
     app.kubernetes.io/version: "v1.0"
@@ -56,7 +56,7 @@ kind: Deployment
 metadata:
   name: lvm-uservice
   labels:
-    helm.sh/chart: lvm-uservice-1.0.0
+    helm.sh/chart: lvm-uservice-1.1.0
     app.kubernetes.io/name: lvm-uservice
     app.kubernetes.io/instance: lvm-uservice
     app.kubernetes.io/version: "v1.0"

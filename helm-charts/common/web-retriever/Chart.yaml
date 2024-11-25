@@ -5,11 +5,11 @@ apiVersion: v2
 name: web-retriever
 description: The Helm chart for deploying web retriever as microservice
 type: application
-version: 1.0.0
+version: 1.1.0
 # The web retriever microservice server version
 appVersion: "v1.0"
 dependencies:
   - name: tei
-    version: 1.0.0
+    version: 1.1.0
     repository: file://../tei
     condition: tei.enabled

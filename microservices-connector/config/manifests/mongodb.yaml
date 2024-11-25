@@ -8,7 +8,7 @@ kind: Service
 metadata:
   name: mongodb
   labels:
-    helm.sh/chart: mongodb-1.0.0
+    helm.sh/chart: mongodb-1.1.0
     app.kubernetes.io/name: mongodb
     app.kubernetes.io/instance: mongodb
     app.kubernetes.io/version: "7.0.11"
@@ -33,7 +33,7 @@ kind: Deployment
 metadata:
   name: mongodb
   labels:
-    helm.sh/chart: mongodb-1.0.0
+    helm.sh/chart: mongodb-1.1.0
     app.kubernetes.io/name: mongodb
     app.kubernetes.io/instance: mongodb
     app.kubernetes.io/version: "7.0.11"
