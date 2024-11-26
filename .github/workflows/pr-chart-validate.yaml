@@ -53,4 +53,5 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         run: |
           helm-charts/update_dependency.sh
+          helm repo add milvus https://zilliztech.github.io/milvus-helm
           ct lint --check-version-increment=false --validate-maintainers=false --chart-dirs ${{ env.CHARTS_DIRS }} --target-branch ${{ github.event.repository.default_branch }}
