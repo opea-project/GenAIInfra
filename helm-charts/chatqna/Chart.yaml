@@ -21,9 +21,9 @@ dependencies:
   - name: tei
     version: 1.0.0
     repository: "file://../common/tei"
-  - name: teirerank
-    version: 1.0.0
-    repository: "file://../common/teirerank"
+#  - name: teirerank
+#    version: 1.0.0
+#    repository: "file://../common/teirerank"
   - name: redis-vector-db
     version: 1.0.0
     repository: "file://../common/redis-vector-db"
