@@ -8,7 +8,7 @@
 replicaCount: 1
 
 TTS_MODEL_PATH: "microsoft/speecht5_tts"
-#VOCODE_MODEL: "microsoft/speecht5_hifigan"
+# VOCODE_MODEL: "microsoft/speecht5_hifigan"
 
 image:
   repository: opea/speecht5
