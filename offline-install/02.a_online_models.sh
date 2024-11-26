@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 registry=registry:5000
-hf_token="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"
+hf_token=""
 http_proxy=""
 https_proxy=""
 
