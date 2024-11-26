@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: data-prep-config
   labels:
-    helm.sh/chart: data-prep-1.0.0
+    helm.sh/chart: data-prep-0-latest
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
     app.kubernetes.io/version: "v1.0"
@@ -38,7 +38,7 @@ kind: Service
 metadata:
   name: data-prep
   labels:
-    helm.sh/chart: data-prep-1.0.0
+    helm.sh/chart: data-prep-0-latest
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
     app.kubernetes.io/version: "v1.0"
@@ -63,7 +63,7 @@ kind: Deployment
 metadata:
   name: data-prep
   labels:
-    helm.sh/chart: data-prep-1.0.0
+    helm.sh/chart: data-prep-0-latest
     app.kubernetes.io/name: data-prep
     app.kubernetes.io/instance: data-prep
     app.kubernetes.io/version: "v1.0"
@@ -101,7 +101,6 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/dataprep-redis:latest"
-          imagePullPolicy: 
           ports:
             - name: data-prep
               containerPort: 6007

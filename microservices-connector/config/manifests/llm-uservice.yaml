@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: llm-uservice-config
   labels:
-    helm.sh/chart: llm-uservice-1.0.0
+    helm.sh/chart: llm-uservice-0-latest
     app.kubernetes.io/name: llm-uservice
     app.kubernetes.io/instance: llm-uservice
     app.kubernetes.io/version: "v1.0"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: llm-uservice
   labels:
-    helm.sh/chart: llm-uservice-1.0.0
+    helm.sh/chart: llm-uservice-0-latest
     app.kubernetes.io/name: llm-uservice
     app.kubernetes.io/instance: llm-uservice
     app.kubernetes.io/version: "v1.0"
@@ -57,7 +57,7 @@ kind: Deployment
 metadata:
   name: llm-uservice
   labels:
-    helm.sh/chart: llm-uservice-1.0.0
+    helm.sh/chart: llm-uservice-0-latest
     app.kubernetes.io/name: llm-uservice
     app.kubernetes.io/instance: llm-uservice
     app.kubernetes.io/version: "v1.0"
@@ -95,7 +95,6 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/llm-tgi:latest"
-          imagePullPolicy: 
           ports:
             - name: llm-uservice
               containerPort: 9000

@@ -11,6 +11,8 @@ ASR_MODEL_PATH: "openai/whisper-small"
 
 image:
   repository: opea/whisper
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 

@@ -241,7 +241,7 @@ kind: ConfigMap
 metadata:
   name: retriever-usvc-tei-config
   labels:
-    helm.sh/chart: tei-1.0.0
+    helm.sh/chart: tei-0-latest
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "cpu-1.5"
@@ -268,7 +268,7 @@ kind: ConfigMap
 metadata:
   name: retriever-usvc-config
   labels:
-    helm.sh/chart: retriever-usvc-1.0.0
+    helm.sh/chart: retriever-usvc-0-latest
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
@@ -443,7 +443,7 @@ kind: Service
 metadata:
   name: retriever-usvc-tei
   labels:
-    helm.sh/chart: tei-1.0.0
+    helm.sh/chart: tei-0-latest
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "cpu-1.5"
@@ -468,7 +468,7 @@ kind: Service
 metadata:
   name: retriever-usvc
   labels:
-    helm.sh/chart: retriever-usvc-1.0.0
+    helm.sh/chart: retriever-usvc-0-latest
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
@@ -691,7 +691,7 @@ kind: Deployment
 metadata:
   name: retriever-usvc-tei
   labels:
-    helm.sh/chart: tei-1.0.0
+    helm.sh/chart: tei-0-latest
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "cpu-1.5"
@@ -720,7 +720,6 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
-          imagePullPolicy: 
           args:
             - "--auto-truncate"
           volumeMounts:
@@ -781,7 +780,7 @@ kind: Deployment
 metadata:
   name: retriever-usvc
   labels:
-    helm.sh/chart: retriever-usvc-1.0.0
+    helm.sh/chart: retriever-usvc-0-latest
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
@@ -819,7 +818,6 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/retriever-milvus:latest"
-          imagePullPolicy: 
           ports:
             - name: retriever-usvc
               containerPort: 7000

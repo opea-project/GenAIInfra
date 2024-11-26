@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: tei-config
   labels:
-    helm.sh/chart: tei-1.0.0
+    helm.sh/chart: tei-0-latest
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
@@ -35,7 +35,7 @@ kind: Service
 metadata:
   name: tei
   labels:
-    helm.sh/chart: tei-1.0.0
+    helm.sh/chart: tei-0-latest
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
@@ -60,7 +60,7 @@ kind: Deployment
 metadata:
   name: tei
   labels:
-    helm.sh/chart: tei-1.0.0
+    helm.sh/chart: tei-0-latest
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
@@ -89,7 +89,6 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
-          imagePullPolicy: 
           args:
             - "--auto-truncate"
           volumeMounts:

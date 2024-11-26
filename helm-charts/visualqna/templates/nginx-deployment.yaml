@@ -66,7 +66,9 @@ spec:
     spec:
       containers:
       - image: nginx:1.27.1
+        {{- if .Values.image.pullPolicy }}
         imagePullPolicy: {{ .Values.image.pullPolicy }}
+        {{- end }}
         name: nginx
         volumeMounts:
         - mountPath: /etc/nginx/conf.d

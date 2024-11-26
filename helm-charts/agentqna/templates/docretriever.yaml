@@ -58,7 +58,9 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.docretriever.image.repository }}:{{ .Values.docretriever.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.docretriever.image.pullPolicy }}
           imagePullPolicy: {{ .Values.docretriever.image.pullPolicy }}
+          {{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp

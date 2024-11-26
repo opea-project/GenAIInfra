@@ -23,6 +23,8 @@ HF_HUB_ENABLE_HF_TRANSFER: "0"
 
 image:
   repository: ghcr.io/huggingface/text-embeddings-inference
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "cpu-1.5"
 

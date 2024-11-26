@@ -11,6 +11,8 @@ port: 2080
 shmSize: 1Gi
 image:
   repository: opea/vllm
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
