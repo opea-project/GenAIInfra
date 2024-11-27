@@ -28,6 +28,35 @@ spec:
       serviceAccountName: {{ include "vllm.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if not (hasPrefix "/data/" .Values.LLM_MODEL_ID) }}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: {{ include "vllm.fullname" . }}-config
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-c']
+          args:
+            - |
+              huggingface-cli download --cache-dir /data --token $(HF_TOKEN) {{ .Values.LLM_MODEL_ID | quote }};
+              chmod -R g+w /data/models--{{ replace "/" "--" .Values.LLM_MODEL_ID }}
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           envFrom:
@@ -39,11 +68,7 @@ spec:
                 optional: true
             {{- end }}
           securityContext:
-            {{- if .Values.global.modelUseHostPath }}
-            {}
-            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
-            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}

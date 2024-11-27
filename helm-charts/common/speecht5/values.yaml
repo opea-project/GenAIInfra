@@ -8,7 +8,7 @@
 replicaCount: 1
 
 TTS_MODEL_PATH: "microsoft/speecht5_tts"
-# VOCODE_MODEL: "microsoft/speecht5_hifigan"
+VOCODER_MODEL: "microsoft/speecht5_hifigan"
 
 image:
   repository: opea/speecht5
@@ -47,6 +47,9 @@ securityContext:
     - ALL
   seccompProfile:
     type: RuntimeDefault
+  # Init container sets the downloaded model dir to be group writable, so that container
+  # can keep its lock file there. This relies on both containers using the same group ID.
+  runAsGroup: 0
 
 service:
   type: ClusterIP
@@ -96,6 +99,7 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   # service account name to be shared with all parent/child charts.
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.

@@ -62,6 +62,9 @@ securityContext:
     - ALL
   seccompProfile:
     type: RuntimeDefault
+  # Init container sets the downloaded model dir to be group writable, so that container
+  # can keep its lock file there. This relies on both containers using the same group ID.
+  runAsGroup: 0
 
 service:
   type: ClusterIP
