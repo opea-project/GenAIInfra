@@ -35,7 +35,9 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.v2a.image.repository }}:{{ .Values.v2a.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp

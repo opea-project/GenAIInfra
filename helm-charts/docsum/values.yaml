@@ -10,7 +10,8 @@ LLM_SERVICE_HOST_IP: ""
 
 image:
   repository: opea/docsum
-  pullPolicy: IfNotPresent
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 v2a:

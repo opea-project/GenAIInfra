@@ -40,7 +40,9 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.crag.image.repository }}:{{ .Values.crag.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.crag.image.pullPolicy }}
           imagePullPolicy: {{ .Values.crag.image.pullPolicy }}
+          {{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp
