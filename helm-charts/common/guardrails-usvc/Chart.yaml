@@ -10,5 +10,6 @@ appVersion: "v1.0"
 dependencies:
   - name: tgi
     version: 0-latest
+    alias: tgi-guardrails
     repository: file://../tgi
-    condition: tgi.enabled
+    condition: tgi-guardrails.enabled
