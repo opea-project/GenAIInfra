@@ -53,9 +53,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{/*
 Create the name of the service account to use
 */}}
-{{- define "llm-uservice.serviceAccountName" -}}
+{{- define "embedding-usvc.serviceAccountName" -}}
 {{- if .Values.serviceAccount.create }}
-{{- default (include "llm-uservice.fullname" .) .Values.serviceAccount.name }}
+{{- default (include "embedding-usvc.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
