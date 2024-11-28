@@ -15,14 +15,25 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-port: 7777
-service:
-  type: ClusterIP
-  port: 7777
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
 
-nginx:
-  service:
-    type: NodePort
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
 
 securityContext:
   readOnlyRootFilesystem: true
@@ -34,6 +45,15 @@ securityContext:
     - ALL
   seccompProfile:
     type: RuntimeDefault
+
+port: 7777
+service:
+  type: ClusterIP
+  port: 7777
+
+nginx:
+  service:
+    type: NodePort
 
 nodeSelector: {}
 
