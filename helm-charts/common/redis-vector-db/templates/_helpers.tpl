@@ -54,7 +54,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "redis-vector-db.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
+{{- if .Values.global.sharedSAName }}
+{{- .Values.global.sharedSAName }}
+{{- else if .Values.serviceAccount.create }}
 {{- default (include "redis-vector-db.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
