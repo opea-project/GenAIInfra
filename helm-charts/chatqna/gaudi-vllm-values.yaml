@@ -9,6 +9,7 @@ tgi:
 
 vllm:
   enabled: true
+  accelDevice: "gaudi"
   image:
     repository: opea/vllm-gaudi
     tag: "latest"
