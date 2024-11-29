@@ -9,7 +9,7 @@ replicaCount: 1
 
 # Enabling HPA will:
 # - Ignore above replica count, as it will be controlled by HPA
-# - Add example HPA scaling rules with thresholds suitable for Xeon deployments
+# - Add example HPA scaling rules with custom metrics thresholds
 # - Require custom metrics ConfigMap available in the main application chart
 autoscaling:
   maxReplicas: 3
