@@ -8,7 +8,7 @@ image:
 # guardrails related config
 guardrails-usvc:
   enabled: true
-  SAFETY_GUARD_ENDPOINT: "http://{{ .Release.Name }}-tgi-guardrails"
+  # SAFETY_GUARD_ENDPOINT: "http://{{ .Release.Name }}-tgi-guardrails"
   SAFETY_GUARD_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
 tgi-guardrails:
   LLM_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
