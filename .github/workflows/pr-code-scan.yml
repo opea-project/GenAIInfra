@@ -33,7 +33,7 @@ jobs:
     steps:
       - name: Checkout out Repo
         uses: actions/checkout@v4
-      
+
       - name: Check Dangerous Command Injection
         uses: opea-project/validation/actions/check-cmd@main
         with:
