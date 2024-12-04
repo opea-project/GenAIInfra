@@ -15,14 +15,15 @@ selector="app.kubernetes.io/name=grafana"
 grafana="kubectl -n $ns get pod --selector $selector --field-selector=status.phase=Running -o name"
 
 # Labels needed in configMap to get (Helm installed) Grafana to load it as dashboard
-labels="grafana_dashboard=1 release=prometheus-stack app=kube-prometheus-stack-grafana"
+labels="grafana_dashboard=1"
 
 error_exit ()
 {
 	name=${0##*/}
 	echo
-	echo "Create/update dashboards specified in given JSON files to Grafana."
-	echo "Names for the created configMaps will be in '$USER-<filename>' format."
+	echo "Create/update dashboards specified in given JSON files for Grafana."
+	echo "Names for the created configMaps will be in '$USER-<filename>' format"
+	echo "and they go to (Grafana) '$ns' namespace."
 	echo
 	echo "usage: $name <JSON files>"
 	echo
@@ -44,11 +45,12 @@ for file in "$@"; do
 	if [ ! -f "$file" ]; then
 		error_exit "JSON file '$file' does not exist"
 	fi
-	# Dashboard 'uid' is optional, but it should have a title...
+	# Dashboard 'uid' is optional as Grafana can generate one...
 	uid=$(jq .uid "$file" | tail -1)
 	if [ -z "$uid" ]; then
 		error_exit "'$file' dashboard has invalid JSON"
 	fi
+	# ...but it should have a title.
 	title=$(jq .title "$file" | tail -1)
 	if [ "$title" = "null" ]; then
 		error_exit "'$file' dashboard has no 'title' field"
@@ -103,22 +105,4 @@ done
 
 rm $tmp
 
-echo
-echo "Restarting Grafana so that it notices updated dashboards..."
-pod=$($grafana)
-echo "kubectl -n $ns delete $pod"
-kubectl -n "$ns" delete "$pod"
-
-echo
-echo "Waiting until new Grafana instance is running..."
-while true; do
-	sleep 2
-	pod=$($grafana)
-	if [ -n "$pod" ]; then
-		break
-	fi
-done
-echo "kubectl -n $ns wait $pod --for=condition=Ready"
-kubectl -n "$ns" wait "$pod" --for=condition=Ready
-
-echo "DONE!"
+echo "DONE! => Dashboard(s) should appear in Grafana after 1 min wait *and* Grafana page reload."
