@@ -53,6 +53,12 @@ jobs:
           ref: ${{ steps.get-checkout-ref.outputs.CHECKOUT_REF }}
           fetch-depth: 0
 
+      - name: Check Dangerous Command Injection
+        if: github.event_name == 'pull_request' || github.event_name == 'pull_request_target'
+        uses: opea-project/validation/actions/check-cmd@main
+        with:
+          work_dir: ${{ github.workspace }}
+
       - name: Set variables
         id: set_variables
         env:
