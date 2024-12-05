@@ -61,7 +61,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "tgi.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
+{{- if .Values.global.sharedSAName }}
+{{- .Values.global.sharedSAName }}
+{{- else if .Values.serviceAccount.create }}
 {{- default (include "tgi.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}

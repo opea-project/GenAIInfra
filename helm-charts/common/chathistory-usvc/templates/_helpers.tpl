@@ -54,7 +54,9 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 Create the name of the service account to use
 */}}
 {{- define "chathistory-usvc.serviceAccountName" -}}
-{{- if .Values.serviceAccount.create }}
+{{- if .Values.global.sharedSAName }}
+{{- .Values.global.sharedSAName }}
+{{- else if .Values.serviceAccount.create }}
 {{- default (include "chathistory-usvc.fullname" .) .Values.serviceAccount.name }}
 {{- else }}
 {{- default "default" .Values.serviceAccount.name }}
