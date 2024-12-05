@@ -1,0 +1,96 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-m2t
+  labels:
+    {{- include "docsum.labels" . | nindent 4 }}
+    app: {{ .Release.Name }}-m2t
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "docsum.selectorLabels" . | nindent 6 }}
+      app: {{ .Release.Name }}-m2t
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "docsum.selectorLabels" . | nindent 8 }}
+        app: {{ .Release.Name }}-m2t
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}-m2t
+          env:
+            - name: V2A_ENDPOINT
+              value: {{ .Release.Name }}-v2a:{{ .Values.v2a.service.port }}
+            - name: A2T_ENDPOINT
+              value: {{ .Release.Name }}-whisper:{{ .Values.whisper.service.port }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.m2t.image.repository }}:{{ .Values.m2t.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: m2t
+              containerPort: {{ .Values.m2t.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.evenly_distributed }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "docsum.selectorLabels" . | nindent 14 }}
+              app: {{ .Release.Name }}-m2t
+      {{- end }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Release.Name }}-m2t
+  labels:
+    {{- include "docsum.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.m2t.service.type }}
+  ports:
+    - port: {{ .Values.m2t.service.port }}
+      targetPort: {{ .Values.m2t.port }}
+      protocol: TCP
+      name: m2t
+  selector:
+    {{- include "docsum.selectorLabels" . | nindent 4 }}
+    app: {{ .Release.Name }}-m2t

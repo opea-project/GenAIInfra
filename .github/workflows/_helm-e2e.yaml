@@ -11,6 +11,11 @@ on:
         required: true
         type: string
         description: "workload to test, chatqna or common/asr"
+      dockerhub:
+        default: "false"
+        required: false
+        type: string
+        description: "Set to true if you want to use released docker images at dockerhub. By default using internal docker registry."
       tag:
         default: "latest"
         required: false
@@ -81,8 +86,13 @@ jobs:
           CHART_MOUNT=/home/$USER_ID/.cache/huggingface/hub
           HFTOKEN=$(cat /home/$USER_ID/.cache/huggingface/token)
           pushd helm-charts
-          # insert a prefix before opea/.*, the prefix is OPEA_IMAGE_REPO
-          find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
+          if [ "${{ inputs.dockerhub }}" = "true" ]; then
+            echo "Use released docker images"
+          else
+            echo "Use internal docker registry"
+            # insert a prefix before opea/.*, the prefix is OPEA_IMAGE_REPO
+            find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
+          fi
           # set OPEA image tag to ${{ inputs.tag }}
           find . -name '*values.yaml' -type f -exec sed -i 's#tag: "latest"#tag: ${{ inputs.tag }}#g' {} \;
           # set huggingface token

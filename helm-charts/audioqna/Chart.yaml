@@ -7,27 +7,27 @@ description: The Helm chart to deploy AudioQnA
 type: application
 dependencies:
   - name: asr
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/asr"
   - name: whisper
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/whisper"
   - name: tts
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tts"
   - name: speecht5
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/speecht5"
   - name: tgi
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tgi"
   - name: llm-uservice
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/llm-uservice"
 # Uncomment the following to enable UI when the UI image is ready on DockerHub
 # - name: ui
-#  version: 1.0.0
+#  version: 0-latest
 #  repository: "file://../common/ui"
 #  alias: audioqna-ui
-version: 1.0.0
+version: 0-latest
 appVersion: "1.1"

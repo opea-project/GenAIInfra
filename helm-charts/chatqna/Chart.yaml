@@ -7,35 +7,35 @@ description: The Helm chart to deploy ChatQnA
 type: application
 dependencies:
   - name: tgi
-    version: 1.0.0
+    version: 0-latest
     alias: tgi-guardrails
     repository: "file://../common/tgi"
     condition: guardrails-usvc.enabled
   - name: guardrails-usvc
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/guardrails-usvc"
     condition: guardrails-usvc.enabled
   - name: tgi
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tgi"
   - name: tei
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tei"
   - name: teirerank
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/teirerank"
   - name: redis-vector-db
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/redis-vector-db"
   - name: retriever-usvc
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/retriever-usvc"
   - name: data-prep
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/data-prep"
   - name: ui
     alias: chatqna-ui
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/ui"
-version: 1.0.0
+version: 0-latest
 appVersion: "v1.0"

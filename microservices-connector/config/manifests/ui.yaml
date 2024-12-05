@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: ui-config
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-0-latest
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: ui
     app.kubernetes.io/version: "v1.0"
@@ -28,7 +28,7 @@ kind: Service
 metadata:
   name: ui
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-0-latest
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: ui
     app.kubernetes.io/version: "v1.0"
@@ -53,7 +53,7 @@ kind: Deployment
 metadata:
   name: ui
   labels:
-    helm.sh/chart: ui-1.0.0
+    helm.sh/chart: ui-0-latest
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: ui
     app.kubernetes.io/version: "v1.0"
@@ -67,7 +67,7 @@ spec:
   template:
     metadata:
       labels:
-        helm.sh/chart: ui-1.0.0
+        helm.sh/chart: ui-0-latest
         app.kubernetes.io/name: ui
         app.kubernetes.io/instance: ui
         app.kubernetes.io/version: "v1.0"
@@ -86,7 +86,6 @@ spec:
           securityContext:
             {}
           image: "opea/chatqna-conversation-ui:latest"
-          imagePullPolicy: IfNotPresent
           ports:
             - name: ui
               containerPort: 80

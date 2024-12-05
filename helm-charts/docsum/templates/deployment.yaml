@@ -39,12 +39,14 @@ spec:
               {{- else }}
               value: {{ .Release.Name }}-llm-uservice
               {{- end }}
-            #- name: MEGA_SERVICE_PORT
-            #  value: {{ .Values.port }}
+            - name: DATA_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-m2t
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp

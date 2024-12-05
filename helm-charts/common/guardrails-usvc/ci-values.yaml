@@ -5,5 +5,5 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-tgi:
+tgi-guardrails:
   enabled: true

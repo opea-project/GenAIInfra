@@ -10,6 +10,11 @@ on:
         required: false
         type: string
         description: "workloads to test, empty for testing all helm charts"
+      dockerhub:
+        default: "false"
+        required: false
+        type: string
+        description: "Set to true if you want to use released docker images at dockerhub. By default using internal docker registry."
       tag:
         default: "latest"
         description: "Image tag to be tested"
@@ -50,9 +55,9 @@ jobs:
                 if [ -f "$file" ]; then
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    run_matrix="${run_matrix}{\"example\":\"$(basename "${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$(basename "${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
                   fi
                 fi
               done
@@ -65,9 +70,9 @@ jobs:
                 if [ -f "$file" ]; then
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    run_matrix="${run_matrix}{\"example\":\"$(basename "${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$(basename "${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                   fi
                 fi
               done
@@ -98,7 +103,8 @@ jobs:
     uses: ./.github/workflows/_helm-e2e.yaml
     with:
       tag: ${{ inputs.tag }}
-      workload: ${{ matrix.example }}
+      dockerhub: ${{ inputs.dockerhub }}
+      workload: ${{ matrix.directory }}/${{ matrix.example }}
       hardware: ${{ matrix.hardware }}
       valuefile: ${{ matrix.valuefile }}
     secrets: inherit

@@ -9,7 +9,7 @@ tgi:
 vllm:
   enabled: true
   image:
-    repository: opea/vllm-hpu
+    repository: opea/vllm-gaudi
     tag: "latest"
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   OMPI_MCA_btl_vader_single_copy_mechanism: none

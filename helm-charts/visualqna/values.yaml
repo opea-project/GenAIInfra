@@ -9,7 +9,8 @@ replicaCount: 1
 
 image:
   repository: opea/visualqna
-  pullPolicy: IfNotPresent
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
@@ -55,14 +56,6 @@ visualqna-ui:
     tag: "latest"
   BACKEND_SERVICE_ENDPOINT: "/v1/visualqna"
   containerPort: 5173
-
-# If you would like to switch to traditional UI image
-# Uncomment the following lines
-# visualqna-ui:
-#   image:
-#     repository: "opea/visualqna-ui"
-#     tag: "latest"
-#   containerPort: "5173"
 
 global:
   http_proxy: ""

@@ -20,17 +20,17 @@ cd GenAIInfra/helm-charts/
 ./update_dependency.sh
 helm dependency update audioqna
 export HFTOKEN="insert-your-huggingface-token-here"
-export MODELDIR="/mnt/opea-models"
-export MODELNAME="Intel/neural-chat-7b-v3-3"
 # To run on Xeon
-helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
+helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 # To run on Gaudi
-#helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f audioqna/gaudi-values.yaml
+#helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/gaudi-values.yaml
 ```
 
 ### IMPORTANT NOTE
 
-1. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
+1. If you want to cache the downloaded model for later reuse, please set the bash environment variable `MODELDIR` to an existing directory on the node, then append `--set global.modelUseHostPath=${MODELDIR}` to the `helm install` commands.
+
+2. Make sure your `${MODELDIR}` and `${MODELDIR}/.locks` is writable to all the users if you want to use the cached downloaded models, i.e. `$ sudo chmod 0777 ${MODELDIR} && sudo chmod 0777 ${MODELDIR}/.locks `.
 
 ## Verify
 

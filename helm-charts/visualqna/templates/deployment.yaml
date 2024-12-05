@@ -34,13 +34,23 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: LVM_SERVICE_HOST_IP
-              value: {{ .Release.Name }}-lvm-uservice
-            - name: LVM_SERVICE_PORT
-              value: "80"
+              value: {{ include "lvm-uservice.fullname" (index .Subcharts "lvm-uservice") | quote }}
             - name: MEGA_SERVICE_HOST_IP
               value: "0.0.0.0"
             - name: MEGA_SERVICE_PORT
               value: {{ .Values.port | quote }}
+            {{- if .Values.global.http_proxy }}
+            - name: http_proxy
+              value: {{ .Values.global.http_proxy | quote }}
+            {{- end }}
+            {{- if .Values.global.https_proxy }}
+            - name: https_proxy
+              value: {{ .Values.global.https_proxy | quote }}
+            {{- end }}
+            {{- if or .Values.global.http_proxy .Values.global.https_proxy }}
+            - name: no_proxy
+              value: {{ printf "%s,%s" (include "lvm-uservice.fullname" (index .Subcharts "lvm-uservice")) .Values.global.no_proxy | quote }}
+            {{- end }}
             {{- if .Values.LOGFLAG }}
             - name: LOGFLAG
               value: {{ .Values.LOGFLAG | quote }}
@@ -48,7 +58,9 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp

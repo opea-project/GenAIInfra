@@ -10,9 +10,28 @@ LLM_SERVICE_HOST_IP: ""
 
 image:
   repository: opea/docsum
-  pullPolicy: IfNotPresent
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
+v2a:
+  image:
+    repository: opea/dataprep-video2audio
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  port: 7078
+  service:
+    type: ClusterIP
+    port: 7078
+m2t:
+  image:
+    repository: opea/dataprep-multimedia2text
+    # Overrides the image tag whose default is the chart appVersion.
+    tag: "latest"
+  port: 7079
+  service:
+    type: ClusterIP
+    port: 7079
 
 port: 8888
 service:

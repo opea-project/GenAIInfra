@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: teirerank-config
   labels:
-    helm.sh/chart: teirerank-1.0.0
+    helm.sh/chart: teirerank-0-latest
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -35,7 +35,7 @@ kind: Service
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-1.0.0
+    helm.sh/chart: teirerank-0-latest
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -60,7 +60,7 @@ kind: Deployment
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-1.0.0
+    helm.sh/chart: teirerank-0-latest
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
     app.kubernetes.io/version: "cpu-1.5"
@@ -89,7 +89,6 @@ spec:
           securityContext:
             {}
           image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
-          imagePullPolicy: IfNotPresent
           args:
             - "--auto-truncate"
           volumeMounts:
