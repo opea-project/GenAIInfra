@@ -23,7 +23,7 @@ data:
   HF_HOME: "/tmp/.cache/huggingface"
   # https://github.com/outlines-dev/outlines/blob/main/outlines/caching.py#L14-L29
   OUTLINES_CACHE_DIR: "/tmp/.cache/outlines"
-  VLLM_CPU_KVCACHE_SPACE: "40"
+  OMPI_MCA_btl_vader_single_copy_mechanism: "none"
 ---
 # Source: vllm/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -88,12 +88,18 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/llm-vllm-hpu:latest"
+          image: "opea/vllm-hpu:latest"
           imagePullPolicy: IfNotPresent
           args:
-            - "/bin/bash"
-            - "-c"
-            - "python3 -m vllm.entrypoints.openai.api_server --enforce-eager --model Intel/neural-chat-7b-v3-3 --tensor-parallel-size 1 --host 0.0.0.0 --port 2080 --download-dir /data --block-size 128 --max-num-seqs 256 --max-seq_len-to-capture 2048"
+            - "--enforce-eager"
+            - "--tensor-parallel-size"
+            - "1"
+            - "--block-size"
+            - "128"
+            - "--max-num-seqs"
+            - "256"
+            - "--max-seq_len-to-capture"
+            - "2048"
             - "--model"
             - "Intel/neural-chat-7b-v3-3"
             - "--host"

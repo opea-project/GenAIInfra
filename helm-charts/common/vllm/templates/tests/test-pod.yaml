@@ -19,7 +19,7 @@ spec:
         - |
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
-            curl http://{{ include "vllm.fullname" . }}/v1/completions \
+            curl http://{{ include "vllm.fullname" . }}/v1/completions -sS --fail-with-body \
             -H "Content-Type: application/json" \
             -d '{"model": {{ .Values.LLM_MODEL_ID | quote }},"prompt": "What is Deep Learning?","max_tokens": 32,"temperature": 0}' && break;
             curlcode=$?

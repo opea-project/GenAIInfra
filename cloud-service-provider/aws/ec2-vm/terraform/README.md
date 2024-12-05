@@ -10,7 +10,7 @@ This example uses the following Terraform module:
 
 ## Overview
 
-This example creates an AWS EC2  in the default VPC. The default region is can be changed in variables.tf.
+This example creates an AWS EC2 in the default VPC. The default region is can be changed in variables.tf.
 
 This example also creates:
 
@@ -45,7 +45,7 @@ variables.tf
 ```
 
 For additional customization, refer to the module documentation under **"Inputs"** [Terraform Module](https://registry.terraform.io/modules/intel/aws-vm/intel/latest)
-. 
+.
 
 The module supports much more than what is shown in this example.
 
@@ -75,9 +75,9 @@ cd GenAIInfra/cloud-service-provider/aws/ec2-vm/terraform
 
 # Modify the main.tf and variables.tf file to suit your needs (see above)
 
-terraform init  
+terraform init
 terraform plan
-terraform apply  
+terraform apply
 ```
 
 ## SSH

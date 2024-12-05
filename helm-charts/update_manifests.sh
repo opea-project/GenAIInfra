@@ -31,7 +31,7 @@ function generate_yaml {
     if [[ "$filename" =~ ^variant_.*-values.yaml ]]; then
       ext=$(echo $filename | sed 's/^variant_//' | sed 's/-values.yaml$//')
       outputfile="$ext-${chart}.yaml"
-      releasename=$ext-$chart
+      releasename=$(echo "${ext}-${chart}" | sed 's/_/-/g')
     else
       ext=$(echo $filename | sed 's/-values.yaml$//')
       outputfile="${chart}_${ext}.yaml"

@@ -1,0 +1,90 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Manual event to release helm chart to public site on release branch
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        default: "1.1.0"
+        description: "Release Version"
+        required: true
+        type: string
+      # artifacthub:
+      #   default: false
+      #   description: "Release to ArtifactHub repo"
+      #   required: true
+      #   type: bool
+      ghcr:
+        default: true
+        description: "Release to ghcr"
+        required: true
+        type: bool
+
+jobs:
+  release-charts:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Prepare helm packages
+        env:
+          SRC_DIR: helm-charts
+          DEST_DIR: charts
+        run: |
+          if grep -r '^version: ' `find helm-charts/ -name "Chart.yaml"` | grep -v "${{ inputs.version }}"; then
+            echo "Version check failed"
+            exit 1
+          fi
+          mkdir -p ${DEST_DIR}
+          # git clone --branch charts-release https://github.com/opea-project/GenAIInfra.git charts
+          # update components
+          for chart in ${SRC_DIR}/common/*
+          do
+                  echo "Packaging chart $chart..."
+                  helm dependency update ${chart}
+                  helm package $chart --destination ${DEST_DIR}
+          done
+          # update E2E Applications
+          for chart in ${SRC_DIR}/*
+          do
+                  if [ -f $chart ]; then continue; fi
+                  if [[ $chart =~ "common" ]]; then continue; fi
+                  echo "Packaging chart $chart..."
+                  helm dependency update ${chart}
+                  helm package $chart --destination ${DEST_DIR}
+          done
+
+      - name: Publish helm charts
+        run: |
+          set -x
+          cd charts
+          # if [ "${{ inputs.artifacthub }}" = "true" ]; then
+          #   echo "Push ${{ inputs.version }} charts to charts-release branch"
+          #   helm repo index .
+          #   # Insert copyright to avoid warnings
+          #   sed -i '1s/^/# Copyright (C) 2024 Intel Corporation\n# SPDX-License-Identifier: Apache-2.0\n\n/' index.yaml
+
+          #   git config --global user.name "NeuralChatBot"
+          #   git config --global user.email "grp_neural_chat_bot@intel.com"
+          #   git remote set-url origin https://NeuralChatBot:"${{ secrets.ACTION_TOKEN }}"@github.com/opea-project/GenAIInfra.git
+
+          #   git status
+          #   git add .
+          #   git commit -s -m "Add release ${{ inputs.version }} helm charts"
+          #   git push
+          # fi
+          if [ "${{ inputs.ghcr }}" = "true" ]; then
+           echo "Publish charts version ${{ inputs.version }}to ghcr"
+           echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u test --password-stdin
+           for chart in *-${{ inputs.version }}.tgz; do
+             echo "Publishing ${chart}\n"
+             helm push ${chart} oci://ghcr.io/opea-project/charts
+           done
+          fi
