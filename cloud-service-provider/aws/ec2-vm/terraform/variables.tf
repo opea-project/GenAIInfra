@@ -4,12 +4,29 @@ variable "region" {
   default     = "us-east-1"
 }
 
+variable "availability_zone" {
+  description = "Target AWS availability zone to deploy EC2 in."
+  type        = string
+  default     = "us-east-1d"
+}
+
+variable "instance_type" {
+  description = "EC2 instance type."
+  type        = string
+  default     = "c7i.16xlarge"
+}
+
+variable "volume_size" {
+  description = "Size of VM disk in GB."
+  type        = number
+  default     = 600
+}
+
 ##################################################################################################
 ###                                                                                            ###
 ###  PLEASE CHANGE THE IP CIDR BLOCK on TO ALLOW SSH FROM YOUR OWN ALLOWED IP ADDRESS FOR SSH  ###
 ###                 Use https://whatismyipaddress.com/ to get your IP address                  ###
 ##################################################################################################
-
 
 # Variable to add ingress rules to the security group. Replace the default values with the required ports and CIDR ranges.
 variable "ingress_rules" {

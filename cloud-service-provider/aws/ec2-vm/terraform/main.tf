@@ -68,16 +68,16 @@ module "ec2-vm" {
   source            = "intel/aws-vm/intel"
   version           = "1.3.3"
   key_name          = aws_key_pair.TF_key.key_name
-  instance_type     = "c7i.16xlarge" # Modify the instance type as required for your AI needs
-  availability_zone = "us-east-1d"
+  instance_type     = var.instance_type # Modify the instance type as required for your AI needs
+  availability_zone = var.availability_zone
   ami               = data.aws_ami.ubuntu-linux-2204.id
 
   # Size of VM disk in GB
   root_block_device = [{
-    volume_size = "600"
+    volume_size = var.volume_size
   }]
 
   tags = {
-    Name     = "opea-vm-${random_id.rid.dec}"
+    Name = "opea-vm-${random_id.rid.dec}"
   }
 }
