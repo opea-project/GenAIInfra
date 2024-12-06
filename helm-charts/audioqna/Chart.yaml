@@ -24,10 +24,9 @@ dependencies:
   - name: llm-uservice
     version: 0-latest
     repository: "file://../common/llm-uservice"
-# Uncomment the following to enable UI when the UI image is ready on DockerHub
-# - name: ui
-#  version: 0-latest
-#  repository: "file://../common/ui"
-#  alias: audioqna-ui
+  - name: ui
+    version: 0-latest
+    repository: "file://../common/ui"
+    alias: audioqna-ui
 version: 0-latest
 appVersion: "1.1"
