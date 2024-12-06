@@ -64,13 +64,12 @@ affinity: {}
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
-# Uncomment the following to enable UI when the UI image is ready on DockerHub
-# audioqna-ui:
-#  image:
-#    repository: opea/audioqna-ui
-#    tag: "latest"
-#  BACKEND_SERVICE_ENDPOINT: "/v1/audioqna"
-#  containerPort: 5173
+audioqna-ui:
+  image:
+    repository: opea/audioqna-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/audioqna"
+  containerPort: 5173
 
 global:
   http_proxy: ""
