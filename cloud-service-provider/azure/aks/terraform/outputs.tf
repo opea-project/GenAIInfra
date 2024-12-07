@@ -1,5 +1,5 @@
 output "cluster_endpoint" {
-  description = "Endpoint for ASK control plane"
+  description = "Endpoint for AKS control plane"
   #sensitive = false
   sensitive = true
   value       = azurerm_kubernetes_cluster.main.kube_config.0.host
