@@ -5,13 +5,13 @@ variable "location" {
 }
 
 variable "cluster_name" {
-  description = "ASK cluster name"
+  description = "AKS cluster name"
   type        = string
-  default     = "opea ask cluster"
+  default     = "opea aks cluster"
 }
 
 variable "kubernetes_version" {
-  description = "ASK cluster version"
+  description = "AKS cluster version"
   type        = string
   default     = "1.30" 
 }
@@ -34,7 +34,7 @@ variable "os_disk_size_gb" {
 }
 
 variable "node_pool_type" {
-  description = "Azure VM Scale Set priority"
+  description = "VM spot or on-demand instance types"
   type        = string
   default     = "Regular"  # Regular for on-demand, Spot for spot instances
 }
@@ -77,7 +77,7 @@ variable "cluster_version" {
 }
 
 variable "instance_types" {
-  description = "Azure VM size for nodes"
+  description = "Azure VM instance type"
   type    = list(string)
   default = ["Standard_D32d_v5"]
 }
