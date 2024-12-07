@@ -21,7 +21,7 @@ module "vnet" {
   depends_on = [azurerm_resource_group.main]
 }
 
-# ASK Cluster
+# AKS Cluster
 resource "azurerm_kubernetes_cluster" "main" {
   name                = var.cluster_name
   location            = azurerm_resource_group.main.location
@@ -104,7 +104,7 @@ resource "azurerm_key_vault" "main" {
 # Update kubeconfig
 resource "null_resource" "kubectl" {
   provisioner "local-exec" {
-    command = "az ask get-credentials --resource-group ${azurerm_resource_group.main.name} --name ${azurerm_kubernetes_cluster.main.name} --overwrite-existing"
+    command = "az aks get-credentials --resource-group ${azurerm_resource_group.main.name} --name ${azurerm_kubernetes_cluster.main.name} --overwrite-existing"
   }
   depends_on = [azurerm_kubernetes_cluster.main]
 }
