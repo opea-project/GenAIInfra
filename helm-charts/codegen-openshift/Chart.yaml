@@ -1,0 +1,18 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: codegen
+description: A Helm chart for deploying codegen on Red Hat OpenShift
+dependencies:
+  - name: tgi
+    version: 1.0.0
+    repository: "file://tgi"
+  - name: llm-uservice
+    version: 1.0.0
+    repository: "file://llm-uservice"
+  - name: react-ui
+    version: 0.1.0
+    repository: "file://react-ui"
+type: application
+version: 1.0.0
