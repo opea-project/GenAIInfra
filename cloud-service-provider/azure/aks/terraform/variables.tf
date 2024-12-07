@@ -5,13 +5,13 @@ variable "location" {
 }
 
 variable "cluster_name" {
-  description = "AKS cluster name"
+  description = "ASK cluster name"
   type        = string
-  default     = "opea aks cluster"
+  default     = "opea ask cluster"
 }
 
 variable "kubernetes_version" {
-  description = "AKS cluster version"
+  description = "ASK cluster version"
   type        = string
   default     = "1.30" 
 }
