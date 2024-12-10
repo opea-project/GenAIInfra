@@ -57,6 +57,13 @@ To deploy GenAIExamples to Kubernetes using helm charts, you need [Helm](https:/
 
 For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/README.md)
 
+### Use terraform to deploy on cloud service providers
+
+You can use [Terraform](https://www.terraform.io/) to create infrastruture to run OPEA applications on various cloud service provider (CSP) environments.
+
+* [AWS/EKS: Create managed Kubernetes cluster on AWS for OPEA](https://github.com/opea-project/GenAIInfra/blob/main/cloud-service-provider/aws/eks/terraform/README.MD)
+
+
 ## Additional Content
 
 - [Code of Conduct](https://github.com/opea-project/docs/tree/main/community/CODE_OF_CONDUCT.md)
