@@ -59,10 +59,9 @@ For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](h
 
 ### Use terraform to deploy on cloud service providers
 
-You can use [Terraform](https://www.terraform.io/) to create infrastruture to run OPEA applications on various cloud service provider (CSP) environments.
+You can use [Terraform](https://www.terraform.io/) to create infrastructure to run OPEA applications on various cloud service provider (CSP) environments.
 
-* [AWS/EKS: Create managed Kubernetes cluster on AWS for OPEA](https://github.com/opea-project/GenAIInfra/blob/main/cloud-service-provider/aws/eks/terraform/README.MD)
-
+- [AWS/EKS: Create managed Kubernetes cluster on AWS for OPEA](https://github.com/opea-project/GenAIInfra/blob/main/cloud-service-provider/aws/eks/terraform/README.MD)
 
 ## Additional Content
 
