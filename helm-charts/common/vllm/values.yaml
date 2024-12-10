@@ -51,7 +51,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-extraCmdArgs: ["--enforce-eager", "--dtype", "auto"]
+extraCmdArgs: []
 
 livenessProbe:
   httpGet:
