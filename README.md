@@ -39,7 +39,7 @@ The following steps are optional. They're only required if you want to run the w
 
    NOTE: Make sure you configure the appropriate container runtime based on the type of container runtime you installed during Kubernetes setup.
 
-4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Orchestration/Gaudi_Kubernetes/Device_Plugin_for_Kubernetes.html).
+4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Kubernetes_Installation/index.html).
 
    Alternatively, Intel provides a base operator to manage the Gaudi software stack. Refer to [this file](kubernetes-addons/Intel-Gaudi-Base-Operator/README.md) for details.
 
