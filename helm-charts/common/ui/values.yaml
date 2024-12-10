@@ -18,6 +18,17 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
 podAnnotations: {}
 
 podSecurityContext: {}
@@ -96,4 +107,8 @@ DATAPREP_GET_FILE_ENDPOINT: "/v1/dataprep/get_file"
 # data preparation delete file service URL, default to Mega data preparation service
 DATAPREP_DELETE_FILE_ENDPOINT: "/v1/dataprep/delete_file"
 
-global: {}
+global:
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: ""
