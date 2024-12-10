@@ -39,7 +39,7 @@ The following steps are optional. They're only required if you want to run the w
 
    NOTE: Make sure you configure the appropriate container runtime based on the type of container runtime you installed during Kubernetes setup.
 
-4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Orchestration/Gaudi_Kubernetes/Device_Plugin_for_Kubernetes.html).
+4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Kubernetes_Installation/index.html).
 
    Alternatively, Intel provides a base operator to manage the Gaudi software stack. Refer to [this file](kubernetes-addons/Intel-Gaudi-Base-Operator/README.md) for details.
 
@@ -56,6 +56,12 @@ Once you have deployed GMC in your Kubernetes cluster, you can deploy any of the
 To deploy GenAIExamples to Kubernetes using helm charts, you need [Helm](https://helm.sh/docs/intro/install/) installed on your machine.
 
 For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/README.md)
+
+### Use terraform to deploy on cloud service providers
+
+You can use [Terraform](https://www.terraform.io/) to create infrastructure to run OPEA applications on various cloud service provider (CSP) environments.
+
+- [AWS/EKS: Create managed Kubernetes cluster on AWS for OPEA](https://github.com/opea-project/GenAIInfra/blob/main/cloud-service-provider/aws/eks/terraform/README.MD)
 
 ## Additional Content
 
