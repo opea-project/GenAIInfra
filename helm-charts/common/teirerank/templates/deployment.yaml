@@ -31,6 +31,38 @@ spec:
       serviceAccountName: {{ include "teirerank.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if not (hasPrefix "/data/" .Values.RERANK_MODEL_ID) }}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: {{ include "teirerank.fullname" . }}-config
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            {{- if hasKey .Values.securityContext "runAsGroup" }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup }}
+            {{- end }}
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-c']
+          args:
+            - |
+              huggingface-cli download --cache-dir /data --token $(HF_TOKEN) $(MODEL_ID);
+              chmod -R g+w /data/models--{{ replace "/" "--" .Values.RERANK_MODEL_ID }}
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           envFrom:
