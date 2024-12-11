@@ -67,6 +67,10 @@ autoscaling:
 
 # Override values in specific subcharts
 tgi:
+  enabled: true
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+vllm:
+  enabled: false
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 # disable guardrails-usvc by default

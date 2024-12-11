@@ -13,10 +13,27 @@ metadata:
 data:
   config.yaml: |
     rules:
-    {{- if .Values.tgi.autoscaling.enabled }}
+    {{- if and .Values.vllm.enabled .Values.vllm.autoscaling.enabled }}
     # check metric with:
     # kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/<metric> | jq
     #
+    - seriesQuery: '{__name__="vllm:time_per_output_token_seconds_sum",service="{{ include "vllm.fullname" .Subcharts.vllm }}"}'
+      # Average output token latency from vLLM histograms, over 1 min
+      # (interval should be at least 4x serviceMonitor query interval,
+      # 0.001 divider add is to make sure there's always a valid value)
+      metricsQuery: 'rate(vllm:time_per_output_token_seconds_sum{service="{{ include "vllm.fullname" .Subcharts.vllm }}",<<.LabelMatchers>>}[1m]) / (0.001+rate(vllm:time_per_output_token_seconds_count{service="{{ include "vllm.fullname" .Subcharts.vllm }}",<<.LabelMatchers>>}[1m]))'
+      name:
+        matches: ^vllm:time_per_output_token_seconds_sum
+        as: "{{ include "vllm.metricPrefix" .Subcharts.vllm }}_token_latency"
+      resources:
+        # HPA needs both namespace + suitable object resource for its query paths:
+        # /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/<metric>
+        # (pod is not suitable object type for matching as each instance has different name)
+        overrides:
+          namespace: {resource: "namespace"}
+          service:   {resource: "service"}
+    {{- end }}
+    {{- if and .Values.tgi.enabled .Values.tgi.autoscaling.enabled }}
     {{- if .Values.tgi.accelDevice }}
     - seriesQuery: '{__name__="tgi_queue_size",service="{{ include "tgi.fullname" .Subcharts.tgi }}"}'
       # TGI instances queue_size sum
@@ -27,16 +44,12 @@ data:
     {{- else }}
     - seriesQuery: '{__name__="tgi_request_inference_duration_sum",service="{{ include "tgi.fullname" .Subcharts.tgi }}"}'
       # Average request latency from TGI histograms, over 1 min
-      # (0.001 divider add is to make sure there's always a valid value)
       metricsQuery: 'rate(tgi_request_inference_duration_sum{service="{{ include "tgi.fullname" .Subcharts.tgi }}",<<.LabelMatchers>>}[1m]) / (0.001+rate(tgi_request_inference_duration_count{service="{{ include "tgi.fullname" .Subcharts.tgi }}",<<.LabelMatchers>>}[1m]))'
       name:
         matches: ^tgi_request_inference_duration_sum
         as: "{{ include "tgi.metricPrefix" .Subcharts.tgi }}_request_latency"
     {{- end }}
       resources:
-        # HPA needs both namespace + suitable object resource for its query paths:
-        # /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/<metric>
-        # (pod is not suitable object type for matching as each instance has different name)
         overrides:
           namespace: {resource: "namespace"}
           service:   {resource: "service"}
