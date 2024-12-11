@@ -47,7 +47,7 @@ The following steps are optional. They're only required if you want to run the w
 
 ### Use GenAI Microservices Connector (GMC) to deploy and adjust GenAIExamples
 
-Follow [GMC README](https://github.com/opea-project/GenAIInfra/blob/main/microservices-connector/README.md)
+Follow [GMC README](microservices-connector/README.md)
 to install GMC into your kubernetes cluster. [GenAIExamples](https://github.com/opea-project/GenAIExamples) contains several sample GenAI example use case pipelines such as ChatQnA, DocSum, etc.
 Once you have deployed GMC in your Kubernetes cluster, you can deploy any of the example pipelines by following its Readme file (e.g. [Docsum](https://github.com/opea-project/GenAIExamples/blob/main/DocSum/kubernetes/intel/README_gmc.md)).
 
@@ -55,13 +55,14 @@ Once you have deployed GMC in your Kubernetes cluster, you can deploy any of the
 
 To deploy GenAIExamples to Kubernetes using helm charts, you need [Helm](https://helm.sh/docs/intro/install/) installed on your machine.
 
-For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/README.md)
+For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](helm-charts/README.md)
 
 ### Use terraform to deploy on cloud service providers
 
 You can use [Terraform](https://www.terraform.io/) to create infrastructure to run OPEA applications on various cloud service provider (CSP) environments.
 
-- [AWS/EKS: Create managed Kubernetes cluster on AWS for OPEA](https://github.com/opea-project/GenAIInfra/blob/main/cloud-service-provider/aws/eks/terraform/README.MD)
+- [AWS/EKS: Create managed Kubernetes cluster on AWS for OPEA](cloud-service-provider/aws/eks/terraform/README.MD)
+- [Azure/AKS: Create managed Kubernetes cluster on Azure for OPEA](cloud-service-provider/azure/aks/terraform/README.md)
 
 ## Additional Content
 
