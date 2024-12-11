@@ -69,10 +69,6 @@ service:
   type: ClusterIP
   port: 8888
 
-nginx:
-  service:
-    type: NodePort
-
 nodeSelector: {}
 
 tolerations: []
@@ -87,6 +83,10 @@ llm-uservice:
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+nginx:
+  service:
+    type: NodePort
 
 docsum-ui:
   image:

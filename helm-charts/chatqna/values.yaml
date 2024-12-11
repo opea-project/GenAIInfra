@@ -50,10 +50,6 @@ service:
   type: ClusterIP
   port: 8888
 
-nginx:
-  service:
-    type: NodePort
-
 nodeSelector: {}
 
 tolerations: []
@@ -77,6 +73,10 @@ vllm:
 # See guardrails-values.yaml for guardrail related options
 guardrails-usvc:
   enabled: false
+
+nginx:
+  service:
+    type: NodePort
 
 # If you would like to switch to traditional UI image
 # Uncomment the following lines

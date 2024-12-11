@@ -51,10 +51,6 @@ service:
   type: ClusterIP
   port: 7777
 
-nginx:
-  service:
-    type: NodePort
-
 nodeSelector: {}
 
 tolerations: []
@@ -64,6 +60,10 @@ affinity: {}
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: mistralai/Mistral-7B-Instruct-v0.3
+
+nginx:
+  service:
+    type: NodePort
 
 codetrans-ui:
   image:

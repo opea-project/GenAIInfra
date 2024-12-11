@@ -50,10 +50,6 @@ service:
   type: ClusterIP
   port: 8888
 
-nginx:
-  service:
-    type: NodePort
-
 nodeSelector: {}
 
 tolerations: []
@@ -68,6 +64,10 @@ llm-uservice:
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
+
+nginx:
+  service:
+    type: NodePort
 
 faqgen-ui:
   image:

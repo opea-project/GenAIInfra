@@ -45,9 +45,6 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-nginx:
-  service:
-    type: NodePort
 port: 8888
 service:
   type: ClusterIP
@@ -69,6 +66,10 @@ tgi:
   MAX_INPUT_LENGTH: "4096"
   MAX_TOTAL_TOKENS: "8192"
   LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
+
+nginx:
+  service:
+    type: NodePort
 
 visualqna-ui:
   image:

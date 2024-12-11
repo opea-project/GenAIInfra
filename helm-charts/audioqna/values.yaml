@@ -50,10 +50,6 @@ service:
   type: ClusterIP
   port: 3008
 
-nginx:
-  service:
-    type: NodePort
-
 nodeSelector: {}
 
 tolerations: []
@@ -63,6 +59,10 @@ affinity: {}
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+nginx:
+  service:
+    type: NodePort
 
 audioqna-ui:
   image:
