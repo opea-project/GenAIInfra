@@ -35,8 +35,8 @@ spec:
             - configMapRef:
                 name: {{ include "vllm.fullname" . }}-config
           securityContext:
-            allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
             capabilities:
               drop:
               - ALL
@@ -48,14 +48,22 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: huggingface/downloader:0.17.3
-          command: ['sh', '-c']
+          command: ['sh', '-ec']
           args:
             - |
-              huggingface-cli download --cache-dir /data --token $(HF_TOKEN) {{ .Values.LLM_MODEL_ID | quote }};
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model {{ .Values.LLM_MODEL_ID }} ... ";
+              huggingface-cli download --cache-dir /data {{ .Values.LLM_MODEL_ID | quote }};
+              echo "Change model files mode ...";
               chmod -R g+w /data/models--{{ replace "/" "--" .Values.LLM_MODEL_ID }}
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
           volumeMounts:
             - mountPath: /data
               name: model-volume
+            - mountPath: /tmp
+              name: tmp
       {{- end }}
       containers:
         - name: {{ .Chart.Name }}
