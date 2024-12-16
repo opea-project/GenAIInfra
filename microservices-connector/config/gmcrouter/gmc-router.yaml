@@ -20,8 +20,8 @@ spec:
       serviceAccountName: default
       containers:
       - name: router-server
-        image: opea/gmcrouter:latest
-        imagePullPolicy: IfNotPresent
+        image: localhost:5000/opea/gmcrouter:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8080
         env:
@@ -31,6 +31,28 @@ spec:
           value: {{.HttpProxy}}
         - name: https_proxy
           value: {{.HttpsProxy}}
+        ### OTEL/Tracing
+        # target
+        - name: OTEL_EXPORTER_OTLP_ENDPOINT
+          value: "http://otelcol-traces-collector.monitoring-traces:4318"
+        # exclusion
+        - name: OTEL_GO_EXCLUDED_URLS
+          value: "/metrics"
+        # identification
+        - name: OTEL_SERVICE_NAME
+          value: "{{.Namespace}}/{{.DplymntName}}"
+        # identification (namespace is used to distinguish different span names for different router-instances) used by router not OTEL
+        - name: OTEL_NAMESPACE
+          value: "{{.Namespace}}"
+        ### TODO: Enabling this breaks traces->logs correlation when query in Grafana
+        # - name: OTEL_RESOURCE_ATTRIBUTES
+        #   value: "namespace={{.Namespace}}"
+        # ratio: 0 never and 1 always with 0.5 half of queries will be traced
+        - name: OTEL_TRACES_SAMPLER_FRACTION
+          value: "1.0"
+        ### OTEL/Logs: Warning: Enabling logs through collector disables logs to stdout
+        # - name: OTEL_LOGS_GRPC_ENDPOINT
+        #   value: "otelcol-traces-collector.monitoring-traces:4317"
         args:
         - "--graph-json"
         - {{.GRAPH_JSON}}

@@ -119,12 +119,12 @@ docker.build: manager-image router-image
 # Build manager Docker image
 manager-image:
 	@echo "Building manager Docker image..."
-	$(CONTAINER_TOOL) build -t $(DOCKER_REGISTRY)/${CTR_IMG}:$(VERSION) -f Dockerfile.manager .
+	$(CONTAINER_TOOL) build --build-arg https_proxy --build-arg http_proxy -t $(DOCKER_REGISTRY)/${CTR_IMG}:$(VERSION) -f Dockerfile.manager .
 
 # Build router Docker image
 router-image:
 	@echo "Building router Docker image..."
-	$(CONTAINER_TOOL) build -t $(DOCKER_REGISTRY)/${ROUTER_IMG}:$(VERSION) -f Dockerfile.router .
+	$(CONTAINER_TOOL) build --build-arg https_proxy --build-arg http_proxy -t $(DOCKER_REGISTRY)/${ROUTER_IMG}:$(VERSION) -f Dockerfile.router .
 
 # Publish manager and router docker images
 .PHONY: docker.push
@@ -192,7 +192,7 @@ uninstall: manifests kustomize ## Uninstall CRDs from the K8s cluster specified 
 
 .PHONY: deploy
 deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in ~/.kube/config.
-	cd config/manager && $(KUSTOMIZE) edit set image controller=${CTR_IMG}
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(DOCKER_REGISTRY)/${CTR_IMG}:$(VERSION)
 	$(KUSTOMIZE) build config/default | $(KUBECTL) apply -f -
 
 .PHONY: undeploy
@@ -215,7 +215,7 @@ GOLANGCI_LINT = $(LOCALBIN)/golangci-lint-$(GOLANGCI_LINT_VERSION)
 
 ## Tool Versions
 KUSTOMIZE_VERSION ?= v5.3.0
-CONTROLLER_TOOLS_VERSION ?= v0.14.0
+CONTROLLER_TOOLS_VERSION ?= v0.15.0
 ENVTEST_VERSION ?= release-0.17
 GOLANGCI_LINT_VERSION ?= v1.57.2
 

@@ -7,13 +7,114 @@
 
 replicaCount: 1
 
-image:
-  repository: opea/gmcmanager
-  pullPolicy: IfNotPresent
-  # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+proxy:
+  httpProxy: ""
+  httpsProxy: ""
+  noProxy: ""
 
-imagePullSecrets: []
+tokens:
+  hugToken: ""
+
+
+# Common tag & repository for all images. Override if needed for specific images.
+common_tag: &tag "ts1734346962"
+common_repository: &repo "localhost:5000"
+
+llm_model: &cpu_model "Intel/neural-chat-7b-v3-3"
+llm_model_gaudi: &hpu_model "mistralai/Mixtral-8x7B-Instruct-v0.1"
+
+images:
+  gmcManager:
+    image: "opea/gmcmanager"
+    repository: *repo
+    tag: *tag
+    pullPolicy: Always
+  gmcRouter:
+    image: "opea/gmcrouter"
+    repository: *repo
+    tag: *tag
+  dataprep-usvc:
+    image: "opea/dataprep"
+    repository: *repo
+    tag: *tag
+  embedding-usvc:
+    image: "opea/embedding"
+    repository: *repo
+    tag: *tag
+  reranking-usvc:
+    image: "opea/reranking"
+    repository: *repo
+    tag: *tag
+  torchserve:
+    image: "opea/torchserve"
+    repository: *repo
+    tag: *tag
+    envfile: "src/comps/embeddings/impl/model-server/torchserve/docker/.env"
+  retriever-usvc:
+    image: "opea/retriever"
+    repository: *repo
+    tag: *tag
+  ingestion-usvc:
+    image: "opea/ingestion"
+    repository: *repo
+    tag: *tag
+  llm-usvc:
+    image: "opea/llm"
+    repository: *repo
+    tag: *tag
+    envfile: "src/comps/llms/impl/microservice/.env"
+    envs:
+      LLM_MODEL_NAME: *hpu_model
+  in-guard-usvc:
+    image: "opea/in-guard"
+    repository: *repo
+    tag: *tag
+  out-guard-usvc:
+    image: "opea/out-guard"
+    repository: *repo
+    tag: *tag
+  ui-usvc:
+    image: "opea/chatqna-conversation-ui"
+    repository: *repo
+    tag: *tag
+  tgi:
+    envfile: "src/comps/llms/impl/model_server/tgi/docker/.env.cpu"
+    envs:
+      LLM_TGI_MODEL_NAME: *cpu_model
+  tgi_gaudi:
+    envfile: "src/comps/llms/impl/model_server/tgi/docker/.env.hpu"
+    envs:
+      LLM_TGI_MODEL_NAME: *hpu_model
+  vllm_gaudi:
+    image: "opea/vllm-gaudi"
+    repository: *repo
+    tag: *tag
+    envfile: "src/comps/llms/impl/model_server/vllm/docker/.env.hpu"
+    envs:
+      LLM_VLLM_MODEL_NAME: *hpu_model
+  vllm:
+    image: "opea/vllm-cpu"
+    repository: *repo
+    tag: *tag
+    envfile: "src/comps/llms/impl/model_server/vllm/docker/.env.cpu"
+    envs:
+      LLM_VLLM_MODEL_NAME: *cpu_model
+  vllm_openvino:
+    image: "opea/vllm-openvino"
+    repository: *repo
+    tag: *tag
+    envfile: "src/comps/llms/impl/model_server/vllm/docker/.env.cpu"
+    envs:
+      LLM_VLLM_MODEL_NAME: *cpu_model
+  langdtct-usvc:
+    image: "opea/language_detection"
+    repository: *repo
+    tag: *tag
+    envfile: "src/comps/language_detection/impl/microservice/.env"
+
+
+imagePullSecrets:
+  - name: regcred
 nameOverride: ""
 fullnameOverride: ""
 
@@ -38,23 +139,22 @@ podSecurityContext: {}
 securityContext:
   capabilities:
     drop:
-    - ALL
+      - ALL
   runAsNonRoot: true
   allowPrivilegeEscalation: false
 
 resources:
   limits:
-    cpu: 500m
     memory: 128Mi
   requests:
-    cpu: 10m
+    cpu: 500m
     memory: 64Mi
 
 livenessProbe:
   httpGet:
     path: /healthz
     port: gmc
-  initialDelaySeconds: 15
+  initialDelaySeconds: 30
   periodSeconds: 20
 readinessProbe:
   httpGet:
@@ -84,3 +184,17 @@ affinity: {}
 
 service:
   type: ClusterIP
+
+pvc:
+  - name: model-volume-embedding
+    accessMode: ReadWriteOnce
+    namespace: chatqa
+    storage: 20Gi
+  - name: model-volume-embedding
+    accessMode: ReadWriteOnce
+    namespace: dataprep
+    storage: 20Gi
+  - name: model-volume-llm
+    accessMode: ReadWriteOnce
+    namespace: chatqa
+    storage: 100Gi
