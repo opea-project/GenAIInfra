@@ -35,8 +35,8 @@ spec:
             - configMapRef:
                 name: {{ include "speecht5.fullname" . }}-config
           securityContext:
-            allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
             {{- if hasKey .Values.securityContext "runAsGroup" }}
             runAsGroup: {{ .Values.securityContext.runAsGroup }}
             {{- end }}
@@ -51,16 +51,24 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: huggingface/downloader:0.17.3
-          command: ['sh', '-c']
+          command: ['sh', '-ec']
           args:
             - |
-              huggingface-cli download --cache-dir /data --token $(HF_TOKEN)  {{ .Values.TTS_MODEL_PATH | quote }};
-              huggingface-cli download --cache-dir /data --token $(HF_TOKEN)  {{ .Values.VOCODER_MODEL| quote }};
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download models {{ .Values.TTS_MODEL_PATH }} {{ .Values.VOCODER_MODEL }} ... ";
+              huggingface-cli download --cache-dir /data {{ .Values.TTS_MODEL_PATH | quote }};
+              huggingface-cli download --cache-dir /data {{ .Values.VOCODER_MODEL| quote }};
+              echo "Change model files mode ...";
               chmod -R g+w /data/models--{{ replace "/" "--" .Values.TTS_MODEL_PATH }};
               chmod -R g+w /data/models--{{ replace "/" "--" .Values.VOCODER_MODEL }}
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
           volumeMounts:
             - mountPath: /data
               name: model-volume
+            - mountPath: /tmp
+              name: tmp
       {{- end }}
       containers:
         - name: {{ .Release.Name }}

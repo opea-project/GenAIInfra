@@ -35,8 +35,8 @@ spec:
             - configMapRef:
                 name: {{ include "whisper.fullname" . }}-config
           securityContext:
-            allowPrivilegeEscalation: false
             readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
             {{- if hasKey .Values.securityContext "runAsGroup" }}
             runAsGroup: {{ .Values.securityContext.runAsGroup }}
             {{- end }}
@@ -51,14 +51,22 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: huggingface/downloader:0.17.3
-          command: ['sh', '-c']
+          command: ['sh', '-ec']
           args:
             - |
-              huggingface-cli download --cache-dir /data --token $(HF_TOKEN)  {{ .Values.ASR_MODEL_PATH | quote }};
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model {{ .Values.ASR_MODEL_PATH }} ... ";
+              huggingface-cli download --cache-dir /data {{ .Values.ASR_MODEL_PATH | quote }};
+              echo "Change model files mode ...";
               chmod -R g+w /data/models--{{ replace "/" "--" .Values.ASR_MODEL_PATH }}
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
           volumeMounts:
             - mountPath: /data
               name: model-volume
+            - mountPath: /tmp
+              name: tmp
       {{- end }}
       containers:
         - name: {{ .Release.Name }}

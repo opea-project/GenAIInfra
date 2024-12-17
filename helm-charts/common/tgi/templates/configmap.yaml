@@ -19,6 +19,7 @@ data:
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- if contains "tgi-gaudi" .Values.image.repository }}
   HABANA_LOGS: "/tmp/habana_logs"
+  TRITON_CACHE_DIR: "/tmp/triton_cache"
   {{- end }}
   NUMBA_CACHE_DIR: "/tmp"
   HF_HOME: "/tmp/.cache/huggingface"
