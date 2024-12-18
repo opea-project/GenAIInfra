@@ -1,0 +1,17 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nginx-config
+  labels:
+    {{- include "chatqna.labels" . | nindent 4 }}
+data:
+  FRONTEND_SERVICE_IP: {{ include "ui.fullname" (index .Subcharts "chatqna-ui") | quote }}
+  FRONTEND_SERVICE_PORT: {{ index .Values "chatqna-ui" "service" "port" | quote }}
+  BACKEND_SERVICE_NAME: chatqna
+  BACKEND_SERVICE_IP: {{ include "chatqna.fullname" . | quote }}
+  BACKEND_SERVICE_PORT: {{ .Values.service.port | quote }}
+  DATAPREP_SERVICE_IP: {{ include "data-prep.fullname" (index .Subcharts "data-prep") | quote }}
+  DATAPREP_SERVICE_PORT: {{ index .Values "data-prep" "service" "port" | quote }}
