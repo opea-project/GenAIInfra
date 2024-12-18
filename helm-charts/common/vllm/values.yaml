@@ -7,6 +7,17 @@
 
 replicaCount: 1
 
+# Enabling HPA will:
+# - Ignore above replica count, as it will be controlled by HPA
+# - Add example HPA scaling rules with custom metrics thresholds
+# - Require custom metrics ConfigMap available in the main application chart
+autoscaling:
+  maxReplicas: 4
+  enabled: false
+
+# empty for CPU (longer latencies are tolerated before HPA scaling unaccelerated service)
+accelDevice: ""
+
 port: 2080
 shmSize: 1Gi
 image:
@@ -62,7 +73,7 @@ resources: {}
   #   cpu: 100m
   #   memory: 128Mi
 
-extraCmdArgs: ["--enforce-eager", "--dtype", "auto"]
+extraCmdArgs: []
 
 livenessProbe:
   httpGet:
@@ -92,6 +103,11 @@ tolerations: []
 affinity: {}
 
 LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+# Environment variables for vLLM (set in configmap):
+# https://docs.vllm.ai/en/latest/getting_started/gaudi-installation.html#environment-variables
+OMPI_MCA_btl_vader_single_copy_mechanism: ""
+PT_HPU_ENABLE_LAZY_COLLECTIVES: ""
 VLLM_CPU_KVCACHE_SPACE: ""
 
 global:
@@ -113,3 +129,9 @@ global:
   # By default, both var are set to empty, the model will be downloaded and saved to a tmp volume.
   modelUseHostPath: ""
   modelUsePVC: ""
+
+  # Install Prometheus serviceMonitor for service
+  monitoring: false
+
+  # Prometheus Helm install release name for serviceMonitor
+  prometheusRelease: prometheus-stack

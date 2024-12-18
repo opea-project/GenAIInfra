@@ -8,7 +8,10 @@ metadata:
   labels:
     {{- include "vllm.labels" . | nindent 4 }}
 spec:
+  {{- if ne (int .Values.replicaCount) 1 }}
+  # remove if replica count should not be reset on pod update (e.g. with HPA)
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "vllm.selectorLabels" . | nindent 6 }}
@@ -158,4 +161,8 @@ spec:
           labelSelector:
             matchLabels:
               {{- include "vllm.selectorLabels" . | nindent 14 }}
+      {{- end }}
+      {{- if not .Values.accelDevice }}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
+      terminationGracePeriodSeconds: 120
       {{- end }}
