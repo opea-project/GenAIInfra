@@ -81,11 +81,16 @@ affinity: {}
 
 # To override values in subchart llm-uservice
 llm-uservice:
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   image:
     repository: opea/llm-docsum-tgi
 
-# To override values in subchart tgi
+# To override values in tgi/vllm subcharts
 tgi:
+  enabled: true
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+vllm:
+  enabled: false
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 docsum-ui:

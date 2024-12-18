@@ -19,7 +19,10 @@ data:
   vLLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
   {{- end }}
   {{- if .Values.LLM_MODEL_ID }}
+  # llm-uservice text gen (ChatQnA) variant
   LLM_MODEL: {{ .Values.LLM_MODEL_ID | quote}}
+  # llm-uservice DocSum & FaqGen variants
+  LLM_MODEL_ID: {{ .Values.LLM_MODEL_ID | quote}}
   {{- end }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
