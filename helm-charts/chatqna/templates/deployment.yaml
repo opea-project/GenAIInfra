@@ -64,6 +64,18 @@ spec:
               value: {{ .Release.Name }}-guardrails-usvc
             - name: GUARDRAIL_SERVICE_PORT
               value: "9090"
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-llm-uservice
+            - name: LLM_SERVICE_PORT
+              value: "9000"
+            - name: RERANK_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-reranking-usvc
+            - name: RERANK_SERVICE_PORT
+              value: "8000"
+            - name: EMBEDDING_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-embedding-usvc
+            - name: EMBEDDING_SERVICE_PORT
+              value: "6000"
             {{- if .Values.LOGFLAG }}
             - name: LOGFLAG
               value: {{ .Values.LOGFLAG | quote }}
