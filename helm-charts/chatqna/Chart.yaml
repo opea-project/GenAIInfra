@@ -10,7 +10,7 @@ dependencies:
     version: 0-latest
     alias: tgi-guardrails
     repository: "file://../common/tgi"
-    condition: guardrails-usvc.enabled
+    condition: tgi-guardrails.enabled
   - name: guardrails-usvc
     version: 0-latest
     repository: "file://../common/guardrails-usvc"
@@ -23,15 +23,29 @@ dependencies:
     version: 0-latest
     repository: "file://../common/vllm"
     condition: vllm.enabled
+  - name: llm-uservice
+    version: 0-latest
+    repository: "file://../common/llm-uservice"
+    condition: llm-uservice.enabled
   - name: tei
     version: 0-latest
     repository: "file://../common/tei"
+  - name: embedding-usvc
+    version: 0-latest
+    repository: "file://../common/embedding-usvc"
+    condition: embedding-usvc.enabled
   - name: teirerank
     version: 0-latest
     repository: "file://../common/teirerank"
+    condition: teirerank.enabled
+  - name: reranking-usvc
+    version: 0-latest
+    repository: "file://../common/reranking-usvc"
+    condition: reranking-usvc.enabled
   - name: redis-vector-db
     version: 0-latest
     repository: "file://../common/redis-vector-db"
+    condition: redis-vector-db.enabled
   - name: retriever-usvc
     version: 0-latest
     repository: "file://../common/retriever-usvc"
