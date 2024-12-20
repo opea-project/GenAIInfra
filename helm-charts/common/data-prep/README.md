@@ -46,12 +46,13 @@ curl http://localhost:6007/v1/dataprep  \
 
 ## Values
 
-| Key                    | Type   | Default                 | Description |
-| ---------------------- | ------ | ----------------------- | ----------- |
-| image.repository       | string | `"opea/dataprep-redis"` |             |
-| service.port           | string | `"6007"`                |             |
-| REDIS_URL              | string | `""`                    |             |
-| TEI_EMBEDDING_ENDPOINT | string | `""`                    |             |
+| Key                    | Type   | Default                 | Description                              |
+| ---------------------- | ------ | ----------------------- | ---------------------------------------- |
+| image.repository       | string | `"opea/dataprep-redis"` |                                          |
+| service.port           | string | `"6007"`                |                                          |
+| REDIS_URL              | string | `""`                    |                                          |
+| TEI_EMBEDDING_ENDPOINT | string | `""`                    |                                          |
+| global.monitoring      | bool   | `false`                 | See ../../monitoring.md before enabling! |
 
 ## Milvus support
 

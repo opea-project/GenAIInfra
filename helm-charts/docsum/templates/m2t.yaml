@@ -85,6 +85,7 @@ metadata:
   name: {{ .Release.Name }}-m2t
   labels:
     {{- include "docsum.labels" . | nindent 4 }}
+    app: {{ .Release.Name }}-m2t
 spec:
   type: {{ .Values.m2t.service.type }}
   ports:
@@ -95,3 +96,20 @@ spec:
   selector:
     {{- include "docsum.selectorLabels" . | nindent 4 }}
     app: {{ .Release.Name }}-m2t
+---
+{{- if .Values.global.monitoring }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "docsum.fullname" . }}-m2t
+  labels:
+    release: {{ .Values.global.prometheusRelease }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "docsum.selectorLabels" . | nindent 6 }}
+      app: {{ .Release.Name }}-m2t
+  endpoints:
+  - port: m2t
+    interval: 5s
+{{- end }}
