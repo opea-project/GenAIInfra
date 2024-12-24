@@ -120,7 +120,7 @@ resource "azurerm_kubernetes_cluster" "main" {
 
 # Azure Files Storage Account
 resource "azurerm_storage_account" "main" {
-  name                     = replace(lower("${var.cluster_name}sta"),"-", "")
+  name                     = replace(lower("${var.cluster_name}st"), "-", "")
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Premium"
@@ -137,7 +137,7 @@ resource "azurerm_storage_share" "main" {
 
 # Key Vault
 resource "azurerm_key_vault" "main" {
-  name                       = replace(lower("${var.cluster_name}akv"), "-", "")
+  name                       = "${var.cluster_name}-kv
   location                   = azurerm_resource_group.main.location
   resource_group_name        = azurerm_resource_group.main.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
