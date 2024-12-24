@@ -21,6 +21,70 @@ module "vnet" {
   depends_on = [azurerm_resource_group.main]
 }
 
+# Cosmos DB
+resource "azurerm_cosmosdb_account" "main" {
+  name                      = "${var.cluster_name}-cosmosdb"
+  location                  = var.cosmosdb_account_location
+  resource_group_name       = azurerm_resource_group.main.name
+  offer_type                = "Standard"
+  kind                      = "GlobalDocumentDB"
+  geo_location {
+    location          = var.cosmosdb_account_location
+    failover_priority = 0
+  }
+  consistency_policy {
+    consistency_level       = "BoundedStaleness"
+    max_interval_in_seconds = 300
+    max_staleness_prefix    = 100000
+  }
+  capabilities {
+    name = "EnableNoSQLFullTextSearch"
+  }
+  capabilities {
+    name = "EnableNoSQLVectorSearch"
+  }
+  depends_on = [
+    azurerm_resource_group.main
+  ]
+}
+
+resource "azurerm_cosmosdb_sql_database" "main" {
+  name                = "${var.cluster_name}-sqldb"
+  resource_group_name = azurerm_resource_group.main.name
+  account_name        = azurerm_cosmosdb_account.main.name
+  throughput          = var.throughput
+}
+
+resource "azurerm_cosmosdb_sql_container" "main" {
+  name                  = "${var.cluster_name}-sql-container"
+  resource_group_name   = azurerm_resource_group.main.name
+  account_name          = azurerm_cosmosdb_account.main.name
+  database_name         = azurerm_cosmosdb_sql_database.main.name
+  partition_key_paths   = ["/definition/id"]
+  partition_key_version = 1
+  throughput            = var.throughput
+
+  indexing_policy {
+    indexing_mode = "consistent"
+
+    included_path {
+      path = "/*"
+    }
+
+    included_path {
+      path = "/included/?"
+    }
+
+    excluded_path {
+      path = "/excluded/?"
+    }
+  }
+
+  unique_key {
+    paths = ["/definition/idlong", "/definition/idshort"]
+  }
+}
+
 # AKS Cluster
 resource "azurerm_kubernetes_cluster" "main" {
   name                = var.cluster_name
@@ -56,7 +120,7 @@ resource "azurerm_kubernetes_cluster" "main" {
 
 # Azure Files Storage Account
 resource "azurerm_storage_account" "main" {
-  name                     = replace(lower("${var.cluster_name}st"), "-", "")
+  name                     = replace(lower("${var.cluster_name}sta"),"-", "")
   resource_group_name      = azurerm_resource_group.main.name
   location                 = azurerm_resource_group.main.location
   account_tier             = "Premium"
@@ -73,7 +137,7 @@ resource "azurerm_storage_share" "main" {
 
 # Key Vault
 resource "azurerm_key_vault" "main" {
-  name                       = "${var.cluster_name}-kv"
+  name                       = replace(lower("${var.cluster_name}akv"), "-", "")
   location                   = azurerm_resource_group.main.location
   resource_group_name        = azurerm_resource_group.main.name
   tenant_id                  = data.azurerm_client_config.current.tenant_id
@@ -109,5 +173,64 @@ resource "null_resource" "kubectl" {
   depends_on = [azurerm_kubernetes_cluster.main]
 }
 
+# Application Insights
+resource "azurerm_log_analytics_workspace" "main" {
+  name                = "workspace-${var.cluster_name}"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  sku                 = "PerGB2018"
+  retention_in_days   = 30
+}
+
+resource "azurerm_application_insights" "t_appinsights" {
+  name                = "${var.cluster_name}-appinsights"
+  location            = azurerm_resource_group.main.location
+  resource_group_name = azurerm_resource_group.main.name
+  workspace_id        = azurerm_log_analytics_workspace.main.id
+  application_type    = "web"
+}
+
 # Data source for Azure subscription information
 data "azurerm_client_config" "current" {}
+
+# Cosmos db Primary connection string into key vault
+resource "azurerm_key_vault_secret" "cosdb_primary" {
+  name         = "AzCosmosDBConnectionStringPrimary"
+  value        = tostring("AccountEndpoint=${azurerm_cosmosdb_account.main.endpoint};AccountKey=${azurerm_cosmosdb_account.main.primary_key};")
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# Cosmos db Secondary connection string into key vault
+resource "azurerm_key_vault_secret" "cosdb_secondary" {
+  name         = "AzCosmosDBConnectionStringSecondary"
+  value        = tostring("AccountEndpoint=${azurerm_cosmosdb_account.main.endpoint};AccountKey=${azurerm_cosmosdb_account.main.secondary_key};")
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# Kubernetes cluster end point into key vault
+resource "azurerm_key_vault_secret" "kube_cluster_endpoint" {
+  name         = "KubeClusterEndPoint"
+  value        = tostring("${azurerm_kubernetes_cluster.main.kube_config.0.host}")
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# App Insights Instrumentation Key
+resource "azurerm_key_vault_secret" "app_insights_instrumentation_key" {
+  name         = "AppInsightsInstrumentationKey"
+  value        = tostring("${azurerm_application_insights.t_appinsights.instrumentation_key}")
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# App Insights app id
+resource "azurerm_key_vault_secret" "app_insights_app_id" {
+  name         = "AppInsightsAppId"
+  value        = tostring("${azurerm_application_insights.t_appinsights.app_id}")
+  key_vault_id = azurerm_key_vault.main.id
+}
+
+# App Insights Connection String
+resource "azurerm_key_vault_secret" "app_insights_connection_string" {
+  name         = "AppInsightsConnectionString"
+  value        = tostring("${azurerm_application_insights.t_appinsights.connection_string}")
+  key_vault_id = azurerm_key_vault.main.id
+}

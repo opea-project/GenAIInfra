@@ -4,6 +4,12 @@ variable "location" {
   default     = "eastus"
 }
 
+variable "cosmosdb_account_location" {
+  description = "Cosmos DB account Location"
+  type        = string
+  default     = "westus"
+}
+
 variable "cluster_name" {
   description = "AKS cluster name"
   type        = string
@@ -80,4 +86,18 @@ variable "instance_types" {
   description = "Azure VM instance type"
   type    = list(string)
   default = ["Standard_D32d_v5"]
+}
+
+variable "throughput" {
+  type        = number
+  default     = 400
+  description = "Cosmos db database throughput"
+  validation {
+    condition     = var.throughput >= 400 && var.throughput <= 1000000
+    error_message = "Cosmos db manual throughput should be equal to or greater than 400 and less than or equal to 1000000."
+  }
+  validation {
+    condition     = var.throughput % 100 == 0
+    error_message = "Cosmos db throughput should be in increments of 100."
+  }
 }
