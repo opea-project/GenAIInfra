@@ -80,6 +80,7 @@ metadata:
   name: {{ .Release.Name }}-v2a
   labels:
     {{- include "docsum.labels" . | nindent 4 }}
+    app: {{ .Release.Name }}-v2a
 spec:
   type: {{ .Values.v2a.service.type }}
   ports:
@@ -90,3 +91,20 @@ spec:
   selector:
     {{- include "docsum.selectorLabels" . | nindent 4 }}
     app: {{ .Release.Name }}-v2a
+---
+{{- if .Values.global.monitoring }}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ include "docsum.fullname" . }}-v2a
+  labels:
+    release: {{ .Values.global.prometheusRelease }}
+spec:
+  selector:
+    matchLabels:
+      {{- include "docsum.selectorLabels" . | nindent 6 }}
+      app: {{ .Release.Name }}-v2a
+  endpoints:
+  - port: v2a
+    interval: 5s
+{{- end }}

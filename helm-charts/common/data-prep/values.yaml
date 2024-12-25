@@ -128,3 +128,9 @@ global:
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
   sharedSAName: ""
+
+  # Install Prometheus serviceMonitors for service components
+  monitoring: false
+
+  # Prometheus Helm install release name needed for serviceMonitors
+  prometheusRelease: prometheus-stack
