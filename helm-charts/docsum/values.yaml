@@ -6,7 +6,6 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-LLM_SERVICE_HOST_IP: ""
 
 image:
   repository: opea/docsum
@@ -14,24 +13,6 @@ image:
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
-v2a:
-  image:
-    repository: opea/dataprep-video2audio
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
-  port: 7078
-  service:
-    type: ClusterIP
-    port: 7078
-m2t:
-  image:
-    repository: opea/dataprep-multimedia2text
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
-  port: 7079
-  service:
-    type: ClusterIP
-    port: 7079
 
 imagePullSecrets: []
 nameOverride: ""
@@ -79,10 +60,15 @@ affinity: {}
 llm-uservice:
   image:
     repository: opea/llm-docsum-tgi
+  MAX_INPUT_TOKENS: "1024"
+  MAX_TOTAL_TOKENS: "2048"
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  MAX_INPUT_LENGTH: "1024"
+  MAX_TOTAL_TOKENS: "2048"
 
 nginx:
   service:

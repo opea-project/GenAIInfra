@@ -16,6 +16,8 @@ TGI_LLM_ENDPOINT: ""
 # For vllm, set the LLM_MODEL_ID the same as vllm sub chart
 vLLM_ENDPOINT: ""
 LLM_MODEL_ID: ""
+MAX_INPUT_TOKENS: ""
+MAX_TOTAL_TOKENS: ""
 
 # Set it as a non-null string, such as true, if you want to enable logging facility,
 # otherwise, keep it as "" to disable it.
