@@ -6,24 +6,15 @@ name: audioqna
 description: The Helm chart to deploy AudioQnA
 type: application
 dependencies:
-  - name: asr
-    version: 0-latest
-    repository: "file://../common/asr"
   - name: whisper
     version: 0-latest
     repository: "file://../common/whisper"
-  - name: tts
-    version: 0-latest
-    repository: "file://../common/tts"
   - name: speecht5
     version: 0-latest
     repository: "file://../common/speecht5"
   - name: tgi
     version: 0-latest
     repository: "file://../common/tgi"
-  - name: llm-uservice
-    version: 0-latest
-    repository: "file://../common/llm-uservice"
   - name: ui
     version: 0-latest
     repository: "file://../common/ui"
