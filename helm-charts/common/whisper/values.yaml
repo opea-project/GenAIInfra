@@ -69,20 +69,20 @@ resources: {}
 
 livenessProbe:
   httpGet:
-    path: /v1/health
+    path: /health
     port: whisper
   initialDelaySeconds: 5
   periodSeconds: 5
   failureThreshold: 24
 readinessProbe:
   httpGet:
-    path: /v1/health
+    path: /health
     port: whisper
   initialDelaySeconds: 5
   periodSeconds: 5
 startupProbe:
   httpGet:
-    path: /v1/health
+    path: /health
     port: whisper
   initialDelaySeconds: 5
   periodSeconds: 5
