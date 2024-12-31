@@ -20,13 +20,21 @@ spec:
         apiVersion: v1
         # get metric for named object of given type (in same namespace)
         kind: Service
-        name: {{ include "tei.fullname" . }}
+{{- if .Values.autoscaling.useFrontendMetric }}
+        name: {{ include "tei.frontendService" . }}
       target:
-{{- if .Values.accelDevice }}
         # Metric is sum from all pods. "AverageValue" divides value returned from
         # the custom metrics API by the number of Pods before comparing to the target:
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
+        type: AverageValue
+        averageValue: {{ .Values.autoscaling.frontendMetricFactor }}
+      metric:
+        name: {{ include "tei.frontendMetricName" . }}
+{{- else }}
+        name: {{ include "tei.fullname" . }}
+      target:
+{{- if .Values.accelDevice }}
         type: AverageValue
         averageValue: 15
       metric:
@@ -39,6 +47,7 @@ spec:
         value: 4 # seconds
       metric:
         name: {{ include "tei.metricPrefix" . }}_request_latency
+{{- end }}
 {{- end }}
   behavior:
     scaleDown:

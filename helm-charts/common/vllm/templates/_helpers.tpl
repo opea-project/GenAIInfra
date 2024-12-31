@@ -38,6 +38,20 @@ Convert chart name to a string suitable as metric prefix
 {{- end }}
 
 {{/*
+Frontend metric name for top-level application
+*/}}
+{{- define "vllm.frontendMetricName" -}}
+{{- include "vllm.metricPrefix" . | trimSuffix "_vllm" }}_frontend_metric
+{{- end }}
+
+{{/*
+Frontend service name
+*/}}
+{{- define "vllm.frontendService" -}}
+{{- include "vllm.fullname" . | trimSuffix "-vllm" }}
+{{- end }}
+
+{{/*
 Common labels
 */}}
 {{- define "vllm.labels" -}}

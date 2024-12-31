@@ -20,13 +20,22 @@ spec:
         apiVersion: v1
         # get metric for named object of given type (in same namespace)
         kind: Service
+{{- if .Values.autoscaling.useFrontendMetric }}
+        name: {{ include "vllm.frontendService" . }}
+{{- else }}
         name: {{ include "vllm.fullname" . }}
+{{- end }}
       target:
         # Metric is sum from all pods. "AverageValue" divides value returned from
         # the custom metrics API by the number of Pods before comparing to the target:
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
         type: AverageValue
+{{- if .Values.autoscaling.useFrontendMetric }}
+        averageValue: {{ .Values.autoscaling.frontendMetricFactor }}
+      metric:
+        name: {{ include "vllm.frontendMetricName" . }}
+{{- else }}
 {{- if .Values.accelDevice }}
         averageValue: 0.1
 {{- else }}
@@ -35,6 +44,7 @@ spec:
 {{- end }}
       metric:
         name: {{ include "vllm.metricPrefix" . }}_token_latency
+{{- end }}
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 180

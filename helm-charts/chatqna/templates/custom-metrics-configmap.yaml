@@ -13,10 +13,31 @@ metadata:
 data:
   config.yaml: |
     rules:
-    {{- if and .Values.vllm.enabled .Values.vllm.autoscaling.enabled }}
-    # check metric with:
+    # check metrics with:
     # kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/<metric> | jq
+    {{- if .Values.autoscaling.useFrontendMetric }}
     #
+    # E2E metric for scaling both frontend (megaservice) and its backend services
+    #
+    - seriesQuery: '{__name__="{{ .Values.autoscaling.frontendMetric }}",service="{{ include "chatqna.fullname" . }}"}'
+      # sum of specified frontend metric for all deployed ChatQnA megaservice instances
+      metricsQuery: 'sum by (namespace,service)({{ .Values.autoscaling.frontendMetric }}{service="{{ include "chatqna.fullname" . }}",<<.LabelMatchers>>})'
+      name:
+        matches: ^{{ .Values.autoscaling.frontendMetric }}
+        as: "{{ include "chatqna.frontendMetricName" . }}"
+      resources:
+        # HPA needs both namespace + suitable object resource for its query paths:
+        # /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/<metric>
+        # (pod is not suitable object type for matching as each instance has different name)
+        overrides:
+          namespace: {resource: "namespace"}
+          service:   {resource: "service"}
+    {{- end }}
+    #
+    # metrics for scaling backends based on their own metrics
+    #
+    {{- if and .Values.vllm.enabled .Values.vllm.autoscaling.enabled }}
+    # vLLM
     - seriesQuery: '{__name__="vllm:time_per_output_token_seconds_sum",service="{{ include "vllm.fullname" .Subcharts.vllm }}"}'
       # Average output token latency from vLLM histograms, over 1 min
       # (interval should be at least 4x serviceMonitor query interval,
@@ -26,14 +47,14 @@ data:
         matches: ^vllm:time_per_output_token_seconds_sum
         as: "{{ include "vllm.metricPrefix" .Subcharts.vllm }}_token_latency"
       resources:
-        # HPA needs both namespace + suitable object resource for its query paths:
-        # /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/<metric>
-        # (pod is not suitable object type for matching as each instance has different name)
         overrides:
           namespace: {resource: "namespace"}
           service:   {resource: "service"}
     {{- end }}
     {{- if and .Values.tgi.enabled .Values.tgi.autoscaling.enabled }}
+    #
+    # TGI
+    #
     {{- if .Values.tgi.accelDevice }}
     - seriesQuery: '{__name__="tgi_queue_size",service="{{ include "tgi.fullname" .Subcharts.tgi }}"}'
       # TGI instances queue_size sum
@@ -55,6 +76,9 @@ data:
           service:   {resource: "service"}
     {{- end }}
     {{- if .Values.teirerank.autoscaling.enabled }}
+    #
+    # TEI-rerank
+    #
     {{- if .Values.teirerank.accelDevice }}
     - seriesQuery: '{__name__="te_queue_size",service="{{ include "teirerank.fullname" .Subcharts.teirerank }}"}'
       # TEI instances queue_size sum
@@ -76,6 +100,9 @@ data:
           service:   {resource: "service"}
     {{- end }}
     {{- if .Values.tei.autoscaling.enabled }}
+    #
+    # TEI-embed
+    #
     {{- if .Values.tei.accelDevice }}
     - seriesQuery: '{__name__="te_queue_size",service="{{ include "tei.fullname" .Subcharts.tei }}"}'
       # TEI instances queue_size sum
