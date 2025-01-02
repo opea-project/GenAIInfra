@@ -61,7 +61,8 @@ affinity: {}
 autoscaling:
   enabled: false
 
-# Override values in specific subcharts
+# Optional subcharts enablement and subcharts settings overwritten
+# LLM choice, tgi by default.
 tgi:
   enabled: true
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
@@ -69,9 +70,25 @@ vllm:
   enabled: false
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
-# disable guardrails-usvc by default
+# disable guardrails by default
 # See guardrails-values.yaml for guardrail related options
 guardrails-usvc:
+  enabled: false
+tgi-guardrails:
+  enabled: false
+
+# reranking
+teirerank:
+  enabled: true
+# vector db choice, redis by default.
+redis-vector-db:
+  enabled: true
+# Microservice layer, disabled by default
+llm-uservice:
+  enabled: false
+embedding-usvc:
+  enabled: false
+reranking-usvc:
   enabled: false
 
 nginx:
