@@ -4,3 +4,6 @@
 image:
   repository: opea/llm-docsum-tgi
   tag: "latest"
+
+MAX_INPUT_TOKENS: 2048
+MAX_TOTAL_TOKENS: 4096
