@@ -34,18 +34,18 @@ spec:
       containers:
         - name: {{ .Release.Name }}
           env:
-            - name: LLM_SERVICE_HOST_IP
-              value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") }}
-            - name: LLM_SERVICE_PORT
-              value: {{ index .Values "llm-uservice" "service" "port" | quote }}
-            - name: ASR_SERVICE_HOST_IP
-              value: {{ include "asr.fullname" (index .Subcharts "asr") }}
-            - name: ASR_SERVICE_PORT
-              value: {{ index .Values "asr" "service" "port" | quote }}
-            - name: TTS_SERVICE_HOST_IP
-              value: {{ include "tts.fullname" (index .Subcharts "tts") }}
-            - name: TTS_SERVICE_PORT
-              value: {{ index .Values "tts" "service" "port" | quote }}
+            - name: LLM_SERVER_HOST_IP
+              value: {{ include "tgi.fullname" (index .Subcharts "tgi") }}
+            - name: LLM_SERVER_PORT
+              value: "80"
+            - name: WHISPER_SERVER_HOST_IP
+              value: {{ include "whisper.fullname" (index .Subcharts "whisper") }}
+            - name: WHISPER_SERVER_PORT
+              value: {{ index .Values "whisper" "service" "port" | quote }}
+            - name: SPEECHT5_SERVER_HOST_IP
+              value: {{ include "speecht5.fullname" (index .Subcharts "speecht5") }}
+            - name: SPEECHT5_SERVER_PORT
+              value: {{ index .Values "speecht5" "service" "port" | quote }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
