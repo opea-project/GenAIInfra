@@ -28,5 +28,8 @@ dependencies:
     version: 0-latest
     repository: "file://../common/ui"
     alias: audioqna-ui
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
 version: 0-latest
 appVersion: "1.1"

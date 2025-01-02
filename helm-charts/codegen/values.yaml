@@ -50,10 +50,6 @@ service:
   type: ClusterIP
   port: 7778
 
-nginx:
-  service:
-    type: NodePort
-
 nodeSelector: {}
 
 tolerations: []
@@ -63,6 +59,10 @@ affinity: {}
 # To override values in subchart tgi
 tgi:
   LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
+
+nginx:
+  service:
+    type: NodePort
 
 codegen-ui:
   image:
