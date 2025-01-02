@@ -64,8 +64,12 @@ llm-uservice:
   MAX_TOTAL_TOKENS: "2048"
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
-# To override values in subchart tgi
+# To override values in tgi/vllm subcharts
 tgi:
+  enabled: true
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+vllm:
+  enabled: false
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   MAX_INPUT_LENGTH: "1024"
   MAX_TOTAL_TOKENS: "2048"
