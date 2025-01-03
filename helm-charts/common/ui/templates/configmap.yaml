@@ -37,6 +37,4 @@ data:
   VITE_FAQ_GEN_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if contains "faqgen-ui" .Values.image.repository }}
   FAQ_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
-  {{- else }}
-    {{- fail "Unsupported ui image: " .Values.image.repository }}
   {{- end }}

@@ -33,6 +33,9 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "ui.fullname" . }}-config
+            - configMapRef:
+                name: {{ .Release.Name }}-opea-ui-config
+                optional: true
             {{- if .Values.global.extraEnvConfig }}
             - configMapRef:
                 name: {{ .Values.global.extraEnvConfig }}
