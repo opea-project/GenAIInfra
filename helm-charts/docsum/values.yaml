@@ -70,16 +70,30 @@ tgi:
   MAX_INPUT_LENGTH: "1024"
   MAX_TOTAL_TOKENS: "2048"
 
+# Use docsum gradio UI
 nginx:
+  enabled: false
+docsum-ui:
+  image:
+    repository: opea/docsum-gradio-ui
+    tag: "latest"
+  containerPort: 5173
   service:
     type: NodePort
 
-docsum-ui:
-  image:
-    repository: opea/docsum-ui
-    tag: "latest"
-  BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
-  containerPort: 5173
+# NOTE: uncomment the following settings to use other docsum UI
+# nginx:
+#   enabled: true
+#   service:
+#     type: NodePort
+# docsum-ui:
+#   image:
+#     repository: opea/docsum-ui
+#     tag: "latest"
+#   BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
+#   containerPort: 5173
+#   service:
+#     type: ClusterIP
 
 global:
   http_proxy: ""
