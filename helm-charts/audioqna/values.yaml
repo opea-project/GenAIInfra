@@ -14,14 +14,25 @@ image:
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-port: 8888
-service:
-  type: ClusterIP
-  port: 3008
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
 
-nginx:
-  service:
-    type: NodePort
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
 
 securityContext:
   readOnlyRootFilesystem: true
@@ -34,6 +45,11 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+port: 8888
+service:
+  type: ClusterIP
+  port: 3008
+
 nodeSelector: {}
 
 tolerations: []
@@ -44,19 +60,26 @@ affinity: {}
 tgi:
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
-# Uncomment the following to enable UI when the UI image is ready on DockerHub
-# audioqna-ui:
-#  image:
-#    repository: opea/audioqna-ui
-#    tag: "latest"
-#  BACKEND_SERVICE_ENDPOINT: "/v1/audioqna"
-#  containerPort: 5173
+nginx:
+  service:
+    type: NodePort
+
+audioqna-ui:
+  image:
+    repository: opea/audioqna-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/audioqna"
+  containerPort: 5173
 
 global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: "audioqna"
   # set modelUseHostPath or modelUsePVC to use model cache.
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models

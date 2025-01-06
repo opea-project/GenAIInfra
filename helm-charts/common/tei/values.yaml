@@ -9,7 +9,7 @@ replicaCount: 1
 
 # Enabling HPA will:
 # - Ignore above replica count, as it will be controlled by HPA
-# - Add example HPA scaling rules with thresholds suitable for Xeon deployments
+# - Add example HPA scaling rules with custom metrics thresholds
 # - Require custom metrics ConfigMap available in the main application chart
 autoscaling:
   maxReplicas: 2
@@ -35,6 +35,17 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
 podAnnotations: {}
 
 podSecurityContext: {}
@@ -50,6 +61,9 @@ securityContext:
     - ALL
   seccompProfile:
     type: RuntimeDefault
+  # Init container sets the downloaded model dir to be group writable, so that container
+  # can keep its lock file there. This relies on both containers using the same group ID.
+  runAsGroup: 0
 
 service:
   type: ClusterIP
@@ -99,6 +113,11 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: ""
 
   # Choose where to save your downloaded models
   # Set modelUseHostPath for local directory, this is good for one node test. Example:

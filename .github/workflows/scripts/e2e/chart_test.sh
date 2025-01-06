@@ -12,7 +12,7 @@ function dump_pod_log() {
     kubectl describe pod $pod_name -n $namespace
     echo "-----------------------------------"
     echo "#kubectl logs $pod_name -n $namespace"
-    kubectl logs $pod_name -n $namespace
+    kubectl logs $pod_name -n $namespace --all-containers --prefix=true
     echo "-----------------------------------"
 }
 

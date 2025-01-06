@@ -8,7 +8,10 @@ metadata:
   labels:
     {{- include "vllm.labels" . | nindent 4 }}
 spec:
+  {{- if ne (int .Values.replicaCount) 1 }}
+  # remove if replica count should not be reset on pod update (e.g. with HPA)
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "vllm.selectorLabels" . | nindent 6 }}
@@ -25,8 +28,46 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "vllm.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if not (hasPrefix "/data/" .Values.LLM_MODEL_ID) }}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: {{ include "vllm.fullname" . }}-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model {{ .Values.LLM_MODEL_ID }} ... ";
+              huggingface-cli download --cache-dir /data {{ .Values.LLM_MODEL_ID | quote }};
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--{{ replace "/" "--" .Values.LLM_MODEL_ID }}
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      {{- end }}
       containers:
         - name: {{ .Chart.Name }}
           envFrom:
@@ -38,11 +79,7 @@ spec:
                 optional: true
             {{- end }}
           securityContext:
-            {{- if .Values.global.modelUseHostPath }}
-            {}
-            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
-            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -124,4 +161,8 @@ spec:
           labelSelector:
             matchLabels:
               {{- include "vllm.selectorLabels" . | nindent 14 }}
+      {{- end }}
+      {{- if not .Values.accelDevice }}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
+      terminationGracePeriodSeconds: 120
       {{- end }}

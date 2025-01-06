@@ -4,16 +4,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Release.Name }}-v2a
+  name: {{ include "nginx.fullname" . }}
   labels:
-    {{- include "docsum.labels" . | nindent 4 }}
-    app: {{ .Release.Name }}-v2a
+    {{- include "nginx.labels" . | nindent 4 }}
 spec:
+  {{- if ne (int .Values.replicaCount) 1 }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
-      {{- include "docsum.selectorLabels" . | nindent 6 }}
-      app: {{ .Release.Name }}-v2a
+      {{- include "nginx.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -21,35 +21,56 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "docsum.selectorLabels" . | nindent 8 }}
-        app: {{ .Release.Name }}-v2a
+        {{- include "nginx.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "nginx.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
-        - name: {{ .Release.Name }}-v2a
+        - name: {{ .Chart.Name }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-nginx-config
+                optional: true
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-          image: "{{ .Values.v2a.image.repository }}:{{ .Values.v2a.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- end }}
-          volumeMounts:
-            - mountPath: /tmp
-              name: tmp
           ports:
-            - name: v2a
-              containerPort: {{ .Values.v2a.port }}
+            - name: nginx
+              containerPort: {{ .Values.service.port }}
               protocol: TCP
+          {{- if .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml .Values.livenessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml .Values.readinessProbe | nindent 12 }}
+          {{- end }}
+          {{- if .Values.startupProbe }}
+          startupProbe:
+            {{- toYaml .Values.startupProbe | nindent 12 }}
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          {{- with .Values.volumeMounts }}
+          volumeMounts:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+      {{- with .Values.volumes }}
       volumes:
-        - name: tmp
-          emptyDir: {}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -69,23 +90,5 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              {{- include "docsum.selectorLabels" . | nindent 14 }}
-              app: {{ .Release.Name }}-v2a
+              {{- include "nginx.selectorLabels" . | nindent 14 }}
       {{- end }}
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Release.Name }}-v2a
-  labels:
-    {{- include "docsum.labels" . | nindent 4 }}
-spec:
-  type: {{ .Values.v2a.service.type }}
-  ports:
-    - port: {{ .Values.v2a.service.port }}
-      targetPort: {{ .Values.v2a.port }}
-      protocol: TCP
-      name: v2a
-  selector:
-    {{- include "docsum.selectorLabels" . | nindent 4 }}
-    app: {{ .Release.Name }}-v2a

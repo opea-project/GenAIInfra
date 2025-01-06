@@ -11,6 +11,7 @@ Helm chart for deploying ChatQnA service. ChatQnA depends on the following servi
 - [teirerank](../common/teirerank/README.md)
 - [llm-uservice](../common/llm-uservice/README.md)
 - [tgi](../common/tgi/README.md)
+- [vllm](../common/vllm/README.md)
 
 ## Installing the Chart
 
@@ -26,13 +27,15 @@ export MODELNAME="Intel/neural-chat-7b-v3-3"
 # If you would like to use the traditional UI, please change the image as well as the containerport within the values
 # append these at the end of the command "--set chatqna-ui.image.repository=opea/chatqna-ui,chatqna-ui.image.tag=latest,chatqna-ui.containerPort=5173"
 helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
-# To use Gaudi device
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
+# To use Gaudi device with TGI
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-tgi-values.yaml
+# To use Gaudi device with vLLM
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-vllm-values.yaml
 # To use Nvidia GPU
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
-# To include guardrail component in chatqna on Xeon
+# To include guardrail component in chatqna on Xeon with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-values.yaml
-# To include guardrail component in chatqna on Gaudi
+# To include guardrail component in chatqna on Gaudi with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
 ```
 
