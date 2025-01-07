@@ -1,7 +1,10 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 name: Update the helm charts 0-latest
 
-on:  
-  pull_request:  
+on:
+  pull_request:
     branches:
       - main
     types: [closed]
@@ -10,18 +13,18 @@ on:
 env:
   CHARTS_DIR: "helm-charts"
 
-jobs:  
-  run-on-merge:  
-    if: github.event.pull_request.merged == true  
-    runs-on: ubuntu-latest  
+jobs:
+  run-on-merge:
+    if: github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
 
-    steps:  
-      - name: Checkout Code  
+    steps:
+      - name: Checkout Code
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
           ref: ${{ github.ref }}
-        
+
       - name: Get the modified charts list
         run: |
           echo "This job runs after a PR is merged!"
