@@ -22,5 +22,6 @@ dependencies:
   - name: nginx
     version: 0-latest
     repository: "file://../common/nginx"
+    condition: nginx.enabled
 version: 0-latest
 appVersion: "v1.0"
