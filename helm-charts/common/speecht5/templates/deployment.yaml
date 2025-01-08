@@ -71,7 +71,7 @@ spec:
               name: tmp
       {{- end }}
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
                 name: {{ include "speecht5.fullname" . }}-config
