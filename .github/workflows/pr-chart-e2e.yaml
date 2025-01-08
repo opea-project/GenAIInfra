@@ -34,6 +34,10 @@ jobs:
       - name: Get test matrix
         id: get-test-matrix
         run: |
+          if grep -r '^version: ' `find helm-charts/ -name "Chart.yaml"` | grep -v "0-latest"; then
+            echo "Version check failed, main branch should always use version 0-latest"
+            exit 1
+          fi
           base_commit=${{ github.event.pull_request.base.sha }}
           merged_commit=$(git log -1 --format='%H')
           e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
