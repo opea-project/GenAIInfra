@@ -5,18 +5,29 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-tei:
-  enabled: false
+# Configurations for OPEA microservice mm-embedding
+# Set it as a non-null string, such as true, if you want to enable logging facility.
+LOGFLAG: ""
+
+# embedding need to use different backend embedding engine: TEI, multimodal-bridgetower, PredictionGuard
+# Default is to use the TEI(text-embedding-inference) as the backend
+EMBEDDING_BACKEND: "TEI"
+
+# Uncomment and set the following settings to use PredictionGuard as the backend
+# EMBEDDING_BACKEND: "PredictionGuard"
+PG_EMBEDDING_MODEL_NAME: "bridgetower-large-itm-mlm-itc"
+PREDICTIONGUARD_API_KEY: ""
+
+# Uncomment and set the following settings to use embedding-multimodal-bridgetower as the backend
+# EMBEDDING_BACKEND: "BridgeTower"
+
+# common backend embedding service endpoint URL, e.g. "http://tei:80", "http://mm-embedding:80"
+EMBEDDING_ENDPOINT: ""
 
 replicaCount: 1
 
-# Set it as a non-null string, such as true, if you want to enable logging facility,
-# otherwise, keep it as "" to disable it.
-LOGFLAG: ""
-
-TEI_EMBEDDING_ENDPOINT: ""
 image:
-  repository: opea/embedding-tei
+  repository: opea/embedding
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
@@ -58,25 +69,14 @@ service:
   # The default port for embedding service is 9000
   port: 6000
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources:
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: v1/health_check
-    port: embedding-usvc
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  failureThreshold: 24
 readinessProbe:
   httpGet:
     path: v1/health_check
@@ -111,3 +111,9 @@ global:
 
   # Prometheus Helm install release name for serviceMonitor
   prometheusRelease: prometheus-stack
+
+# The following is for CI tests only
+tei:
+  enabled: false
+mm-embedding:
+  enabled: false

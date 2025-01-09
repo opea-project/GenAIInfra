@@ -6,8 +6,8 @@
 # Declare variables to be passed into your templates.
 
 tei:
-  enabled: true
-mm-embedding:
   enabled: false
+mm-embedding:
+  enabled: true
 
-EMBEDDING_BACKEND: "TEI"
+EMBEDDING_BACKEND: "BridgeTower"
