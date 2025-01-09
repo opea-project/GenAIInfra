@@ -8,10 +8,19 @@ metadata:
   labels:
     {{- include "reranking-usvc.labels" . | nindent 4 }}
 data:
+  {{- if eq "TEI" .Values.RERANK_BACKEND }}
+  RERANK_COMPONENT_NAME: "OPEA_TEI_RERANKING"
   {{- if .Values.TEI_RERANKING_ENDPOINT }}
   TEI_RERANKING_ENDPOINT: {{ .Values.TEI_RERANKING_ENDPOINT | quote }}
   {{- else }}
   TEI_RERANKING_ENDPOINT: "http://{{ .Release.Name }}-teirerank"
+  {{- end }}
+  {{- else if eq "VideoRerank" .Values.RERANK_BACKEND }}
+  RERANK_COMPONENT_NAME: "OPEA_VIDEO_RERANKING"
+  CHUNK_DURATION: {{ .Values.CHUNK_DURATION | quote }}
+  FILE_SERVER_ENDPOINT: {{ .Values.FILE_SERVER_ENDPOINT | quote }}
+  {{- else }}
+  {{- cat "Invalid RERANK_BACKEND:" .Values.RERANK_BACKEND | fail }}
   {{- end }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}

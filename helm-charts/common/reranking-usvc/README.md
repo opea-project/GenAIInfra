@@ -44,9 +44,10 @@ curl http://localhost:8000/v1/reranking \
 
 ## Values
 
-| Key                    | Type   | Default                | Description |
-| ---------------------- | ------ | ---------------------- | ----------- |
-| image.repository       | string | `"opea/reranking-tgi"` |             |
-| TEI_RERANKING_ENDPOINT | string | `""`                   |             |
-| service.port           | string | `"8000"`               |             |
-| global.monitoring      | bool   | `false`                |             |
+| Key                    | Type   | Default                | Description                                        |
+| ---------------------- | ------ | ---------------------- | -------------------------------------------------- |
+| image.repository       | string | `"opea/reranking-tgi"` |                                                    |
+| RERANK_BACKEND         | string | `"TEI"`                | backend engine to use, one of "TEI", "VideoRerank" |
+| TEI_RERANKING_ENDPOINT | string | `""`                   |                                                    |
+| service.port           | string | `"8000"`               |                                                    |
+| global.monitoring      | bool   | `false`                |                                                    |
