@@ -28,8 +28,38 @@ spec:
       serviceAccountName: {{ include "data-prep.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-db
+          envFrom:
+            - configMapRef:
+                name: {{ include "data-prep.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              {{- if eq "REDIS" .Values.DATAPREP_BACKEND }}
+              TESTHOST=$(REDIS_HOST);
+              TESTPORT=$(REDIS_PORT);
+              {{- else if eq "MILVUS" .Values.DATAPREP_BACKEND }}
+              TESTHOST=$(MILVUS_HOST);
+              TESTPORT=$(MILVUS_PORT);
+              {{- end }}
+              wait_timeout={{ .Values.waitTimeout | default 1 }};
+              total_timeout={{ .Values.retryTimeoutSeconds | default 60 }};
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${TESTHOST} ${TESTPORT}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${TESTHOST}:${TESTPORT} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
+              done;
+              echo "${TESTHOST}:${TESTPORT} is reachable within $j seconds.";
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
                 name: {{ include "data-prep.fullname" . }}-config
