@@ -16,18 +16,14 @@ milvus:
   minio:
     mode: standalone
 redis-vector-db:
-    enabled: false
+  enabled: false
 tei:
   enabled: true
 
-image:
-  repository: opea/retriever-milvus
-port: 7000
+RETRIEVER_BACKEND: "MILVUS"
 # text embedding inference service URL, e.g. http://<service-name>:<port>
-#TEI_EMBEDDING_ENDPOINT: "http://dataprep-tei:80"
+#TEI_EMBEDDING_ENDPOINT: "http://retriever-tei:80"
 # milvus DB configurations
-#MILVUS_HOST: "dataprep-milvus"
-MILVUS_PORT: "19530"
+#MILVUS_HOST: "retriever-milvus"
+MILVUS_PORT: 19530
 COLLECTION_NAME: "rag_milvus"
-MOSEC_EMBEDDING_ENDPOINT: ""
-MOSEC_EMBEDDING_MODEL: ""

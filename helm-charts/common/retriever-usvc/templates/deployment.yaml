@@ -28,8 +28,36 @@ spec:
       serviceAccountName: {{ include "retriever-usvc.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-db
+          envFrom:
+            - configMapRef:
+                name: {{ include "retriever-usvc.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              {{- if eq "REDIS" .Values.RETRIEVER_BACKEND }}
+              TESTHOST=$(REDIS_HOST);
+              TESTPORT=$(REDIS_PORT);
+              {{- else if eq "MILVUS" .Values.RETRIEVER_BACKEND }}
+              TESTHOST=$(MILVUS_HOST);
+              TESTPORT=$(MILVUS_PORT);
+              {{- end }}
+              retry_count={{ .Values.retryCount | default 60 }};
+              j=1;
+              while ! nc -z ${TESTHOST} ${TESTPORT}; do
+                [[ $j -ge ${retry_count} ]] && echo "ERROR: ${TESTHOST}:${TESTPORT} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+1)); sleep 1;
+              done;
+              echo "${TESTHOST}:${TESTPORT} is reachable within $j seconds.";
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
                 name: {{ include "retriever-usvc.fullname" . }}-config
