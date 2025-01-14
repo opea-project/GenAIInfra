@@ -2,8 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 image:
-  repository: opea/llm-faqgen-tgi
+  repository: opea/llm-faqgen
   tag: "latest"
+
+LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 
 tgi:
   enabled: true
