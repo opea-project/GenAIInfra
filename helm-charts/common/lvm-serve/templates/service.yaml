@@ -1,0 +1,18 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "lvm-serve.fullname" . }}
+  labels:
+    {{- include "lvm-serve.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: 80
+      targetPort: lvm-serve
+      protocol: TCP
+      name: lvm-serve
+  selector:
+    {{- include "lvm-serve.selectorLabels" . | nindent 4 }}
