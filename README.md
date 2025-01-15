@@ -41,6 +41,7 @@ The following steps are optional. They're only required if you want to run the w
 
 4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Kubernetes_Installation/index.html).
 
+Alternatively, Intel provides a [base operator](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Kubernetes_Installation/Kubernetes_Operator.html) to manage the Gaudi software stack.
 
 ## Usages
 
