@@ -4,7 +4,7 @@
 name: Update the helm charts 0-latest
 
 on:
-  pull_request:
+  pull_request_target:
     branches:
       - main
     types: [closed]
