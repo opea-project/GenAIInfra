@@ -17,26 +17,22 @@ spec:
       command: ['bash', '-c']
       args:
         - |
+          {{- if contains "llm-docsum" .Values.image.repository }}
+          url="http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/docsum";
+          body='{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5.","max_tokens":17}';
+          {{- else if contains "llm-faqgen" .Values.image.repository }}
+          url="http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/faqgen";
+          body='{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5.","max_tokens":17}';
+          {{- else }}
+          url="http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions";
+          body='{"model": "{{ .Values.LLM_MODEL_ID }}", "messages": [{"role": "user", "content": "What is Deep Learning?"}], "max_tokens":17}';
+          {{- end }}
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
-          {{- if contains "llm-docsum-tgi" .Values.image.repository }}
-          # Try with docsum endpoint
-            curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/docsum -sS --fail-with-body \
+            curl "$url" -sS --fail-with-body \
               -X POST \
-              -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5.","max_tokens":17}' \
+              -d "$body" \
               -H 'Content-Type: application/json' && break;
-          {{- else if contains "llm-faqgen-tgi" .Values.image.repository }}
-          # Try with faqgen endpoint
-            curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/faqgen -sS --fail-with-body \
-              -X POST \
-              -d '{"query":"Text Embeddings Inference (TEI) is a toolkit for deploying and serving open source text embeddings and sequence classification models. TEI enables high-performance extraction for the most popular models, including FlagEmbedding, Ember, GTE and E5.","max_tokens":17}' \
-              -H 'Content-Type: application/json' && break;
-          {{- else }}
-            curl http://{{ include "llm-uservice.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \
-              -X POST \
-              -d '{"query":"What is Deep Learning?","max_tokens":17,"top_k":10,"top_p":0.95,"typical_p":0.95,"temperature":0.01,"repetition_penalty":1.03,"streaming":true}' \
-              -H 'Content-Type: application/json' && break;
-          {{- end }}
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;

@@ -28,8 +28,38 @@ spec:
       serviceAccountName: {{ include "llm-uservice.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-llm
+          envFrom:
+            - configMapRef:
+                name: {{ include "llm-uservice.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              proto=$(echo ${LLM_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\1/p');
+              host=$(echo ${LLM_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\2/p');
+              port=$(echo ${LLM_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\3/p');
+              if [ -z "$port" ]; then
+                  port=80;
+                  [[ "$proto" = "https" ]] && port=443;
+              fi;
+              retry_count={{ .Values.retryCount | default 60 }};
+              j=1;
+              while ! nc -z ${host} ${port}; do
+                [[ $j -ge ${retry_count} ]] && echo "ERROR: ${host}:${port} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+1)); sleep 1;
+              done;
+              echo "${host}:${port} is reachable within $j seconds.";
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
                 name: {{ include "llm-uservice.fullname" . }}-config

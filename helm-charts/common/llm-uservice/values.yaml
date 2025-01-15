@@ -5,26 +5,34 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-tgi:
-  enabled: false
-vllm:
-  enabled: false
+# Configurations for OPEA microservice llm-uservice
+# Set it as a non-null string, such as true, if you want to enable logging.
+LOGFLAG: ""
 
-replicaCount: 1
-# For tgi
-TGI_LLM_ENDPOINT: ""
-# For vllm, set the LLM_MODEL_ID the same as vllm sub chart
-vLLM_ENDPOINT: ""
-LLM_MODEL_ID: ""
+# settings for llm-textgen service
+# backend inference engine to use, i.e. TGI, vLLM
+TEXTGEN_BACKEND: "TGI"
+
+# settings for llm-docsum service
+# backend inference engine to use, i.e. TGI, vLLM
+DOCSUM_BACKEND: "TGI"
 MAX_INPUT_TOKENS: ""
 MAX_TOTAL_TOKENS: ""
 
-# Set it as a non-null string, such as true, if you want to enable logging facility,
-# otherwise, keep it as "" to disable it.
-LOGFLAG: ""
+# settings for llm-faqgen
+# backend inference engine to use, i.e. TGI, vLLM
+FAQGEN_BACKEND: "TGI"
+
+# settings for llm-textgen, llm-docsum, llm-faqgen
+# model used by the inference backend
+LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
+# inference backend URL, e.g. http://tgi:80
+LLM_ENDPOINT: ""
+
+replicaCount: 1
 
 image:
-  repository: opea/llm-tgi
+  repository: opea/llm-textgen
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
@@ -66,25 +74,14 @@ service:
   # The default port for llm service is 9000
   port: 9000
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources:
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: v1/health_check
-    port: llm-uservice
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  failureThreshold: 24
 readinessProbe:
   httpGet:
     path: v1/health_check
@@ -120,3 +117,9 @@ global:
 
   # Prometheus Helm install release name for serviceMonitor
   prometheusRelease: prometheus-stack
+
+# for CI tests only
+tgi:
+  enabled: false
+vllm:
+  enabled: false
