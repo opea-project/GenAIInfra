@@ -21,7 +21,11 @@ spec:
           for ((i=1; i<=max_retry; i++)); do
             curl http://{{ include "reranking-usvc.fullname" . }}:{{ .Values.service.port }}/v1/reranking -sS --fail-with-body \
             -X POST \
+            {{- if eq "TEI" .Values.RERANK_BACKEND }}
             -d '{"initial_query":"What is Deep Learning?", "retrieved_docs": [{"text":"Deep Learning is not..."}, {"text":"Deep learning is..."}]}' \
+            {{- else }}
+            -d '{"retrieved_docs":[{"doc": [{"text": "this is the retrieved text"}]}], "initial_query": "this is the query", "top_n": 1, "metadata":[{"other_key": "value", "video":"top_video_name", "timestamp":"20"},{"other_key": "value", "video":"second_video_name", "timestamp":"40"}]}' \
+            {{- end }}
             -H 'Content-Type: application/json' && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;

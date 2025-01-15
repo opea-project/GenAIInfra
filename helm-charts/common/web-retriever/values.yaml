@@ -5,13 +5,9 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-tei:
-  enabled: false
-
 replicaCount: 1
 
-# Set it as a non-null string, such as true, if you want to enable logging facility,
-# otherwise, keep it as "" to disable it.
+# Set it as a non-null string, such as true, if you want to enable logging.
 LOGFLAG: ""
 
 TEI_EMBEDDING_ENDPOINT: ""
@@ -19,7 +15,7 @@ GOOGLE_API_KEY: ""
 GOOGLE_CSE_ID: ""
 
 image:
-  repository: opea/web-retriever-chroma
+  repository: opea/web-retriever
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
@@ -61,25 +57,14 @@ service:
   # The default port for retriever service is 7000
   port: 7077
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources:
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: v1/health_check
-    port: web-retriever
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  failureThreshold: 24
 readinessProbe:
   httpGet:
     path: v1/health_check
@@ -108,3 +93,7 @@ global:
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
   sharedSAName: ""
+
+# For CI tests only
+tei:
+  enabled: false
