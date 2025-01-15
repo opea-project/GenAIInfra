@@ -22,8 +22,8 @@ data:
   {{- if .Values.model }}
   model: {{ .Values.model | quote }}
   {{- end }}
-  {{- if .Values.streaming }}
-  streaming: {{ .Values.streaming | quote }}
+  {{- if .Values.stream }}
+  stream: {{ .Values.stream | quote }}
   {{- end }}
   {{- if .Values.temperature }}
   temperature: {{ .Values.temperature | quote }}

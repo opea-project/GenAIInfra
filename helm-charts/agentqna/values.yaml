@@ -61,12 +61,6 @@ worker:
   toolPath: "/mnt/tools"
   service:
     port: 9095
-  image:
-    repository: opea/agent-langchain
-    # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
-    # pullPolicy: ""
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
   strategy: rag_agent_llama
   recursion_limit: "12"
   llm_engine: tgi
@@ -74,7 +68,7 @@ worker:
   model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
   temperature: "0.01"
   max_new_tokens: "4096"
-  streaming: "false"
+  stream: "false"
   tools: "/home/user/tools/worker_agent_tools.yaml"
   require_human_feedback: "false"
   RETRIEVAL_TOOL_URL: ""
@@ -83,12 +77,6 @@ supervisor:
   toolPath: "/mnt/tools"
   service:
     port: 9090
-  image:
-    repository: opea/agent-langchain
-    # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
-    # pullPolicy: ""
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
   strategy: react_llama
   recursion_limit: 10
   llm_engine: tgi
@@ -96,7 +84,7 @@ supervisor:
   model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
   temperature: "0.01"
   max_new_tokens: "4096"
-  streaming: "false"
+  stream: "false"
   tools: /home/user/tools/supervisor_agent_tools.yaml
   require_human_feedback: false
   CRAG_SERVER: ""
