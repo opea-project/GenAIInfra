@@ -1,7 +1,14 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+vllm:
+  enabled: false
+
+llm-uservice:
+  DOCSUM_BACKEND: "TGI"
+
 tgi:
+  enabled: true
   accelDevice: "gaudi"
   image:
     repository: ghcr.io/huggingface/tgi-gaudi

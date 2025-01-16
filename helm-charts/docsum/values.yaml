@@ -59,16 +59,21 @@ affinity: {}
 # To override values in subchart llm-uservice
 llm-uservice:
   image:
-    repository: opea/llm-docsum-tgi
+    repository: opea/llm-docsum
+  DOCSUM_BACKEND: "TGI"
   MAX_INPUT_TOKENS: "1024"
   MAX_TOTAL_TOKENS: "2048"
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
-# To override values in subchart tgi
+# To override values in TGI/vLLM subcharts
 tgi:
+  enabled: true
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   MAX_INPUT_LENGTH: "1024"
   MAX_TOTAL_TOKENS: "2048"
+vllm:
+  enabled: false
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 # Use docsum gradio UI
 nginx:
