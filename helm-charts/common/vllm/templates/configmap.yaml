@@ -25,6 +25,9 @@ data:
   {{- if .Values.VLLM_CPU_KVCACHE_SPACE }}
   VLLM_CPU_KVCACHE_SPACE: {{ .Values.VLLM_CPU_KVCACHE_SPACE | quote}}
   {{- end }}
+  {{- if .Values.VLLM_SKIP_WARMUP }}
+  VLLM_SKIP_WARMUP: {{ .Values.VLLM_SKIP_WARMUP | quote }}
+  {{- end }}
   {{- if .Values.PT_HPU_ENABLE_LAZY_COLLECTIVES }}
   PT_HPU_ENABLE_LAZY_COLLECTIVES: {{ .Values.PT_HPU_ENABLE_LAZY_COLLECTIVES | quote }}
   {{- end }}

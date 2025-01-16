@@ -1,0 +1,17 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Accelerate inferencing in heaviest components to improve performance
+# by overriding their subchart values
+
+vllm:
+  enabled: true
+  image:
+    repository: opea/vllm-gaudi
+    # tag: "good"
+supervisor:
+  llm_endpoint_url: http://agentqna-vllm
+rag-agent:
+  llm_endpoint_url: http://agentqna-vllm
+sql-agent:
+  llm_endpoint_url: http://agentqna-vllm
