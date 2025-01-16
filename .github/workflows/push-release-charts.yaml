@@ -4,7 +4,7 @@
 name: Update the helm charts 0-latest
 
 on:
-  pull_request_target:
+  push:
     branches:
       - main
     types: [closed]
@@ -14,8 +14,7 @@ env:
   CHARTS_DIR: "helm-charts"
 
 jobs:
-  run-on-merge:
-    if: github.event.pull_request.merged == true
+  release-on-push:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +31,7 @@ jobs:
             echo "Version check failed, only update 0-latest"
             exit 1
           fi
-          base_commit=${{ github.event.pull_request.base.sha }}
+          base_commit=$(git rev-parse HEAD~1) # push event
           merged_commit=$(git log -1 --format='%H')
           # Update components
           common_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
@@ -51,8 +50,8 @@ jobs:
           popd
           # Update Examples
           e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
-          grep -v "common" | \
-          grep -vE 'README.md|*.sh' | \
+          grep "^$CHARTS_DIR" | \
+          grep -vE 'README.md|common|*.sh' | \
           cut -d'/' -f2 | sort -u )
           echo "Charts to be updated: $e2e_charts"
           echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin
