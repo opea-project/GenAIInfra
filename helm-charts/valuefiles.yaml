@@ -13,12 +13,11 @@ chatqna:
   dest_dir: ChatQnA/kubernetes/helm
   values:
     - cpu-values.yaml
-    - gaudi-values.yaml
+    - cpu-tgi-values.yaml
     - gaudi-vllm-values.yaml
-    - guardrails-values.yaml
+    - gaudi-tgi-values.yaml
     - guardrails-gaudi-values.yaml
     - norerank-values.yaml
-    - withwrapper-values.yaml
 agentqna:
   src_repo: GenAIInfra
   src_dir: helm-charts/agentqna

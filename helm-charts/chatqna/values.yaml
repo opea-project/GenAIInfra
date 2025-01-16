@@ -64,11 +64,20 @@ autoscaling:
 # Optional subcharts enablement and subcharts settings overwritten
 # LLM choice, tgi by default.
 tgi:
-  enabled: true
-  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
-vllm:
   enabled: false
-  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
+vllm:
+  enabled: true
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
+  shmSize: 128Gi
+  VLLM_TORCH_PROFILER_DIR: "/tmp/vllm_profile"
+data-prep:
+  DATAPREP_BACKEND: "REDIS"
+  INDEX_NAME: "rag-redis"
+retriever-usvc:
+  RETRIEVER_BACKEND: "REDIS"
+  INDEX_NAME: "rag-redis"
+
 
 # disable guardrails by default
 # See guardrails-values.yaml for guardrail related options
@@ -86,22 +95,25 @@ redis-vector-db:
 # Microservice layer, disabled by default
 llm-uservice:
   enabled: false
+  TEXTGEN_BACKEND: "vLLM"
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 embedding-usvc:
   enabled: false
+  EMBEDDING_BACKEND: "TEI"
 reranking-usvc:
   enabled: false
+  RERANK_BACKEND: "TEI"
 
 nginx:
   service:
     type: NodePort
 
-# If you would like to switch to traditional UI image
 # Uncomment the following lines
-# chatqna-ui:
-#   image:
-#     repository: opea/chatqna-ui
-#     tag: "latest"
-#   containerPort: "5173"
+chatqna-ui:
+  image:
+    repository: opea/chatqna-ui
+    tag: "latest"
+  containerPort: "5173"
 
 global:
   http_proxy: ""
