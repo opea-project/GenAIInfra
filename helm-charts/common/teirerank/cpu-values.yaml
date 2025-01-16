@@ -2,8 +2,4 @@
 # SPDX-License-Identifier: Apache-2.0
 
 image:
-  repository: opea/whisper-gaudi
-
-resources:
-  limits:
-    habana.ai/gaudi: 1
+  repository: ghcr.io/huggingface/text-embeddings-inference
