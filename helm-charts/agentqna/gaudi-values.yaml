@@ -5,6 +5,7 @@
 # by overriding their subchart values
 
 tgi:
+  enabled: true
   accelDevice: "gaudi"
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
