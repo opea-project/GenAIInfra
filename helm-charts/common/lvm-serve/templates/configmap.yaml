@@ -1,0 +1,43 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "lvm-serve.fullname" . }}-config
+  labels:
+    {{- include "lvm-serve.labels" . | nindent 4 }}
+data:
+  {{- if or (hasSuffix "lvm-llava" .Values.image.repository) (hasSuffix "llava-gaudi" .Values.image.repository) }}
+  LVM_MODEL_ID: {{ .Values.LVM_MODEL_ID | quote }}
+  {{- else if hasSuffix "lvm-video-llama" .Values.image.repository }}
+  llm_download: {{ .Values.LLM_DOWNLOAD | default "True" | quote }}
+  {{- else if hasSuffix "lvm-predictionguard" .Values.image.repository }}
+  PREDICTIONGUARD_API_KEY: {{ .Values.PREDICTIONGUARD_API_KEY | quote }}
+  {{- else if hasSuffix "lvm-llama-vision" .Values.image.repository }}
+  LLAMA_VISION_MODEL_ID: {{ .Values.LVM_MODEL_ID | quote }}
+  {{- else if hasSuffix "lvm-llama-vision-guard" .Values.image.repository }}
+  LLAMA_VISION_GUARD_MODEL_ID: {{ .Values.LVM_MODEL_ID | quote }}
+  {{- else if hasSuffix "lvm-llama-vision-tp" .Values.image.repository }}
+  MODEL_ID: {{ .Values.LVM_MODEL_ID | quote }}
+  {{- end }}
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+  HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+  {{- if .Values.global.HF_ENDPOINT }}
+  HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
+  {{- end }}
+  http_proxy: {{ .Values.global.http_proxy | quote }}
+  https_proxy: {{ .Values.global.https_proxy | quote }}
+  no_proxy: {{ .Values.global.no_proxy | quote }}
+  LOGFLAG: {{ .Values.LOGFLAG | quote }}
+  HF_HOME: "/tmp/.cache/huggingface"
+  {{- if not (regexMatch "(lvm-video-llama|lvm-predictionguard)$" .Values.image.repository) }}
+  HF_HUB_CACHE: "/data"
+  {{- end }}
+  HABANA_LOGS: "/tmp/habana_logs"
+  {{- if .Values.PT_HPU_ENABLE_LAZY_COLLECTIVES }}
+  PT_HPU_ENABLE_LAZY_COLLECTIVES: {{ .Values.PT_HPU_ENABLE_LAZY_COLLECTIVES | quote }}
+  {{- end }}
+  {{- if .Values.OMPI_MCA_btl_vader_single_copy_mechanism }}
+  OMPI_MCA_btl_vader_single_copy_mechanism: {{ .Values.OMPI_MCA_btl_vader_single_copy_mechanism | quote}}
+  {{- end }}

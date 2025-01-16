@@ -21,3 +21,5 @@
 .idea/
 *.tmproj
 .vscode/
+# CI values
+ci*-values.yaml

@@ -25,10 +25,53 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "speecht5.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if not (hasPrefix "/data/" .Values.TTS_MODEL_PATH) }}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: {{ include "speecht5.fullname" . }}-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            {{- if hasKey .Values.securityContext "runAsGroup" }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup }}
+            {{- end }}
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download models {{ .Values.TTS_MODEL_PATH }} {{ .Values.VOCODER_MODEL }} ... ";
+              huggingface-cli download --cache-dir /data {{ .Values.TTS_MODEL_PATH | quote }};
+              huggingface-cli download --cache-dir /data {{ .Values.VOCODER_MODEL| quote }};
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--{{ replace "/" "--" .Values.TTS_MODEL_PATH }};
+              chmod -R g+w /data/models--{{ replace "/" "--" .Values.VOCODER_MODEL }}
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      {{- end }}
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
                 name: {{ include "speecht5.fullname" . }}-config
@@ -38,11 +81,7 @@ spec:
                 optional: true
             {{- end }}
           securityContext:
-            {{- if .Values.global.modelUseHostPath }}
-            {}
-            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
-            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}

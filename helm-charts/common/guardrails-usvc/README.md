@@ -47,11 +47,10 @@ curl http://localhost:9090/v1/guardrails \
 
 ## Values
 
-| Key                             | Type   | Default                              | Description                                                                                                                                                  |
-| ------------------------------- | ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                                 | Your own Hugging Face API token                                                                                                                              |
-| global.modelUseHostPath         | string | `"/mnt/opea-models"`                 | Cached models directory, tgi will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory |
-| image.repository                | string | `"opea/guardrails-usvc"`             |                                                                                                                                                              |
-| service.port                    | string | `"9090"`                             |                                                                                                                                                              |
-| SAFETY_GUARD_ENDPOINT           | string | `""`                                 | LLM endpoint                                                                                                                                                 |
-| SAFETY_GUARD_MODEL_ID           | string | `"meta-llama/Meta-Llama-Guard-2-8B"` | Model ID for the underlying LLM service is using                                                                                                             |
+| Key                             | Type   | Default                              | Description                                      |
+| ------------------------------- | ------ | ------------------------------------ | ------------------------------------------------ |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                                 | Your own Hugging Face API token                  |
+| image.repository                | string | `"opea/guardrails-usvc"`             |                                                  |
+| service.port                    | string | `"9090"`                             |                                                  |
+| SAFETY_GUARD_ENDPOINT           | string | `""`                                 | LLM endpoint                                     |
+| SAFETY_GUARD_MODEL_ID           | string | `"meta-llama/Meta-Llama-Guard-2-8B"` | Model ID for the underlying LLM service is using |

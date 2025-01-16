@@ -5,5 +5,11 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
+LVM_BACKEND: "TGI"
 tgi:
   enabled: true
+  LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
+  MAX_INPUT_LENGTH: "4096"
+  MAX_TOTAL_TOKENS: "8192"
+lvm-serve:
+  enabled: false

@@ -7,6 +7,26 @@
 
 replicaCount: 1
 
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
 securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
@@ -41,12 +61,6 @@ worker:
   toolPath: "/mnt/tools"
   service:
     port: 9095
-  image:
-    repository: opea/agent-langchain
-    # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
-    # pullPolicy: ""
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
   strategy: rag_agent_llama
   recursion_limit: "12"
   llm_engine: tgi
@@ -54,7 +68,7 @@ worker:
   model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
   temperature: "0.01"
   max_new_tokens: "4096"
-  streaming: "false"
+  stream: "false"
   tools: "/home/user/tools/worker_agent_tools.yaml"
   require_human_feedback: "false"
   RETRIEVAL_TOOL_URL: ""
@@ -63,12 +77,6 @@ supervisor:
   toolPath: "/mnt/tools"
   service:
     port: 9090
-  image:
-    repository: opea/agent-langchain
-    # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
-    # pullPolicy: ""
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
   strategy: react_llama
   recursion_limit: 10
   llm_engine: tgi
@@ -76,7 +84,7 @@ supervisor:
   model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
   temperature: "0.01"
   max_new_tokens: "4096"
-  streaming: "false"
+  stream: "false"
   tools: /home/user/tools/supervisor_agent_tools.yaml
   require_human_feedback: false
   CRAG_SERVER: ""
@@ -102,6 +110,10 @@ global:
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: "agentqna"
   # set modelUseHostPath or modelUsePVC to use model cache.
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models

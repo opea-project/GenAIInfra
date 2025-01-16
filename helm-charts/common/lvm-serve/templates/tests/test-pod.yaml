@@ -1,0 +1,41 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "lvm-serve.fullname" . }}-testpod"
+  labels:
+    {{- include "lvm-serve.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: curl
+      image: python:3.10
+      command: ['bash', '-c']
+      args:
+        - |
+          {{- if or (hasSuffix "lvm-llava" .Values.image.repository) (hasSuffix "llava-gaudi" .Values.image.repository) }}
+          pip install Pillow requests;
+          image_b64_str=$(python -c 'import base64;from io import BytesIO;import PIL.Image;import requests;image_path = "https://avatars.githubusercontent.com/u/39623753?s=40&v=4";image = PIL.Image.open(requests.get(image_path, stream=True, timeout=3000).raw);buffered = BytesIO();image.save(buffered, format="PNG");img_b64_str = base64.b64encode(buffered.getvalue()).decode();print(img_b64_str)');
+          body="{\"img_b64_str\": \"${image_b64_str}\", \"prompt\": \"What is this?\", \"max_new_tokens\": 32}";
+          url="http://{{ include "lvm-serve.fullname" . }}/generate";
+          {{- else if hasSuffix "lvm-video-llama" .Values.image.repository }}
+          body="";
+          url="http://{{ include "lvm-serve.fullname" . }}/generate?video_url=https%3A%2F%2Fgithub.com%2FDAMO-NLP-SG%2FVideo-LLaMA%2Fraw%2Fmain%2Fexamples%2Fsilence_girl.mp4&start=0.0&duration=9&prompt=What%20is%20the%20person%20doing%3F&max_new_tokens=32";
+          {{- else }}
+          body='{"image": "iVBORw0KGgoAAAANSUhEUgAAAAoAAAAKCAYAAACNMs+9AAAAFUlEQVR42mP8/5+hnoEIwDiqkL4KAcT9GO0U4BxoAAAAAElFTkSuQmCC", "prompt": "Describe the image.", "max_new_tokens": 32}';
+          url="http://{{ include "lvm-serve.fullname" . }}/v1/lvm";
+          {{- end }}
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
+            curl $url -sS --fail-with-body \
+              -X POST \
+              -d "$body" \
+              -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+  restartPolicy: Never

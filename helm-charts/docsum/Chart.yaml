@@ -9,6 +9,11 @@ dependencies:
   - name: tgi
     version: 0-latest
     repository: "file://../common/tgi"
+    condition: tgi.enabled
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
   - name: llm-uservice
     version: 0-latest
     repository: "file://../common/llm-uservice"
@@ -19,5 +24,9 @@ dependencies:
     version: 0-latest
     repository: "file://../common/ui"
     alias: docsum-ui
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
+    condition: nginx.enabled
 version: 0-latest
 appVersion: "v1.0"

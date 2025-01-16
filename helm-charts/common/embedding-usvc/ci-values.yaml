@@ -7,3 +7,7 @@
 
 tei:
   enabled: true
+mm-embedding:
+  enabled: false
+
+EMBEDDING_BACKEND: "TEI"

@@ -36,10 +36,11 @@ Then run the command `kubectl port-forward svc/asr 9099:9099` to expose the asr 
 Open another terminal and run the following command to verify the service if working:
 
 ```console
+wget https://github.com/intel/intel-extension-for-transformers/raw/main/intel_extension_for_transformers/neural_chat/assets/audio/sample.wav
 curl http://localhost:9099/v1/audio/transcriptions \
-  -XPOST \
-  -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"}' \
-  -H 'Content-Type: application/json'
+  -H "Content-Type: multipart/form-data" \
+  -F file="@./sample.wav" \
+  -F model="openai/whisper-small"
 ```
 
 ## Values

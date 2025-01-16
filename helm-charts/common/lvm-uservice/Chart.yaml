@@ -13,3 +13,7 @@ dependencies:
     version: 0-latest
     repository: file://../tgi
     condition: tgi.enabled
+  - name: lvm-serve
+    version: 0-latest
+    repository: file://../lvm-serve
+    condition: lvm-serve.enabled

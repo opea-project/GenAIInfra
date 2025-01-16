@@ -16,8 +16,10 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="Intel/neural-chat-7b-v3-3"
 helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
-# To use Gaudi device
-# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-values.yaml
+# To use Gaudi device with TGI
+# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-tgi-values.yaml ...
+# To use Gaudi device with vLLM
+# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-vllm-values.yaml ..
 ```
 
 ## Verify
@@ -42,14 +44,17 @@ curl http://localhost:8888/v1/docsum \
 
 ### Verify the workload through UI
 
-The UI has already been installed via the Helm chart. To access it, use the external IP of one your Kubernetes node along with the NGINX port. You can find the NGINX port using the following command:
+The UI has already been installed via the Helm chart. To access it, use the external IP of one your Kubernetes node along with docsum-ui service nodePort(If using the default docsum gradio UI) or along with the NGINX service nodePort. You can find the corresponding port using the following command:
 
 ```bash
-export port=$(kubectl get service docsum-nginx --output='jsonpath={.spec.ports[0].nodePort}')
+# For docsum gradio UI
+export port=$(kubectl get service docsum-docsum-ui --output='jsonpath={.spec.ports[0].nodePort}')
+# For other docsum UI
+# export port=$(kubectl get service docsum-nginx --output='jsonpath={.spec.ports[0].nodePort}')
 echo $port
 ```
 
-Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the ChatQnA workload.
+Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the DocSum workload.
 
 ## Values
 

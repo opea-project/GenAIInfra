@@ -21,10 +21,11 @@ spec:
           for ((i=1; i<=max_retry; i++)); do
             curl -sS --fail-with-body http://{{ include "tts.fullname" . }}:{{ .Values.service.port }}/v1/audio/speech \
             -XPOST \
-            -d '{"text": "Who are you?"}' \
-            -H 'Content-Type: application/json' && break;
+            -d '{"input":"Who are you?", "voice": "male"}' \
+            -H 'Content-Type: application/json' --output speech.wav && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
-          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi;
+          file speech.wav
   restartPolicy: Never

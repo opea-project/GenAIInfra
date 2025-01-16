@@ -2,5 +2,9 @@
 # SPDX-License-Identifier: Apache-2.0
 
 image:
-  repository: opea/llm-docsum-tgi
+  repository: opea/llm-docsum
   tag: "latest"
+
+LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
+MAX_INPUT_TOKENS: 2048
+MAX_TOTAL_TOKENS: 4096

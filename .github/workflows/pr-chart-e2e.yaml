@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 name: E2E test with helm charts
@@ -34,6 +34,10 @@ jobs:
       - name: Get test matrix
         id: get-test-matrix
         run: |
+          if grep -r '^version: ' `find helm-charts/ -name "Chart.yaml"` | grep -v "0-latest"; then
+            echo "Version check failed, main branch should always use version 0-latest"
+            exit 1
+          fi
           base_commit=${{ github.event.pull_request.base.sha }}
           merged_commit=$(git log -1 --format='%H')
           e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
@@ -46,8 +50,14 @@ jobs:
           cut -d'/' -f3 | sort -u )
           run_matrix="{\"include\":["
           for chart in ${e2e_charts}; do
-            for file in "$CHARTS_DIR/$chart"/ci-*values.yaml; do
+            for file in "$CHARTS_DIR/$chart"/*values.yaml; do
               if [ -f "$file" ]; then
+                if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
+                  continue
+                fi
+                if [[ "$file" == *"variant_"* ]] || [[ "$file" == *"milvus"* ]]; then
+                  continue
+                fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
                   run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
@@ -58,8 +68,14 @@ jobs:
             done
           done
           for chart in ${common_charts}; do
-            for file in "$CHARTS_DIR/common/$chart"/ci-*values.yaml; do
+            for file in "$CHARTS_DIR/common/$chart"/*values.yaml; do
               if [ -f "$file" ]; then
+                if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
+                  continue
+                fi
+                if [[ "$file" == *"variant_"* ]] || [[ "$file" == *"milvus"* ]]; then
+                  continue
+                fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
                   run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"

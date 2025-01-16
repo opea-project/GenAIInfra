@@ -1,0 +1,9 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+appVersion: "1.1"
+description: A Helm chart for deploying opea multimodel embedding microservices
+name: mm-embedding
+type: application
+version: 0-latest
