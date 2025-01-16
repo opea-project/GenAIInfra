@@ -84,7 +84,7 @@ curl http://localhost:9000/v1/faqgen \
 | image.repository                | string | `"opea/llm-textgen"`          | one of "opea/llm-textgen", "opea/llm-docsum", "opea/llm-faqgen"                  |
 | LLM_ENDPOINT                    | string | `""`                          | backend inference service endpoint                                               |
 | LLM_MODEL_ID                    | string | `"Intel/neural-chat-7b-v3-3"` | model used by the inference backend                                              |
-| TEXTGEN_BACKEND                 | string | `"tgi"`                       | backend inference engine, only valid for llm-textgen image, one of "TGI", "vLLM" |
-| DOCSUM_BACKEND                  | string | `"tgi"`                       | backend inference engine, only valid for llm-docsum image, one of "TGI", "vLLM"  |
-| FAQGEN_BACKEND                  | string | `"tgi"`                       | backend inference engine, only valid for llm-faqgen image, one of "TGi", "vLLM"  |
+| TEXTGEN_BACKEND                 | string | `"TGI"`                       | backend inference engine, only valid for llm-textgen image, one of "TGI", "vLLM" |
+| DOCSUM_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-docsum image, one of "TGI", "vLLM"  |
+| FAQGEN_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-faqgen image, one of "TGi", "vLLM"  |
 | global.monitoring               | bool   | `false`                       | Service usage metrics                                                            |

@@ -13,3 +13,7 @@ dependencies:
     version: 0-latest
     repository: file://../tei
     condition: tei.enabled
+  - name: mm-embedding
+    version: 0-latest
+    repository: file://../mm-embedding
+    condition: mm-embedding.enabled
