@@ -57,3 +57,9 @@ data:
   {{- if .Values.FLASH_ATTENTION_RECOMPUTE }}
   FLASH_ATTENTION_RECOMPUTE: {{ .Values.FLASH_ATTENTION_RECOMPUTE | quote }}
   {{- end }}
+  {{- if .Values.PREFILL_BATCH_BUCKET_SIZE }}
+  PREFILL_BATCH_BUCKET_SIZE: {{ .Values.PREFILL_BATCH_BUCKET_SIZE | quote }}
+  {{- end }}
+  {{- if .Values.BATCH_BUCKET_SIZE }}
+  BATCH_BUCKET_SIZE: {{ .Values.BATCH_BUCKET_SIZE | quote }}
+  {{- end }}

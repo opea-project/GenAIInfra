@@ -59,7 +59,8 @@ affinity: {}
 # To override values in subchart llm-uservice
 llm-uservice:
   image:
-    repository: opea/llm-faqgen-tgi
+    repository: opea/llm-faqgen
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 
 # To override values in subchart tgi
 tgi:

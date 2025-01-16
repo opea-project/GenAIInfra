@@ -67,6 +67,9 @@ tgi:
   MAX_TOTAL_TOKENS: "8192"
   LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
 
+lvm-uservice:
+  LVM_BACKEND: "TGI"
+
 nginx:
   service:
     type: NodePort
