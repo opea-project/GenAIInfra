@@ -132,7 +132,7 @@ vllm:
   OMPI_MCA_btl_vader_single_copy_mechanism: none
   PT_HPU_ENABLE_LAZY_COLLECTIVES: true
   VLLM_SKIP_WARMUP: true
-  extraCmdArgs: ["--tensor-parallel-size","4","--max-seq_len-to-capture","16384"]
+  extraCmdArgs: ["--tensor-parallel-size", "4", "--max-seq_len-to-capture", "16384"]
   resources:
     limits:
       habana.ai/gaudi: 4
