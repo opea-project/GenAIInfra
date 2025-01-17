@@ -1,0 +1,65 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+repositories:
+- name: opea
+  url: ghcr.io/opea-project/charts
+  oci: true
+- name: jetstack
+  url: https://charts.jetstack.io
+- name: istio
+  url: https://istio-release.storage.googleapis.com/charts
+  oci: false
+
+releases:
+- name: chatqna
+  chart: opea/chatqna
+  namespace: chatqna
+  version: 1.1.0
+  values:
+    - global:
+        HUGGINGFACEHUB_API_TOKEN: {{ env "HF_TOKEN" }}
+        modelUsePVC: model-volume
+        https_proxy: {{ env "https_proxy" }}
+
+- name: cert-manager
+  chart: jetstack/cert-manager
+  namespace: cert-manager
+  version: "v1.16.1"
+  set:
+  - name: crds.enabled
+    value: true
+
+- name: istio-base
+  chart: istio/base
+  namespace: istio-system
+  set:
+  - name: defaultRevision
+    value: default
+
+- name: istiod
+  chart: istio/istiod
+  namespace: istio-system
+  wait: true
+  set:
+  - name: profile
+    value: ambient
+
+- name: istio-cni
+  chart: istio/cni
+  namespace: istio-system
+  wait: true
+  set:
+  - name: profile
+    value: ambient
+
+- name: ztunnel
+  chart: istio/ztunnel
+  namespace: istio-system
+  wait: true
+
+- name: istio-ingress
+  chart: istio/gateway
+  namespace: istio-ingress
+  needs:
+    - istio-system/istiod

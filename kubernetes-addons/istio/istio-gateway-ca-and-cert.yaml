@@ -1,0 +1,25 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: cert-manager.io/v1
+kind: Issuer
+metadata:
+  name: ca-issuer
+  namespace: istio-ingress
+spec:
+  selfSigned: {}
+---
+apiVersion: cert-manager.io/v1
+kind: Certificate
+metadata:
+  name: istio-gateway
+  namespace: istio-ingress # ceritificate must be in the same namespace as istio ingress gw
+spec:
+  commonName: "Istio ingress for OPEA services"
+  dnsNames:
+  - "*.intel.com" # adjust to your environment
+  issuerRef:
+    group: cert-manager.io
+    kind: Issuer
+    name: ca-issuer
+  secretName: istio-gateway
