@@ -1,31 +1,38 @@
 # retriever-usvc
 
-Helm chart for deploying Retriever microservice.
+Helm chart for deploying OPEA retriever-usvc microservice.
 
-retriever-usvc depends on redis and tei, you should set these endpoints before start.
+## Installing the chart
 
-## (Option1): Installing the chart separately
+`retriever-usvc` will use TEI for embedding service, and support different vector DB backends.
 
-First, you need to install the tei and redis-vector-db chart, refer to the [tei](../tei/README.md) and [redis-vector-db](../redis-vector-db/README.md) for more information.
+- TEI: please refer to the [tei](../tei) for more information.
 
-After you've deployed the tei and redis-vector-db chart successfully, run `kubectl get svc` to get the service endpoint and URL respectively, i.e. `http://tei`, `redis://redis-vector-db:6379`.
+- Redis vector DB: please refer to [redis-vector-db](../redis-vector-db/) for more information.
 
-To install retriever-usvc chart, run the following:
+- Milvus DB: please refer to [milvus-helm](https://github.com/zilliztech/milvus-helm/tree/milvus-4.2.12) for more information.
+
+First, you need to install the `tei` helm chart and one of the vector DB service, i.e. `redis-vector-db` chart.
+
+After you've deployed dependency charts successfully, please run `kubectl get svc` to get the service endpoint URL respectively, i.e. `http://tei:80`, `redis://redis-vector-db:6379`.
+
+To install `retriever-usvc` chart, run the following:
 
 ```console
 cd GenAIInfra/helm-charts/common/retriever-usvc
-export REDIS_URL="redis://redis-vector-db:6379"
+helm dependency update
+export HFTOKEN="insert-your-huggingface-token-here"
 export TEI_EMBEDDING_ENDPOINT="http://tei"
-helm dependency update
-helm install retriever-usvc . --set REDIS_URL=${REDIS_URL} --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT}
-```
 
-## (Option2): Installing the chart with dependencies automatically
+# Install retriever-usvc with Redis DB backend
+export RETRIEVER_BACKEND="REDIS"
+export DB_HOST="redis-vector-db"
+helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set REDIS_HOST=${DB_HOST}
 
-```console
-cd GenAIInfra/helm-charts/common/retriever-usvc
-helm dependency update
-helm install retriever-usvc . --set tei.enabled=true --set redis-vector-db.enabled=true
+# Install retriever-usvc with Milvus DB backend
+# export RETRIEVER_BACKEND="MILVUS"
+# export DB_HOST="milvus"
+# helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set MILVUS_HOST=${DB_HOST}
 ```
 
 ## Verify
@@ -46,14 +53,16 @@ curl http://localhost:7000/v1/retrieval  \
 
 ## Values
 
-| Key                    | Type   | Default                | Description |
-| ---------------------- | ------ | ---------------------- | ----------- |
-| image.repository       | string | `"opea/retriever-tgi"` |             |
-| service.port           | string | `"7000"`               |             |
-| REDIS_URL              | string | `""`                   |             |
-| TEI_EMBEDDING_ENDPOINT | string | `""`                   |             |
-| global.monitoring      | bool   | `false`                |             |
+| Key                             | Type   | Default   | Description                                                                                             |
+| ------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                         |
+| service.port                    | string | `"7000"`  |                                                                                                         |
+| RETRIEVER_BACKEND               | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS"                                                      |
+| REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration    |
+| MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration |
+| TEI_EMBEDDING_ENDPOINT          | string | `""`      |                                                                                                         |
+| global.monitoring               | bool   | `false`   |                                                                                                         |
 
 ## Milvus support
 
-Refer to the milvus-values.yaml for milvus configurations.
+Refer to the milvus-values.yaml for Milvus configurations.
