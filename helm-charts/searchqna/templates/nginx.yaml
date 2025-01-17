@@ -1,0 +1,15 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nginx-config
+  labels:
+    {{- include "searchqna.labels" . | nindent 4 }}
+data:
+  FRONTEND_SERVICE_IP: {{ include "ui.fullname" (index .Subcharts "searchqna-ui") | quote }}
+  FRONTEND_SERVICE_PORT: {{ index .Values "searchqna-ui" "service" "port" | quote }}
+  BACKEND_SERVICE_NAME: searchqna
+  BACKEND_SERVICE_IP: {{ include "searchqna.fullname" . | quote }}
+  BACKEND_SERVICE_PORT: {{ .Values.service.port | quote }}
