@@ -14,10 +14,10 @@ data:
   BASIC_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if contains "codetrans-ui" .Values.image.repository }}
   BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
-  {{- else if (contains "docsum-ui" .Values.image.repository) }}
+  {{- else if contains "docsum-ui" .Values.image.repository }}
   DOC_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   BACKEND_SERVICE_ENDPOINT: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
-  {{- else if (contains "docsum-react-ui" .Values.image.repository) }}
+  {{- else if contains "docsum-react-ui" .Values.image.repository }}
   VITE_DOC_SUM_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if contains "chatqna-ui" .Values.image.repository }}
   CHAT_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
@@ -37,4 +37,6 @@ data:
   VITE_FAQ_GEN_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if contains "faqgen-ui" .Values.image.repository }}
   FAQ_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  {{- else if hasSuffix "searchqna-ui" .Values.image.repository }}
+  BACKEND_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- end }}

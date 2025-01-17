@@ -1,0 +1,38 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: searchqna
+description: The Helm chart to deploy SearchQnA
+type: application
+dependencies:
+  - name: tei
+    version: 0-latest
+    repository: "file://../common/tei"
+  - name: embedding-usvc
+    version: 0-latest
+    repository: "file://../common/embedding-usvc"
+  - name: web-retriever
+    version: 0-latest
+    repository: "file://../common/web-retriever"
+  - name: teirerank
+    version: 0-latest
+    repository: "file://../common/teirerank"
+  - name: reranking-usvc
+    version: 0-latest
+    repository: "file://../common/reranking-usvc"
+  - name: tgi
+    version: 0-latest
+    repository: "file://../common/tgi"
+  - name: llm-uservice
+    version: 0-latest
+    repository: "file://../common/llm-uservice"
+  - name: ui
+    version: 0-latest
+    repository: "file://../common/ui"
+    alias: searchqna-ui
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
+version: 0-latest
+appVersion: "1.1"
