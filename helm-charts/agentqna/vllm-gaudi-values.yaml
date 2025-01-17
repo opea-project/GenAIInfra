@@ -8,10 +8,9 @@ vllm:
   enabled: true
   image:
     repository: opea/vllm-gaudi
-    # tag: "good"
 supervisor:
-  llm_endpoint_url: http://agentqna-vllm
-rag-agent:
-  llm_endpoint_url: http://agentqna-vllm
-sql-agent:
-  llm_endpoint_url: http://agentqna-vllm
+  llm_endpoint_url: http://{{ .Release.Name }}-vllm
+ragagent:
+  llm_endpoint_url: http://{{ .Release.Name }}-vllm
+sqlagent:
+  llm_endpoint_url: http://{{ .Release.Name }}-vllm

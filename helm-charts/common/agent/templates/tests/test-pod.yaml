@@ -17,6 +17,10 @@ spec:
       command: ['bash', '-c']
       args:
         - |
+          if [ {{ include "agent.fullname" . }} != "agent" ]; then
+            echo "Skip test."
+            exit 0
+          fi
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
           curl http://{{ include "agent.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \

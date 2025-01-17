@@ -18,7 +18,7 @@ data:
   tools: {{ .Values.tools | quote }}
   {{- end }}
   {{- if .Values.llm_endpoint_url }}
-  llm_endpoint_url: {{ .Values.llm_endpoint_url | quote }}
+  llm_endpoint_url: {{ tpl .Values.llm_endpoint_url . | quote }}
   {{- else }}
   llm_endpoint_url: "http://{{ .Release.Name }}-tgi"
   {{- end }}

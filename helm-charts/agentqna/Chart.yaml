@@ -8,11 +8,11 @@ type: application
 dependencies:
   - name: agent
     version: 0-latest
-    alias: rag-agent
+    alias: ragagent
     repository: "file://../common/agent"
   - name: agent
     version: 0-latest
-    alias: sql-agent
+    alias: sqlagent
     repository: "file://../common/agent"
   - name: agent
     version: 0-latest
