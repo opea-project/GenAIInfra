@@ -8,7 +8,11 @@ type: application
 dependencies:
   - name: agent
     version: 0-latest
-    alias: worker
+    alias: ragagent
+    repository: "file://../common/agent"
+  - name: agent
+    version: 0-latest
+    alias: sqlagent
     repository: "file://../common/agent"
   - name: agent
     version: 0-latest
@@ -18,6 +22,10 @@ dependencies:
     version: 0-latest
     repository: "file://../common/tgi"
     condition: tgi.enabled
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
   - name: tei
     version: 0-latest
     repository: "file://../common/tei"

@@ -8,11 +8,17 @@ metadata:
   labels:
     {{- include "agent.labels" . | nindent 4 }}
 data:
+  {{- if .Values.db_name }}
+  db_name: {{ .Values.db_name | quote }}
+  {{- end }}
+  {{- if .Values.db_path }}
+  db_path: {{ .Values.db_path | quote }}
+  {{- end }}
   {{- if .Values.tools }}
   tools: {{ .Values.tools | quote }}
   {{- end }}
   {{- if .Values.llm_endpoint_url }}
-  llm_endpoint_url: {{ .Values.llm_endpoint_url | quote }}
+  llm_endpoint_url: {{ tpl .Values.llm_endpoint_url . | quote }}
   {{- else }}
   llm_endpoint_url: "http://{{ .Release.Name }}-tgi"
   {{- end }}
@@ -41,12 +47,18 @@ data:
   {{- if .Values.WORKER_AGENT_URL }}
   WORKER_AGENT_URL: {{ .Values.WORKER_AGENT_URL | quote }}
   {{- else }}
-  WORKER_AGENT_URL: "http://{{ .Release.Name }}-worker:9095/v1/chat/completions"
+  WORKER_AGENT_URL: "http://{{ .Release.Name }}-rag-agent:9095/v1/chat/completions"
+  {{- end }}
+  {{- if .Values.SQL_AGENT_URL }}
+  SQL_AGENT_URL: {{ .Values.SQL_AGENT_URL | quote }}
+  {{- else }}
+  SQL_AGENT_URL: "http://{{ .Release.Name }}-sql-agent:9096/v1/chat/completions"
   {{- end }}
   require_human_feedback: {{ .Values.require_human_feedback | quote }}
   recursion_limit: {{ .Values.recursion_limit | quote }}
   llm_engine: {{ .Values.llm_engine | quote }}
   strategy: {{ .Values.strategy | quote }}
+  use_hints: {{ .Values.use_hints | quote }}
   max_new_tokens: {{ .Values.max_new_tokens | quote }}
   {{- if .Values.OPENAI_API_KEY }}
   OPENAI_API_KEY: {{ .Values.OPENAI_API_KEY | quote }}

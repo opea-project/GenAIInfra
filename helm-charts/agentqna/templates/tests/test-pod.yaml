@@ -17,14 +17,54 @@ spec:
       command: ['bash', '-c']
       args:
         - |
-          max_retry=20;
+          # Ingest data
+          cd /mnt/tools
+          pip install requests tqdm
+          ./ingest_data.sh
+          # Test ragagent
+          max_retry=10;
           for ((i=1; i<=max_retry; i++)); do
-            curl http://{{ include "agentqna.fullname" (index .Subcharts "supervisor") }}:{{ .Values.supervisor.service.port }}/v1/chat/completions -sS --fail-with-body \
+            curl http://{{ include "agentqna.fullname" (index .Subcharts "ragagent") }}:{{ .Values.ragagent.service.port }}/v1/chat/completions -sS --fail-with-body \
             -X POST \
-            -d '{"query": "Tell me three songs of Michael Jackson."}' \
+            -d '{"messages": "Tell me about Michael Jackson song Thriller"}' \
             -H 'Content-Type: application/json' && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+          # Test sqlagent
+          max_retry=10;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ include "agentqna.fullname" (index .Subcharts "sqlagent") }}:{{ .Values.sqlagent.service.port }}/v1/chat/completions -sS --fail-with-body \
+            -X POST \
+            -d '{"messages": "How many employees are there in the company?"}' \
+            -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+          # Test supervisor
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ include "agentqna.fullname" (index .Subcharts "supervisor") }}:{{ .Values.supervisor.service.port }}/v1/chat/completions -sS --fail-with-body \
+            -X POST \
+            -d '{"messages": "How many albums does Iron Maiden have?"}' \
+            -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+      volumeMounts:
+        - mountPath: /mnt/tools
+          name: test
+  volumes:
+    - name: test
+      hostPath:
+        path: /mnt/tools
+        type: Directory
+  {{- with .Values.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
   restartPolicy: Never
