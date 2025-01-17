@@ -73,6 +73,27 @@ function dump_all_pod_logs() {
     done
 }
 
+function check_local_opea_image() {
+    origimg=$1
+    img=$(echo $origimg | xargs)
+    host=$(echo $img | awk 'BEGIN {FS="opea/"} {print $1}')
+    if [ -z "$host" ]; then
+        echo "Skip none CI local image $origimg"
+        exit 0
+    fi
+    image=$(echo $img | awk 'BEGIN {FS="opea/"} {print $2}')
+    image_name=$(echo $image | awk 'BEGIN {FS=":"} {print $1}')
+    image_tag=$(echo $image | awk 'BEGIN {FS=":"} {print $2}')
+    image_tag=${image_tag:-latest}
+    resp=$(curl -s -f -X GET "${host}v2/opea/${image_name}/manifests/${image_tag}")
+    if [ -z "$resp" ]; then
+        echo "Failed to get image manifest $origimg"
+        exit 1
+    fi
+    DATE=$(echo "$resp" | jq -r '.history[0].v1Compatibility' | jq -r '.created')
+    echo "Found image $origimg created at $DATE"
+}
+
 if [ $# -eq 0 ]; then
     echo "Usage: $0 <function_name>"
     exit 1
@@ -88,6 +109,9 @@ case "$1" in
     dump_all_pod_logs)
         dump_all_pod_logs $2
         ;;
+    check_local_opea_image)
+	check_local_opea_image $2
+	;;
     *)
         echo "Unknown function: $1"
         ;;
