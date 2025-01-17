@@ -10,12 +10,12 @@ metadata:
 data:
   {{- if hasSuffix "llm-textgen" .Values.image.repository }}
   {{- if eq "TGI" .Values.TEXTGEN_BACKEND }}
-  LLM_COMPONENT_NAME: "OPEA_LLM"
+  LLM_COMPONENT_NAME: "OpeaTextGenService"
   {{- if not .Values.LLM_ENDPOINT }}
   LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
   {{- end }}
   {{- else if eq "vLLM" .Values.TEXTGEN_BACKEND }}
-  LLM_COMPONENT_NAME: "OPEA_LLM"
+  LLM_COMPONENT_NAME: "OpeaTextGenService"
   {{- if not .Values.LLM_ENDPOINT }}
   LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
   {{- end }}
@@ -26,12 +26,12 @@ data:
   MAX_INPUT_TOKENS: {{ .Values.MAX_INPUT_TOKENS | default "" | quote }}
   MAX_TOTAL_TOKENS: {{ .Values.MAX_TOTAL_TOKENS | default "" | quote }}
   {{- if eq "TGI" .Values.DOCSUM_BACKEND }}
-  DocSum_COMPONENT_NAME: "OPEADocSum_TGI"
+  DocSum_COMPONENT_NAME: "OpeaDocSumTgi"
   {{- if not .Values.LLM_ENDPOINT }}
   LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
   {{- end }}
   {{- else if eq "vLLM" .Values.DOCSUM_BACKEND }}
-  DocSum_COMPONENT_NAME: "OPEADocSum_vLLM"
+  DocSum_COMPONENT_NAME: "OpeaDocSumvLLM"
   {{- if not .Values.LLM_ENDPOINT }}
   LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
   {{- end }}
@@ -40,12 +40,12 @@ data:
   {{- end }}
   {{- else if hasSuffix "llm-faqgen" .Values.image.repository }}
   {{- if eq "TGI" .Values.FAQGEN_BACKEND }}
-  FAQGen_COMPONENT_NAME: "OPEAFAQGen_TGI"
+  FAQGen_COMPONENT_NAME: "OpeaFaqGenTgi"
   {{- if not .Values.LLM_ENDPOINT }}
   LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
   {{- end }}
   {{- else if eq "vLLM" .Values.FAQGEN_BACKEND }}
-  FAQGen_COMPONENT_NAME: "OPEAFAQGen_vLLM"
+  FAQGen_COMPONENT_NAME: "OpeaFaqGenvLLM"
   {{- if not .Values.LLM_ENDPOINT }}
   LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
   {{- end }}
