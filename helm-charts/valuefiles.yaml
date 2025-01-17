@@ -66,6 +66,22 @@ faqgen:
   values:
     - cpu-values.yaml
     - gaudi-values.yaml
+searchqna:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/searchqna
+  dest_repo: GenAIExamples
+  dest_dir: SearchQnA/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+txt2img:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/txt2img
+  dest_repo: GenAIExamples
+  dest_dir: Text2Image/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
 visualqna:
   src_repo: GenAIInfra
   src_dir: helm-charts/visualqna
@@ -204,6 +220,14 @@ teirerank:
   src_dir: helm-charts/common/teirerank
   dest_repo: GenAIComps
   dest_dir: comps/third_parties/teirerank/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+text2image:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/text2image
+  dest_repo: GenAIComps
+  dest_dir: comps/text2image/deployment/kubernetes
   values:
     - cpu-values.yaml
     - gaudi-values.yaml

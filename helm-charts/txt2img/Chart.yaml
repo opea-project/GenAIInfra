@@ -1,0 +1,20 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: txt2img
+description: The Helm chart to deploy txt2img
+type: application
+dependencies:
+  - name: text2image
+    version: 0-latest
+    repository: "file://../common/text2image"
+  - name: ui
+    version: 0-latest
+    repository: "file://../common/ui"
+    alias: txt2img-ui
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
+version: 0-latest
+appVersion: "v1.0"
