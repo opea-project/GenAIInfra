@@ -55,7 +55,7 @@ service:
 # Change the port to 6012 if you are using 1.0 docker images
 # https://github.com/opea-project/GenAIComps/pull/740
 port: 6018
-resources: {}
+resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
   # resources, such as Minikube. If you do want to specify resources, uncomment the following
@@ -63,9 +63,9 @@ resources: {}
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
 livenessProbe:
   httpGet:
