@@ -153,6 +153,17 @@ vllm:
   VLLM_SKIP_WARMUP: true
   extraCmdArgs: ["--tensor-parallel-size", "4", "--max-seq_len-to-capture", "16384"]
 
+nginx:
+  service:
+    type: NodePort
+
+agentqna-ui:
+  image:
+    repository: opea/agent-ui
+    tag: "latest"
+  BACKEND_SERVICE_ENDPOINT: "/v1/chat/completions"
+  containerPort: 5173
+
 global:
   http_proxy: ""
   https_proxy: ""

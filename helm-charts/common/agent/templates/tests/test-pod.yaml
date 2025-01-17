@@ -17,8 +17,8 @@ spec:
       command: ['bash', '-c']
       args:
         - |
-          if [ {{ include "agent.fullname" . }} != "agent" ]; then
-            echo "Skip test."
+          if [[ {{ include "agent.fullname" . }} == "agentqna"* ]]; then
+            echo "Skip agent component tests in agentqna e2e example test."
             exit 0
           fi
           max_retry=20;

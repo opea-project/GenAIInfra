@@ -20,7 +20,7 @@ spec:
           # Ingest data
           cd /mnt/tools
           pip install requests tqdm
-          ./ingest_data.sh
+          ./ingest_data.sh {{ include "agentqna.fullname" (index .Subcharts "data-prep") }}
           # Test ragagent
           max_retry=10;
           for ((i=1; i<=max_retry; i++)); do

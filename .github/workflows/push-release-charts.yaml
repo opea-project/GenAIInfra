@@ -50,7 +50,7 @@ jobs:
           # Update Examples
           e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
           grep "^$CHARTS_DIR" | \
-          grep -vE 'README.md|common|*.sh' | \
+          grep -vE 'README.md|valuefiles.yaml|common|*.sh' | \
           cut -d'/' -f2 | sort -u )
           echo "Charts to be updated: $e2e_charts"
           echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin

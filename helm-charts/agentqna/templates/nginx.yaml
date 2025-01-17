@@ -1,0 +1,15 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nginx-config
+  labels:
+    {{- include "agentqna.labels" . | nindent 4 }}
+data:
+  FRONTEND_SERVICE_IP: {{ include "ui.fullname" (index .Subcharts "agentqna-ui") | quote }}
+  FRONTEND_SERVICE_PORT: {{ index .Values "agentqna-ui" "service" "port" | quote }}
+  BACKEND_SERVICE_NAME: chat/completions
+  BACKEND_SERVICE_IP: {{ include "agentqna.fullname" (index .Subcharts "supervisor") | quote }}
+  BACKEND_SERVICE_PORT: {{ .Values.supervisor.service.port | quote }}

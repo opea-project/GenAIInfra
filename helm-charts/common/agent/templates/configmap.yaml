@@ -47,12 +47,12 @@ data:
   {{- if .Values.WORKER_AGENT_URL }}
   WORKER_AGENT_URL: {{ .Values.WORKER_AGENT_URL | quote }}
   {{- else }}
-  WORKER_AGENT_URL: "http://{{ .Release.Name }}-rag-agent:9095/v1/chat/completions"
+  WORKER_AGENT_URL: "http://{{ .Release.Name }}-ragagent:9095/v1/chat/completions"
   {{- end }}
   {{- if .Values.SQL_AGENT_URL }}
   SQL_AGENT_URL: {{ .Values.SQL_AGENT_URL | quote }}
   {{- else }}
-  SQL_AGENT_URL: "http://{{ .Release.Name }}-sql-agent:9096/v1/chat/completions"
+  SQL_AGENT_URL: "http://{{ .Release.Name }}-sqlagent:9096/v1/chat/completions"
   {{- end }}
   require_human_feedback: {{ .Values.require_human_feedback | quote }}
   recursion_limit: {{ .Values.recursion_limit | quote }}
