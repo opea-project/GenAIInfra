@@ -39,4 +39,6 @@ data:
   FAQ_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if hasSuffix "searchqna-ui" .Values.image.repository }}
   BACKEND_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  {{- else if contains "text2image-ui" .Values.image.repository }}
+  BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- end }}

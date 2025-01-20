@@ -1,0 +1,15 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nginx-config
+  labels:
+    {{- include "txt2img.labels" . | nindent 4 }}
+data:
+  FRONTEND_SERVICE_IP: {{ include "ui.fullname" (index .Subcharts "txt2img-ui") | quote }}
+  FRONTEND_SERVICE_PORT: {{ index .Values "txt2img-ui" "service" "port" | quote }}
+  BACKEND_SERVICE_NAME: text2image
+  BACKEND_SERVICE_IP: {{ include "txt2img.fullname" (index .Subcharts "text2image") | quote }}
+  BACKEND_SERVICE_PORT: {{ .Values.text2image.service.port | quote }}
