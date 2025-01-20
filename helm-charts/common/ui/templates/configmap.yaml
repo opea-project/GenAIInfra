@@ -41,4 +41,6 @@ data:
   BACKEND_BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- else if contains "text2image-ui" .Values.image.repository }}
   BASE_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
+  {{- else if contains "agent-ui" .Values.image.repository }}
+  AGENT_URL: {{ .Values.BACKEND_SERVICE_ENDPOINT | quote }}
   {{- end }}
