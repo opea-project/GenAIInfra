@@ -57,11 +57,13 @@ spec:
                   port=80;
                   [[ "$proto" = "https" ]] && port=443;
               fi;
-              retry_count={{ .Values.retryCount | default 60 }};
-              j=1;
-              while ! nc -z ${host} ${port}; do
-                [[ $j -ge ${retry_count} ]] && echo "ERROR: ${host}:${port} is NOT reachable in $j seconds!" && exit 1;
-                j=$((j+1)); sleep 1;
+              wait_timeout={{ .Values.waitTimeout | default 1 }};
+              total_timeout={{ .Values.retryTimeoutSeconds | default 60 }};
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${host} ${port}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${host}:${port} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
               done;
               echo "${host}:${port} is reachable within $j seconds.";
       {{- end }}
