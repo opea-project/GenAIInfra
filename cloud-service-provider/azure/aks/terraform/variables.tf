@@ -101,3 +101,8 @@ variable "throughput" {
     error_message = "Cosmos db throughput should be in increments of 100."
   }
 }
+
+variable "is_cosmosdb_required" {
+  type    = bool
+  description = "Is Cosmos DB required for your deployment? [true/false]"
+}

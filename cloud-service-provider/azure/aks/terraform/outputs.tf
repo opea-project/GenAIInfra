@@ -19,12 +19,6 @@ output "cluster_name" {
   value       = azurerm_kubernetes_cluster.main.name
 }
 
-output "cosmosdb_connection_strings" {
-  description  = "Azure Cosmos DB Connection Strings"
-  value = "AccountEndpoint=${azurerm_cosmosdb_account.main.endpoint};AccountKey=${azurerm_cosmosdb_account.main.primary_key};"
-  sensitive   = true
-}
-
 output "instrumentation_key" {
   description = "App Insights Instrumentation Key"
   value = azurerm_application_insights.t_appinsights.instrumentation_key

@@ -36,6 +36,7 @@ OPEA needs a volume where to store the model. For that we need to create Kuberne
 
 Use the commands below to create AKS cluster.
 User has to input their Azure subscription id while running the following commands when prompted.
+User should also input their decision to install Cosmos DB as part of the installation when prompted.
 
 ```bash
 terraform plan --var-file opea-chatqna.tfvars -out opea-chatqna.plan

@@ -23,6 +23,7 @@ module "vnet" {
 
 # Cosmos DB
 resource "azurerm_cosmosdb_account" "main" {
+  count                     = var.is_cosmosdb_required ? 1 : 0
   name                      = "${var.cluster_name}-cosmosdb"
   location                  = var.cosmosdb_account_location
   resource_group_name       = azurerm_resource_group.main.name
@@ -49,17 +50,22 @@ resource "azurerm_cosmosdb_account" "main" {
 }
 
 resource "azurerm_cosmosdb_sql_database" "main" {
+  count               = var.is_cosmosdb_required ? 1 : 0
   name                = "${var.cluster_name}-sqldb"
   resource_group_name = azurerm_resource_group.main.name
-  account_name        = azurerm_cosmosdb_account.main.name
+  account_name        = azurerm_cosmosdb_account.main[count.index].name
   throughput          = var.throughput
+  depends_on = [
+    azurerm_cosmosdb_account.main
+  ]
 }
 
 resource "azurerm_cosmosdb_sql_container" "main" {
+  count                 = var.is_cosmosdb_required ? 1 : 0
   name                  = "${var.cluster_name}-sql-container"
   resource_group_name   = azurerm_resource_group.main.name
-  account_name          = azurerm_cosmosdb_account.main.name
-  database_name         = azurerm_cosmosdb_sql_database.main.name
+  account_name          = azurerm_cosmosdb_account.main[count.index].name
+  database_name         = azurerm_cosmosdb_sql_database.main[count.index].name
   partition_key_paths   = ["/definition/id"]
   partition_key_version = 1
   throughput            = var.throughput
@@ -83,6 +89,9 @@ resource "azurerm_cosmosdb_sql_container" "main" {
   unique_key {
     paths = ["/definition/idlong", "/definition/idshort"]
   }
+  depends_on = [
+    azurerm_cosmosdb_sql_database.main
+  ]
 }
 
 # AKS Cluster
@@ -178,7 +187,6 @@ resource "azurerm_log_analytics_workspace" "main" {
   name                = "workspace-${var.cluster_name}"
   location            = azurerm_resource_group.main.location
   resource_group_name = azurerm_resource_group.main.name
-  sku                 = "PerGB2018"
   retention_in_days   = 30
 }
 
@@ -195,15 +203,17 @@ data "azurerm_client_config" "current" {}
 
 # Cosmos db Primary connection string into key vault
 resource "azurerm_key_vault_secret" "cosdb_primary" {
+  count        = var.is_cosmosdb_required ? 1 : 0
   name         = "AzCosmosDBConnectionStringPrimary"
-  value        = tostring("AccountEndpoint=${azurerm_cosmosdb_account.main.endpoint};AccountKey=${azurerm_cosmosdb_account.main.primary_key};")
+  value        = tostring("AccountEndpoint=${azurerm_cosmosdb_account.main[count.index].endpoint};AccountKey=${azurerm_cosmosdb_account.main[count.index].primary_key};")
   key_vault_id = azurerm_key_vault.main.id
 }
 
 # Cosmos db Secondary connection string into key vault
 resource "azurerm_key_vault_secret" "cosdb_secondary" {
+  count        = var.is_cosmosdb_required ? 1 : 0
   name         = "AzCosmosDBConnectionStringSecondary"
-  value        = tostring("AccountEndpoint=${azurerm_cosmosdb_account.main.endpoint};AccountKey=${azurerm_cosmosdb_account.main.secondary_key};")
+  value        = tostring("AccountEndpoint=${azurerm_cosmosdb_account.main[count.index].endpoint};AccountKey=${azurerm_cosmosdb_account.main[count.index].secondary_key};")
   key_vault_id = azurerm_key_vault.main.id
 }
 
