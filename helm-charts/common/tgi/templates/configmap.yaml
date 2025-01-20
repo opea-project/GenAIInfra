@@ -22,6 +22,7 @@ data:
   TRITON_CACHE_DIR: "/tmp/triton_cache"
   {{- end }}
   NUMBA_CACHE_DIR: "/tmp"
+  HUGGINGFACE_HUB_CACHE: "/data"
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.MAX_INPUT_LENGTH }}
   MAX_INPUT_LENGTH: {{ .Values.MAX_INPUT_LENGTH | quote }}
