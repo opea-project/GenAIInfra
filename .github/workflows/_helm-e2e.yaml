@@ -126,6 +126,10 @@ jobs:
             echo "should_cleanup=false" >> $GITHUB_ENV
             exit 1
             fi
+            # increase helm install wait for for vllm-gaudi case
+            if [[ $img == *"vllm-gaudi"* ]]; then
+                ROLLOUT_TIMEOUT_SECONDS=900s
+            fi
           done
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
