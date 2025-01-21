@@ -2,7 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 
 # To override values in subchart tgi
+vllm:
+  enabled: false
 tgi:
+  enabled: true
   accelDevice: "nvidia"
   image:
     repository: ghcr.io/huggingface/text-generation-inference

@@ -34,3 +34,6 @@ data:
   {{- if .Values.OMPI_MCA_btl_vader_single_copy_mechanism }}
   OMPI_MCA_btl_vader_single_copy_mechanism: {{ .Values.OMPI_MCA_btl_vader_single_copy_mechanism | quote}}
   {{- end }}
+  {{- if .Values.VLLM_TORCH_PROFILER_DIR }}
+  VLLM_TORCH_PROFILER_DIR: {{ .Values.VLLM_TORCH_PROFILER_DIR | quote }}
+  {{- end }}

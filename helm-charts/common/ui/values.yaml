@@ -99,13 +99,13 @@ affinity: {}
 BACKEND_SERVICE_ENDPOINT: "/v1/chatqna"
 
 # data preparation service URL, default to Mega data preparation service
-DATAPREP_SERVICE_ENDPOINT: "/v1/dataprep"
+DATAPREP_SERVICE_ENDPOINT: "/v1/dataprep/ingest"
 
 # data preparation get file service URL, default to Mega data preparation service
-DATAPREP_GET_FILE_ENDPOINT: "/v1/dataprep/get_file"
+DATAPREP_GET_FILE_ENDPOINT: "/v1/dataprep/get"
 
 # data preparation delete file service URL, default to Mega data preparation service
-DATAPREP_DELETE_FILE_ENDPOINT: "/v1/dataprep/delete_file"
+DATAPREP_DELETE_FILE_ENDPOINT: "/v1/dataprep/delete"
 
 global:
   # service account name to be shared with all parent/child charts.
