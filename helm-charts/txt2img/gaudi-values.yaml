@@ -5,7 +5,6 @@ text2image:
   accelDevice: "gaudi"
   image:
     repository: opea/text2image-gaudi
-    tag: "latest"
   resources:
     limits:
       habana.ai/gaudi: 1

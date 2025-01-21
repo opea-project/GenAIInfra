@@ -5,6 +5,5 @@
 
 image:
   repository: opea/embedding-multimodal-clip
-  tag: "latest"
 
 EMBEDDING_MODEL_ID: openai/clip-vit-base-patch32

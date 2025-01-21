@@ -155,6 +155,14 @@ lvm-uservice:
   dest_dir: comps/lvms/deployment/kubernetes
   values:
     - cpu-values.yaml
+mm-embedding:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/mm-embedding
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/bridgetower/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
 mongodb:
   src_repo: GenAIInfra
   src_dir: helm-charts/common/mongodb
