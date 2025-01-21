@@ -3,7 +3,6 @@
 
 image:
   repository: opea/lvm-video-llama
-  tag: "latest"
 
 LLM_DOWNLOAD: "True"
 port: 9009

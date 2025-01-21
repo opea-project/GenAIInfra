@@ -5,7 +5,6 @@ accelDevice: "gaudi"
 
 image:
   repository: opea/embedding-multimodal-bridgetower-gaudi
-  tag: "latest"
 
 resources:
   limits:

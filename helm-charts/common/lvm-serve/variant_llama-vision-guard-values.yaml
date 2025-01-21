@@ -5,7 +5,6 @@ accelDevice: "gaudi"
 
 image:
   repository: opea/lvm-llama-vision-guard
-  tag: "latest"
 
 resources:
   limits:

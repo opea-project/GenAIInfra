@@ -5,7 +5,6 @@ accelDevice: "gaudi"
 
 image:
   repository: opea/llava-gaudi
-  tag: "latest"
 
 resources:
   limits:
