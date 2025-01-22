@@ -68,8 +68,8 @@ jobs:
         run: |
           CHART_NAME="${workload_path##*/}"
           echo "CHART_NAME=$CHART_NAME" >> $GITHUB_ENV
-          echo "RELEASE_NAME=${CHART_NAME}$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "NAMESPACE=${CHART_NAME}-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          echo "RELEASE_NAME=${CHART_NAME}$(date +%d%H%M%S)" >> $GITHUB_ENV
+          echo "NAMESPACE=Infra-${CHART_NAME}-$(date +%d%H%M%S)" >> $GITHUB_ENV
           echo "ROLLOUT_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "TEST_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "KUBECTL_TIMEOUT_SECONDS=60s" >> $GITHUB_ENV
