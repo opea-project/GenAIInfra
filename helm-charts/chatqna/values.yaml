@@ -12,7 +12,7 @@ image:
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.2"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -112,7 +112,7 @@ nginx:
 chatqna-ui:
   image:
     repository: opea/chatqna-ui
-    tag: "latest"
+    tag: "1.2"
   containerPort: "5173"
 
 global:

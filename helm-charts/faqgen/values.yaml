@@ -12,7 +12,7 @@ image:
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.2"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -73,7 +73,7 @@ nginx:
 faqgen-ui:
   image:
     repository: opea/faqgen-ui
-    tag: "latest"
+    tag: "1.2"
   BACKEND_SERVICE_ENDPOINT: "/v1/faqgen"
   containerPort: 5173
 

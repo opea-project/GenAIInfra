@@ -1,0 +1,188 @@
+---
+# Source: mm-embedding/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: clip-mm-embedding-config
+  labels:
+    helm.sh/chart: mm-embedding-1.2.0
+    app.kubernetes.io/name: mm-embedding
+    app.kubernetes.io/instance: clip-mm-embedding
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  PORT: "6990"
+  HF_TOKEN: "insert-your-huggingface-token-here"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+  HF_HOME: "/tmp/.cache/huggingface"
+  HF_HUB_CACHE: "/data"
+---
+# Source: mm-embedding/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: clip-mm-embedding
+  labels:
+    helm.sh/chart: mm-embedding-1.2.0
+    app.kubernetes.io/name: mm-embedding
+    app.kubernetes.io/instance: clip-mm-embedding
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: mm-embedding
+      protocol: TCP
+      name: mm-embedding
+  selector:
+    app.kubernetes.io/name: mm-embedding
+    app.kubernetes.io/instance: clip-mm-embedding
+---
+# Source: mm-embedding/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: clip-mm-embedding
+  labels:
+    helm.sh/chart: mm-embedding-1.2.0
+    app.kubernetes.io/name: mm-embedding
+    app.kubernetes.io/instance: clip-mm-embedding
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mm-embedding
+      app.kubernetes.io/instance: clip-mm-embedding
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: mm-embedding-1.2.0
+        app.kubernetes.io/name: mm-embedding
+        app.kubernetes.io/instance: clip-mm-embedding
+        app.kubernetes.io/version: "1.1"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: clip-mm-embedding-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model openai/clip-vit-base-patch32 ... ";
+              huggingface-cli download --cache-dir /data "openai/clip-vit-base-patch32";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--openai--clip-vit-base-patch32
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      containers:
+        - name: mm-embedding
+          envFrom:
+            - configMapRef:
+                name: clip-mm-embedding-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/embedding-multimodal-clip:1.2"
+          args:
+            - "--model_name_or_path"
+            - "openai/clip-vit-base-patch32"
+          ports:
+            - name: mm-embedding
+              containerPort: 6990
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: mm-embedding
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: mm-embedding
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: tmp
+          emptyDir: {}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
+      terminationGracePeriodSeconds: 120
+---
+# Source: mm-embedding/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: mm-embedding/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: mm-embedding/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#

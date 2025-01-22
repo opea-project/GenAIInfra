@@ -8,14 +8,15 @@ kind: ConfigMap
 metadata:
   name: guardrails-usvc-config
   labels:
-    helm.sh/chart: guardrails-usvc-0-latest
+    helm.sh/chart: guardrails-usvc-1.2.0
     app.kubernetes.io/name: guardrails-usvc
     app.kubernetes.io/instance: guardrails-usvc
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
-  SAFETY_GUARD_ENDPOINT: "http://guardrails-usvc-tgi"
+  SAFETY_GUARD_ENDPOINT: "http://guardrails-usvc-tgi-guardrails"
   SAFETY_GUARD_MODEL_ID: "meta-llama/Meta-Llama-Guard-2-8B"
+  GUARDRAILS_COMPONENT_NAME: "OPEA_LLAMA_GUARD"
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
   HF_HOME: "/tmp/.cache/huggingface"
   LOGFLAG: ""
@@ -32,7 +33,7 @@ kind: Service
 metadata:
   name: guardrails-usvc
   labels:
-    helm.sh/chart: guardrails-usvc-0-latest
+    helm.sh/chart: guardrails-usvc-1.2.0
     app.kubernetes.io/name: guardrails-usvc
     app.kubernetes.io/instance: guardrails-usvc
     app.kubernetes.io/version: "v1.0"
@@ -57,7 +58,7 @@ kind: Deployment
 metadata:
   name: guardrails-usvc
   labels:
-    helm.sh/chart: guardrails-usvc-0-latest
+    helm.sh/chart: guardrails-usvc-1.2.0
     app.kubernetes.io/name: guardrails-usvc
     app.kubernetes.io/instance: guardrails-usvc
     app.kubernetes.io/version: "v1.0"
@@ -74,8 +75,47 @@ spec:
         app.kubernetes.io/name: guardrails-usvc
         app.kubernetes.io/instance: guardrails-usvc
     spec:
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: wait-for-llm
+          envFrom:
+            - configMapRef:
+                name: guardrails-usvc-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              proto=$(echo ${SAFETY_GUARD_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\1/p');
+              host=$(echo ${SAFETY_GUARD_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\2/p');
+              port=$(echo ${SAFETY_GUARD_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\3/p');
+              if [ -z "$port" ]; then
+                  port=80;
+                  [[ "$proto" = "https" ]] && port=443;
+              fi;
+              wait_timeout=1;
+              total_timeout=60;
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${host} ${port}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${host}:${port} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
+              done;
+              echo "${host}:${port} is reachable within $j seconds.";
       containers:
         - name: guardrails-usvc
           envFrom:
@@ -94,7 +134,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/guardrails-tgi:latest"
+          image: "opea/guardrails:1.2"
           ports:
             - name: guardrails-usvc
               containerPort: 9090
@@ -102,13 +142,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: v1/health_check
-              port: guardrails-usvc
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: v1/health_check
@@ -123,7 +156,13 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: guardrails-usvc/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

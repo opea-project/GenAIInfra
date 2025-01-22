@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: tei-config
   labels:
-    helm.sh/chart: tei-0-latest
+    helm.sh/chart: tei-1.2.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
@@ -27,6 +27,7 @@ data:
   # More options for HPU
   OMPI_MCA_btl_vader_single_copy_mechanism: "none"
   MAX_WARMUP_SEQUENCE_LENGTH: "512"
+  HF_TOKEN: "insert-your-huggingface-token-here"
 ---
 # Source: tei/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -37,7 +38,7 @@ kind: Service
 metadata:
   name: tei
   labels:
-    helm.sh/chart: tei-0-latest
+    helm.sh/chart: tei-1.2.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
@@ -62,7 +63,7 @@ kind: Deployment
 metadata:
   name: tei
   labels:
-    helm.sh/chart: tei-0-latest
+    helm.sh/chart: tei-1.2.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: tei
     app.kubernetes.io/version: "cpu-1.5"
@@ -78,8 +79,45 @@ spec:
         app.kubernetes.io/name: tei
         app.kubernetes.io/instance: tei
     spec:
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: tei-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model BAAI/bge-base-en-v1.5 ... ";
+              huggingface-cli download --cache-dir /data "BAAI/bge-base-en-v1.5";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--BAAI--bge-base-en-v1.5;
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
         - name: tei
           envFrom:
@@ -89,7 +127,16 @@ spec:
                 name: extra-env-config
                 optional: true
           securityContext:
-            {}
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
           image: "ghcr.io/huggingface/tei-gaudi:1.5.0"
           args:
             - "--auto-truncate"
@@ -129,6 +176,9 @@ spec:
           resources:
             limits:
               habana.ai/gaudi: 1
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: model-volume
           hostPath:
@@ -142,6 +192,10 @@ spec:
           emptyDir: {}
 ---
 # Source: tei/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: tei/templates/serviceaccount.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---

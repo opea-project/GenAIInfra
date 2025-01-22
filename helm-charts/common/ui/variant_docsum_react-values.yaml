@@ -3,6 +3,6 @@
 
 image:
   repository: opea/docsum-react-ui
-  tag: "latest"
+  tag: "1.2"
 
 BACKEND_SERVICE_ENDPOINT: "/v1/docsum"

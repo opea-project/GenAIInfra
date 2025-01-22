@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: tgi-config
   labels:
-    helm.sh/chart: tgi-0-latest
+    helm.sh/chart: tgi-1.2.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -21,7 +21,9 @@ data:
   https_proxy: ""
   no_proxy: ""
   HABANA_LOGS: "/tmp/habana_logs"
+  TRITON_CACHE_DIR: "/tmp/triton_cache"
   NUMBA_CACHE_DIR: "/tmp"
+  HUGGINGFACE_HUB_CACHE: "/data"
   HF_HOME: "/tmp/.cache/huggingface"
   MAX_INPUT_LENGTH: "1024"
   MAX_TOTAL_TOKENS: "2048"
@@ -43,7 +45,7 @@ kind: Service
 metadata:
   name: tgi
   labels:
-    helm.sh/chart: tgi-0-latest
+    helm.sh/chart: tgi-1.2.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -68,7 +70,7 @@ kind: Deployment
 metadata:
   name: tgi
   labels:
-    helm.sh/chart: tgi-0-latest
+    helm.sh/chart: tgi-1.2.0
     app.kubernetes.io/name: tgi
     app.kubernetes.io/instance: tgi
     app.kubernetes.io/version: "2.1.0"
@@ -84,8 +86,45 @@ spec:
         app.kubernetes.io/name: tgi
         app.kubernetes.io/instance: tgi
     spec:
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: tgi-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model Intel/neural-chat-7b-v3-3 ... ";
+              huggingface-cli download --cache-dir /data "Intel/neural-chat-7b-v3-3";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--Intel--neural-chat-7b-v3-3;
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
         - name: tgi
           envFrom:
@@ -95,8 +134,17 @@ spec:
                 name: extra-env-config
                 optional: true
           securityContext:
-            {}
-          image: "ghcr.io/huggingface/tgi-gaudi:2.0.6"
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ghcr.io/huggingface/tgi-gaudi:2.3.1"
           volumeMounts:
             - mountPath: /data
               name: model-volume
@@ -104,6 +152,8 @@ spec:
               name: shm
             - mountPath: /tmp
               name: tmp
+            - mountPath: /usr/src/out
+              name: tokenizer
           ports:
             - name: http
               containerPort: 2080
@@ -131,6 +181,9 @@ spec:
           resources:
             limits:
               habana.ai/gaudi: 1
+            requests:
+              cpu: 1
+              memory: 16Gi
       volumes:
         - name: model-volume
           hostPath:
@@ -142,8 +195,14 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
+        - name: tokenizer
+          emptyDir: {}
 ---
 # Source: tgi/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: tgi/templates/serviceaccount.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---

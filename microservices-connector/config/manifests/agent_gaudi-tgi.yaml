@@ -1,0 +1,382 @@
+---
+# Source: agent/charts/tgi/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-tgi-config
+  labels:
+    helm.sh/chart: tgi-1.2.0
+    app.kubernetes.io/name: tgi
+    app.kubernetes.io/instance: agent
+    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  MODEL_ID: "meta-llama/Meta-Llama-3.1-70B-Instruct"
+  PORT: "2080"
+  HF_TOKEN: "insert-your-huggingface-token-here"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HABANA_LOGS: "/tmp/habana_logs"
+  TRITON_CACHE_DIR: "/tmp/triton_cache"
+  NUMBA_CACHE_DIR: "/tmp"
+  HUGGINGFACE_HUB_CACHE: "/data"
+  HF_HOME: "/tmp/.cache/huggingface"
+  MAX_INPUT_LENGTH: "4096"
+  MAX_TOTAL_TOKENS: "8192"
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  HF_HUB_ENABLE_HF_TRANSFER: "0"
+  # More options for HPU
+  OMPI_MCA_btl_vader_single_copy_mechanism: "none"
+  PT_HPU_ENABLE_LAZY_COLLECTIVES: "true"
+  ENABLE_HPU_GRAPH: "true"
+  LIMIT_HPU_GRAPH: "true"
+  USE_FLASH_ATTENTION: "true"
+  FLASH_ATTENTION_RECOMPUTE: "true"
+---
+# Source: agent/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: agent-config
+  labels:
+    helm.sh/chart: agent-1.2.0
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: agent
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  tools: "/home/user/tools/supervisor_agent_tools.yaml"
+  llm_endpoint_url: "http://agent-tgi"
+  #
+  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
+  stream: "false"
+  temperature: "0.01"
+  RETRIEVAL_TOOL_URL: "http://agent-docretriever:8889/v1/retrievaltool"
+  CRAG_SERVER: "http://agent-crag:8080"
+  WORKER_AGENT_URL: "http://agent-ragagent:9095/v1/chat/completions"
+  SQL_AGENT_URL: "http://agent-sqlagent:9096/v1/chat/completions"
+  require_human_feedback: "false"
+  recursion_limit: "10"
+  llm_engine: "tgi"
+  strategy: "react_llama"
+  use_hints: 
+  max_new_tokens: "4096"
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_HOME: "/tmp/.cache/huggingface"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+---
+# Source: agent/charts/tgi/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent-tgi
+  labels:
+    helm.sh/chart: tgi-1.2.0
+    app.kubernetes.io/name: tgi
+    app.kubernetes.io/instance: agent
+    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 2080
+      protocol: TCP
+      name: tgi
+  selector:
+    app.kubernetes.io/name: tgi
+    app.kubernetes.io/instance: agent
+---
+# Source: agent/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: agent
+  labels:
+    helm.sh/chart: agent-1.2.0
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: agent
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9090
+      targetPort: 9090
+      protocol: TCP
+      name: agent
+  selector:
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: agent
+---
+# Source: agent/charts/tgi/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent-tgi
+  labels:
+    helm.sh/chart: tgi-1.2.0
+    app.kubernetes.io/name: tgi
+    app.kubernetes.io/instance: agent
+    app.kubernetes.io/version: "2.1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tgi
+      app.kubernetes.io/instance: agent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: tgi
+        app.kubernetes.io/instance: agent
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: agent-tgi-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model meta-llama/Meta-Llama-3.1-70B-Instruct ... ";
+              huggingface-cli download --cache-dir /data "meta-llama/Meta-Llama-3.1-70B-Instruct";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--meta-llama--Meta-Llama-3.1-70B-Instruct;
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      containers:
+        - name: tgi
+          envFrom:
+            - configMapRef:
+                name: agent-tgi-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ghcr.io/huggingface/tgi-gaudi:2.3.1"
+          args:
+            - "--sharded"
+            - "true"
+            - "--num-shard"
+            - "4"
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /dev/shm
+              name: shm
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /usr/src/out
+              name: tokenizer
+          ports:
+            - name: http
+              containerPort: 2080
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 24
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: http
+            timeoutSeconds: 1
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: http
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 120
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: http
+            timeoutSeconds: 1
+          resources:
+            limits:
+              habana.ai/gaudi: 4
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        - name: tmp
+          emptyDir: {}
+        - name: tokenizer
+          emptyDir: {}
+---
+# Source: agent/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: agent
+  labels:
+    helm.sh/chart: agent-1.2.0
+    app.kubernetes.io/name: agent
+    app.kubernetes.io/instance: agent
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: agent
+      app.kubernetes.io/instance: agent
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: agent
+        app.kubernetes.io/instance: agent
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: agent
+          envFrom:
+            - configMapRef:
+                name: agent-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/agent:1.2"
+          ports:
+            - name: agent
+              containerPort: 9090
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /home/user/tools
+              name: tool
+            - mountPath: /tmp
+              name: tmp
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: v1/health_check
+              port: agent
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: agent
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: agent
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: tool
+          hostPath:
+            path: /mnt/tools
+            type: Directory
+        - name: tmp
+          emptyDir: {}
+---
+# Source: agent/charts/tgi/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: agent/charts/tgi/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: agent/charts/tgi/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+# Dashboard for the exposed TGI metrics:
+# - https://grafana.com/grafana/dashboards/19831-text-generation-inference-dashboard/
+# Metric descriptions:
+# - https://github.com/huggingface/text-generation-inference/discussions/1127#discussioncomment-7240527
+---
+# Source: agent/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: agent/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

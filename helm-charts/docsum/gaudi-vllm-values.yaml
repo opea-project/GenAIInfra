@@ -14,7 +14,7 @@ vllm:
   enabled: true
   image:
     repository: opea/vllm-gaudi
-    tag: "latest"
+    tag: "1.2"
   resources:
     limits:
       habana.ai/gaudi: 1

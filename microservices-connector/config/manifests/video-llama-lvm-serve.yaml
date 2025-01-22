@@ -1,0 +1,154 @@
+---
+# Source: lvm-serve/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: video-llama-lvm-serve-config
+  labels:
+    helm.sh/chart: lvm-serve-1.2.0
+    app.kubernetes.io/name: lvm-serve
+    app.kubernetes.io/instance: video-llama-lvm-serve
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  llm_download: "True"
+  HF_TOKEN: "insert-your-huggingface-token-here"
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+  HF_HOME: "/tmp/.cache/huggingface"
+  HABANA_LOGS: "/tmp/habana_logs"
+---
+# Source: lvm-serve/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: video-llama-lvm-serve
+  labels:
+    helm.sh/chart: lvm-serve-1.2.0
+    app.kubernetes.io/name: lvm-serve
+    app.kubernetes.io/instance: video-llama-lvm-serve
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: lvm-serve
+      protocol: TCP
+      name: lvm-serve
+  selector:
+    app.kubernetes.io/name: lvm-serve
+    app.kubernetes.io/instance: video-llama-lvm-serve
+---
+# Source: lvm-serve/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: video-llama-lvm-serve
+  labels:
+    helm.sh/chart: lvm-serve-1.2.0
+    app.kubernetes.io/name: lvm-serve
+    app.kubernetes.io/instance: video-llama-lvm-serve
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lvm-serve
+      app.kubernetes.io/instance: video-llama-lvm-serve
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: lvm-serve-1.2.0
+        app.kubernetes.io/name: lvm-serve
+        app.kubernetes.io/instance: video-llama-lvm-serve
+        app.kubernetes.io/version: "1.1"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: lvm-serve
+          envFrom:
+            - configMapRef:
+                name: video-llama-lvm-serve-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/lvm-video-llama:1.2"
+          args:
+            - "--model_name_or_path"
+            - "llava-hf/llava-1.5-7b-hf"
+          ports:
+            - name: lvm-serve
+              containerPort: 9009
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: health
+              port: lvm-serve
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: health
+              port: lvm-serve
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: tmp
+          emptyDir: {}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
+      terminationGracePeriodSeconds: 120
+---
+# Source: lvm-serve/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: lvm-serve/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: lvm-serve/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#

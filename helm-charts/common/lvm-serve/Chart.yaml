@@ -6,4 +6,4 @@ appVersion: "1.1"
 description: A Helm chart for deploying opea LVM(large vision model) inference microservices
 name: lvm-serve
 type: application
-version: 0-latest
+version: 1.2.0

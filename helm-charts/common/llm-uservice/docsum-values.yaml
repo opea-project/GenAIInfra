@@ -3,7 +3,7 @@
 
 image:
   repository: opea/llm-docsum
-  tag: "latest"
+  tag: "1.2"
 
 LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
 MAX_INPUT_TOKENS: 2048

@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: vllm-config
   labels:
-    helm.sh/chart: vllm-0-latest
+    helm.sh/chart: vllm-1.2.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
@@ -34,7 +34,7 @@ kind: Service
 metadata:
   name: vllm
   labels:
-    helm.sh/chart: vllm-0-latest
+    helm.sh/chart: vllm-1.2.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
@@ -59,13 +59,12 @@ kind: Deployment
 metadata:
   name: vllm
   labels:
-    helm.sh/chart: vllm-0-latest
+    helm.sh/chart: vllm-1.2.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
     app.kubernetes.io/managed-by: Helm
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: vllm
@@ -76,8 +75,44 @@ spec:
         app.kubernetes.io/name: vllm
         app.kubernetes.io/instance: vllm
     spec:
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: vllm-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model Intel/neural-chat-7b-v3-3 ... ";
+              huggingface-cli download --cache-dir /data "Intel/neural-chat-7b-v3-3";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--Intel--neural-chat-7b-v3-3
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
         - name: vllm
           envFrom:
@@ -88,9 +123,8 @@ spec:
                 optional: true
           securityContext:
             {}
-          image: "opea/vllm-gaudi:latest"
+          image: "opea/vllm-gaudi:1.2"
           args:
-            - "--enforce-eager"
             - "--tensor-parallel-size"
             - "1"
             - "--block-size"
@@ -141,6 +175,9 @@ spec:
           resources:
             limits:
               habana.ai/gaudi: 1
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: model-volume
           hostPath:
@@ -152,3 +189,20 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
+---
+# Source: vllm/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: vllm/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: vllm/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+# Dashboard for the exposed vLLM metrics:
+# - https://github.com/vllm-project/vllm/tree/main/examples/production_monitoring/
+# Metric descriptions:
+# - https://docs.vllm.ai/en/stable/serving/metrics.html

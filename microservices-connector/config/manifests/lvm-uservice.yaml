@@ -8,14 +8,15 @@ kind: ConfigMap
 metadata:
   name: lvm-uservice-config
   labels:
-    helm.sh/chart: lvm-uservice-0-latest
+    helm.sh/chart: lvm-uservice-1.2.0
     app.kubernetes.io/name: lvm-uservice
     app.kubernetes.io/instance: lvm-uservice
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
+  LVM_COMPONENT_NAME: "OPEA_TGI_LLAVA_LVM"
   LVM_ENDPOINT: "http://lvm-uservice-tgi"
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_TOKEN: "insert-your-huggingface-token-here"
   HF_HOME: "/tmp/.cache/huggingface"
   http_proxy: ""
   https_proxy: ""
@@ -31,7 +32,7 @@ kind: Service
 metadata:
   name: lvm-uservice
   labels:
-    helm.sh/chart: lvm-uservice-0-latest
+    helm.sh/chart: lvm-uservice-1.2.0
     app.kubernetes.io/name: lvm-uservice
     app.kubernetes.io/instance: lvm-uservice
     app.kubernetes.io/version: "v1.0"
@@ -56,7 +57,7 @@ kind: Deployment
 metadata:
   name: lvm-uservice
   labels:
-    helm.sh/chart: lvm-uservice-0-latest
+    helm.sh/chart: lvm-uservice-1.2.0
     app.kubernetes.io/name: lvm-uservice
     app.kubernetes.io/instance: lvm-uservice
     app.kubernetes.io/version: "v1.0"
@@ -73,8 +74,47 @@ spec:
         app.kubernetes.io/name: lvm-uservice
         app.kubernetes.io/instance: lvm-uservice
     spec:
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: wait-for-lvm
+          envFrom:
+            - configMapRef:
+                name: lvm-uservice-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              proto=$(echo ${LVM_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\1/p');
+              host=$(echo ${LVM_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\2/p');
+              port=$(echo ${LVM_ENDPOINT} | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\3/p');
+              if [ -z "$port" ]; then
+                  port=80;
+                  [[ "$proto" = "https" ]] && port=443;
+              fi;
+              wait_timeout=1;
+              total_timeout=60;
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${host} ${port}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${host}:${port} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
+              done;
+              echo "${host}:${port} is reachable within $j seconds.";
       containers:
         - name: lvm-uservice
           envFrom:
@@ -93,7 +133,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/lvm-tgi:latest"
+          image: "opea/lvm:1.2"
           ports:
             - name: lvm-uservice
               containerPort: 9399
@@ -101,19 +141,13 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: v1/health_check
-              port: lvm-uservice
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: v1/health_check
               port: lvm-uservice
             initialDelaySeconds: 5
             periodSeconds: 5
+            timeoutSeconds: 5
           startupProbe:
             failureThreshold: 120
             httpGet:
@@ -122,10 +156,16 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: lvm-uservice/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
 ---
 # Source: lvm-uservice/templates/servicemonitor.yaml
 # Copyright (C) 2024 Intel Corporation

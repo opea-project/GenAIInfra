@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: web-retriever-config
   labels:
-    helm.sh/chart: web-retriever-0-latest
+    helm.sh/chart: web-retriever-1.2.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
     app.kubernetes.io/version: "v1.0"
@@ -33,7 +33,7 @@ kind: Service
 metadata:
   name: web-retriever
   labels:
-    helm.sh/chart: web-retriever-0-latest
+    helm.sh/chart: web-retriever-1.2.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
     app.kubernetes.io/version: "v1.0"
@@ -58,7 +58,7 @@ kind: Deployment
 metadata:
   name: web-retriever
   labels:
-    helm.sh/chart: web-retriever-0-latest
+    helm.sh/chart: web-retriever-1.2.0
     app.kubernetes.io/name: web-retriever
     app.kubernetes.io/instance: web-retriever
     app.kubernetes.io/version: "v1.0"
@@ -75,6 +75,7 @@ spec:
         app.kubernetes.io/name: web-retriever
         app.kubernetes.io/instance: web-retriever
     spec:
+      serviceAccountName: default
       securityContext:
         {}
       containers:
@@ -95,7 +96,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/web-retriever-chroma:latest"
+          image: "opea/web-retriever:1.2"
           ports:
             - name: web-retriever
               containerPort: 7077
@@ -103,13 +104,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: v1/health_check
-              port: web-retriever
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: v1/health_check
@@ -124,7 +118,13 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: web-retriever/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

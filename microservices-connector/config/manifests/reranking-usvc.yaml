@@ -8,12 +8,13 @@ kind: ConfigMap
 metadata:
   name: reranking-usvc-config
   labels:
-    helm.sh/chart: reranking-usvc-0-latest
+    helm.sh/chart: reranking-usvc-1.2.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
+  RERANK_COMPONENT_NAME: "OPEA_TEI_RERANKING"
   TEI_RERANKING_ENDPOINT: "http://reranking-usvc-teirerank"
   http_proxy: ""
   https_proxy: ""
@@ -29,7 +30,7 @@ kind: Service
 metadata:
   name: reranking-usvc
   labels:
-    helm.sh/chart: reranking-usvc-0-latest
+    helm.sh/chart: reranking-usvc-1.2.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
     app.kubernetes.io/version: "v1.0"
@@ -54,7 +55,7 @@ kind: Deployment
 metadata:
   name: reranking-usvc
   labels:
-    helm.sh/chart: reranking-usvc-0-latest
+    helm.sh/chart: reranking-usvc-1.2.0
     app.kubernetes.io/name: reranking-usvc
     app.kubernetes.io/instance: reranking-usvc
     app.kubernetes.io/version: "v1.0"
@@ -71,6 +72,7 @@ spec:
         app.kubernetes.io/name: reranking-usvc
         app.kubernetes.io/instance: reranking-usvc
     spec:
+      serviceAccountName: default
       securityContext:
         {}
       containers:
@@ -91,7 +93,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/reranking-tei:latest"
+          image: "opea/reranking:1.2"
           ports:
             - name: reranking-usvc
               containerPort: 8000
@@ -99,13 +101,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: v1/health_check
-              port: reranking-usvc
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: v1/health_check
@@ -120,10 +115,16 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: reranking-usvc/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
 ---
 # Source: reranking-usvc/templates/servicemonitor.yaml
 # Copyright (C) 2024 Intel Corporation

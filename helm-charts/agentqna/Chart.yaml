@@ -7,52 +7,52 @@ description: The Helm chart to deploy AgentQnA
 type: application
 dependencies:
   - name: agent
-    version: 0-latest
+    version: 1.2.0
     alias: ragagent
     repository: "file://../common/agent"
   - name: agent
-    version: 0-latest
+    version: 1.2.0
     alias: sqlagent
     repository: "file://../common/agent"
   - name: agent
-    version: 0-latest
+    version: 1.2.0
     alias: supervisor
     repository: "file://../common/agent"
   - name: tgi
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/tgi"
     condition: tgi.enabled
   - name: vllm
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/vllm"
     condition: vllm.enabled
   - name: tei
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/tei"
   - name: embedding-usvc
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/embedding-usvc"
   - name: teirerank
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/teirerank"
   - name: reranking-usvc
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/reranking-usvc"
   - name: redis-vector-db
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/redis-vector-db"
   - name: retriever-usvc
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/retriever-usvc"
   - name: data-prep
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/data-prep"
   - name: ui
     alias: agentqna-ui
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/ui"
   - name: nginx
-    version: 0-latest
+    version: 1.2.0
     repository: "file://../common/nginx"
-version: 0-latest
+version: 1.2.0
 appVersion: "v1.0"

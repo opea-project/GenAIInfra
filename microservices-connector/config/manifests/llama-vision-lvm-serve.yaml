@@ -1,0 +1,192 @@
+---
+# Source: lvm-serve/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: llama-vision-lvm-serve-config
+  labels:
+    helm.sh/chart: lvm-serve-1.2.0
+    app.kubernetes.io/name: lvm-serve
+    app.kubernetes.io/instance: llama-vision-lvm-serve
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  LLAMA_VISION_MODEL_ID: "meta-llama/Llama-3.2-11B-Vision-Instruct"
+  HF_TOKEN: "insert-your-huggingface-token-here"
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+  HF_HOME: "/tmp/.cache/huggingface"
+  HF_HUB_CACHE: "/data"
+  HABANA_LOGS: "/tmp/habana_logs"
+---
+# Source: lvm-serve/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: llama-vision-lvm-serve
+  labels:
+    helm.sh/chart: lvm-serve-1.2.0
+    app.kubernetes.io/name: lvm-serve
+    app.kubernetes.io/instance: llama-vision-lvm-serve
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: lvm-serve
+      protocol: TCP
+      name: lvm-serve
+  selector:
+    app.kubernetes.io/name: lvm-serve
+    app.kubernetes.io/instance: llama-vision-lvm-serve
+---
+# Source: lvm-serve/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llama-vision-lvm-serve
+  labels:
+    helm.sh/chart: lvm-serve-1.2.0
+    app.kubernetes.io/name: lvm-serve
+    app.kubernetes.io/instance: llama-vision-lvm-serve
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: lvm-serve
+      app.kubernetes.io/instance: llama-vision-lvm-serve
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: lvm-serve-1.2.0
+        app.kubernetes.io/name: lvm-serve
+        app.kubernetes.io/instance: llama-vision-lvm-serve
+        app.kubernetes.io/version: "1.1"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: llama-vision-lvm-serve-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model meta-llama/Llama-3.2-11B-Vision-Instruct ... ";
+              huggingface-cli download --cache-dir /data "meta-llama/Llama-3.2-11B-Vision-Instruct";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--meta-llama--Llama-3.2-11B-Vision-Instruct
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      containers:
+        - name: lvm-serve
+          envFrom:
+            - configMapRef:
+                name: llama-vision-lvm-serve-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/lvm-llama-vision:1.2"
+          args:
+            - "--model_name_or_path"
+            - "meta-llama/Llama-3.2-11B-Vision-Instruct"
+          ports:
+            - name: lvm-serve
+              containerPort: 9399
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: lvm-serve
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: lvm-serve
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 1
+          resources:
+            limits:
+              habana.ai/gaudi: 1
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: tmp
+          emptyDir: {}
+---
+# Source: lvm-serve/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: lvm-serve/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: lvm-serve/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
