@@ -394,6 +394,7 @@ Add both host names for ChatQnA UI and backend service, edit the /etc/hosts file
 sudo sed -i '1i\127.0.0.1       chatqna-service.com' /etc/hosts
 sudo sed -i '1i\127.0.0.1       chatqna-ui.com' /etc/hosts
 ```
+
 By setting your routing for FQDN based services you can restrict access to only services you want to expose in your Kubernetes cluster.
 
 Open browser with address `"chatqna-ui.com:${INGRESS_PORT}"` if using GMC based deployment. Otherwise, open the browser with address `"chatqna-service.com:${INGRESS_PORT}"`.
