@@ -1,0 +1,20 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Identity provider OIDC config
+oidc:
+  realm: ${KEYCLOAK_REALM}                                             # replace with your realm name for OPEA apps
+  client_id: ${KEYCLOAK_CLIENT_ID}                                     # replace with your oidc client id
+  client_secret: ${KEYCLOAK_CLIENT_SECRET}                             # your oidc client secret
+  discovery: http://${KEYCLOAK_ADDR}/realms/${KEYCLOAK_CLIENT_ID}/.well-known/openid-configuration
+  introspection_endpoint: http://${KEYCLOAK_ADDR}/realms/${KEYCLOAK_CLIENT_ID}/protocol/openid-connect/token/introspect
+
+# APISIX chatqna api config
+chatqna:
+  namespace: default                                                   # namespace in which your chatqna service is running
+  hostname: your-hostname                                              # 'Host' HTTP header from incoming request should match this. Wildcards like '*' allowed too
+  query_api:
+    path: /chatqna-oidc                                                # This is the path that will be published in apisix and this should be used by UI to access the chatqna service
+    backend_service: chatqna                                           # your kubernetes service name to access chatqna megaservice or gmc without .<namespace>.svc.cluster.local
+    service_port: 8888                                                 # port on which chatqna mega service or gmc is running
+    service_path: "/v1/chatqna"                                        # path to access chatqna mega service or gmc backend
