@@ -187,7 +187,7 @@ cd /opt/keycloak/bin/
 ./kcadm.sh update realms/master -s sslRequired=NONE --server ${KEYCLOAK_ADDR}
 ```
 
-Then goto the Keycloak console and find the "Realm setting" for `apisix` realm, set "Require SSL" to "None".
+Then go to the Keycloak console and find the "Realm setting" for `apisix` realm, set "Require SSL" to "None".
 
 **Export the router service through istio ingress gateway**
 
@@ -219,7 +219,7 @@ export INGRESS_HOST=$(kubectl -n "$INGRESS_NS" get service "$INGRESS_NAME" -o js
 export INGRESS_PORT=$(kubectl -n "$INGRESS_NS" get service "$INGRESS_NAME" -o jsonpath='{.spec.ports[?(@.name=="http2")].port}')
 ```
 
-You can refter to the [istio ingress gateway guide](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) for more details about ingress gateway ip and ports.
+You can refer to the [istio ingress gateway guide](https://istio.io/latest/docs/tasks/traffic-management/ingress/ingress-control/#determining-the-ingress-ip-and-ports) for more details about ingress gateway ip and ports.
 
 **Apply authentication and authorization policies to the pipeline endpoint based on OIDC provider**
 
@@ -388,12 +388,13 @@ envsubst < $(pwd)/$DEPLOY_METHOD/chatQnA_authZ_oauth.yaml | kubectl apply -f -
 
 **Validate authentication and authorization with UI service**
 
-Add both host names for ChatQnA UI and backend service into /etc/hosts
+Add both host names for ChatQnA UI and backend service, edit the /etc/hosts file on the computer from where you are working/browsing to bypass the need for a DNS server to resolve your FQDN (fully qualified domain name).
 
 ```bash
 sudo sed -i '1i\127.0.0.1       chatqna-service.com' /etc/hosts
 sudo sed -i '1i\127.0.0.1       chatqna-ui.com' /etc/hosts
 ```
+By setting your routing for FQDN based services you can restrict access to only services you want to expose in your Kubernetes cluster.
 
 Open browser with address `"chatqna-ui.com:${INGRESS_PORT}"` if using GMC based deployment. Otherwise, open the browser with address `"chatqna-service.com:${INGRESS_PORT}"`.
 

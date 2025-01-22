@@ -8,7 +8,7 @@ Please refer to [GenAIExamples ChatQnA](https://github.com/opea-project/GenAIExa
 
 ## Starting and Configuring Keycloak
 
-In this stage, we run keycloak, setup a realm with OIDC based authentication. For demonstration, we will add a realm called `apisix` and add a user called `mary` with password. In the authentication step, only the user from `apisix` realm can access the chatQnA pipeline.
+In this stage we run keycloak and setup a realm with OIDC based authentication. For demonstration, we will add a realm called `apisix` and add a user called `mary` with password. In the authentication step, only the user from `apisix` realm can access the chatQnA pipeline.
 
 ### Step 1: Prerequisite.
 
@@ -89,7 +89,7 @@ cd /opt/keycloak/bin/
 ./kcadm.sh update realms/master -s sslRequired=NONE --server ${KEYCLOAK_ADDR}
 ```
 
-Then goto the Keycloak console and find the "Realm setting" for `apisix` realm, set "Require SSL" to "None".
+Then go to the Keycloak console and find the "Realm setting" for `apisix` realm, set "Require SSL" to "None".
 
 ## Update values
 
