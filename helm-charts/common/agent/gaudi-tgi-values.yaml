@@ -1,0 +1,24 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Accelerate inferencing in heaviest components to improve performance
+# by overriding their subchart values
+
+tgi:
+  enabled: true
+  livenessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+  readinessProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+  startupProbe:
+    initialDelaySeconds: 5
+    periodSeconds: 5
+    timeoutSeconds: 1
+    failureThreshold: 120
+
+llm_endpoint_url: http://{{ .Release.Name }}-tgi
+llm_engine: tgi

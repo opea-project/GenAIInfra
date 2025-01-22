@@ -20,7 +20,7 @@ data:
   {{- if .Values.llm_endpoint_url }}
   llm_endpoint_url: {{ tpl .Values.llm_endpoint_url . | quote }}
   {{- else }}
-  llm_endpoint_url: "http://{{ .Release.Name }}-tgi"
+  llm_endpoint_url: "http://{{ .Release.Name }}-vllm"
   {{- end }}
   # {{- if .Values.port }}
   # port: {{ .Values.port | quote }}
