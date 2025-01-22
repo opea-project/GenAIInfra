@@ -105,4 +105,5 @@ variable "throughput" {
 variable "is_cosmosdb_required" {
   type    = bool
   description = "Is Cosmos DB required for your deployment? [true/false]"
+  default     = false
 }
