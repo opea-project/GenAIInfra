@@ -26,6 +26,10 @@ terraform init
 
 By default, 1-node cluster is created which is suitable for running the OPEA application. See `variables.tf` and `opea-<application-name>.tfvars` if you want to tune the cluster properties, e.g., number of nodes, instance types or disk size.
 
+## Cosmos DB
+
+By default Cosmos DB will not be provisioned. If you want Cosmos DB as part of your resource provisioning, update `is_cosmosdb_required` property present in `opea-<application-name>.tfvars` to `true`.
+
 ## Persistent Volume Claim
 
 OPEA needs a volume where to store the model. For that we need to create Kubernetes Persistent Volume Claim (PVC). OPEA requires `ReadWriteMany` option since multiple pods needs access to the storage and they can be on different nodes. On AKS, only Azure File Service supports `ReadWriteMany`. Thus, each OPEA application below uses the file `aks-azfs-csi-pvc.yaml` to create PVC in its namespace.
