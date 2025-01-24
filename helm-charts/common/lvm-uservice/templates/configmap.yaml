@@ -10,6 +10,7 @@ metadata:
 data:
   {{- if eq "TGI" .Values.LVM_BACKEND }}
   LVM_COMPONENT_NAME: "OPEA_TGI_LLAVA_LVM"
+  MAX_IMAGES: {{ .Values.MAX_IMAGES | default 1 | quote }}
   {{- if not .Values.LVM_ENDPOINT }}
   LVM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
   {{- end }}
@@ -19,10 +20,11 @@ data:
   {{- end }}
   {{- if eq "LLaVA" .Values.LVM_BACKEND }}
   LVM_COMPONENT_NAME: "OPEA_LLAVA_LVM"
+  MAX_IMAGES: {{ .Values.MAX_IMAGES | default 1 | quote }}
   {{- else if eq "VideoLlama" .Values.LVM_BACKEND }}
   LVM_COMPONENT_NAME: "OPEA_VIDEO_LLAMA_LVM"
   {{- else if eq "LlamaVision" .Values.LVM_BACKEND }}
-  LVM_COMPONENT_NAME: "OPEA_LLAVA_VISION_LVM"
+  LVM_COMPONENT_NAME: "OPEA_LLAMA_VISION_LVM"
   {{- else if eq "PredictionGuard" .Values.LVM_BACKEND }}
   LVM_COMPONENT_NAME: "OPEA_PREDICTION_GUARD_LVM"
   {{- else }}
