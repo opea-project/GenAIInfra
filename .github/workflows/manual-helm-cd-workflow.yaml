@@ -51,8 +51,14 @@ jobs:
               if [[ "$chart" == *"common" ]] || [[ -f $chart ]]; then
                 continue
               fi
-              for file in "$chart"/ci-*values.yaml; do
+              for file in "$chart"/*values.yaml; do
                 if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
+                    continue
+                  fi
+                  if [[ "$file" == *"variant_"* ]] || [[ "$file" == *"milvus"* ]]; then
+                    continue
+                  fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
                     run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
@@ -66,8 +72,14 @@ jobs:
               if [[ -f $chart ]]; then
                 continue
               fi
-              for file in "$chart"/ci-*values.yaml; do
+              for file in "$chart"/*values.yaml; do
                 if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
+                    continue
+                  fi
+                  if [[ "$file" == *"variant_"* ]] || [[ "$file" == *"milvus"* ]]; then
+                    continue
+                  fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
                     run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
@@ -80,8 +92,14 @@ jobs:
           else
             service_list=($(echo ${{ github.event.inputs.workloads }} | tr ',' ' '))
             for service in $service_list; do
-              for file in "$CHARTS_DIR/$service"/ci-*values.yaml; do
+              for file in "$CHARTS_DIR/$service"/*values.yaml; do
                 if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
+                    continue
+                  fi
+                  if [[ "$file" == *"variant_"* ]] || [[ "$file" == *"milvus"* ]]; then
+                    continue
+                  fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
                     run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
