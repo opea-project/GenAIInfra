@@ -9,6 +9,8 @@
 LOGFLAG: ""
 # backend inference engine to use, i.e. TGI, LLaVA, VideoLlama, LlamaVision, PredictionGuard
 LVM_BACKEND: "TGI"
+# maximum image number sent to backend, only valid for TGI, LLaVa backend
+MAX_IMAGES: 1
 # inference engine service URL, e.g. http://tgi:80
 LVM_ENDPOINT: ""
 
