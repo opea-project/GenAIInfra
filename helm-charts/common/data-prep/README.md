@@ -12,6 +12,8 @@ Helm chart for deploying OPEA data-prep microservice.
 
 - Milvus DB: please refer to [milvus-helm](https://github.com/zilliztech/milvus-helm/tree/milvus-4.2.12) for more information.
 
+- Qdrant DB: please refer to [qdrant-helm](https://github.com/qdrant/qdrant-helm/tree/qdrant-1.13.1/charts/qdrant) for more information.
+
 First, you need to install the `tei` helm chart and one of the vector DB service, i.e. `redis-vector-db` chart.
 
 After you've deployed dependency charts successfully, please run `kubectl get svc` to get the service endpoint URL respectively, i.e. `http://tei:80`, `redis://redis-vector-db:6379`.
@@ -32,7 +34,12 @@ helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} 
 # Install data-prep with Milvus DB backend
 # export DATAPREP_BACKEND="MILVUS"
 # export DB_HOST="milvus"
-# helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set DATAPREP_BACKEND=${DATAPREP_BACKEND} --set MILVUS_HOST=${DB_HOST}
+# helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set DATAPREP_BACKEND=${DATAPREP_BACKEND} --set MILVUS_HOST=${DB_HOST},MILVUS_PORT=19530,COLLECTION_NAME=rag__milvus
+
+# Install data-prep with Qdrant DB backend
+# export DATAPREP_BACKEND="QDRANT"
+# export DB_HOST="qdrant"
+# helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set DATAPREP_BACKEND=${DATAPREP_BACKEND} --set QDRANT_HOST=${DB_HOST},QDRANT_PORT=6333,COLLECTION_NAME=rag_qdrant
 ```
 
 ## Verify
@@ -56,9 +63,10 @@ curl http://localhost:6007/v1/dataprep/ingest  \
 | ------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
 | service.port                    | string | `"6007"`  |                                                                                                         |
 | global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                         |
-| DATAPREP_BACKEND                | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS"                                                      |
+| DATAPREP_BACKEND                | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT"                                            |
 | REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration    |
 | MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration |
+| QDRANT_HOST                     | string | `""`      | Qdrant service URL host, only valid for Qdrant, please see `values.yaml` for other Qdrant configuration |
 | TEI_EMBEDDING_ENDPOINT          | string | `""`      |                                                                                                         |
 | global.monitoring               | bool   | `false`   | See ../../monitoring.md before enabling!                                                                |
 
