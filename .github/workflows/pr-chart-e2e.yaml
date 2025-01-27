@@ -55,7 +55,7 @@ jobs:
                 if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
                   continue
                 fi
-                if [[ "$file" == *"variant_"* ]] || [[ "$file" == *"milvus"* ]]; then
+                if [[ "$file" == *"variant_"* ]]; then
                   continue
                 fi
                 filename=$(basename "$file" .yaml)
@@ -73,7 +73,7 @@ jobs:
                 if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
                   continue
                 fi
-                if [[ "$file" == *"variant_"* ]] || [[ "$file" == *"milvus"* ]]; then
+                if [[ "$file" == *"variant_"* ]]; then
                   continue
                 fi
                 filename=$(basename "$file" .yaml)
