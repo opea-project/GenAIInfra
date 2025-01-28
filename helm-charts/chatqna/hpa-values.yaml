@@ -12,6 +12,10 @@
 autoscaling:
   enabled: true
 
+global:
+  # K8s custom metrics (used for scaling thresholds) are based on metrics from service monitoring
+  monitoring: true
+
 # Override values in specific subcharts
 
 # Enabling "autoscaling" for any of the subcharts requires enabling it also above!
