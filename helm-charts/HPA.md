@@ -30,8 +30,8 @@ HPA controlled _CPU_ pods SHOULD have appropriate resource requests or affinity 
 subcharts and tested to work) so that k8s scheduler does not schedule too many of them on the same
 node(s). Otherwise they never reach ready state.
 
-If you use different models than the default ones, update TGI and TEI resource requests to match
-model requirements.
+If you use different models than the default ones, update inferencing services (vLLM, TGI, TEI) resource
+requests to match model requirements.
 
 Too large requests would not be a problem as long as pods still fit to available nodes. However,
 unless rules have been added to pods preventing them from being scheduled on same nodes, too
@@ -142,7 +142,7 @@ $ kubectl -n $prom_ns delete $(kubectl -n $prom_ns get pod --selector $selector 
 After [verifying that service metrics work](monitoring.md#verify),
 one can verify that HPA rules can access custom metrics based on them.
 
-Verify that there are (TGI and/or TEI) custom metrics prefixed with chart name:
+Verify that there are custom metrics from inferencing service(s), prefixed with the chart name:
 
 ```console
 $ kubectl get --raw /apis/custom.metrics.k8s.io/v1beta1 | jq .resources[].name
@@ -154,3 +154,6 @@ And HPA rules have TARGET values for HPA controlled service deployments (instead
 $ ns=default  # OPEA namespace
 $ kubectl -n $ns get hpa
 ```
+
+**NOTE**: inferencing services provide metrics only after they've processed their first request.
+And reranking service is used only after query context data has been uploaded!
