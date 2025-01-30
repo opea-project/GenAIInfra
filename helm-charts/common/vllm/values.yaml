@@ -102,6 +102,8 @@ tolerations: []
 
 affinity: {}
 
+tdxEnabled: false
+
 LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 # Environment variables for vLLM (set in configmap):
