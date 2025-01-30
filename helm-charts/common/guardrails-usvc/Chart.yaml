@@ -13,3 +13,10 @@ dependencies:
     alias: tgi-guardrails
     repository: file://../tgi
     condition: tgi-guardrails.enabled
+  - name: common-library
+    version: 1.2.0
+    repository: "file://../common-library"
+  - name: tdx
+    version: 1.2.0
+    repository: "file://../tdx"
+    condition: tdxEnabled
