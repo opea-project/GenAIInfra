@@ -58,7 +58,7 @@ var _ = BeforeSuite(func() {
 		templateDir + "/teirerank.yaml",
 		templateDir + "/tgi.yaml",
 		templateDir + "/tgi_gaudi.yaml",
-		templateDir + "/llm-uservice.yaml",
+		templateDir + "/llm-usvc.yaml",
 		templateDir + "/docsum-llm-uservice.yaml",
 		"../../config/gmcrouter/gmc-router.yaml",
 	}
