@@ -12,7 +12,7 @@ replicaCount: 1
 image:
   repository: ollama/ollama
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "0.5.7"
 
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   pullPolicy: Always
@@ -87,15 +87,6 @@ readinessProbe:
     path: /api/version
     port: http
 
-# Enabling HPA will:
-# - Ignore above replica count, as it will be controlled by HPA
-# - Add example HPA scaling rules with custom metrics thresholds
-# - Require custom metrics ConfigMap available in the main application chart
-autoscaling:
-  enabled: false
-  minReplicas: 1
-  maxReplicas: 4
-
 
 OLLAMA_MODEL: "llama3.2:1b"
 
@@ -104,8 +95,3 @@ global:
   https_proxy: ""
   no_proxy: ""
 
-  # Install Prometheus serviceMonitor for service
-  monitoring: false
-
-  # Prometheus Helm install release name for serviceMonitor
-  prometheusRelease: prometheus-stack

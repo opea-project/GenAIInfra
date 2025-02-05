@@ -8,9 +8,7 @@ metadata:
   labels:
     {{- include "ollama-service.labels" . | nindent 4 }}
 spec:
-  {{- if not .Values.autoscaling.enabled }}
   replicas: {{ .Values.replicaCount }}
-  {{- end }}
   selector:
     matchLabels:
       {{- include "ollama-service.selectorLabels" . | nindent 6 }}
