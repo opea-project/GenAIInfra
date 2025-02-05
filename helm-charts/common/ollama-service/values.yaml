@@ -63,8 +63,6 @@ service:
   # By default, Ollama binds to port 11434
   targetPort: 11434
 
-
-
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
   # choice for the user. This also increases chances charts run on environments with little
