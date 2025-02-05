@@ -64,3 +64,10 @@ data:
   {{- if .Values.BATCH_BUCKET_SIZE }}
   BATCH_BUCKET_SIZE: {{ .Values.BATCH_BUCKET_SIZE | quote }}
   {{- end }}
+  {{- if .Values.SHARDED }}
+  SHARDED: {{ .Values.SHARDED | quote }}
+  {{- end }}
+  {{- if .Values.NUM_CARDS }}
+  NUM_CARDS: {{ .Values.NUM_CARDS | quote }}
+  NUM_SHARD: {{ .Values.NUM_CARDS | quote }}
+  {{- end }}

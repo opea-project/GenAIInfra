@@ -111,6 +111,7 @@ LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 OMPI_MCA_btl_vader_single_copy_mechanism: ""
 PT_HPU_ENABLE_LAZY_COLLECTIVES: ""
 VLLM_CPU_KVCACHE_SPACE: ""
+NUM_CARDS: "1"
 
 global:
   http_proxy: ""
