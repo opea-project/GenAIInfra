@@ -25,3 +25,6 @@ data:
   {{- end }}
   HF_HOME: "/tmp/.cache/huggingface"
   LOGFLAG: {{ .Values.LOGFLAG | quote }}
+  {{- if .Values.global.HUGGINGFACEHUB_API_TOKEN }}
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+  {{- end }}
