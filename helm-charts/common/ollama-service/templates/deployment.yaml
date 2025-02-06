@@ -33,13 +33,24 @@ spec:
           envFrom:
             - configMapRef:
                 name: {{ include "ollama-service.fullname" . }}-config
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+            capabilities:
+              drop:
+                - ALL
+              add:
+                - DAC_OVERRIDE
+                # To be able to make data model directory group writable for
+                # previously downloaded model by old versions of helm chart
+                - FOWNER
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
-          command: ['sh', '-ec']
+          command: ['bash', '-c']
           args:
             - ollama serve & sleep 10 && ollama pull ${LLM_MODEL_ID}
           volumeMounts:
-            - mountPath: /root/.ollama/models
+            # Running as non-root sets $HOME to /
+            - mountPath: /.ollama
               name: model-volume
 
       containers:
@@ -64,7 +75,8 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
           volumeMounts:
-            - mountPath: /root/.ollama/models
+            # Running as non-root sets $HOME to /
+            - mountPath: /.ollama
               name: model-volume
             {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}

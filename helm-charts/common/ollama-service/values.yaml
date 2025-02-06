@@ -45,13 +45,16 @@ podLabels: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
-  # capabilities:
-  #   drop:
-  #   - ALL
-  # readOnlyRootFilesystem: true
-  # runAsNonRoot: true
-  # runAsUser: 1000
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1001
+  runAsGroup: 1001
+  seccompProfile:
+    type: RuntimeDefault
 
 # This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
 service:
@@ -90,3 +93,8 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
+
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: ""
