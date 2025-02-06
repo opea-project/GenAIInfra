@@ -20,7 +20,7 @@ spec:
           for ((i=1; i<=max_retry; i++)); do
             curl http://{{ include "ollama-service.fullname" . }}/api/generate \
             -X POST \
-            -d '{"model": "{{ .Values.OLLAMA_MODEL }}","prompt": "What is Deep Learning?","options":{"num_predict":20}}' && break;
+            -d '{"model": "{{ .Values.LLM_MODEL_ID }}","prompt": "What is Deep Learning?","options":{"num_predict":20}}' && break;
             curlcode=?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;

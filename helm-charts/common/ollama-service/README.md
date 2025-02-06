@@ -37,4 +37,4 @@ curl http://localhost:11434/api/generate -d '{
 
 | Key          | Type   | Default         |
 | ------------ | ------ | --------------- |
-| OLLAMA_MODEL | String | `"llama3.2:1b"` |
+| LLM_MODEL_ID | String | `"llama3.2:1b"` |

@@ -15,7 +15,7 @@ image:
   tag: "0.5.7"
 
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
-  pullPolicy: Always
+  # pullPolicy: Always
 
 # This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
 imagePullSecrets: []
@@ -57,9 +57,7 @@ securityContext: {}
 service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   type: ClusterIP
-
   port: 80
-
   # By default, Ollama binds to port 11434
   targetPort: 11434
 
@@ -86,7 +84,7 @@ readinessProbe:
     port: http
 
 
-OLLAMA_MODEL: "llama3.2:1b"
+LLM_MODEL_ID: "llama3.2:1b"
 
 global:
   http_proxy: ""
