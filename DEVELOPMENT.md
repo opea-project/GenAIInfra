@@ -14,6 +14,10 @@ You must install these tools:
 1. [`pre-commit`](https://pre-commit.com/#install): better to do a pre-commit test before
    you create a commit
 
+## Creating new helm chart for OPEA services
+
+Please see [development README](dev/README.md) of how to create new helm chart for OPEA services.
+
 ## Testing
 
 To test your changes after developing or updating a helm chart, you can use the following command:
