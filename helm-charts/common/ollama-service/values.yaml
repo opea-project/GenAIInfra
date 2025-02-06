@@ -6,7 +6,8 @@
 # Declare variables to be passed into your templates.
 
 # This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
-replicaCount: 1
+# Do not set this value if you plan to use horizontal pod autoscaling or only need one replica
+# replicaCount: 1
 
 # This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
 image:
@@ -86,6 +87,20 @@ resources: {}
 #     path: /api/version
 #     port: http
 
+# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
+# Note: Do not use (above) "replicaCount" with HPA (Chart ignores value=1 as it's k8s default)
+# Note: Because HPA can sometimes change replica counts up and down rather frequently, the microservice needs to handle SIGTERM elegantly:
+# - stop accepting new requests
+# - handle all of its buffered requests
+# - terminate after tthose have been processed
+# See https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/#pod-termination.
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
 
 LLM_MODEL_ID: "llama3.2:1b"
 
@@ -106,3 +121,7 @@ global:
   # By default, both are set to empty, the model will be downloaded every time and will not be saved into any permanent storage medium.
   modelUseHostPath: ""
   modelUsePVC: ""
+
+  monitoring: false
+  # Prometheus Helm install release name for serviceMonitor
+  prometheusRelease: prometheus-stack

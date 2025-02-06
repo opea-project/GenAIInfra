@@ -8,7 +8,9 @@ metadata:
   labels:
     {{- include "ollama-service.labels" . | nindent 4 }}
 spec:
+  {{- if .Values.replicaCount }}
   replicas: {{ .Values.replicaCount }}
+  {{- end }}
   selector:
     matchLabels:
       {{- include "ollama-service.selectorLabels" . | nindent 6 }}
