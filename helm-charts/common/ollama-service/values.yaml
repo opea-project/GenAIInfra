@@ -98,3 +98,11 @@ global:
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
   sharedSAName: ""
+
+  # Choose where to save your downloaded models
+  # Set modelUseHostPath for local directory, this is good for one node test, e.g /mnt/opea-models
+  # Set modelUsePVC for PersistentVolumeClaim(PVC), which is suitable for multinode deployment, e.g. model-volume
+  # You can only set one of the following variable, the behavior is not defined if both of them are set.
+  # By default, both are set to empty, the model will be downloaded every time and will not be saved into any permanent storage medium.
+  modelUseHostPath: ""
+  modelUsePVC: ""

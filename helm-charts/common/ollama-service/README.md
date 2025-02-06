@@ -35,6 +35,8 @@ curl http://localhost:11434/api/generate -d '{
 
 ## Values
 
-| Key          | Type   | Default         |
-| ------------ | ------ | --------------- |
-| LLM_MODEL_ID | String | `"llama3.2:1b"` |
+| Key                     | Type   | Default         | Description                                                                                                                                                                                                                                                                                                                |
+| ----------------------- | ------ | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LLM_MODEL_ID            | String | `"llama3.2:1b"` | The model ID to use. Must be one of the models listed in the [Ollama Library](https://ollama.com/library)                                                                                                                                                                                                                  |
+| global.modelUseHostPath | String | `""`            | Cached models directory on Kubernetes node, service will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to the container as /.ollama directory. Setting this to null/empty will force the container to download the model. May not be set if "global.modelUsePVC" is also set. |
+| global.modelUsePVC      | String | `""`            | Name of Persistent Volume Claim to use for model cache. The Persistent Volume will be mounted to the container as /.ollama directory. Setting this to null/empty will force the container to download the model. May not be set if "global.modelUseHostPath" is also set.                                                  |
