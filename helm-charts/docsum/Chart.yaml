@@ -6,6 +6,10 @@ name: docsum
 description: The Helm chart to deploy DocSum
 type: application
 dependencies:
+  - name: dashboard
+    version: 0-latest
+    repository: "file://../common/dashboard"
+    condition: global.monitoring
   - name: tgi
     version: 0-latest
     repository: "file://../common/tgi"

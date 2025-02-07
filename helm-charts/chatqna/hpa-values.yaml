@@ -9,6 +9,9 @@
 # Default upstream configMap is in:
 #  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
 
+dashboard:
+  scaling: true
+
 autoscaling:
   enabled: true
 
