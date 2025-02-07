@@ -433,7 +433,7 @@ data:
               "expr": "sum by (le)(increase(megaservice_request_latency_bucket{service=\"$release\",namespace=\"$namespace\"}[$__rate_interval]))",
               "format": "heatmap",
               "hide": false,
-              "legendFormat": "{{le}}",
+              "legendFormat": "{{ printf "{{le}}" }}",
               "range": true,
               "refId": "A"
             }
@@ -884,7 +884,7 @@ data:
               "expr": "sum by (le)(increase(megaservice_first_token_latency_bucket{service=\"$release\",namespace=\"$namespace\"}[$__rate_interval]))",
               "format": "heatmap",
               "hide": false,
-              "legendFormat": "{{le}}",
+              "legendFormat": "{{ printf "{{le}}" }}",
               "range": true,
               "refId": "A"
             }
@@ -1362,7 +1362,7 @@ data:
               "expr": "sum by (le)(increase(megaservice_inter_token_latency_bucket{service=\"$release\",namespace=\"$namespace\"}[$__rate_interval]))",
               "format": "heatmap",
               "hide": false,
-              "legendFormat": "{{le}}",
+              "legendFormat": "{{ printf "{{le}}" }}",
               "range": true,
               "refId": "A"
             }
