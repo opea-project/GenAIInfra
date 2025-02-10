@@ -1,34 +1,38 @@
-# Monitoring support
+# Observability for OPEA Workloads in Kubernetes
 
 ## Table of Contents
 
 - [Introduction](#introduction)
 - [Pre-conditions](#pre-conditions)
-  - [Prometheus install](#prometheus-install)
-  - [Helm options](#helm-options)
+  - [Prometheus + Grafana install](#prometheus--grafana-install)
+  - [OPEA Helm options](#opea-helm-options)
 - [Install](#install)
+  - [Monitoring support + Grafana access](#monitoring-support--grafana-access)
+  - [Dashboards](#dashboards)
 - [Verify](#verify)
+- [Dashboards](#dashboards)
 
 ## Introduction
 
-Monitoring provides service component usage metrics for [Prometheus](https://prometheus.io/),
-which can be visualized e.g. in [Grafana](https://grafana.com/).
+Helm chart `monitoring` option enables observability support for the OPEA workloads;
+[Prometheus](https://prometheus.io/) metrics for the service components,
+and [Grafana](https://grafana.com/) visualization for them.
 
 Scaling the services automatically based on their usage with [HPA](HPA.md) also relies on these metrics.
 
-[Observability documentation](../kubernetes-addons/Observability/README.md)
+[Metrics / visualization add-ons](../kubernetes-addons/Observability/README.md)
 explains how to install additional monitoring for node and device metrics,
 and Grafana for visualizing those metrics.
 
 ## Pre-conditions
 
-### Prometheus install
+### Prometheus + Grafana install
 
 If cluster does not run [Prometheus operator](https://github.com/prometheus-operator/kube-prometheus)
 yet, it SHOULD be be installed before enabling monitoring, e.g. by using a Helm chart for it:
 https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-prometheus-stack
 
-To install (older version) of Prometheus:
+To install (older 55.x version) of Prometheus & Grafana:
 
 ```console
 $ helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
@@ -38,16 +42,51 @@ $ kubectl create ns $prom_ns
 $ helm install prometheus-stack prometheus-community/kube-prometheus-stack --version 55.5.2 -n $prom_ns
 ```
 
-### Helm options
+### OPEA Helm options
 
-If Prometheus is installed under some other release name than `prometheus-stack`,
+If Prometheus & Grafana are installed under some other release name than `prometheus-stack`,
 provide that as `global.prometheusRelease` value for the OPEA service Helm install,
 or in its `values.yaml` file. Otherwise Prometheus ignores the installed
 `serviceMonitor` objects.
 
 ## Install
 
-Install Helm chart with `--set global.monitoring=true` option.
+### Monitoring support + Grafana access
+
+Install (e.g. ChatQnA) Helm chart with `--set global.monitoring=true` option.
+
+Use port-forward to access Grafana
+
+```
+kubectl port-forward service/grafana 3000:80
+```
+
+Open your browser and navigate to http://localhost:3000. Use
+"admin/prom-operator" as the username and the password to login.
+
+### Dashboards
+
+Currently, when `monitoring` option is enabled for ChatQnA and DocSum
+Helm charts, also OPEA application monitoring dashboard is installed:
+
+![Metrics dashboard](./assets/opea-metrics.png)
+
+When [HPA scaling](HPA.md) is enabled, additional application scaling
+dashboard is installed:
+
+![Scaling dashboard](./assets/opea-scaling.png)
+
+For other applications, if they were installed with `monitoring`
+option enabled, dashboard(s) for monitoring them can be installed
+afterwards, with:
+
+```
+$ helm install dashboards dashboards/ --set global.monitoring=true
+```
+
+NOTE: dashboards will list available applications and their metrics
+only after they've processed their first token, because related
+metrics are not available before that!
 
 ## Verify
 
