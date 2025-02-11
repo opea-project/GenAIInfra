@@ -4,16 +4,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "ollama-service.fullname" . }}
+  name: {{ include "ollama.fullname" . }}
   labels:
-    {{- include "ollama-service.labels" . | nindent 4 }}
+    {{- include "ollama.labels" . | nindent 4 }}
 spec:
   {{- if .Values.replicaCount }}
   replicas: {{ .Values.replicaCount }}
   {{- end }}
   selector:
     matchLabels:
-      {{- include "ollama-service.selectorLabels" . | nindent 6 }}
+      {{- include "ollama.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -21,30 +21,22 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
       labels:
-        {{- include "ollama-service.selectorLabels" . | nindent 8 }}
+        {{- include "ollama.selectorLabels" . | nindent 8 }}
     spec:
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-      serviceAccountName: {{ include "ollama-service.serviceAccountName" . }}
+      serviceAccountName: {{ include "ollama.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       initContainers:
         - name: model-downloader
           envFrom:
             - configMapRef:
-                name: {{ include "ollama-service.fullname" . }}-config
+                name: {{ include "ollama.fullname" . }}-config
           securityContext:
-            {{- toYaml .Values.securityContext | nindent 12 }}
-            capabilities:
-              drop:
-                - ALL
-              add:
-                - DAC_OVERRIDE
-                # To be able to make data model directory group writable for
-                # previously downloaded model by old versions of helm chart
-                - FOWNER
+            {{- toYaml .Values.initContainerSecurityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           command: ['bash', '-c']
@@ -54,14 +46,13 @@ spec:
             # Running as non-root sets $HOME to /
             - mountPath: /.ollama
               name: model-volume
-
       containers:
         - name: {{ .Chart.Name }}
           command: ["bash", "-c"]
           args: ["ollama serve & sleep 10 && ollama run {{ .Values.LLM_MODEL_ID }} & wait"]
           envFrom:
             - configMapRef:
-                name: {{ include "ollama-service.fullname" . }}-config
+                name: {{ include "ollama.fullname" . }}-config
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -126,5 +117,5 @@ spec:
           whenUnsatisfiable: ScheduleAnyway
           labelSelector:
             matchLabels:
-              {{- include "ollama-service.selectorLabels" . | nindent 14 }}
+              {{- include "ollama.selectorLabels" . | nindent 14 }}
       {{- end }}

@@ -5,14 +5,14 @@
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
-  name: {{ include "ollama-service.fullname" . }}
+  name: {{ include "ollama.fullname" . }}
   labels:
-    {{- include "ollama-service.labels" . | nindent 4 }}
+    {{- include "ollama.labels" . | nindent 4 }}
 spec:
   scaleTargetRef:
     apiVersion: apps/v1
     kind: Deployment
-    name: {{ include "ollama-service.fullname" . }}
+    name: {{ include "ollama.fullname" . }}
   minReplicas: {{ .Values.autoscaling.minReplicas }}
   maxReplicas: {{ .Values.autoscaling.maxReplicas }}
   metrics:

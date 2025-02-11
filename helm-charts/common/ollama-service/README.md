@@ -1,4 +1,4 @@
-# ollama-service
+# ollama
 
 Helm chart for deploying Ollama model server.
 
@@ -10,23 +10,23 @@ To install the chart, run the following:
 cd GenAIInfra/helm-charts/common
 export MODELNAME="llama3.2"
 
-helm install ollama-release ollama-service --set OLLAMA_MODEL=${MODELNAME}
+helm install ollama-release ollama --set OLLAMA_MODEL=${MODELNAME}
 ```
 
-By default, the ollama-service will download the "llama3.2:1b" model, which is about 1.3GB.
+By default, the ollama container will download the "llama3.2:1b" model, which is about 1.3GB.
 
 ## Verify
 
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
 
-Then run the command `kubectl port-forward svc/ollama-release-ollama-service 11434:80` to expose the ollama service for access.
+Then run the command `kubectl port-forward svc/ollama-release 11434:80` to expose the ollama service for access.
 
 Open another terminal and run the following command to verify the service is working:
 
 ```console
 curl http://localhost:11434/api/generate -d '{
   "model": "llama3.2:1b",
-  "prompt": "Why is the sky blue?",
+  "prompt": "What is Deep Learning?",
   "options": {
     "num_predict": 40
   }

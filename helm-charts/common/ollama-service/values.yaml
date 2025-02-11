@@ -1,7 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Default values for ollama-service.
+# Default values for ollama.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
@@ -49,11 +49,24 @@ podSecurityContext: {}
 securityContext:
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
-  runAsUser: 1001
-  runAsGroup: 1001
+  runAsUser: 1000
+  seccompProfile:
+    type: RuntimeDefault
+
+initContainerSecurityContext:
+  capabilities:
+    drop:
+      - ALL
+    add:
+      - DAC_OVERRIDE
+      # To be able to make data model directory group writable for
+      # previously downloaded model by old versions of helm chart
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
   seccompProfile:
     type: RuntimeDefault
 
@@ -121,7 +134,3 @@ global:
   # By default, both are set to empty, the model will be downloaded every time and will not be saved into any permanent storage medium.
   modelUseHostPath: ""
   modelUsePVC: ""
-
-  monitoring: false
-  # Prometheus Helm install release name for serviceMonitor
-  prometheusRelease: prometheus-stack

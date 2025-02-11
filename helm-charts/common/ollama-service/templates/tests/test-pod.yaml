@@ -4,9 +4,9 @@
 apiVersion: v1
 kind: Pod
 metadata:
-  name: "{{ include "ollama-service.fullname" . }}-testpod"
+  name: "{{ include "ollama.fullname" . }}-testpod"
   labels:
-    {{- include "ollama-service.labels" . | nindent 4 }}
+    {{- include "ollama.labels" . | nindent 4 }}
   annotations:
     "helm.sh/hook": "test"
 spec:
@@ -18,7 +18,7 @@ spec:
         - |
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
-            curl http://{{ include "ollama-service.fullname" . }}/api/generate \
+            curl http://{{ include "ollama.fullname" . }}/api/generate \
             -X POST \
             -d '{"model": "{{ .Values.LLM_MODEL_ID }}","prompt": "What is Deep Learning?","options":{"num_predict":20}}' && break;
             curlcode=?
