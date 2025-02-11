@@ -8,23 +8,21 @@ This document outlines the deployment process of Helm Charts on Intel® Xeon® P
 
 [Confidential Containers](https://confidentialcontainers.org/docs/overview/) encapsulates pods inside confidential virtual machines, allowing Cloud Native workloads to leverage confidential computing hardware with minimal modification.
 
-
 ## Prerequisites
 
 ### System Requirements
 
-| Category            | Details                                                                              |
-|---------------------|--------------------------------------------------------------------------------------|
-| Operating System    | Ubuntu 24.04                                                                         |
-| Hardware Platforms  | 4th Gen Intel® Xeon® Scalable processors<br>5th Gen Intel® Xeon® Scalable processors |
-| Kubernetes Version  | 1.29+                                                                                |
+| Category           | Details                                                                                  |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| Operating System   | Ubuntu 24.04                                                                             |
+| Hardware Platforms | 4th Gen Intel® Xeon® Scalable processors<br>5th Gen Intel® Xeon® Scalable processors |
+| Kubernetes Version | 1.29+                                                                                    |
 
 This guide assumes that:
 
 1. you are familiar with the regular deployment of the GenAIExamples using [Helm Charts](../README.md),
 2. you have prepared a server with 4th Gen Intel® Xeon® Scalable Processor or later,
 3. you have a single-node Kubernetes cluster already set up on the server for the regular deployment of the GenAIExamples.
-
 
 ## Getting Started
 
@@ -40,6 +38,7 @@ Follow the below steps on the server node with Intel Xeon Processor:
    ```
 
    The output should show the Intel TDX module version and initialization status:
+
    ```text
    virt/tdx: TDX module: attributes 0x0, vendor_id 0x8086, major_version 1, minor_version 5, build_date 20240129, build_num 698
    (...)
@@ -60,13 +59,11 @@ Follow the below steps on the server node with Intel Xeon Processor:
    kubectl wait --for=condition=Ready node --all --timeout=2m
    ```
 
-
 ### Prepare the cluster
 
 Follow the steps below on the Kubernetes cluster:
 
 1. [Install Confidential Containers Operator](https://cc-enabling.trustedservices.intel.com/intel-confidential-containers-guide/02/infrastructure_setup/#install-confidential-containers-operator)
-
 
 ### Deploy the ChatQnA
 
@@ -92,12 +89,12 @@ Follow the steps below to deploy ChatQnA:
       --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=8Gi \
       --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=8Gi
    ```
-   
+
    > [!NOTE]
    > The `resources.limits` and `resources.requests` needs to be set when the Intel TDX is used.
-   > 
+   >
    > The above example sets the memory limits and requests to 4Gi for each microservice.
-   > 
+   >
    > By default, each Kubernetes pod will be assigned `1` CPU and `2Gi` of memory, but half of it will be used for filesystem.
-   > 
+   >
    > If the pods fail to start due to lack of disk space, increase the memory limits.
