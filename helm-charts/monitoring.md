@@ -47,7 +47,7 @@ or in its `values.yaml` file. Otherwise Prometheus ignores the installed
 
 ## Install
 
-Install Helm chart with `global.monitoring:true` option.
+Install Helm chart with `--set global.monitoring=true` option.
 
 ## Verify
 
@@ -91,5 +91,5 @@ $ curl --no-progress-meter $prom_url/api/v1/query? \
   --data-urlencode 'query=tgi_queue_size{service="'$chart'-tgi"}' | jq
 ```
 
-**NOTE**: services provide metrics only after they've processed their first request.
-And ChatQnA uses (TEI) reranking service only after query context data has been uploaded!
+**NOTE**: inferencing services provide metrics only after they've processed their first request.
+And reranking service only after query context data has been uploaded!
