@@ -59,12 +59,5 @@ dependencies:
   - name: nginx
     version: 0-latest
     repository: "file://../common/nginx"
-  - name: common-library
-    version: 0-latest
-    repository: "file://../common-library"
-  - name: tdx
-    version: 0-latest
-    repository: "file://../tdx"
-    condition: tdxEnabled
 version: 0-latest
 appVersion: "v1.0"

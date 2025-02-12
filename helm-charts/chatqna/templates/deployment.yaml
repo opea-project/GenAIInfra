@@ -16,12 +16,14 @@ spec:
       app: {{ include "chatqna.fullname" . }}
   template:
     metadata:
-      {{- include "common.annotations" . | nindent 6 }}
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       labels:
         {{- include "chatqna.selectorLabels" . | nindent 8 }}
         app: {{ include "chatqna.fullname" . }}
     spec:
-      {{- include "common.runtimeClassName" . | nindent 6 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
