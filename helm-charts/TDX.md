@@ -87,13 +87,11 @@ Follow the steps below to deploy ChatQnA:
       --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=8Gi \
       --set tei.tdxEnabled=true --set tei.resources.limits.memory=8Gi \
       --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=8Gi \
-      --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=48Gi
+      --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=80Gi
    ```
 
 > [!NOTE]
-> The `resources.limits` and `resources.requests` needs to be set when the Intel TDX is used.
->
-> The above example sets the memory limits and requests to 4Gi for each microservice.
+> The `resources.limits` needs to be set when the Intel TDX is used.
 >
 > By default, each Kubernetes pod will be assigned `1` CPU and `2Gi` of memory, but half of it will be used for filesystem.
 >
