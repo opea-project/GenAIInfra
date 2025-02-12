@@ -26,9 +26,9 @@ dependencies:
     repository: https://qdrant.github.io/qdrant-helm
     condition: qdrant.enabled
   - name: common-library
-    version: 1.2.0
+    version: 0-latest
     repository: "file://../common-library"
   - name: tdx
-    version: 1.2.0
+    version: 0-latest
     repository: "file://../tdx"
     condition: tdxEnabled
