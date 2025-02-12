@@ -18,7 +18,8 @@ spec:
         - |
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
-            curl http://{{ include "ollama.fullname" . }}/api/generate \
+            echo 'POST http://{{ include "ollama.fullname" . }}:{{ .Values.service.port }}/api/generate';
+            curl http://{{ include "ollama.fullname" . }}:{{ .Values.service.port }}/api/generate \
             -X POST \
             -d '{"model": "{{ .Values.LLM_MODEL_ID }}","prompt": "What is Deep Learning?","options":{"num_predict":20}}' && break;
             curlcode=?
