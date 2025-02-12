@@ -20,6 +20,7 @@ spec:
           for ((i=1; i<=max_retry; i++)); do
             echo 'POST http://{{ include "ollama.fullname" . }}:{{ .Values.service.port }}/api/generate';
             curl http://{{ include "ollama.fullname" . }}:{{ .Values.service.port }}/api/generate \
+            -sS --fail-with-body \
             -X POST \
             -d '{"model": "{{ .Values.LLM_MODEL_ID }}","prompt": "What is Deep Learning?","options":{"num_predict":20}}' && break;
             curlcode=?
