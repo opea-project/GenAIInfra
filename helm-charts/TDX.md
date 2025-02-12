@@ -69,9 +69,11 @@ Follow the steps below on the Kubernetes cluster:
 
 Follow the steps below to deploy ChatQnA:
 
-1. Update the dependencies:
+1. Set the environment variables and update the dependencies:
 
    ```
+   export HFTOKEN="insert-your-huggingface-token-here"
+   export MODELNAME="Intel/neural-chat-7b-v3-3"
    export myrelease=chatqna
    export chartname=chatqna
    ./update_dependency.sh
@@ -82,7 +84,7 @@ Follow the steps below to deploy ChatQnA:
 
    ```
    helm install $myrelease $chartname \
-      --set global.HUGGINGFACEHUB_API_TOKEN="insert-your-huggingface-token-here" \
+      --set global.HUGGINGFACEHUB_API_TOKEN="${HFTOKEN}" --set vllm.LLM_MODEL_ID="${MODELNAME}" \
       --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=8Gi \
       --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=8Gi \
       --set tei.tdxEnabled=true --set tei.resources.limits.memory=8Gi \

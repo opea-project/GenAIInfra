@@ -36,6 +36,8 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
 # To include guardrail component in chatqna on Gaudi with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
+# To run chatqna with Intel TDX feature
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vllm.LLM_MODEL_ID=${MODELNAME} --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=8Gi --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=8Gi --set tei.tdxEnabled=true --set tei.resources.limits.memory=8Gi --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=8Gi --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=80Gi
 ```
 
 ### IMPORTANT NOTE
