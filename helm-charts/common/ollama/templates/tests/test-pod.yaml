@@ -23,7 +23,7 @@ spec:
             -sS --fail-with-body \
             -X POST \
             -d '{"model": "{{ .Values.LLM_MODEL_ID }}","prompt": "What is Deep Learning?","options":{"num_predict":20}}' && break;
-            curlcode=?
+            curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
