@@ -87,7 +87,7 @@ Follow the steps below to deploy ChatQnA:
       --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=8Gi \
       --set tei.tdxEnabled=true --set tei.resources.limits.memory=8Gi \
       --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=8Gi \
-      --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=8Gi
+      --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=48Gi
    ```
 
 > [!NOTE]
