@@ -56,6 +56,8 @@ tolerations: []
 
 affinity: {}
 
+tdxEnabled: false
+
 # This is just to avoid Helm errors when HPA is NOT used
 # (use hpa-values.yaml files to actually enable HPA).
 autoscaling:
