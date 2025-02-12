@@ -54,7 +54,7 @@ Follow the below steps on the server node with Intel Xeon Processor:
    echo "runtimeRequestTimeout: 30m" | sudo tee -a /etc/kubernetes/kubelet-config.yaml > /dev/null 2>&1
    # Vanilla Kubernetes installation
    sudo sed -i 's/runtimeRequestTimeout: .*/runtimeRequestTimeout: 30m/' /var/lib/kubelet/config.yaml > /dev/null 2>&1
-   # Wait for the node to be ready
+   # Restart kubelet and wait for the node to be ready
    sudo systemctl daemon-reload && sudo systemctl restart kubelet
    kubectl wait --for=condition=Ready node --all --timeout=2m
    ```
@@ -90,11 +90,11 @@ Follow the steps below to deploy ChatQnA:
       --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=8Gi
    ```
 
-   > [!NOTE]
-   > The `resources.limits` and `resources.requests` needs to be set when the Intel TDX is used.
-   >
-   > The above example sets the memory limits and requests to 4Gi for each microservice.
-   >
-   > By default, each Kubernetes pod will be assigned `1` CPU and `2Gi` of memory, but half of it will be used for filesystem.
-   >
-   > If the pods fail to start due to lack of disk space, increase the memory limits.
+> [!NOTE]
+> The `resources.limits` and `resources.requests` needs to be set when the Intel TDX is used.
+>
+> The above example sets the memory limits and requests to 4Gi for each microservice.
+>
+> By default, each Kubernetes pod will be assigned `1` CPU and `2Gi` of memory, but half of it will be used for filesystem.
+>
+> If the pods fail to start due to lack of disk space, increase the memory limits.
