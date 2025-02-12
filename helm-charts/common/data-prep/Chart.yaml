@@ -21,3 +21,10 @@ dependencies:
     version: 4.2.12
     repository: https://zilliztech.github.io/milvus-helm/
     condition: milvus.enabled
+  - name: common-library
+    version: 0-latest
+    repository: "file://../common-library"
+  - name: tdx
+    version: 0-latest
+    repository: "file://../tdx"
+    condition: tdxEnabled

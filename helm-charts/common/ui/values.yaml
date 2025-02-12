@@ -95,6 +95,8 @@ tolerations: []
 
 affinity: {}
 
+tdxEnabled: false
+
 # chatQnA backend service URL, default to Mega backend service
 BACKEND_SERVICE_ENDPOINT: "/v1/chatqna"
 

@@ -6,4 +6,12 @@ appVersion: "1.1"
 description: A Helm chart for Kubernetes
 name: nginx
 type: application
+dependencies:
+  - name: common-library
+    version: 0-latest
+    repository: "file://../common-library"
+  - name: tdx
+    version: 0-latest
+    repository: "file://../tdx"
+    condition: tdxEnabled
 version: 0-latest
