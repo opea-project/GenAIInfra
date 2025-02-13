@@ -48,6 +48,9 @@ spec:
               {{- else if eq "MILVUS" .Values.DATAPREP_BACKEND }}
               TESTHOST=$(MILVUS_HOST);
               TESTPORT=$(MILVUS_PORT);
+              {{- else if eq "QDRANT" .Values.DATAPREP_BACKEND }}
+              TESTHOST=$(QDRANT_HOST);
+              TESTPORT=$(QDRANT_PORT);
               {{- end }}
               wait_timeout={{ .Values.waitTimeout | default 1 }};
               total_timeout={{ .Values.retryTimeoutSeconds | default 60 }};
