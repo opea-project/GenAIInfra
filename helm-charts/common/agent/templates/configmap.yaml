@@ -58,6 +58,7 @@ data:
   recursion_limit: {{ .Values.recursion_limit | quote }}
   llm_engine: {{ .Values.llm_engine | quote }}
   strategy: {{ .Values.strategy | quote }}
+  with_memory: {{ .Values.with_memory |quote }}
   use_hints: {{ .Values.use_hints | quote }}
   max_new_tokens: {{ .Values.max_new_tokens | quote }}
   {{- if .Values.OPENAI_API_KEY }}

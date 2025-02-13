@@ -49,11 +49,7 @@ spec:
               containerPort: 9090
               protocol: TCP
           volumeMounts:
-            {{- if .Values.DBPath }}
-            - mountPath: /home/user/chinook-db
-              name: dbpath
-            {{- end }}
-            {{- if .Values.toolPath }}
+            {{- if or .Values.toolPVC .Values.toolHostPath }}
             - mountPath: /home/user/tools
               name: tool
             {{- end }}
@@ -74,16 +70,14 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        {{- if .Values.DBPath }}
-        - name: dbpath
-          hostPath:
-            path: {{ .Values.DBPath }}
-            type: Directory
-        {{- end }}
-        {{- if .Values.toolPath }}
+        {{- if .Values.toolPVC }}
+        - name: tool
+          persistentVolumeClaim:
+            claimName: {{ .Values.toolPVC }}
+        {{- else if .Values.toolHostPath }}
         - name: tool
           hostPath:
-            path: {{ .Values.toolPath }}
+            path: {{ .Values.toolHostPath }}
             type: Directory
         {{- end }}
         - name: tmp
