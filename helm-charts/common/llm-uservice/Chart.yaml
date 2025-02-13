@@ -17,10 +17,6 @@ dependencies:
     version: 0-latest
     repository: file://../vllm
     condition: vllm.enabled
-  - name: common-library
+  - name: commonlibrary
     version: 0-latest
-    repository: "file://../common-library"
-  - name: tdx
-    version: 0-latest
-    repository: "file://../tdx"
-    condition: tdxEnabled
+    repository: "file://../commonlibrary"

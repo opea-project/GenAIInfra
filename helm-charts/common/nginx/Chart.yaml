@@ -7,11 +7,7 @@ description: A Helm chart for Kubernetes
 name: nginx
 type: application
 dependencies:
-  - name: common-library
+  - name: commonlibrary
     version: 0-latest
-    repository: "file://../common-library"
-  - name: tdx
-    version: 0-latest
-    repository: "file://../tdx"
-    condition: tdxEnabled
+    repository: "file://../commonlibrary"
 version: 0-latest
