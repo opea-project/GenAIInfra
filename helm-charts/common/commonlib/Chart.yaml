@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
-name: commonlibrary
+name: commonlib
 description: A Helm chart for the common templates
 type: library
 version: 0-latest

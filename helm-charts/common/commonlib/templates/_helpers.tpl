@@ -4,7 +4,7 @@
   {{- $annotations = merge $annotations . -}}
 {{- end }}
 {{- if .Values.tdxEnabled }}
-    {{- $annotations = merge $annotations .Values.commonlibrary.tdx.annotations -}}
+    {{- $annotations = merge $annotations .Values.commonlib.tdx.annotations -}}
 {{- end }}
 {{- if gt (len $annotations) 0 -}}
 annotations:
@@ -14,6 +14,6 @@ annotations:
 
 {{- define "common.runtimeClassName" -}}
 {{- if .Values.tdxEnabled }}
-runtimeClassName: {{ .Values.commonlibrary.tdx.runtimeClassName }}
+runtimeClassName: {{ .Values.commonlib.tdx.runtimeClassName }}
 {{- end }}
 {{- end }}

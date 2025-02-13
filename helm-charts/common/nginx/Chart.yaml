@@ -7,7 +7,7 @@ description: A Helm chart for Kubernetes
 name: nginx
 type: application
 dependencies:
-  - name: commonlibrary
+  - name: commonlib
     version: 0-latest
-    repository: "file://../commonlibrary"
+    repository: "file://../commonlib"
 version: 0-latest
