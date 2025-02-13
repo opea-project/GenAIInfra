@@ -42,7 +42,7 @@ jobs:
           merged_commit=$(git log -1 --format='%H')
           e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
           grep "^$CHARTS_DIR/" | \
-          grep -vE 'README.md|CI.md|common|*.sh' | \
+          grep -vE 'valuefiles.yaml|common|*.md|*.sh' | \
           cut -d'/' -f2 | sort -u )
           common_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
           grep "^$CHARTS_DIR/common" | \
