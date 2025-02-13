@@ -20,13 +20,13 @@ spec:
           # Ingest data
           cd /mnt/tools
           pip install requests tqdm
-          ./ingest_data.sh {{ include "agentqna.fullname" (index .Subcharts "data-prep") }}
+          python3 index_data.py --filedir /mnt/tools --filename test_docs_music.jsonl --host_ip {{ include "agentqna.fullname" (index .Subcharts "data-prep") }}
           # Test ragagent
           max_retry=10;
           for ((i=1; i<=max_retry; i++)); do
             curl http://{{ include "agentqna.fullname" (index .Subcharts "ragagent") }}:{{ .Values.ragagent.service.port }}/v1/chat/completions -sS --fail-with-body \
             -X POST \
-            -d '{"messages": "Tell me about Michael Jackson song Thriller"}' \
+            -d '{"messages": "Tell me something about Thriller"}' \
             -H 'Content-Type: application/json' && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
