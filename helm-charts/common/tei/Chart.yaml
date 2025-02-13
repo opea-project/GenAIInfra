@@ -6,13 +6,9 @@ name: tei
 description: The Helm chart for HuggingFace Text Embedding Inference Server
 type: application
 dependencies:
-  - name: common-library
+  - name: commonlibrary
     version: 0-latest
-    repository: "file://../common-library"
-  - name: tdx
-    version: 0-latest
-    repository: "file://../tdx"
-    condition: tdxEnabled
+    repository: "file://../commonlibrary"
 version: 0-latest
 # The HF TEI version
 appVersion: "cpu-1.5"

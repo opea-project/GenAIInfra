@@ -13,10 +13,6 @@ dependencies:
     version: 0-latest
     repository: file://../teirerank
     condition: teirerank.enabled
-  - name: common-library
+  - name: commonlibrary
     version: 0-latest
-    repository: "file://../common-library"
-  - name: tdx
-    version: 0-latest
-    repository: "file://../tdx"
-    condition: tdxEnabled
+    repository: "file://../commonlibrary"

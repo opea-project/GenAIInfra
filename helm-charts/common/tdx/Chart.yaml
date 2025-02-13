@@ -1,9 +1,0 @@
-# Copyright (C) 2025 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
-
-apiVersion: v2
-name: tdx
-description: A Helm chart for the TDX feature
-type: library
-version: 0-latest
-appVersion: "1.5"
