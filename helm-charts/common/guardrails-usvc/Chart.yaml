@@ -13,3 +13,6 @@ dependencies:
     alias: tgi-guardrails
     repository: file://../tgi
     condition: tgi-guardrails.enabled
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"

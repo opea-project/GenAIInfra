@@ -1,0 +1,8 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+tdx:
+  runtimeClassName: kata-qemu-tdx
+  annotations:
+    io.containerd.cri.runtime-handler: "kata-qemu-tdx"
+    io.katacontainers.config.runtime.create_container_timeout: "1800"

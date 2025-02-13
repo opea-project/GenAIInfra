@@ -5,6 +5,10 @@ apiVersion: v2
 name: tgi
 description: The Helm chart for HuggingFace Text Generation Inference Server
 type: application
+dependencies:
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"
 version: 0-latest
 # The HF TGI version
 appVersion: "2.1.0"
