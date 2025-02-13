@@ -17,6 +17,6 @@ dependencies:
     version: 0-latest
     repository: file://../vllm
     condition: vllm.enabled
-  - name: commonlibrary
+  - name: commonlib
     version: 0-latest
-    repository: "file://../commonlibrary"
+    repository: "file://../commonlib"

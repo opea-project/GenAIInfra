@@ -6,8 +6,8 @@ name: ui
 description: Common Helm chart for the UI for various opea workload
 type: application
 dependencies:
-  - name: commonlibrary
+  - name: commonlib
     version: 0-latest
-    repository: "file://../commonlibrary"
+    repository: "file://../commonlib"
 version: 0-latest
 appVersion: "v1.0"
