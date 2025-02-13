@@ -41,6 +41,7 @@ jobs:
           echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin
           pushd $CHARTS_DIR/common
           for chart in ${common_charts}; do
+            if [ ! -d $chart ]; then continue; fi
             echo "Updating $chart"
             helm dependency update ${chart}
             helm package $chart
@@ -50,12 +51,13 @@ jobs:
           # Update Examples
           e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
           grep "^$CHARTS_DIR" | \
-          grep -vE 'README.md|valuefiles.yaml|common|*.sh' | \
+          grep -vE 'valuefiles.yaml|common|*.md|*.sh' | \
           cut -d'/' -f2 | sort -u )
           echo "Charts to be updated: $e2e_charts"
           echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin
           pushd $CHARTS_DIR
           for chart in ${e2e_charts}; do
+            if [ ! -d $chart ]; then continue; fi
             echo "Updating $chart"
             helm dependency update ${chart}
             helm package $chart
