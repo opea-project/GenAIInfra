@@ -85,10 +85,13 @@ Follow the steps below to deploy ChatQnA:
    ```
    helm install $myrelease $chartname \
       --set global.HUGGINGFACEHUB_API_TOKEN="${HFTOKEN}" --set vllm.LLM_MODEL_ID="${MODELNAME}" \
-      --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=8Gi \
-      --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=8Gi \
-      --set tei.tdxEnabled=true --set tei.resources.limits.memory=8Gi \
-      --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=8Gi \
+      --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=4Gi \
+      --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=7Gi \
+      --set tei.tdxEnabled=true --set tei.resources.limits.memory=4Gi \
+      --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=6Gi \
+      --set nginx.tdxEnabled=true \
+      --set chatqna-ui.tdxEnabled=true --set chatqna-ui.resources.limits.memory=2Gi \
+      --set data-prep.tdxEnabled=true --set data-prep.resources.limits.memory=11Gi \
       --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=80Gi
    ```
 
