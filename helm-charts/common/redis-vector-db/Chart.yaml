@@ -5,5 +5,9 @@ apiVersion: v2
 name: redis-vector-db
 description: The Helm chart for Redis Vector DB
 type: application
+dependencies:
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"
 version: 0-latest
 appVersion: "7.2.0-v9"
