@@ -60,7 +60,7 @@ Open another terminal and run the following command to verify the service if wor
 # for llm-textgen service
 curl http://localhost:9000/v1/chat/completions \
   -X POST \
-  -d '{"model": "${LLM_MODEL_ID}", "messages": "What is Deep Learning?", "max_tokens":17}' \
+  -d '{"model": "'${LLM_MODEL_ID}'", "messages": "What is Deep Learning?", "max_tokens":17}' \
   -H 'Content-Type: application/json'
 
 # for llm-docsum service
