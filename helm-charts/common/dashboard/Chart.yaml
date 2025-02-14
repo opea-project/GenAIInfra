@@ -1,0 +1,9 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: dashboard
+description: Grafana dashboard(s) Helm chart for OPEA application(s)
+type: application
+version: 0-latest
+appVersion: "1.0"

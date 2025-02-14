@@ -115,6 +115,9 @@ chatqna-ui:
     tag: "latest"
   containerPort: "5173"
 
+dashboard:
+  prefix: "OPEA ChatQnA"
+
 global:
   http_proxy: ""
   https_proxy: ""
@@ -129,8 +132,11 @@ global:
   # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
 
-  # Install Prometheus serviceMonitors for service components
+  # Prometheus monitoring + Grafana dashboard(s) for service components?
   monitoring: false
+
+  # Prometheus/Grafana namespace for Dashboard installation
+  prometheusNamespace: monitoring
 
   # Prometheus Helm install release name needed for serviceMonitors
   prometheusRelease: prometheus-stack
