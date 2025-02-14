@@ -21,11 +21,17 @@ INDEX_NAME: "rag_redis"
 KEY_INDEX_NAME: "file-keys"
 SEARCH_BATCH_SIZE: 10
 
-# Uncomment and set the following settings to use Milvus as vector-DB backend
+# Uncomment and set the following 4 settings to use Milvus as vector-DB backend
 # DATAPREP_BACKEND: "MILVUS"
-MILVUS_HOST: ""
-MILVUS_PORT: 19530
-COLLECTION_NAME: "rag_milvus"
+# MILVUS_HOST: ""
+# MILVUS_PORT: 19530
+# COLLECTION_NAME: "rag_milvus"
+
+# Uncomment and set the following 4 settings to use Qdrant as vector-DB backend
+# DATAPREP_BACKEND: "QDRANT"
+# QDRANT_HOST: ""
+# QDRANT_PORT: 6333
+# COLLECTION_NAME: "rag_qdrant"
 
 # data-prep can do embedding locally or talk to remote TEI service to do embedding.
 # TEI_EMBEDDING_ENDPOINT takes precedence over LOCAL_EMBEDDING_MODEL.
@@ -136,4 +142,6 @@ tei:
 milvus:
   enabled: false
 redis-vector-db:
+  enabled: false
+qdrant:
   enabled: false

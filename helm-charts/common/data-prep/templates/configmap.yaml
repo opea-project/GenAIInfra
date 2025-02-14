@@ -38,6 +38,16 @@ data:
   MILVUS_PORT: {{ .Values.MILVUS_PORT | quote }}
   COLLECTION_NAME: {{ .Values.COLLECTION_NAME | quote }}
   LOCAL_EMBEDDING_MODEL: {{ .Values.LOCAL_EMBEDDING_MODEL | default "" | quote }}
+  {{- else if eq "QDRANT" .Values.DATAPREP_BACKEND }}
+  DATAPREP_COMPONENT_NAME: "OPEA_DATAPREP_QDRANT"
+  {{- if .Values.QDRANT_HOST }}
+  QDRANT_HOST: {{ tpl .Values.QDRANT_HOST . | quote }}
+  {{- else }}
+  QDRANT_HOST: "{{ .Release.Name }}-qdrant"
+  {{- end }}
+  QDRANT_PORT: {{ .Values.QDRANT_PORT | quote }}
+  COLLECTION_NAME: {{ .Values.COLLECTION_NAME | quote }}
+  EMBED_MODEL: {{ .Values.LOCAL_EMBEDDING_MODEL | default "" | quote }}
   {{- else }}
   {{- cat "Invalid DATAPREP_BACKEND:" .Values.DATAPREP_BACKEND | fail }}
   {{- end }}

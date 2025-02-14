@@ -36,6 +36,16 @@ data:
   MILVUS_PORT: {{ .Values.MILVUS_PORT | quote }}
   COLLECTION_NAME: {{ .Values.COLLECTION_NAME | quote }}
   LOCAL_EMBEDDING_MODEL: {{ .Values.LOCAL_EMBEDDING_MODEL | quote }}
+  {{- else if eq "QDRANT" .Values.RETRIEVER_BACKEND }}
+  RETRIEVER_COMPONENT_NAME: "OPEA_RETRIEVER_QDRANT"
+  {{- if .Values.QDRANT_HOST }}
+  QDRANT_HOST: {{ tpl .Values.QDRANT_HOST . | quote }}
+  {{- else }}
+  QDRANT_HOST: "{{ .Release.Name }}-qdrant"
+  {{- end }}
+  QDRANT_PORT: {{ .Values.QDRANT_PORT | quote }}
+  QDRANT_EMBED_DIMENSION: {{ .Values.QDRANT_EMBED_DIMENSION | quote }}
+  QDRANT_INDEX_NAME: {{ .Values.QDRANT_INDEX_NAME | quote }}
   {{- else }}
   {{- cat "Invalid RETRIEVER_BACKEND:" .Values.RETRIEVER_BACKEND | fail }}
   {{- end }}
