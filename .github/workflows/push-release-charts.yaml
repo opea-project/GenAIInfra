@@ -32,35 +32,27 @@ jobs:
           fi
           base_commit=$(git rev-parse HEAD~1) # push event
           merged_commit=$(git log -1 --format='%H')
-          # Update components
-          common_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
-          grep "^$CHARTS_DIR/common" | \
-          grep -vE 'README.md|*.sh' | \
-          cut -d'/' -f3 | sort -u )
-          echo "Charts to be updated: $common_charts"
-          echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin
-          pushd $CHARTS_DIR/common
-          for chart in ${common_charts}; do
-            if [ ! -d $chart ]; then continue; fi
-            echo "Updating $chart"
-            helm dependency update ${chart}
-            helm package $chart
-            helm push ${chart}-0-latest.tgz oci://ghcr.io/opea-project/charts
-          done
-          popd
-          # Update Examples
-          e2e_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
-          grep "^$CHARTS_DIR" | \
-          grep -vE 'valuefiles.yaml|common|*.md|*.sh' | \
-          cut -d'/' -f2 | sort -u )
-          echo "Charts to be updated: $e2e_charts"
-          echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin
-          pushd $CHARTS_DIR
-          for chart in ${e2e_charts}; do
-            if [ ! -d $chart ]; then continue; fi
-            echo "Updating $chart"
-            helm dependency update ${chart}
-            helm package $chart
-            helm push ${chart}-0-latest.tgz oci://ghcr.io/opea-project/charts
-          done
-          popd
+          # args: <parent-dir|include-string> <path-cut-depth> <exclude-pattern>
+          update_charts () {
+            dir="$1"
+            depth=$2
+            exclude="$3"
+            common_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
+            grep "^$dir" | grep -vE "$exclude" | \
+            cut -d'/' -f$depth | sort -u )
+            echo "Charts to be updated: $common_charts"
+            echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin
+            pushd $dir
+            for chart in ${common_charts}; do
+              if [ ! -d $chart ]; then continue; fi
+              echo "Updating $chart"
+              helm dependency update ${chart}
+              helm package $chart
+              helm push ${chart}-0-latest.tgz oci://ghcr.io/opea-project/charts
+            done
+            popd
+          }
+          # Update components: exclude helm chart docs
+          update_charts "$CHARTS_DIR/common/" 3 '\.md$'
+          # Update Examples: exclude non-helm subdirs, files not in subdirs & docs
+          update_charts "$CHARTS_DIR" 2 "$CHARTS_DIR"'/(common/|assets/|[^/]*$|\.md)'
