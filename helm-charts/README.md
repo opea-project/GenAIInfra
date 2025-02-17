@@ -84,6 +84,10 @@ There are global options (which should be shared across all components of a work
 | global     | monitoring                      | Enable monitoring for (ChatQnA) service components. See [Pre-conditions](monitoring.md#pre-conditions) before enabling!                                                                                                                                                        |
 | tgi        | LLM_MODEL_ID                    | The model id you want to use for tgi server. Default "Intel/neural-chat-7b-v3-3".                                                                                                                                                                                              |
 
+## Deploy the Helm Charts on Intel® Xeon® Processors with Intel® Trust Domain Extensions (Intel® TDX)
+
+See [TDX instructions](TDX.md) on how to deploy the Helm Charts on Intel® Xeon® processors with Intel® Trust Domain Extensions (Intel® TDX).
+
 ## Using HPA (autoscaling)
 
 See [HPA instructions](HPA.md) on how to enable horizontal pod autoscaling for service components, based on their usage metrics.

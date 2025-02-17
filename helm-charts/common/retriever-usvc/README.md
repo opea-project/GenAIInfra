@@ -12,6 +12,8 @@ Helm chart for deploying OPEA retriever-usvc microservice.
 
 - Milvus DB: please refer to [milvus-helm](https://github.com/zilliztech/milvus-helm/tree/milvus-4.2.12) for more information.
 
+- Qdrant DB: please refer to [qdrant-helm](https://github.com/qdrant/qdrant-helm/tree/qdrant-1.13.1/charts/qdrant) for more information.
+
 First, you need to install the `tei` helm chart and one of the vector DB service, i.e. `redis-vector-db` chart.
 
 After you've deployed dependency charts successfully, please run `kubectl get svc` to get the service endpoint URL respectively, i.e. `http://tei:80`, `redis://redis-vector-db:6379`.
@@ -33,6 +35,11 @@ helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPO
 # export RETRIEVER_BACKEND="MILVUS"
 # export DB_HOST="milvus"
 # helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set MILVUS_HOST=${DB_HOST}
+
+# Install retriever-usvc with Qdrant DB backend
+# export RETRIEVER_BACKEND="QDRANT"
+# export DB_HOST="qdrant"
+# helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set QDRANT_HOST=${DB_HOST}
 ```
 
 ## Verify
@@ -57,9 +64,10 @@ curl http://localhost:7000/v1/retrieval  \
 | ------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
 | global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                         |
 | service.port                    | string | `"7000"`  |                                                                                                         |
-| RETRIEVER_BACKEND               | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS"                                                      |
+| RETRIEVER_BACKEND               | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT"                                            |
 | REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration    |
 | MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration |
+| QDRANT_HOST                     | string | `""`      | Qdrant service URL host, only valid for Qdrant, please see `values.yaml` for other Qdrant configuration |
 | TEI_EMBEDDING_ENDPOINT          | string | `""`      |                                                                                                         |
 | global.monitoring               | bool   | `false`   |                                                                                                         |
 

@@ -26,6 +26,13 @@ MILVUS_HOST: ""
 MILVUS_PORT: 19530
 COLLECTION_NAME: "rag_milvus"
 
+# Uncomment and set the following settings to use Qdrant as vector-DB backend
+# RETRIEVER_BACKEND: "QDRANT"
+QDRANT_HOST: ""
+QDRANT_PORT: 6333
+QDRANT_EMBED_DIMENSION: 768
+QDRANT_INDEX_NAME: "rag_qdrant"
+
 # retriever-usvc can do embedding locally or talk to remote TEI service to do embedding.
 # TEI_EMBEDDING_ENDPOINT takes precedence over LOCAL_EMBEDDING_MODEL.
 # text embedding inference service URL, e.g. http://<service-name>:<port>
@@ -106,6 +113,8 @@ tolerations: []
 
 affinity: {}
 
+tdxEnabled: false
+
 global:
   http_proxy: ""
   https_proxy: ""
@@ -128,4 +137,6 @@ tei:
 milvus:
   enabled: false
 redis-vector-db:
+  enabled: false
+qdrant:
   enabled: false

@@ -14,13 +14,11 @@ spec:
       {{- include "data-prep.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "common.annotations" . | nindent 6 }}
       labels:
         {{- include "data-prep.selectorLabels" . | nindent 8 }}
     spec:
+      {{- include "common.runtimeClassName" . | indent 6 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -48,6 +46,9 @@ spec:
               {{- else if eq "MILVUS" .Values.DATAPREP_BACKEND }}
               TESTHOST=$(MILVUS_HOST);
               TESTPORT=$(MILVUS_PORT);
+              {{- else if eq "QDRANT" .Values.DATAPREP_BACKEND }}
+              TESTHOST=$(QDRANT_HOST);
+              TESTPORT=$(QDRANT_PORT);
               {{- end }}
               wait_timeout={{ .Values.waitTimeout | default 1 }};
               total_timeout={{ .Values.retryTimeoutSeconds | default 60 }};

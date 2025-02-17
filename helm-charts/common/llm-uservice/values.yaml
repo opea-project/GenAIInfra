@@ -111,6 +111,8 @@ tolerations: []
 
 affinity: {}
 
+tdxEnabled: false
+
 global:
   http_proxy: ""
   https_proxy: ""

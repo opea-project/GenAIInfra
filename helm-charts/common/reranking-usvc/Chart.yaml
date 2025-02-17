@@ -13,3 +13,6 @@ dependencies:
     version: 0-latest
     repository: file://../teirerank
     condition: teirerank.enabled
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"
