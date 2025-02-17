@@ -72,11 +72,19 @@ vllm:
   shmSize: 128Gi
   VLLM_TORCH_PROFILER_DIR: "/tmp/vllm_profile"
 data-prep:
+  # the following are for redis-vector-db
   DATAPREP_BACKEND: "REDIS"
   INDEX_NAME: "rag-redis"
+  # the following are for qdrant db
+  COLLECTION_NAME: "rag-qdrant"
+  QDRANT_PORT: 6333
 retriever-usvc:
+  # the following are for redis-vector-db
   RETRIEVER_BACKEND: "REDIS"
   INDEX_NAME: "rag-redis"
+  # the following are for qdrant db
+  QDRANT_INDEX_NAME: "rag-qdrant"
+  QDRANT_PORT: 6333
 
 
 # disable guardrails by default
@@ -89,9 +97,19 @@ tgi-guardrails:
 # reranking
 teirerank:
   enabled: true
-# vector db choice, redis by default.
+
+# vector db choice
+# redis by default.
 redis-vector-db:
   enabled: true
+# qdrant, disabled by default
+qdrant:
+  enabled: false
+  tag: "v1.13.1"
+  config:
+    cluster:
+      enabled: false
+
 # Microservice layer, disabled by default
 llm-uservice:
   enabled: false
