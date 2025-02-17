@@ -17,3 +17,6 @@ dependencies:
     version: 0-latest
     repository: file://../mm-embedding
     condition: mm-embedding.enabled
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"

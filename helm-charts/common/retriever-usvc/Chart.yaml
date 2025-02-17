@@ -25,3 +25,6 @@ dependencies:
     version: 1.13.1
     repository: https://qdrant.github.io/qdrant-helm
     condition: qdrant.enabled
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"
