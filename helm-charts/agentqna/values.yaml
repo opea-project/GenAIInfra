@@ -123,9 +123,6 @@ tgi:
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
     tag: "2.3.1"
-  resources:
-    limits:
-      habana.ai/gaudi: 4
   LLM_MODEL_ID: "meta-llama/Meta-Llama-3.1-70B-Instruct"
   MAX_INPUT_LENGTH: 4096
   MAX_TOTAL_TOKENS: 8192
@@ -138,6 +135,9 @@ tgi:
   FLASH_ATTENTION_RECOMPUTE: true
   NUM_CARDS: 4
   SHARDED: true
+  resources:
+    limits:
+      habana.ai/gaudi: 4
 
 vllm:
   enabled: false
@@ -145,15 +145,15 @@ vllm:
   image:
     repository: opea/vllm-gaudi
     tag: "latest"
-  resources:
-    limits:
-      habana.ai/gaudi: 4
   LLM_MODEL_ID: "meta-llama/Meta-Llama-3.1-70B-Instruct"
   OMPI_MCA_btl_vader_single_copy_mechanism: none
   PT_HPU_ENABLE_LAZY_COLLECTIVES: true
   VLLM_SKIP_WARMUP: true
-  NUM_CARDS: 4
   extraCmdArgs: ["--max-seq_len-to-capture", "16384"]
+  NUM_CARDS: 4
+  resources:
+    limits:
+      habana.ai/gaudi: 4
 
 nginx:
   service:
