@@ -73,8 +73,9 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-# This section is for setting up autoscaling more information can be found here: https://kubernetes.io/docs/concepts/workloads/autoscaling/
-# Note: do not use (above) "replicaCount" with HPA (Chart ignores value=1 as it's k8s default)
+# Service autoscaling with HorizontalPodAutoscaler (HPA):
+# - Do not use "replicaCount" with HPA (value=1 is ignored as it's k8s default)
+# - https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
   enabled: false
   minReplicas: 1
