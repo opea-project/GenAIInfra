@@ -14,6 +14,8 @@ Helm chart for deploying OPEA retriever-usvc microservice.
 
 - Qdrant DB: please refer to [qdrant-helm](https://github.com/qdrant/qdrant-helm/tree/qdrant-1.13.1/charts/qdrant) for more information.
 
+- OpenSearch DB: please refer to [opensearch-helm](https://artifacthub.io/packages/helm/opensearch-project-helm-charts/opensearch) for more information.
+
 First, you need to install the `tei` helm chart and one of the vector DB service, i.e. `redis-vector-db` chart.
 
 After you've deployed dependency charts successfully, please run `kubectl get svc` to get the service endpoint URL respectively, i.e. `http://tei:80`, `redis://redis-vector-db:6379`.
@@ -23,7 +25,7 @@ To install `retriever-usvc` chart, run the following:
 ```console
 cd GenAIInfra/helm-charts/common/retriever-usvc
 helm dependency update
-export HFTOKEN="insert-your-huggingface-token-here"
+export HF_TOKEN="insert-your-huggingface-token-here"
 export TEI_EMBEDDING_ENDPOINT="http://tei"
 
 # Install retriever-usvc with Redis DB backend
@@ -40,6 +42,12 @@ helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPO
 # export RETRIEVER_BACKEND="QDRANT"
 # export DB_HOST="qdrant"
 # helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set QDRANT_HOST=${DB_HOST}
+
+# Install retriever-usvc with OpenSearch DB backend
+# export RETRIEVER_BACKEND="OPENSEARCH"
+# export DB_HOST="opensearch-cluster-master"
+# export OPENSEARCH_INITIAL_ADMIN_PASSWORD="insert-your-initial-admin-password"
+# helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set OPENSEARCH_HOST=${DB_HOST} --set OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD} --set "opensearch.extraEnvs[0].name=OPENSEARCH_INITIAL_ADMIN_PASSWORD,opensearch.extraEnvs[0].value=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" -f opensearch-values.yaml
 ```
 
 ## Verify
@@ -60,16 +68,17 @@ curl http://localhost:7000/v1/retrieval  \
 
 ## Values
 
-| Key                             | Type   | Default   | Description                                                                                             |
-| ------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                         |
-| service.port                    | string | `"7000"`  |                                                                                                         |
-| RETRIEVER_BACKEND               | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT"                                            |
-| REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration    |
-| MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration |
-| QDRANT_HOST                     | string | `""`      | Qdrant service URL host, only valid for Qdrant, please see `values.yaml` for other Qdrant configuration |
-| TEI_EMBEDDING_ENDPOINT          | string | `""`      |                                                                                                         |
-| global.monitoring               | bool   | `false`   |                                                                                                         |
+| Key                             | Type   | Default   | Description                                                                                                         |
+| ------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------------------- |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                                     |
+| service.port                    | string | `"7000"`  |                                                                                                                     |
+| RETRIEVER_BACKEND               | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT", "OPENSEARCH"                                          |
+| REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration                |
+| MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration             |
+| QDRANT_HOST                     | string | `""`      | Qdrant service URL host, only valid for Qdrant, please see `values.yaml` for other Qdrant configuration             |
+| OPENSEARCH_HOST                 | string | `""`      | OpenSearch service URL host, only valid for OpenSearch, please see `values.yaml` for other OpenSearch configuration |
+| TEI_EMBEDDING_ENDPOINT          | string | `""`      |                                                                                                                     |
+| global.monitoring               | bool   | `false`   |                                                                                                                     |
 
 ## Milvus support
 

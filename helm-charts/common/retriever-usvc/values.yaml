@@ -38,7 +38,7 @@ QDRANT_INDEX_NAME: "rag_qdrant"
 OPENSEARCH_HOST: ""
 OPENSEARCH_PORT: 9200
 OPENSEARCH_INITIAL_ADMIN_PASSWORD: ""
-OPENSEARCH_SSL: false
+OPENSEARCH_SSL: true
 OPENSEARCH_INDEX_NAME: "rag_opensearch"
 
 # retriever-usvc can do embedding locally or talk to remote TEI service to do embedding.
