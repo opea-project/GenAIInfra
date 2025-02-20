@@ -1,0 +1,24 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: opea/llm-textgen
+  tag: "latest"
+
+TEXTGEN_BACKEND: "BEDROCK"
+LLM_MODEL_ID: "anthropic.claude-3-5-sonnet-20240620-v1:0"
+
+bedrock:
+  BEDROCK_REGION: "us-east-1"
+  # Uncomment if using an IAM User
+  # AWS_ACCESS_KEY_ID: ""
+  # AWS_SECRET_ACCESS_KEY: ""
+
+serviceAccount:
+  create: true
+  automount: true
+
+tgi:
+  enabled: false
+vllm:
+  enabled: false

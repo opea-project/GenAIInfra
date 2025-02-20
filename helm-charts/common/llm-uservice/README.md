@@ -35,6 +35,18 @@ helm install llm-uservice . --set TEXTGEN_BACKEND="TGI" --set LLM_ENDPOINT=${LLM
 # install llm-textgen with vLLM backend
 # helm install llm-uservice . --set TEXTGEN_BACKEND="vLLM" --set LLM_ENDPOINT=${LLM_ENDPOINT} --set LLM_MODEL_ID=${LLM_MODEL_ID} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --wait
 
+# install llm-textgen with BEDROCK backend
+export LLM_MODEL_ID="insert-bedrock-model-id-here"
+
+# If you plan to use an IAM User to provide AWS access
+export AWS_ACCESS_KEY_ID="insert-your-aws-access-key-here"
+export AWS_SECRET_ACCESS_KEY="insert-your-aws-secret-key-here"
+helm install llm-uservice . --set TEXTGEN_BACKEND="BEDROCK" --set LLM_MODEL_ID=${LLM_MODEL_ID} --set bedrock.AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} --set bedrock.AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY} --wait
+
+# If you plan to use EKS Pod Identity or IAM Role for Service Account to provide AWS access
+export SERVICE_ACCOUNT_NAME="insert-service-account-name"
+helm install llm-uservice . --set TEXTGEN_BACKEND="BEDROCK" --set LLM_MODEL_ID=${LLM_MODEL_ID} --set bedrock.AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID} --set serviceAccount.create=true --set serviceAccount.name=${SERVICE_ACCOUNT_NAME} --wait
+
 # install llm-docsum with TGI backend
 # helm install llm-uservice . --set image.repository="opea/llm-docsum" --set DOCSUM_BACKEND="TGI" --set LLM_ENDPOINT=${LLM_ENDPOINT} --set LLM_MODEL_ID=${LLM_MODEL_ID} --set MAX_INPUT_TOKENS=2048 --set MAX_TOTAL_TOKENS=4096 --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --wait
 
@@ -60,7 +72,7 @@ Open another terminal and run the following command to verify the service if wor
 # for llm-textgen service
 curl http://localhost:9000/v1/chat/completions \
   -X POST \
-  -d d '{"model": "${LLM_MODEL_ID}", "messages": "What is Deep Learning?", "max_tokens":17}' \
+  -d '{"model": "'${LLM_MODEL_ID}'", "messages": "What is Deep Learning?", "max_tokens":17}' \
   -H 'Content-Type: application/json'
 
 # for llm-docsum service
@@ -78,13 +90,16 @@ curl http://localhost:9000/v1/faqgen \
 
 ## Values
 
-| Key                             | Type   | Default                       | Description                                                                      |
-| ------------------------------- | ------ | ----------------------------- | -------------------------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                          | Your own Hugging Face API token                                                  |
-| image.repository                | string | `"opea/llm-textgen"`          | one of "opea/llm-textgen", "opea/llm-docsum", "opea/llm-faqgen"                  |
-| LLM_ENDPOINT                    | string | `""`                          | backend inference service endpoint                                               |
-| LLM_MODEL_ID                    | string | `"Intel/neural-chat-7b-v3-3"` | model used by the inference backend                                              |
-| TEXTGEN_BACKEND                 | string | `"TGI"`                       | backend inference engine, only valid for llm-textgen image, one of "TGI", "vLLM" |
-| DOCSUM_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-docsum image, one of "TGI", "vLLM"  |
-| FAQGEN_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-faqgen image, one of "TGi", "vLLM"  |
-| global.monitoring               | bool   | `false`                       | Service usage metrics                                                            |
+| Key                             | Type   | Default                       | Description                                                                                                                       |
+| ------------------------------- | ------ | ----------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                          | Your own Hugging Face API token                                                                                                   |
+| image.repository                | string | `"opea/llm-textgen"`          | one of "opea/llm-textgen", "opea/llm-docsum", "opea/llm-faqgen"                                                                   |
+| LLM_ENDPOINT                    | string | `""`                          | backend inference service endpoint                                                                                                |
+| LLM_MODEL_ID                    | string | `"Intel/neural-chat-7b-v3-3"` | model used by the inference backend                                                                                               |
+| TEXTGEN_BACKEND                 | string | `"TGI"`                       | backend inference engine, only valid for llm-textgen image, one of "TGI", "vLLM", "BEDROCK"                                       |
+| DOCSUM_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-docsum image, one of "TGI", "vLLM"                                                   |
+| FAQGEN_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-faqgen image, one of "TGi", "vLLM"                                                   |
+| global.monitoring               | bool   | `false`                       | Service usage metrics                                                                                                             |
+| bedrock.BEDROCK_REGION          | string | `"us-east-1"`                 | The AWS Region to use when accessing the Bedrock service                                                                          |
+| bedrock.AWS_ACCESS_KEY_ID       | string | `""`                          | The AWS Access Key to use when authenticating with the Bedrock service. If set, bedrock.AWS_SECRET_ACCESS_KEY must also be set    |
+| bedrock.AWS_SECRET_ACCESS_KEY   | string | `""`                          | The AWS Secret Access Key to use when authenticating with the Bedrock service. If set, bedrock.AWS_ACCESS_KEY_ID must also be set |

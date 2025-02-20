@@ -10,7 +10,7 @@
 LOGFLAG: ""
 
 # settings for llm-textgen service
-# backend inference engine to use, i.e. TGI, vLLM
+# backend inference engine to use, i.e. TGI, vLLM, BEDROCK
 TEXTGEN_BACKEND: "TGI"
 
 # settings for llm-docsum service
@@ -28,6 +28,15 @@ FAQGEN_BACKEND: "TGI"
 LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
 # inference backend URL, e.g. http://tgi:80
 LLM_ENDPOINT: ""
+
+# settings for llm-textgen using Bedrock
+bedrock:
+  BEDROCK_REGION: "us-east-1"
+  # Used for providing access to AWS
+  # If using EKS Pod Identity or IAM Role for Service Accounts (IRSA),
+  # do not set these values and ensure a service account is created
+  AWS_ACCESS_KEY_ID: ""
+  AWS_SECRET_ACCESS_KEY: ""
 
 replicaCount: 1
 

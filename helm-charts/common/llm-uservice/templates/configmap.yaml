@@ -19,6 +19,17 @@ data:
   {{- if not .Values.LLM_ENDPOINT }}
   LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
   {{- end }}
+  {{- else if eq "BEDROCK" .Values.TEXTGEN_BACKEND }}
+  LLM_COMPONENT_NAME: "OpeaTextGenBedrock"
+  BEDROCK_REGION: {{ .Values.bedrock.BEDROCK_REGION }}
+  LLM_ENDPOINT: "https://bedrock.{{ .Values.bedrock.BEDROCK_REGION }}.amazonaws.com"
+  {{- if .Values.LLM_MODEL_ID }}
+  MODEL_ID: {{ .Values.LLM_MODEL_ID | quote }}
+  {{- end }}
+  {{- if and .Values.bedrock.AWS_ACCESS_KEY_ID .Values.bedrock.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: {{ .Values.bedrock.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: {{ .Values.bedrock.AWS_SECRET_ACCESS_KEY }}
+  {{- end }}
   {{- else }}
   {{- cat "Invalid TEXTGEN_BACKEND:" .Values.TEXTGEN_BACKEND | fail }}
   {{- end }}
