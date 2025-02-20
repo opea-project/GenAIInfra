@@ -1,0 +1,26 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+RETRIEVER_BACKEND: "OPENSEARCH"
+OPENSEARCH_HOST: "opensearch-cluster-master"
+OPENSEARCH_PORT: 9200
+OPENSEARCH_INITIAL_ADMIN_PASSWORD: ""
+OPENSEARCH_SSL: false
+OPENSEARCH_INDEX_NAME: "rag_opensearch"
+
+tei:
+  enabled: true
+redis-vector-db:
+  enabled: false
+milvus:
+  enabled: false
+qdrant:
+  enabled: false
+opensearch:
+  enabled: true
+  persistence:
+    enabled: false
+  singleNode: true
+  extraEnvs:
+    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+      value: "" # must match value above or retriever cannot access OpenSearch
