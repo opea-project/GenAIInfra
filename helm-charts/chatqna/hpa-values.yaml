@@ -24,17 +24,21 @@ global:
 # Enabling "autoscaling" for any of the subcharts requires enabling it also above!
 vllm:
   autoscaling:
+    minReplicas: 1
     maxReplicas: 4
     enabled: true
 tgi:
   autoscaling:
+    minReplicas: 1
     maxReplicas: 4
     enabled: true
 teirerank:
   autoscaling:
+    minReplicas: 1
     maxReplicas: 3
     enabled: true
 tei:
   autoscaling:
+    minReplicas: 1
     maxReplicas: 2
     enabled: true

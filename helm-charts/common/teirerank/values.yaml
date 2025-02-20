@@ -7,11 +7,12 @@
 
 replicaCount: 1
 
-# Enabling HPA will:
-# - Ignore above replica count, as it will be controlled by HPA
-# - Add example HPA scaling rules with custom metrics thresholds
-# - Require custom metrics ConfigMap available in the main application chart
+# Service autoscaling with HorizontalPodAutoscaler (HPA):
+# - Do not use "replicaCount" with HPA (value=1 is ignored as it's k8s default)
+# - Requires custom metrics ConfigMap available in the main application chart
+# - https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
+  minReplicas: 1
   maxReplicas: 3
   enabled: false
 
