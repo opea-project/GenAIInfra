@@ -32,5 +32,8 @@ dependencies:
     version: 0-latest
     repository: "file://../common/nginx"
     condition: nginx.enabled
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../common/commonlib"
 version: 0-latest
 appVersion: "v1.0"
