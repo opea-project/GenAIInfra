@@ -103,6 +103,8 @@ docsum-ui:
 dashboard:
   prefix: "OPEA DocSum"
 
+tdxEnabled: false
+
 global:
   http_proxy: ""
   https_proxy: ""
