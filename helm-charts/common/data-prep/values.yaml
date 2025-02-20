@@ -33,13 +33,13 @@ SEARCH_BATCH_SIZE: 10
 # QDRANT_PORT: 6333
 # COLLECTION_NAME: "rag_qdrant"
 
-# Uncomment and set the following settings to use Opensearch as a vector-DB backend
+# Uncomment and set the following settings to use OpenSearch as a vector-DB backend
 # DATAPREP_BACKEND: "OPENSEARCH"
 # OPENSEARCH_HOST: ""
 # OPENSEARCH_PORT: 9200
 # OPENSEARCH_INITIAL_ADMIN_PASSWORD: ""
 # OPENSEARCH_SSL: false
-# INDEX_NAME: "rag-opensearch"
+# INDEX_NAME: "rag_opensearch"
 # KEY_INDEX_NAME: "file-keys"
 # TIMEOUT_SECONDS: 600
 # SEARCH_BATCH_SIZE: 10

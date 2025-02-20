@@ -54,7 +54,7 @@ data:
   OPENSEARCH_HOST: {{ .Values.OPENSEARCH_HOST }}
   {{- else }}
   OPENSEARCH_HOST: "opensearch-cluster-master"
-  {{- end}}
+  {{- end }}
   OPENSEARCH_PORT: {{ .Values.OPENSEARCH_PORT | quote }}
   {{- if lt (len .Values.OPENSEARCH_INITIAL_ADMIN_PASSWORD) 8 }}
   {{ fail "OPENSEARCH_INITIAL_ADMIN_PASSWORD must be at least 8 characters" }}
