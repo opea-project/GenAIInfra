@@ -37,3 +37,6 @@ data:
   {{- if .Values.VLLM_TORCH_PROFILER_DIR }}
   VLLM_TORCH_PROFILER_DIR: {{ .Values.VLLM_TORCH_PROFILER_DIR | quote }}
   {{- end }}
+  {{- if .Values.NUM_CARDS }}
+  NUM_CARDS: {{ .Values.NUM_CARDS | quote }}
+  {{- end }}
