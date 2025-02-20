@@ -28,3 +28,7 @@ dependencies:
   - name: commonlib
     version: 0-latest
     repository: "file://../commonlib"
+  - name: opensearch
+    version: 2.31.0
+    repository: https://opensearch-project.github.io/helm-charts
+    condition: opensearch.enabled

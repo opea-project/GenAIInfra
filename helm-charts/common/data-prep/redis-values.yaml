@@ -7,3 +7,7 @@ redis-vector-db:
   enabled: true
 milvus:
   enabled: false
+qdrant:
+  enabled: false
+opensearch:
+  enabled: false

@@ -48,6 +48,24 @@ data:
   QDRANT_PORT: {{ .Values.QDRANT_PORT | quote }}
   COLLECTION_NAME: {{ .Values.COLLECTION_NAME | quote }}
   EMBED_MODEL: {{ .Values.LOCAL_EMBEDDING_MODEL | default "" | quote }}
+  {{- else if eq "OPENSEARCH" .Values.DATAPREP_BACKEND }}
+  DATAPREP_COMPONENT_NAME: "OPEA_DATAPREP_OPENSEARCH"
+  {{- if .Values.OPENSEARCH_HOST }}
+  OPENSEARCH_HOST: {{ .Values.OPENSEARCH_HOST }}
+  {{- else }}
+  OPENSEARCH_HOST: "opensearch-cluster-master"
+  {{- end}}
+  OPENSEARCH_PORT: {{ .Values.OPENSEARCH_PORT | quote }}
+  {{- if lt (len .Values.OPENSEARCH_INITIAL_ADMIN_PASSWORD) 8 }}
+  {{ fail "OPENSEARCH_INITIAL_ADMIN_PASSWORD must be at least 8 characters" }}
+  {{- end }}
+  OPENSEARCH_INITIAL_ADMIN_PASSWORD: {{ .Values.OPENSEARCH_INITIAL_ADMIN_PASSWORD | quote }}
+  OPENSEARCH_SSL: {{ .Values.OPENSEARCH_SSL | quote }}
+  INDEX_NAME: {{ .Values.INDEX_NAME | quote }}
+  KEY_INDEX_NAME: {{ .Values.KEY_INDEX_NAME | quote }}
+  TIMEOUT_SECONDS: {{ .Values.TIMEOUT_SECONDS | quote }}
+  SEARCH_BATCH_SIZE: {{ .Values.SEARCH_BATCH_SIZE | quote }}
+  EMBED_MODEL: {{ .Values.LOCAL_EMBEDDING_MODEL | default "" | quote }}
   {{- else }}
   {{- cat "Invalid DATAPREP_BACKEND:" .Values.DATAPREP_BACKEND | fail }}
   {{- end }}
