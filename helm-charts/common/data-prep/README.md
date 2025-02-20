@@ -14,6 +14,8 @@ Helm chart for deploying OPEA data-prep microservice.
 
 - Qdrant DB: please refer to [qdrant-helm](https://github.com/qdrant/qdrant-helm/tree/qdrant-1.13.1/charts/qdrant) for more information.
 
+- OpenSearch DB: please refer to [opensearch-helm](https://artifacthub.io/packages/helm/opensearch-project-helm-charts/opensearch) for more information.
+
 First, you need to install the `tei` helm chart and one of the vector DB service, i.e. `redis-vector-db` chart.
 
 After you've deployed dependency charts successfully, please run `kubectl get svc` to get the service endpoint URL respectively, i.e. `http://tei:80`, `redis://redis-vector-db:6379`.
@@ -40,6 +42,12 @@ helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} 
 # export DATAPREP_BACKEND="QDRANT"
 # export DB_HOST="qdrant"
 # helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set DATAPREP_BACKEND=${DATAPREP_BACKEND} --set QDRANT_HOST=${DB_HOST},QDRANT_PORT=6333,COLLECTION_NAME=rag_qdrant
+
+# Install data-prep with OpenSearch DB backend
+# export DATAPREP_BACKEND="OPENSEARCH"
+# export DB_HOST="opensearch-cluster-master"
+# export OPENSEARCH_INITIAL_ADMIN_PASSWORD="insert-your-initial-admin-password"
+# helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set DATAPREP_BACKEND=${DATAPREP_BACKEND} --set OPENSEARCH_HOST=${DB_HOST} --set OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD} --set "opensearch.extraEnvs[0].name=OPENSEARCH_INITIAL_ADMIN_PASSWORD,opensearch.extraEnvs[0].value=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" -f opensearch-values.yaml
 ```
 
 ## Verify
