@@ -49,6 +49,9 @@ spec:
               {{- else if eq "QDRANT" .Values.DATAPREP_BACKEND }}
               TESTHOST=$(QDRANT_HOST);
               TESTPORT=$(QDRANT_PORT);
+              {{- else if eq "OPENSEARCH" .Values.DATAPREP_BACKEND }}
+              TESTHOST=$(OPENSEARCH_HOST);
+              TESTPORT=$(OPENSEARCH_PORT);
               {{- end }}
               wait_timeout={{ .Values.waitTimeout | default 1 }};
               total_timeout={{ .Values.retryTimeoutSeconds | default 60 }};

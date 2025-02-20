@@ -25,7 +25,7 @@ To install `data-prep` chart, run the following:
 ```console
 cd GenAIInfra/helm-charts/common/data-prep
 helm dependency update
-export HFTOKEN="insert-your-huggingface-token-here"
+export HF_TOKEN="insert-your-huggingface-token-here"
 export TEI_EMBEDDING_ENDPOINT="http://tei"
 
 # Install data-prep with Redis DB backend
@@ -67,16 +67,17 @@ curl http://localhost:6007/v1/dataprep/ingest  \
 
 ## Values
 
-| Key                             | Type   | Default   | Description                                                                                             |
-| ------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
-| service.port                    | string | `"6007"`  |                                                                                                         |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                         |
-| DATAPREP_BACKEND                | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT"                                            |
-| REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration    |
-| MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration |
-| QDRANT_HOST                     | string | `""`      | Qdrant service URL host, only valid for Qdrant, please see `values.yaml` for other Qdrant configuration |
-| TEI_EMBEDDING_ENDPOINT          | string | `""`      |                                                                                                         |
-| global.monitoring               | bool   | `false`   | See ../../monitoring.md before enabling!                                                                |
+| Key                             | Type   | Default   | Description                                                                                                 |
+| ------------------------------- | ------ | --------- | ----------------------------------------------------------------------------------------------------------- |
+| service.port                    | string | `"6007"`  |                                                                                                             |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                             |
+| DATAPREP_BACKEND                | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT", "OPENSEARCH"                                  |
+| REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration        |
+| MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration     |
+| QDRANT_HOST                     | string | `""`      | Qdrant service URL host, only valid for Qdrant, please see `values.yaml` for other Qdrant configuration     |
+| OPENSEARCH_HOST                 | string | `""`      | OpenSearch URL host, only valid for OpenSearch, please see `values.yaml` for other OpenSearch configuration |
+| TEI_EMBEDDING_ENDPOINT          | string | `""`      |                                                                                                             |
+| global.monitoring               | bool   | `false`   | See ../../monitoring.md before enabling!                                                                    |
 
 ## Milvus support
 
