@@ -26,6 +26,11 @@ export MODELDIR="/mnt/opea-models"
 export MODELNAME="meta-llama/Meta-Llama-3-8B-Instruct"
 # To use CPU with vLLM
 helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME}
+# To use CPU with vLLM and OpenSearch vector DB
+# Admin password must be at least 8 characters, and contain at least one uppercase letter, lowercase letter, digit, and special character
+export OPENSEARCH_INITIAL_ADMIN_PASSWORD="insert-initial-opensearch-admin-password"
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} --set data-prep.OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD} --set retriever-usvc.OPENSEARCH_INITIAL_ADMIN_PASSWORD=${OPENSEARCH_INITIAL_ADMIN_PASSWORD} --set "opensearch.extraEnvs[0].name=OPENSEARCH_INITIAL_ADMIN_PASSWORD,opensearch.extraEnvs[0].value=${OPENSEARCH_INITIAL_ADMIN_PASSWORD}" -f chatqna/cpu-opensearch-values.yaml
+
 # To use Gaudi device with vLLM
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-vllm-values.yaml
 # To use CPU with TGI

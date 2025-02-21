@@ -63,5 +63,10 @@ dependencies:
   - name: nginx
     version: 0-latest
     repository: "file://../common/nginx"
+  - name: opensearch
+    version: 2.31.0
+    repository: https://opensearch-project.github.io/helm-charts
+    condition: opensearch.enabled
+
 version: 0-latest
 appVersion: "v1.0"

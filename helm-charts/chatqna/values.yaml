@@ -92,6 +92,8 @@ teirerank:
 # vector db choice, redis by default.
 redis-vector-db:
   enabled: true
+opensearch:
+  enabled: false
 # Microservice layer, disabled by default
 llm-uservice:
   enabled: false
