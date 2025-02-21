@@ -50,6 +50,10 @@ dependencies:
     version: 0-latest
     repository: "file://../common/redis-vector-db"
     condition: redis-vector-db.enabled
+  - name: qdrant
+    version: 1.13.1
+    repository: https://qdrant.github.io/qdrant-helm
+    condition: qdrant.enabled
   - name: retriever-usvc
     version: 0-latest
     repository: "file://../common/retriever-usvc"

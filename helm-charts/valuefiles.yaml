@@ -13,6 +13,7 @@ chatqna:
   dest_dir: ChatQnA/kubernetes/helm
   values:
     - cpu-values.yaml
+    - cpu-qdrant-values.yaml
     - cpu-tgi-values.yaml
     - gaudi-vllm-values.yaml
     - gaudi-tgi-values.yaml
@@ -120,6 +121,7 @@ data-prep:
   values:
     - milvus-values.yaml
     - redis-values.yaml
+    - qdrant-values.yaml
 embedding-usvc:
   src_repo: GenAIInfra
   src_dir: helm-charts/common/embedding-usvc
@@ -206,6 +208,7 @@ retriever-usvc:
   values:
     - milvus-values.yaml
     - redis-values.yaml
+    - qdrant-values.yaml
 speecht5:
   src_repo: GenAIInfra
   src_dir: helm-charts/common/speecht5
