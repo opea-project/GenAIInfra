@@ -41,8 +41,10 @@ spec:
               {{- else }}
               {{- if .Values.vllm.enabled }}
               value: {{ .Release.Name }}-vllm
-              {{- else }}
+              {{- else if .Values.tgi.enabled }}
               value: {{ .Release.Name }}-tgi
+              {{- else if .Values.ipexllm.enabled }}
+              value: {{ .Release.Name }}-ipexllm
               {{- end }}
               {{- end }}
             - name: LLM_SERVER_PORT
@@ -50,8 +52,10 @@ spec:
             - name: LLM_MODEL
               {{- if .Values.vllm.enabled }}
               value: {{ .Values.vllm.LLM_MODEL_ID | quote }}
-              {{- else }}
+              {{- else if .Values.tgi.enabled }}
               value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
+              {{- else if .Values.ipexllm.enabled }}
+              value: {{ trimPrefix "/data/" .Values.ipexllm.LLM_MODEL_ID | quote }}
               {{- end }}
             - name: RERANK_SERVER_HOST_IP
               value: {{ .Release.Name }}-teirerank
