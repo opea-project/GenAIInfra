@@ -44,6 +44,8 @@ const (
 	Embedding                = "Embedding"
 	TeiEmbedding             = "TeiEmbedding"
 	TeiEmbeddingGaudi        = "TeiEmbeddingGaudi"
+	TorchserveEmbedding      = "TorchserveEmbedding"
+	TorchserveEmbeddingGaudi = "TorchserveEmbeddingGaudi"
 	VectorDB                 = "VectorDB"
 	Retriever                = "Retriever"
 	Reranking                = "Reranking"
@@ -71,32 +73,44 @@ const (
 	SpeechT5Gaudi            = "SpeechT5Gaudi"
 	Whisper                  = "Whisper"
 	WhisperGaudi             = "WhisperGaudi"
-	UI                       = "UI"
+	LLMGuardInput            = "LLMGuardInput"
+	LLMGuardOutput           = "LLMGuardOutput"
+	Ingestion                = "Ingestion"
+	VLLMGaudi                = "VLLMGaudi"
+	VLLM                     = "VLLM"
+	VLLMOpenVino             = "VLLMOpenVino"
+	LanguageDetection        = "LanguageDetection"
 )
 
 var yamlDict = map[string]string{
-	TeiEmbedding:      yaml_dir + "tei.yaml",
-	TeiEmbeddingGaudi: yaml_dir + "tei_gaudi.yaml",
-	Embedding:         yaml_dir + "embedding-usvc.yaml",
-	VectorDB:          yaml_dir + "redis-vector-db.yaml",
-	Retriever:         yaml_dir + "retriever-usvc.yaml",
-	Reranking:         yaml_dir + "reranking-usvc.yaml",
-	TeiReranking:      yaml_dir + "teirerank.yaml",
-	Tgi:               yaml_dir + "tgi.yaml",
-	TgiGaudi:          yaml_dir + "tgi_gaudi.yaml",
-	TgiNvidia:         yaml_dir + "tgi_nv.yaml",
-	Llm:               yaml_dir + "llm-uservice.yaml",
-	DocSum:            yaml_dir + "docsum-llm-uservice.yaml",
-	Router:            yaml_dir + "gmc-router.yaml",
-	WebRetriever:      yaml_dir + "web-retriever.yaml",
-	ASR:               yaml_dir + "asr.yaml",
-	TTS:               yaml_dir + "tts.yaml",
-	SpeechT5:          yaml_dir + "speecht5.yaml",
-	SpeechT5Gaudi:     yaml_dir + "speecht5_gaudi.yaml",
-	Whisper:           yaml_dir + "whisper.yaml",
-	WhisperGaudi:      yaml_dir + "whisper_gaudi.yaml",
-	DataPrep:          yaml_dir + "data-prep.yaml",
-	UI:                yaml_dir + "ui.yaml",
+	TeiEmbedding:        yaml_dir + "tei.yaml",
+	TeiEmbeddingGaudi:   yaml_dir + "tei_gaudi.yaml",
+	TorchserveEmbedding: yaml_dir + "torchserve.yaml",
+	Embedding:           yaml_dir + "embedding-usvc.yaml",
+	VectorDB:            yaml_dir + "redis-vector-db.yaml",
+	Retriever:           yaml_dir + "retriever-usvc.yaml",
+	Reranking:           yaml_dir + "reranking-usvc.yaml",
+	TeiReranking:        yaml_dir + "teirerank.yaml",
+	Tgi:                 yaml_dir + "tgi.yaml",
+	TgiGaudi:            yaml_dir + "tgi_gaudi.yaml",
+	Llm:                 yaml_dir + "llm-usvc.yaml",
+	DocSum:              yaml_dir + "docsum-llm-uservice.yaml",
+	Router:              yaml_dir + "gmc-router.yaml",
+	WebRetriever:        yaml_dir + "web-retriever.yaml",
+	ASR:                 yaml_dir + "asr.yaml",
+	TTS:                 yaml_dir + "tts.yaml",
+	SpeechT5:            yaml_dir + "speecht5.yaml",
+	SpeechT5Gaudi:       yaml_dir + "speecht5_gaudi.yaml",
+	Whisper:             yaml_dir + "whisper.yaml",
+	WhisperGaudi:        yaml_dir + "whisper_gaudi.yaml",
+	DataPrep:            yaml_dir + "dataprep-usvc.yaml",
+	LLMGuardInput:       yaml_dir + "in-guard-usvc.yaml",
+	LLMGuardOutput:      yaml_dir + "out-guard-usvc.yaml",
+	Ingestion:           yaml_dir + "ingestion-usvc.yaml",
+	VLLMGaudi:           yaml_dir + "vllm_gaudi.yaml",
+	VLLM:                yaml_dir + "vllm.yaml",
+	VLLMOpenVino:        yaml_dir + "vllm_openvino.yaml",
+	LanguageDetection:   yaml_dir + "langdtct-usvc.yaml",
 }
 
 var (
@@ -126,6 +140,13 @@ func lookupManifestDir(step string) string {
 	} else {
 		return ""
 	}
+}
+
+func setEnvVars(containers []corev1.Container, envVars []corev1.EnvVar) []corev1.Container {
+	for i := range containers {
+		containers[i].Env = append(containers[i].Env, envVars...)
+	}
+	return containers
 }
 
 func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs string, stepCfg *mcv1alpha3.Step, nodeCfg *mcv1alpha3.Router, graph *mcv1alpha3.GMConnector) ([]*unstructured.Unstructured, error) {
@@ -201,31 +222,29 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 
 			// append the user defined ENVs
 			var newEnvVars []corev1.EnvVar
-			for name, value := range *svcCfg {
-				if name == "endpoint" || name == "nodes" {
-					continue
-				}
-				if isDownStreamEndpointKey(name) {
-					ds := findDownStreamService(value, stepCfg, nodeCfg)
-					value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
-					if err != nil {
-						_log.Error(err, "Failed to find downstream service endpoint", "name", name, "value", value)
-						return nil, err
+			if svcCfg != nil {
+				for name, value := range *svcCfg {
+					if name == "endpoint" || name == "nodes" {
+						continue
 					}
+					if isDownStreamEndpointKey(name) {
+						ds := findDownStreamService(value, stepCfg, nodeCfg)
+						value, err = getDownstreamSvcEndpoint(graphNs, value, ds)
+						// value = getDsEndpoint(platform, name, graphNs, ds)
+						if err != nil {
+							return nil, fmt.Errorf("failed to find downstream service endpoint %s-%s: %v", name, value, err)
+						}
+					}
+					itemEnvVar := corev1.EnvVar{
+						Name:  name,
+						Value: value,
+					}
+					newEnvVars = append(newEnvVars, itemEnvVar)
 				}
-				itemEnvVar := corev1.EnvVar{
-					Name:  name,
-					Value: value,
-				}
-				newEnvVars = append(newEnvVars, itemEnvVar)
 			}
-
 			if len(newEnvVars) > 0 {
-				for i := range deployment_obj.Spec.Template.Spec.Containers {
-					deployment_obj.Spec.Template.Spec.Containers[i].Env = append(
-						deployment_obj.Spec.Template.Spec.Containers[i].Env,
-						newEnvVars...)
-				}
+				deployment_obj.Spec.Template.Spec.Containers = setEnvVars(deployment_obj.Spec.Template.Spec.Containers, newEnvVars)
+				deployment_obj.Spec.Template.Spec.InitContainers = setEnvVars(deployment_obj.Spec.Template.Spec.InitContainers, newEnvVars)
 			}
 
 			err = scheme.Scheme.Convert(deployment_obj, obj, nil)
@@ -249,9 +268,11 @@ func (r *GMConnectorReconciler) reconcileResource(ctx context.Context, graphNs s
 
 func isDownStreamEndpointKey(keyname string) bool {
 	return keyname == "TEI_EMBEDDING_ENDPOINT" ||
-		keyname == "TEI_RERANKING_ENDPOINT" ||
+		keyname == "RERANKING_SERVICE_ENDPOINT" ||
 		keyname == "TGI_LLM_ENDPOINT" ||
-		keyname == "REDIS_URL" ||
+		keyname == "VLLM_ENDPOINT" ||
+		keyname == "LLM_MODEL_SERVER_ENDPOINT" ||
+		keyname == "EMBEDDING_MODEL_SERVER_ENDPOINT" ||
 		keyname == "ASR_ENDPOINT" ||
 		keyname == "TTS_ENDPOINT" ||
 		keyname == "TEI_ENDPOINT"
@@ -500,7 +521,13 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 				continue
 			}
 			var deploymentStatus strings.Builder
-			deploymentStatus.WriteString(fmt.Sprintf("Replicas: %d desired | %d updated | %d total | %d available | %d unavailable\n",
+			statusVerbose := "Not ready"
+			if deployment.Status.AvailableReplicas == *deployment.Spec.Replicas {
+				readyCnt += 1
+				statusVerbose = "Ready"
+			}
+			deploymentStatus.WriteString(fmt.Sprintf("%s; Replicas: %d desired | %d updated | %d total | %d available | %d unavailable\n",
+				statusVerbose,
 				*deployment.Spec.Replicas,
 				deployment.Status.UpdatedReplicas,
 				deployment.Status.Replicas,
@@ -514,9 +541,6 @@ func (r *GMConnectorReconciler) collectResourceStatus(graph *mcv1alpha3.GMConnec
 				deploymentStatus.WriteString(fmt.Sprintf("  Message: %s\n", condition.Message))
 			}
 			graph.Status.Annotations[resName] = deploymentStatus.String()
-			if deployment.Status.AvailableReplicas == *deployment.Spec.Replicas {
-				readyCnt += 1
-			}
 		}
 	}
 	externalResourceCntStr := strings.Split(graph.Status.Status, "/")[1]
