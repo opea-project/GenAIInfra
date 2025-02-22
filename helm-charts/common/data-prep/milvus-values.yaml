@@ -22,6 +22,8 @@ milvus:
       enabled: false
 redis-vector-db:
   enabled: false
+opensearch:
+  enabled: false
 tei:
   enabled: true
 

@@ -1,0 +1,28 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+DATAPREP_BACKEND: "OPENSEARCH"
+OPENSEARCH_HOST: "opensearch-cluster-master"
+OPENSEARCH_PORT: 9200
+OPENSEARCH_INITIAL_ADMIN_PASSWORD: "longPassWithNumCharCapLower1#"
+# SSL must be enabled unless you disable OpenSearch security, which is not recommended
+OPENSEARCH_SSL: true
+INDEX_NAME: "rag_opensearch"
+KEY_INDEX_NAME: "file-keys"
+TIMEOUT_SECONDS: 600
+SEARCH_BATCH_SIZE: 10
+
+tei:
+  enabled: true
+redis-vector-db:
+  enabled: false
+milvus:
+  enabled: false
+opensearch:
+  enabled: true
+  persistence:
+    enabled: false
+  singleNode: true
+  extraEnvs:
+    - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
+      value: "longPassWithNumCharCapLower1#" # must match value above or data-prep cannot access OpenSearch

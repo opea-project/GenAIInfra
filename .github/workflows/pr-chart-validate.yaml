@@ -60,4 +60,5 @@ jobs:
           done
           ct lint ${exclude_param} --check-version-increment=false --validate-maintainers=false --chart-dirs ${{ env.CHARTS_DIRS }} --target-branch ${{ github.event.repository.default_branch }} \
               --chart-repos milvus=https://zilliztech.github.io/milvus-helm \
-              --chart-repos qdrant=https://qdrant.github.io/qdrant-helm
+              --chart-repos qdrant=https://qdrant.github.io/qdrant-helm \
+              --chart-repos opensearch=https://opensearch-project.github.io/helm-charts

@@ -46,6 +46,21 @@ data:
   QDRANT_PORT: {{ .Values.QDRANT_PORT | quote }}
   QDRANT_EMBED_DIMENSION: {{ .Values.QDRANT_EMBED_DIMENSION | quote }}
   QDRANT_INDEX_NAME: {{ .Values.QDRANT_INDEX_NAME | quote }}
+  {{- else if eq "OPENSEARCH" .Values.RETRIEVER_BACKEND }}
+  RETRIEVER_COMPONENT_NAME: "OPEA_RETRIEVER_OPENSEARCH"
+  {{- if .Values.OPENSEARCH_HOST }}
+  OPENSEARCH_HOST: {{ .Values.OPENSEARCH_HOST }}
+  {{- else }}
+  OPENSEARCH_HOST: "opensearch-cluster-master"
+  {{- end }}
+  {{- if lt (len .Values.OPENSEARCH_INITIAL_ADMIN_PASSWORD) 8 }}
+  {{ fail "OPENSEARCH_INITIAL_ADMIN_PASSWORD must be at least 8 characters" }}
+  {{- end }}
+  OPENSEARCH_PORT: {{ .Values.OPENSEARCH_PORT | quote }}
+  OPENSEARCH_INITIAL_ADMIN_PASSWORD: {{ .Values.OPENSEARCH_INITIAL_ADMIN_PASSWORD | quote }}
+  OPENSEARCH_SSL: {{ .Values.OPENSEARCH_SSL | quote }}
+  OPENSEARCH_INDEX_NAME: {{ .Values.OPENSEARCH_INDEX_NAME | quote }}
+  EMBED_MODEL: {{ .Values.LOCAL_EMBEDDING_MODEL | quote }}
   {{- else }}
   {{- cat "Invalid RETRIEVER_BACKEND:" .Values.RETRIEVER_BACKEND | fail }}
   {{- end }}

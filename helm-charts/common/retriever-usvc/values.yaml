@@ -10,7 +10,7 @@ replicaCount: 1
 # Set it as a non-null string, such as true, if you want to enable logging.
 LOGFLAG: ""
 
-# retriever-usvc needs to use different vector-DB backend service, e.g. Redis, Milvus
+# retriever-usvc needs to use different vector-DB backend service, e.g. Redis, Milvus, OpenSearch
 # Default is to use Redis as vector-DB backend
 RETRIEVER_BACKEND: "REDIS"
 REDIS_HOST: ""
@@ -32,6 +32,14 @@ QDRANT_HOST: ""
 QDRANT_PORT: 6333
 QDRANT_EMBED_DIMENSION: 768
 QDRANT_INDEX_NAME: "rag_qdrant"
+
+# Uncomment and set the following settings to use OpenSearch as a vector-DB backend
+# RETRIEVER_BACKEND: "OPENSEARCH"
+OPENSEARCH_HOST: ""
+OPENSEARCH_PORT: 9200
+OPENSEARCH_INITIAL_ADMIN_PASSWORD: ""
+OPENSEARCH_SSL: true
+OPENSEARCH_INDEX_NAME: "rag_opensearch"
 
 # retriever-usvc can do embedding locally or talk to remote TEI service to do embedding.
 # TEI_EMBEDDING_ENDPOINT takes precedence over LOCAL_EMBEDDING_MODEL.
@@ -139,4 +147,6 @@ milvus:
 redis-vector-db:
   enabled: false
 qdrant:
+  enabled: false
+opensearch:
   enabled: false

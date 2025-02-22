@@ -11,3 +11,5 @@ redis-vector-db:
   enabled: true
 milvus:
   enabled: false
+opensearch:
+  enabled: false
