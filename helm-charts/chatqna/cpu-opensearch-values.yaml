@@ -12,7 +12,7 @@ data-prep:
   DATAPREP_BACKEND: "OPENSEARCH"
   OPENSEARCH_HOST: "opensearch-cluster-master"
   OPENSEARCH_PORT: 9200
-  OPENSEARCH_INITIAL_ADMIN_PASSWORD: ""
+  OPENSEARCH_INITIAL_ADMIN_PASSWORD: "longPassWithNumCharCapLower1#"
   OPENSEARCH_SSL: true
   INDEX_NAME: "rag_opensearch"
   KEY_INDEX_NAME: "file-keys"
@@ -22,7 +22,7 @@ retriever-usvc:
   RETRIEVER_BACKEND: "OPENSEARCH"
   OPENSEARCH_HOST: "opensearch-cluster-master"
   OPENSEARCH_PORT: 9200
-  OPENSEARCH_INITIAL_ADMIN_PASSWORD: ""
+  OPENSEARCH_INITIAL_ADMIN_PASSWORD: "longPassWithNumCharCapLower1#"
   OPENSEARCH_SSL: true
   OPENSEARCH_INDEX_NAME: "rag_opensearch"
 
@@ -33,4 +33,4 @@ opensearch:
   singleNode: true
   extraEnvs:
     - name: OPENSEARCH_INITIAL_ADMIN_PASSWORD
-      value: "" # must match value above or data-prep cannot access OpenSearch
+      value: "longPassWithNumCharCapLower1#" # must match value above or data-prep cannot access OpenSearch
