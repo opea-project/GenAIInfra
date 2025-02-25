@@ -13,9 +13,6 @@ tgi:
   image:
     repository: ghcr.io/huggingface/tgi-gaudi
     tag: "2.3.1"
-  resources:
-    limits:
-      habana.ai/gaudi: 1
   # higher limits are needed with extra input tokens added by rerank
   MAX_INPUT_LENGTH: "2048"
   MAX_TOTAL_TOKENS: "4096"
@@ -25,6 +22,10 @@ tgi:
   LIMIT_HPU_GRAPH: "true"
   USE_FLASH_ATTENTION: "true"
   FLASH_ATTENTION_RECOMPUTE: "true"
+  NUM_CARDS: 1
+  resources:
+    limits:
+      habana.ai/gaudi: 1
 
   livenessProbe:
     initialDelaySeconds: 5
