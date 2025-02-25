@@ -20,6 +20,8 @@ helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --se
 # helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-tgi-values.yaml ...
 # To use Gaudi device with vLLM
 # helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-vllm-values.yaml ..
+# To run docsum with Intel TDX feature
+# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set tgi.LLM_MODEL_ID=${MODELNAME} --set tdxEnabled=true --set resources.limits.memory=1Gi --set docsum-ui.tdxEnabled=true --set docsum-ui.resources.limits.memory=2Gi --set llm-uservice.tdxEnabled=true --set llm-uservice.resources.limits.memory=4Gi --set tgi.tdxEnabled=true --set tgi.resources.limits.memory=80Gi --set whisper.tdxEnabled=true --set whisper.resources.limits.memory=13Gi
 ```
 
 ## Verify
