@@ -1,0 +1,66 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "llm-uservice.fullname" . }}
+  labels:
+    {{- include "llm-uservice.labels" . | nindent 4 }}
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"llm-tgi:latest"},"fieldPath":"spec.template.spec.containers[?(@.name==\"codegen\")].image"}]'
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "llm-uservice.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "llm-uservice.selectorLabels" . | nindent 8 }}
+    spec:
+      securityContext: {}
+      containers:
+        - name: {{ .Release.Name }}
+          command:
+          - /bin/bash
+          - -c
+          - |
+            cp /usr/lib/ssl/cert.pem /tmp/bundle.crt && \
+            cat /rhoai-ca/tls.crt  | tee -a '/tmp/bundle.crt' && \
+            bash ./entrypoint.sh
+          env:
+            - name: TGI_LLM_ENDPOINT
+              value: "https://{{ .Values.servingRuntime.name }}-{{ .Values.servingRuntime.namespace }}.apps.{{ .Values.global.clusterDomain }}"
+            - name: HUGGINGFACEHUB_API_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  key: HUGGING_FACE_HUB_TOKEN
+                  name: hf-token
+            - name: PYTHONPATH
+              value: {{ .Values.PYTHONPATH | quote }}
+            - name: HOME
+              value: {{ .Values.HOME | quote }}
+            - name: SSL_CERT_FILE
+              value: /tmp/bundle.crt
+          securityContext: {}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: llm-uservice
+              containerPort: 9000
+              protocol: TCP
+          volumeMounts:
+          - mountPath: /tmp/home
+            name: local-dir
+          - mountPath: /rhoai-ca
+            name: odh-ca-bundle
+          resources: {}
+      volumes:
+      - emptyDir:
+          sizeLimit: 5Gi
+        name: local-dir
+      - name: odh-ca-bundle
+        secret:
+          defaultMode: 420
+          secretName: rhoai-ca-bundle
