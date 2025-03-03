@@ -32,6 +32,18 @@ variable "cluster_version" {
   default     = "1.31"
 }
 
+variable "firewall" {
+  description = "GKE firewall"
+  type        = bool
+  default     = false
+}
+
+variable "firewall_ports" {
+  description = "GKE firewall ports"
+  type        = list(string)
+  default     = null
+}
+
 variable "namespace" {
   description = "OPEA application namespace"
   type        = string

@@ -14,6 +14,18 @@ provider "helm" {
     cluster_ca_certificate = base64decode(module.gke.ca_certificate)    
   }
 }
+resource "google_compute_firewall" "default" {
+  #count    = var.firewall ? 1 : 0
+  name    = "${var.cluster_name}-firewall"
+  network = google_compute_network.default.name
+
+  deny {
+    protocol = "tcp"
+    ports    = ["20-22", "3389"]
+  }
+  #target_tags = [ "${var.cluster_name}-firewall" ]
+  source_ranges = ["0.0.0.0/0"]
+}
 
 resource "google_compute_network" "default" {
   name                    = "standalone"
@@ -141,33 +153,5 @@ resource "kubernetes_persistent_volume" "model" {
     }
     mount_options = [ "implicit-dirs", "uid=1000", "gid=1000" ]
   }
-  depends_on = [ null_resource.kubectl ]
-}
-
-resource "helm_release" "app" {
-  chart = "../../../../helm-charts/chatqna"
-  repository = "chatqna"
-  name = "chatqna"
-  namespace = var.namespace
-
-  values = [ file("./custom-values.yaml") ]
-
-  set {
-    name = "global.HUGGINGFACEHUB_API_TOKEN"
-    value = var.hf_token
-  }
-  set {
-    name = "serviceAccount.name"
-    value = kubernetes_service_account.opea_gcs_sa.metadata[0].name
-  }
-  set {
-    name = "global.modelUsePVC"
-    value = "model-volume"
-  }
-  set {
-    name = "nginx.service.type"
-    value = "LoadBalancer"
-  }
-  timeout = 600
   depends_on = [ null_resource.kubectl ]
 }

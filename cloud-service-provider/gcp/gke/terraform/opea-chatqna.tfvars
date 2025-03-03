@@ -1,5 +1,5 @@
-hf_token = ""
-project_id = ""
+#hf_token = ""
+project_id = "service-mesh-296815"
 region = "europe-west4"
 cluster_name = "opea"
 app_name = "chatqna"
