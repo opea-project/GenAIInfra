@@ -55,4 +55,6 @@ jobs:
           # Update components: exclude other Helm chart docs than README.md
           update_charts "$CHARTS_DIR/common/" 3 '.*/[^R][^/]*\.md$'
           # Update Examples: exclude non-helm subdirs, files not in subdirs, other docs
+          # Update dependency for components first
+          ${CHARTS_DIR}/update_dependency.sh
           update_charts "$CHARTS_DIR" 2 "$CHARTS_DIR"'/(common/|assets/|[^/]*$|.*/[^R][^/]*\.md$)'
