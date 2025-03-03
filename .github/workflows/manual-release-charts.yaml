@@ -52,6 +52,8 @@ jobs:
                   helm package $chart --destination ${DEST_DIR}
           done
           # update E2E Applications
+          # Update dependency for components first
+          ${SRC_DIR}/update_dependency.sh
           for chart in ${SRC_DIR}/*
           do
                   if [ -f $chart ]; then continue; fi
