@@ -1,0 +1,33 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "codegen.fullname" . }}
+  labels:
+    {{- include "codegen.labels" . | nindent 4 }}
+    app: {{ include "codegen.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "codegen.selectorLabels" . | nindent 6 }}
+      app: {{ include "codegen.fullname" . }}
+  template:
+    metadata:
+      labels:
+        {{- include "codegen.selectorLabels" . | nindent 8 }}
+        app: {{ include "codegen.fullname" . }}
+    spec:
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-llm-uservice
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: codegen
+              containerPort: {{ .Values.port }}
+              protocol: TCP
