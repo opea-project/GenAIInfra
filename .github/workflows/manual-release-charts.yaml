@@ -47,6 +47,7 @@ jobs:
           # update components
           for chart in ${SRC_DIR}/common/*
           do
+                  if [[ ! -f $chart/Chart.yaml ]]; then continue; fi
                   echo "Packaging chart $chart..."
                   helm dependency update ${chart}
                   helm package $chart --destination ${DEST_DIR}
@@ -57,7 +58,7 @@ jobs:
           for chart in ${SRC_DIR}/*
           do
                   if [ -f $chart ]; then continue; fi
-                  if [[ $chart =~ "common" ]]; then continue; fi
+                  if [[ ! -f $chart/Chart.yaml ]]; then continue; fi
                   echo "Packaging chart $chart..."
                   helm dependency update ${chart}
                   helm package $chart --destination ${DEST_DIR}
