@@ -27,7 +27,7 @@ sudo mkdir /mnt/tools
 sudo chmod 777 /mnt/tools
 ```
 
-Down tools and the configuration to /mnt/tools
+Download tools and the configuration to `/mnt/tools`
 
 ```
 # tools used by supervisor
@@ -40,15 +40,15 @@ wget https://raw.githubusercontent.com/opea-project/GenAIExamples/refs/heads/mai
 wget https://raw.githubusercontent.com/opea-project/GenAIExamples/refs/heads/main/AgentQnA/tools/worker_agent_tools.py -O /mnt/tools/worker_agent_tools.py
 ```
 
-Down the sqlite data file
+Download the `sqlite` database binary file
 
 ```
 wget https://raw.githubusercontent.com/lerocha/chinook-database/refs/heads/master/ChinookDatabase/DataSources/Chinook_Sqlite.sqlite -O /mnt/tools/Chinook_Sqlite.sqlite
 ```
 
-### Deploy with helm chart
+### Deploy with Helm chart
 
-Deploy everything on Gaudi enabled kubernetes cluster:
+Deploy everything on Gaudi enabled Kubernetes cluster:
 
 If you want to try with latest version, use `helm pull oci://ghcr.io/opea-project/charts/agentqna --version 0-latest --untar`
 
@@ -62,14 +62,14 @@ helm install agentqna agentqna -f agentqna/gaudi-values.yaml --set global.HUGGIN
 
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
 
-### Ingest data for rag
+### Ingest data for RAG
 
-Ingest data used by rag.
+Ingest data used by RAG.
 
 ```
 wget https://raw.githubusercontent.com/opea-project/GenAIExamples/refs/heads/main/AgentQnA/retrieval_tool/index_data.py -O /mnt/tools/index_data.py
 wget https://raw.githubusercontent.com/opea-project/GenAIExamples/refs/heads/main/AgentQnA/example_data/test_docs_music.jsonl -O /mnt/tools/test_docs_music.jsonl
-host_ip=$(kubectl get svc |grep data-prep |awk '{print $3}')
+host_ip=$(kubectl get svc -o jsonpath="{.items[].spec.clusterIP}" --selector app.kubernetes.io/name=data-prep)
 python3 index_data.py --filedir /mnt/tools --filename test_docs_music.jsonl --host_ip $host_ip
 ```
 

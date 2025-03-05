@@ -3,7 +3,8 @@
 
 # Accelerate inferencing in heaviest components to improve performance
 # by overriding their subchart values
-
+vllm:
+  enabled: false
 tgi:
   enabled: true
   accelDevice: "gaudi"
@@ -41,9 +42,12 @@ tgi:
 supervisor:
   llm_endpoint_url: http://{{ .Release.Name }}-tgi
   llm_engine: tgi
+  model: "meta-llama/Llama-3.3-70B-Instruct"
 ragagent:
   llm_endpoint_url: http://{{ .Release.Name }}-tgi
   llm_engine: tgi
+  model: "meta-llama/Llama-3.3-70B-Instruct"
 sqlagent:
   llm_endpoint_url: http://{{ .Release.Name }}-tgi
   llm_engine: tgi
+  model: "meta-llama/Llama-3.3-70B-Instruct"

@@ -1,9 +1,6 @@
 # Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Accelerate inferencing in heaviest components to improve performance
-# by overriding their subchart values
-
 supervisor:
   # OpenAI Compatible API without Authentication
   llm_endpoint_url: "YourEndPoint"
