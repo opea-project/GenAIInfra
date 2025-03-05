@@ -111,7 +111,7 @@ data:
                   }
                 ]
               },
-              "unit": "cps"
+              "unit": "reqps"
             },
             "overrides": []
           },
@@ -640,7 +640,7 @@ data:
                   }
                 ]
               },
-              "unit": "cps"
+              "unit": "t/s"
             },
             "overrides": []
           },
@@ -1091,7 +1091,7 @@ data:
                   }
                 ]
               },
-              "unit": "cps"
+              "unit": "t/s"
             },
             "overrides": []
           },
@@ -1970,7 +1970,7 @@ data:
           "type": "timeseries"
         }
       ],
-      "refresh": false,
+      "refresh": "30s",
       "schemaVersion": 38,
       "tags": [],
       "templating": {
