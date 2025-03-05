@@ -2005,7 +2005,7 @@ data:
               "type": "prometheus",
               "uid": "${Metrics}"
             },
-            "definition": "label_values(megaservice_first_token_latency_count,namespace)",
+            "definition": "label_values(megaservice_request_pending,namespace)",
             "hide": 0,
             "includeAll": false,
             "label": "Namespace",
@@ -2014,7 +2014,7 @@ data:
             "options": [],
             "query": {
               "qryType": 1,
-              "query": "label_values(megaservice_first_token_latency_count,namespace)",
+              "query": "label_values(megaservice_request_pending,namespace)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,
@@ -2033,7 +2033,7 @@ data:
               "type": "prometheus",
               "uid": "${Metrics}"
             },
-            "definition": "label_values(megaservice_first_token_latency_count{namespace=\"$namespace\", service!~\".*-uservice\", service!~\".*-usvc\"},service)",
+            "definition": "label_values(megaservice_request_pending{namespace=\"$namespace\", service!~\".*-uservice\", service!~\".*-usvc\"},service)",
             "description": "Helm release name used as prefix for the services",
             "hide": 0,
             "includeAll": false,
@@ -2043,7 +2043,7 @@ data:
             "options": [],
             "query": {
               "qryType": 1,
-              "query": "label_values(megaservice_first_token_latency_count{namespace=\"$namespace\", service!~\".*-uservice\", service!~\".*-usvc\"},service)",
+              "query": "label_values(megaservice_request_pending{namespace=\"$namespace\", service!~\".*-uservice\", service!~\".*-usvc\"},service)",
               "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,
