@@ -1,0 +1,28 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+supervisor:
+  # OpenAI Compatible API without Authentication
+  llm_endpoint_url: "YourEndPoint"
+  OPENAI_API_KEY: EMPTY
+  model: "YourModel"
+  # Use OpenAI KEY
+  # llm_engine: openai
+  # OPENAI_API_KEY: YourOpenAIKey
+ragagent:
+  # OpenAI Compatible API without Authentication
+  llm_endpoint_url: "YourEndPoint"
+  OPENAI_API_KEY: EMPTY
+  model: "YourModel"
+  # Use OpenAI KEY
+  # llm_engine: openai
+  # OPENAI_API_KEY: YourOpenAIKey
+sqlagent:
+  # OpenAI Compatible API without Authentication
+  llm_endpoint_url: "YourEndPoint"
+  OPENAI_API_KEY: EMPTY
+  model: "YourModel"
+  # strategy: sql_agent
+  # Use OpenAI KEY
+  # llm_engine: openai
+  # OPENAI_API_KEY: YourOpenAIKey
