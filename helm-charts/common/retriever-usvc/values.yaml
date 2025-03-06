@@ -68,8 +68,7 @@ podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext:
-  # NOTE: many dependent python modules(e.g. numpy, mpl, haystack, etc.) need to write to local disk
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000

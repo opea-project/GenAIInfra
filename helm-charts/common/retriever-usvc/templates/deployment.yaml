@@ -82,6 +82,8 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+            - mountPath: /home/user/nltk_data
+              name: nltk-data
           {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
@@ -98,6 +100,8 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: tmp
+          emptyDir: {}
+        - name: nltk-data
           emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:

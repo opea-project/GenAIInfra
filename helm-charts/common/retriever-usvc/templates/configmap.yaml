@@ -63,3 +63,6 @@ data:
   HF_HOME: "/tmp/.cache/huggingface"
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   LOGFLAG: {{ .Values.LOGFLAG | quote }}
+  NUMBA_CACHE_DIR: "/tmp/numba/cache"
+  MPLCONFIGDIR: "/tmp/matplotlib"
+  HAYSTACK_TELEMETRY_ENABLED: "False"
