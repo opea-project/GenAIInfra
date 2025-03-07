@@ -38,6 +38,8 @@ spec:
               value: {{ include "tgi.fullname" (index .Subcharts "tgi") }}
             - name: LLM_SERVER_PORT
               value: "80"
+            - name: LLM_MODEL_ID
+              value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
             - name: WHISPER_SERVER_HOST_IP
               value: {{ include "whisper.fullname" (index .Subcharts "whisper") }}
             - name: WHISPER_SERVER_PORT
