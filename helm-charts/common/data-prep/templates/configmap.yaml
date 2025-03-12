@@ -64,3 +64,6 @@ data:
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}
   LOGFLAG: {{ .Values.LOGFLAG | quote }}
+  NUMBA_CACHE_DIR: "/tmp/numba/cache"
+  XDG_CACHE_HOME: "/tmp/fontconfig/cache"
+  MPLCONFIGDIR: "/tmp/matplotlib"

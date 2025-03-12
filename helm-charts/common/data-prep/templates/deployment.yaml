@@ -82,6 +82,12 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+            - mountPath: /home/user/comps/dataprep/src/uploaded_files
+              name: uploaded-files
+            - mountPath: /home/user/nltk_data
+              name: nltk-data
+            - mountPath: /home/user/.config
+              name: user-config-data
           {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
@@ -98,6 +104,12 @@ spec:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
         - name: tmp
+          emptyDir: {}
+        - name: uploaded-files
+          emptyDir: {}
+        - name: nltk-data
+          emptyDir: {}
+        - name: user-config-data
           emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
