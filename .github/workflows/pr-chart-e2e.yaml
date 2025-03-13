@@ -60,7 +60,8 @@ jobs:
                 fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                  echo "Temporarily disable test with Gaudi for CI server setup"
+                  # run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
                 else
                   run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
                 fi
@@ -78,7 +79,8 @@ jobs:
                 fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                  echo "Temporarily disable test with Gaudi for CI server setup"
+                  # run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                 else
                   run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                 fi
