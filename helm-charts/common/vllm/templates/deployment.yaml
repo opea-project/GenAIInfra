@@ -88,6 +88,8 @@ spec:
             - {{ . | quote }}
             {{- end }}
           {{- end }}
+            - "--tensor-parallel-size"
+            - {{ .Values.NUM_CARDS | quote }}
             - "--model"
             - {{ .Values.LLM_MODEL_ID | quote }}
             - "--host"
