@@ -58,32 +58,35 @@ docretriever:
     tag: "latest"
 
 sqlagent:
-  DBPath: "/mnt/tools"
+  toolHostPath: "/mnt/tools"
   db_name: "Chinook"
-  db_path: "sqlite:////home/user/chinook-db/Chinook_Sqlite.sqlite"
+  db_path: "sqlite:////home/user/tools/Chinook_Sqlite.sqlite"
   service:
     port: 9096
   strategy: sql_agent_llama
+  with_memory: false
   use_hints: "false"
   recursion_limit: "6"
   llm_engine: vllm
   llm_endpoint_url: ""
-  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
-  temperature: "0.01"
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: "0"
   max_new_tokens: "4096"
   stream: "false"
+  tools: ""
   require_human_feedback: "false"
 
 ragagent:
-  toolPath: "/mnt/tools"
+  toolHostPath: "/mnt/tools"
   service:
     port: 9095
   strategy: rag_agent_llama
+  with_memory: false
   recursion_limit: "6"
   llm_engine: vllm
   llm_endpoint_url: ""
-  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
-  temperature: "0.01"
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: "0"
   max_new_tokens: "4096"
   stream: "false"
   tools: "/home/user/tools/worker_agent_tools.yaml"
@@ -91,17 +94,18 @@ ragagent:
   RETRIEVAL_TOOL_URL: ""
 
 supervisor:
-  toolPath: "/mnt/tools"
+  toolHostPath: "/mnt/tools"
   service:
     port: 9090
   strategy: react_llama
+  with_memory: true
   recursion_limit: 10
   llm_engine: vllm
   llm_endpoint_url: ""
-  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
-  temperature: "0.01"
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: "0"
   max_new_tokens: "4096"
-  stream: "false"
+  stream: "true"
   tools: /home/user/tools/supervisor_agent_tools.yaml
   require_human_feedback: false
   CRAG_SERVER: ""
@@ -119,39 +123,9 @@ crag:
 # Override values in specific subcharts
 tgi:
   enabled: false
-  accelDevice: "gaudi"
-  image:
-    repository: ghcr.io/huggingface/tgi-gaudi
-    tag: "2.3.1"
-  resources:
-    limits:
-      habana.ai/gaudi: 4
-  LLM_MODEL_ID: "meta-llama/Meta-Llama-3.1-70B-Instruct"
-  MAX_INPUT_LENGTH: 4096
-  MAX_TOTAL_TOKENS: 8192
-  CUDA_GRAPHS: ""
-  OMPI_MCA_btl_vader_single_copy_mechanism: none
-  PT_HPU_ENABLE_LAZY_COLLECTIVES: true
-  ENABLE_HPU_GRAPH: true
-  LIMIT_HPU_GRAPH: true
-  USE_FLASH_ATTENTION: true
-  FLASH_ATTENTION_RECOMPUTE: true
-  extraCmdArgs: ["--sharded", "true", "--num-shard", "4"]
 
 vllm:
   enabled: false
-  accelDevice: "gaudi"
-  image:
-    repository: opea/vllm-gaudi
-    tag: "latest"
-  resources:
-    limits:
-      habana.ai/gaudi: 4
-  LLM_MODEL_ID: "meta-llama/Meta-Llama-3.1-70B-Instruct"
-  OMPI_MCA_btl_vader_single_copy_mechanism: none
-  PT_HPU_ENABLE_LAZY_COLLECTIVES: true
-  VLLM_SKIP_WARMUP: true
-  extraCmdArgs: ["--tensor-parallel-size", "4", "--max-seq_len-to-capture", "16384"]
 
 nginx:
   service:
