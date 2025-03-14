@@ -1,10 +1,8 @@
 # AgentQnA
 
-Helm chart for deploying AgentQnA example.
+Helm chart for deploying AgentQnA example. It demonstrates how agent works, using prepared data and questions. See [AgentQnA overview](https://github.com/opea-project/GenAIExamples/tree/main/AgentQnA#overview) for the details.
 
-See [AgentQnA](https://github.com/opea-project/GenAIExamples/tree/main/AgentQnA) for the example details.
-
-Note that this is an example to demonstrate how agent works and tested with prepared data and questions. Using different datasets, models and questions may get different results.
+Using different datasets, models and questions may get different results.
 
 Agent usually requires larger models to perform better, we used Llama-3.3-70B-Instruct for test, which requires 4x Gaudi devices for local deployment.
 
