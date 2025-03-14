@@ -57,7 +57,8 @@ spec:
               echo "Download model {{ .Values.LLM_MODEL_ID }} ... ";
               huggingface-cli download --cache-dir /data {{ .Values.LLM_MODEL_ID | quote }};
               echo "Change model files mode ...";
-              chmod -R g+w /data/models--{{ replace "/" "--" .Values.LLM_MODEL_ID }}
+              chmod -R g+w /data/models--{{ replace "/" "--" .Values.LLM_MODEL_ID }};
+              chmod -R g+w $(HF_HOME);
               # NOTE: Buggy logout command;
               # huggingface-cli logout;
           volumeMounts:

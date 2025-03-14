@@ -15,16 +15,15 @@ vllm:
   resources:
     limits:
       habana.ai/gaudi: 1
+  securityContext:
+    runAsUser: 0
+    runAsNonRoot: false
   startupProbe:
     initialDelaySeconds: 5
     periodSeconds: 5
     timeoutSeconds: 1
-    failureThreshold: 180
+    failureThreshold: 360
   readinessProbe:
-    initialDelaySeconds: 5
-    periodSeconds: 5
-    timeoutSeconds: 1
-  livenessProbe:
     initialDelaySeconds: 5
     periodSeconds: 5
     timeoutSeconds: 1
