@@ -9,6 +9,7 @@ tgi:
 
 llm-uservice:
   DOCSUM_BACKEND: "vLLM"
+  retryTimeoutSeconds: 720
 
 vllm:
   enabled: true
@@ -18,16 +19,15 @@ vllm:
   resources:
     limits:
       habana.ai/gaudi: 1
+  securityContext:
+    runAsUser: 0
+    runAsNonRoot: false
   startupProbe:
     initialDelaySeconds: 5
     periodSeconds: 5
     timeoutSeconds: 1
-    failureThreshold: 120
+    failureThreshold: 360
   readinessProbe:
-    initialDelaySeconds: 5
-    periodSeconds: 5
-    timeoutSeconds: 1
-  livenessProbe:
     initialDelaySeconds: 5
     periodSeconds: 5
     timeoutSeconds: 1
