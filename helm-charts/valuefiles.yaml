@@ -25,6 +25,7 @@ agentqna:
   dest_repo: GenAIExamples
   dest_dir: AgentQnA/kubernetes/helm
   values:
+    - cpu-values.yaml
     - gaudi-values.yaml
 audioqna:
   src_repo: GenAIInfra
