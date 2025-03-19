@@ -9,6 +9,7 @@ DOCSUM_BACKEND: "vLLM"
 LLM_MODEL_ID: "Intel/neural-chat-7b-v3-3"
 MAX_INPUT_TOKENS: 2048
 MAX_TOTAL_TOKENS: 4096
+retryTimeoutSeconds: 720
 
 
 tgi:
@@ -24,3 +25,8 @@ vllm:
   resources:
     limits:
       habana.ai/gaudi: 1
+  securityContext:
+    runAsUser: 0
+    runAsNonRoot: false
+  startupProbe:
+    failureThreshold: 360
