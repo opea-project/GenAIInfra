@@ -25,8 +25,5 @@ vllm:
   resources:
     limits:
       habana.ai/gaudi: 1
-  securityContext:
-    runAsUser: 0
-    runAsNonRoot: false
   startupProbe:
     failureThreshold: 360
