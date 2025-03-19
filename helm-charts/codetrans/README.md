@@ -15,9 +15,14 @@ helm dependency update codetrans
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="mistralai/Mistral-7B-Instruct-v0.3"
-helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
-# To use Gaudi device
-# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values codetrans/gaudi-values.yaml
+# To use CPU with vLLM
+helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f cpu-values.yaml
+# To use CPU with TGI
+# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f cpu-tgi-values.yaml
+# To use Gaudi device with vLLM
+# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f gaudi-values.yaml
+# To use Gaudi device with TGI
+# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f gaudi-tgi-values.yaml
 ```
 
 ### IMPORTANT NOTE

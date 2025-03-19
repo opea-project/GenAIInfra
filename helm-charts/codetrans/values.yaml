@@ -59,9 +59,15 @@ affinity: {}
 
 # To override values in subchart tgi
 tgi:
+  enabled: false
+  LLM_MODEL_ID: mistralai/Mistral-7B-Instruct-v0.3
+
+vllm:
+  enabled: true
   LLM_MODEL_ID: mistralai/Mistral-7B-Instruct-v0.3
 
 llm-uservice:
+  TEXTGEN_BACKEND: vLLM
   LLM_MODEL_ID: mistralai/Mistral-7B-Instruct-v0.3
 
 nginx:
