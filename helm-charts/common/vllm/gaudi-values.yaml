@@ -13,10 +13,6 @@ resources:
   limits:
     habana.ai/gaudi: 1
 
-# NOTE: opea/vllm-gaudi image requires running as root during runtime
-securityContext:
-  runAsUser: 0
-  runAsNonRoot: false
-# NOTE: opea/vllm-gaudi needsd more warm up time
+# NOTE: opea/vllm-gaudi needs more warm up time
 startupProbe:
   failureThreshold: 360
