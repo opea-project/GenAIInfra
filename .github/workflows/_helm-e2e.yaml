@@ -82,9 +82,6 @@ jobs:
       - name: Initialize chart testing
         run: |
           # Replace values for CI test environment
-          USER_ID=$(whoami)
-          CHART_MOUNT=/home/$USER_ID/.cache/huggingface/hub
-          HFTOKEN=$(cat /home/$USER_ID/.cache/huggingface/token)
           pushd helm-charts
           if [ "${{ inputs.dockerhub }}" = "true" ]; then
             echo "Use released docker images"
@@ -96,11 +93,11 @@ jobs:
           # set OPEA image tag to ${{ inputs.tag }}
           find . -name '*values.yaml' -type f -exec sed -i 's#tag: "latest"#tag: ${{ inputs.tag }}#g' {} \;
           # set huggingface token
-          find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#${HFTOKEN}#g" {} \;
+          #find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#${HFTOKEN}#g" {} \;
           # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
-          find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: .*#modelUseHostPath: $CHART_MOUNT#g" {} \;
+          #find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: .*#modelUseHostPath: $CHART_MOUNT#g" {} \;
           # replace the pull policy "IfNotPresent" with "Always"
-          find . -name '*values.yaml' -type f -exec sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" {} \;
+          #find . -name '*values.yaml' -type f -exec sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" {} \;
           popd
 
       - name: Helm install
@@ -108,8 +105,11 @@ jobs:
         env:
           GOOGLE_CSE_ID: ${{ secrets.GOOGLE_CSE_ID }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          HFTOKEN: ${{ secrets.HF_TOKEN }}
         run: |
           set -xe
+          USER_ID=$(whoami)
+          CHART_MOUNT=/scratch-2/huggingface/hub
           echo "should_cleanup=true" >> $GITHUB_ENV
           value_file="${{ inputs.valuefile }}.yaml"
           if [[ ! -f ${{ env.CHART_FOLDER }}/${value_file} ]]; then
@@ -133,10 +133,12 @@ jobs:
           done
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
-              --set GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY}} \
-              --set GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID}} \
-              --set web-retriever.GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY}} \
-              --set web-retriever.GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID}} \
+              --set GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY }} \
+              --set GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID }} \
+              --set web-retriever.GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY }} \
+              --set web-retriever.GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID }} \
+              --set global.HUGGINGFACEHUB_API_TOKEN=${{ env.HFTOKEN }} \
+              --set global.modelUseHostPath=${CHART_MOUNT}
               --values ${{ env.CHART_FOLDER }}/${value_file} \
               $RELEASE_NAME ${{ env.CHART_FOLDER }} ; then
             echo "Failed to install chart ${{ inputs.workload }}"
