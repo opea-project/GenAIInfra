@@ -35,11 +35,19 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: LLM_SERVER_HOST_IP
+              {{- if .Values.tgi.enabled }}
               value: {{ include "tgi.fullname" (index .Subcharts "tgi") }}
+              {{- else if .Values.vllm.enabled }}
+              value: {{ include "vllm.fullname" (index .Subcharts "vllm") }}
+              {{- end }}
             - name: LLM_SERVER_PORT
               value: "80"
             - name: LLM_MODEL_ID
+              {{- if .Values.tgi.enabled }}
               value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
+              {{- else if .Values.vllm.enabled }}
+              value: {{ .Values.vllm.LLM_MODEL_ID | quote }}
+              {{- end }}
             - name: WHISPER_SERVER_HOST_IP
               value: {{ include "whisper.fullname" (index .Subcharts "whisper") }}
             - name: WHISPER_SERVER_PORT

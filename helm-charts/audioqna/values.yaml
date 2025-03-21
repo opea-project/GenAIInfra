@@ -58,7 +58,12 @@ affinity: {}
 
 # To override values in subchart tgi
 tgi:
-  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  enabled: false
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
+
+vllm:
+  enabled: true
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 
 nginx:
   service:
