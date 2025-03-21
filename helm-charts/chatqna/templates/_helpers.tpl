@@ -62,3 +62,10 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Create frontend custom metric name from chart name
+*/}}
+{{- define "chatqna.frontendMetricName" -}}
+{{- include "chatqna.fullname" . | replace "-" "_" | regexFind "[a-zA-Z_:][a-zA-Z0-9_:]*" }}_frontend_metric
+{{- end }}
