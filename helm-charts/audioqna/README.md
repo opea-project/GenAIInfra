@@ -7,8 +7,8 @@ AudioQnA depends on the following micro services:
 - [asr](../common/asr/README.md)
 - [whisper](../common/whisper/README.md)
 - [llm-uservice](../common/llm-uservice/README.md)
-- [tgi](../common/tgi/README.md)
-- [tts](../common/tts/README.md)
+- [tgi](../common/tgi/README.md) or [vllm](../common/vllm/README.md)
+- [tts](../common/tts/README.md) or [gpt-sovits](../common/gpt-sovits/README.md)
 - [speecht5](../common/speecht5/README.md)
 
 ## Installing the Chart
@@ -20,10 +20,16 @@ cd GenAIInfra/helm-charts/
 ./update_dependency.sh
 helm dependency update audioqna
 export HFTOKEN="insert-your-huggingface-token-here"
-# To run on Xeon
-helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
-# To run on Gaudi
-#helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/gaudi-values.yaml
+# To use CPU with vLLM
+helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/cpu-values.yaml
+# To use CPU with TGI
+# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/cpu-tgi-values.yaml
+# To use CPU with vLLM with multilang tts
+# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f cpu-multilang-values.yaml
+# To use Gaudi device with vLLM
+# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/gaudi-values.yaml
+# To use Gaudi device with TGI
+# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/gaudi-tgi-values.yaml
 ```
 
 ### IMPORTANT NOTE
