@@ -65,6 +65,11 @@ vllm:
   enabled: true
   LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 
+speecht5:
+  enabled: true
+gpt-sovits:
+  enabled: false
+
 nginx:
   service:
     type: NodePort

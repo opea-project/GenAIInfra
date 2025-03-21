@@ -43,8 +43,11 @@ whisper:
       habana.ai/gaudi: 1
 
 speecht5:
+  enabled: true
   image:
     repository: opea/speecht5-gaudi
   resources:
     limits:
       habana.ai/gaudi: 1
+gpt-sovits:
+  enabled: false

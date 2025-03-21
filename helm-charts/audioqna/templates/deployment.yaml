@@ -52,10 +52,17 @@ spec:
               value: {{ include "whisper.fullname" (index .Subcharts "whisper") }}
             - name: WHISPER_SERVER_PORT
               value: {{ index .Values "whisper" "service" "port" | quote }}
+            {{- if .Values.speecht5.enabled }}
             - name: SPEECHT5_SERVER_HOST_IP
               value: {{ include "speecht5.fullname" (index .Subcharts "speecht5") }}
             - name: SPEECHT5_SERVER_PORT
               value: {{ index .Values "speecht5" "service" "port" | quote }}
+            {{- else if index .Values "gpt-sovits" "enabled" }}
+            - name: GPT_SOVITS_SERVER_HOST_IP
+              value: {{ include "gpt-sovits.fullname" (index .Subcharts "gpt-sovits") }}
+            - name: GPT_SOVITS_SERVER_PORT
+              value: {{ index .Values "gpt-sovits" "service" "port" | quote }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

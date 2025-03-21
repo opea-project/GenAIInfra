@@ -35,6 +35,7 @@ audioqna:
   values:
     - cpu-values.yaml
     - cpu-tgi-values.yaml
+    - cpu-multilang-values.yaml
     - gaudi-values.yaml
     - gaudi-tgi-values.yaml
 codegen:

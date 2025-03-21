@@ -12,6 +12,11 @@ dependencies:
   - name: speecht5
     version: 0-latest
     repository: "file://../common/speecht5"
+    condition: speecht5.enabled
+  - name: gpt-sovits
+    version: 0-latest
+    repository: "file://../common/gpt-sovits"
+    condition: gpt-sovits.enabled
   - name: tgi
     version: 0-latest
     repository: "file://../common/tgi"
