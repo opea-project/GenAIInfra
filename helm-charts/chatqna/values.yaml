@@ -60,6 +60,14 @@ affinity: {}
 # (use hpa-values.yaml files to actually enable HPA).
 autoscaling:
   enabled: false
+  minReplicas: 1
+  maxReplicas: 2
+  # useFrontendMetric changes scaling of all application services to be done
+  # based on application E2E metric and factors specified for each service,
+  # instead of each services' own metrics.
+  useFrontendMetric: false
+  frontendMetric: ""
+  frontendMetricFactor: 0
 
 # Optional subcharts enablement and subcharts settings overwritten
 # LLM choice, tgi by default.
