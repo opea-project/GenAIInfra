@@ -45,7 +45,9 @@ codegen:
   dest_dir: CodeGen/kubernetes/helm
   values:
     - cpu-values.yaml
+    - cpu-tgi-values.yaml
     - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
 codetrans:
   src_repo: GenAIInfra
   src_dir: helm-charts/codetrans
