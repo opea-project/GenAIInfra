@@ -1,0 +1,33 @@
+Note: The script is only for DEMO instead of production. It is risky to run this script in production environment.
+The script is tesed in ubuntu 22.04.
+
+1. 00_online_pkg.sh
+
+this script is to clone opea code and install some packages.
+
+
+2. 01_online_images.sh
+
+this script is to pull opea container images to push to your local registry. the script need to access docker.io and  
+ghcr.io. you need to change docker registry.
+
+
+3. 02.a_online_models.sh
+
+this script is to download model images. you need to change proxy and token.
+
+4. copy model to k8s nodes
+
+4.a manually copy (fast)
+
+i. mkdir in k8s nodes
+  sudo rm -rf /mnt/opea-models/; sudo mkdir /mnt/opea-models/; sudo chmod 777 /mnt/opea-models/
+
+ii. scp to k8s nodes
+  example: scp -r cli.data/* vagrant@192.168.1.22:/mnt/opea-models/
+
+4.b k8s daemonset (slow)
+  10_offline_install_models.sh
+
+5. 11.a_offline_install.sh
+  this script is to offline install opea chaqna in k8s. you need to change docker registry
