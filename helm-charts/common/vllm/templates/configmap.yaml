@@ -39,3 +39,6 @@ data:
   {{- if .Values.VLLM_TORCH_PROFILER_DIR }}
   VLLM_TORCH_PROFILER_DIR: {{ .Values.VLLM_TORCH_PROFILER_DIR | quote }}
   {{- end }}
+  {{- if .Values.PT_HPUGRAPH_DISABLE_TENSOR_CACHE }}
+  PT_HPUGRAPH_DISABLE_TENSOR_CACHE: {{ .Values.PT_HPUGRAPH_DISABLE_TENSOR_CACHE | quote }}
+  {{- end }}

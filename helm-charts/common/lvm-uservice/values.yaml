@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 # Default values for lvm-uservice.
@@ -8,11 +8,14 @@
 # Set it as a non-null string, such as true, if you want to enable.
 LOGFLAG: ""
 # backend inference engine to use, i.e. TGI, LLaVA, VideoLlama, LlamaVision, PredictionGuard
-LVM_BACKEND: "TGI"
+LVM_BACKEND: "vLLM"
 # maximum image number sent to backend, only valid for TGI, LLaVa backend
 MAX_IMAGES: 1
 # inference engine service URL, e.g. http://tgi:80
 LVM_ENDPOINT: ""
+
+# VLLM backend requires LLM_MODEL_ID being set and consistent with vLLM setting.
+LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
 
 replicaCount: 1
 
@@ -105,6 +108,10 @@ global:
   prometheusRelease: prometheus-stack
 
 # For CI tests only
+vllm:
+  enabled: false
+  LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
+  extraCmdArgs: ["--chat-template", "examples/template_llava.jinja"]
 tgi:
   enabled: false
   LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
