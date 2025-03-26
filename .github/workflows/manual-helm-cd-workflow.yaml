@@ -3,6 +3,8 @@
 
 name: GenAIInfra Helm CD workflow on manual event
 on:
+  schedule:
+    - cron: "0 0 * * 6"
   workflow_dispatch:
     inputs:
       workloads:
@@ -39,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.opea_branch }}
+          ref: ${{ inputs.opea_branch || 'main' }}
 
       - name: Get test Services
         id: get-services
@@ -120,8 +122,8 @@ jobs:
       matrix: ${{ fromJSON(needs.get-build-matrix.outputs.run_matrix) }}
     uses: ./.github/workflows/_helm-e2e.yaml
     with:
-      tag: ${{ inputs.tag }}
-      dockerhub: ${{ inputs.dockerhub }}
+      tag: ${{ inputs.tag || 'latest' }}
+      dockerhub: ${{ inputs.dockerhub || false }}
       workload: ${{ matrix.directory }}/${{ matrix.example }}
       hardware: ${{ matrix.hardware }}
       valuefile: ${{ matrix.valuefile }}
