@@ -1,0 +1,28 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- range $key, $value := .Values.rbac.roleBindings }}
+{{- if $value.createBinding }}
+apiVersion: rbac.authorization.k8s.io/v1
+{{- if $value.scope.cluster }}
+kind: ClusterRoleBinding
+{{- else }}
+kind: RoleBinding
+{{- end }}
+metadata:
+  name: {{ .name }}
+{{- if eq $value.scope.cluster false }}
+  namespace: {{ $value.scope.namespace }}
+{{- end }}
+subjects:
+- kind: {{ $value.subjects.kind | default "ServiceAccount" }}
+  name: {{ $value.subjects.name }}
+  namespace: {{ $value.subjects.namespace }}
+  apiGroup: ""
+roleRef:
+  kind: {{ $value.roleRef.kind }}
+  name: {{ $value.roleRef.name }}
+  apiGroup: rbac.authorization.k8s.io
+---
+{{- end }}
+{{- end }}
