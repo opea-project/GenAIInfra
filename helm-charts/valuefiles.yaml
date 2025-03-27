@@ -15,10 +15,14 @@ chatqna:
     - cpu-values.yaml
     - cpu-qdrant-values.yaml
     - cpu-tgi-values.yaml
-    - gaudi-vllm-values.yaml
+    - gaudi-values.yaml
     - gaudi-tgi-values.yaml
     - guardrails-gaudi-values.yaml
     - norerank-values.yaml
+    - faqgen-cpu-values.yaml
+    - faqgen-cpu-tgi-values.yaml
+    - faqgen-gaudi-values.yaml
+    - faqgen-gaudi-tgi-values.yaml
 agentqna:
   src_repo: GenAIInfra
   src_dir: helm-charts/agentqna
