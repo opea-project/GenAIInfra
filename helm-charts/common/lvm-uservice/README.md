@@ -8,11 +8,13 @@ lvm-uservice depends on one of the following backend services:
 
 - TGI: please refer to [tgi](../tgi) chart for more information
 
+- vLLM: please refer to [vllm](../vllm) chart for more information
+
 - one of the large vision model inference engine: please refer to [lvm-serve](../lvm-serve) chart for more information
 
-First, you need to get the dependent service deployed, i.e. deploy the tgi helm chart, or lvm helm chart.
+First, you need to get the dependent service deployed, i.e. deploy the tgi helm chart, vllm helm chart or lvm helm chart.
 
-After you've deployed the dependent service successfully, please run `kubectl get svc` to get the backend service URL, e.g. `http://tgi`, `http://lvm-serve`.
+After you've deployed the dependent service successfully, please run `kubectl get svc` to get the backend service URL, e.g. `http://tgi`, `http://myvllm` or `http://lvm-serve`.
 
 To install the `lvm-uservice` chart, run the following:
 
@@ -21,10 +23,16 @@ cd GenAIInfra/helm-charts/common/lvm-uservice
 helm dependency update
 export HFTOKEN="insert-your-huggingface-token-here"
 
+# Use vLLM as the backend
+export LLM_MODEL_ID="model-id-used-for-vllm"
+export LVM_BACKEND="vLLM"
+export LVM_ENDPOINT="http://myvllm"
+helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LLM_MODEL_ID=${LLM_MODEL_ID} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
+
 # Use TGI as the backend
-export LVM_BACKEND="TGI"
-export LVM_ENDPOINT="http://tgi"
-helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
+# export LVM_BACKEND="TGI"
+# export LVM_ENDPOINT="http://tgi"
+# helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
 
 # Use other lvm-serve engine variant as the backend, see file `values.yaml` more details
 # export LVM_ENDPOINT="http://lvm-serve"
@@ -49,9 +57,9 @@ curl http://localhost:9000/v1/lvm \
 
 ## Values
 
-| Key                             | Type   | Default | Description                                                                                       |
-| ------------------------------- | ------ | ------- | ------------------------------------------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`    | Your own Hugging Face API token                                                                   |
-| LVM_BACKEND                     | string | `"TGI"` | lvm backend engine, possible value "TGI", "LLaVA", "VideoLlama", "LlamaVision", "PredictionGuard" |
-| LVM_ENDPOINT                    | string | `""`    | LVM endpoint                                                                                      |
-| global.monitoring               | bool   | `false` | Service usage metrics                                                                             |
+| Key                             | Type   | Default  | Description                                                                                               |
+| ------------------------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------- |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `""`     | Your own Hugging Face API token                                                                           |
+| LVM_BACKEND                     | string | `"vLLM"` | lvm backend engine, possible value "vLLM", "TGI", "LLaVA", "VideoLlama", "LlamaVision", "PredictionGuard" |
+| LVM_ENDPOINT                    | string | `""`     | LVM endpoint                                                                                              |
+| global.monitoring               | bool   | `false`  | Service usage metrics                                                                                     |

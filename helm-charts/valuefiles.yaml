@@ -97,7 +97,9 @@ visualqna:
   dest_dir: VisualQnA/kubernetes/helm
   values:
     - cpu-values.yaml
+    - cpu-tgi-values.yaml
     - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
 
 # Components
 agent:

@@ -3,7 +3,28 @@
 Helm chart for deploying VisualQnA service. VisualQnA depends on the following services:
 
 - [lvm-uservice](../common/lvm-uservice/README.md)
-- [tgi](../common/tgi/README.md)
+- [vllm](../common/vllm/README.md)
+
+## Installing the Chart
+
+To install the chart, run the following:
+
+```console
+cd GenAIInfra/helm-charts/
+./update_dependency.sh
+helm dependency update visualqna
+export HFTOKEN="insert-your-huggingface-token-here"
+export MODELDIR="/mnt/opea-models"
+# To use CPU with vLLM
+helm install visualqna visualqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR}
+# To use Gaudi with vLLM
+# helm install visualqna visualqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f visualqna/gaudi-values.yaml
+
+```
+
+### IMPORTANT NOTE
+
+1. Make sure your `MODELDIR` exists on the node where your workload is scheduled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
 
 ## Verify
 
@@ -41,5 +62,5 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 | ----------------- | ------ | ------------------------------------- | -------------------------------------------------------------------------------------- |
 | image.repository  | string | `"opea/visualqna"`                    |                                                                                        |
 | service.port      | string | `"8888"`                              |                                                                                        |
-| tgi.LLM_MODEL_ID  | string | `"llava-hf/llava-v1.6-mistral-7b-hf"` | Models id from https://huggingface.co/, or predownloaded model directory               |
+| vllm.LLM_MODEL_ID | string | `"llava-hf/llava-v1.6-mistral-7b-hf"` | Models id from https://huggingface.co/, or predownloaded model directory               |
 | global.monitoring | bool   | `false`                               | Enable usage metrics for the service components. See ../monitoring.md before enabling! |

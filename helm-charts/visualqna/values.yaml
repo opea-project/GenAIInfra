@@ -63,12 +63,17 @@ autoscaling:
 
 # Override values in specific subcharts
 tgi:
+  enabled: false
   MAX_INPUT_LENGTH: "4096"
   MAX_TOTAL_TOKENS: "8192"
   LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
+vllm:
+  enabled: true
+  LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
 
 lvm-uservice:
-  LVM_BACKEND: "TGI"
+  LVM_BACKEND: "vLLM"
+  LLM_MODEL_ID: llava-hf/llava-v1.6-mistral-7b-hf
 
 nginx:
   service:
