@@ -103,7 +103,8 @@ jobs:
         run: |
           set -xe
           USER_ID=$(whoami)
-          CHART_MOUNT=/mnt/opea-models
+          CHART_MOUNT=/data2/hf_model
+          # CHART_MOUNT=/mnt/opea-models
           echo "should_cleanup=true" >> $GITHUB_ENV
           value_file="${{ inputs.valuefile }}.yaml"
           if [[ ! -f ${{ env.CHART_FOLDER }}/${value_file} ]]; then
