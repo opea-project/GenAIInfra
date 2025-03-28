@@ -21,7 +21,7 @@ on:
         required: false
         type: string
       hardware:
-        default: "xeon"
+        default: "k8s-xeon"
         required: true
         type: string
       valuefile:
@@ -69,7 +69,7 @@ jobs:
           CHART_NAME="${workload_path##*/}"
           echo "CHART_NAME=$CHART_NAME" >> $GITHUB_ENV
           echo "RELEASE_NAME=${CHART_NAME}$(date +%d%H%M%S)" >> $GITHUB_ENV
-          echo "NAMESPACE=infra-${CHART_NAME}-$(date +%d%H%M%S)" >> $GITHUB_ENV
+          echo "NAMESPACE=infra-${CHART_NAME}-$(head -c 4 /dev/urandom | xxd -p)" >> $GITHUB_ENV
           echo "ROLLOUT_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "TEST_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "KUBECTL_TIMEOUT_SECONDS=60s" >> $GITHUB_ENV
@@ -103,7 +103,7 @@ jobs:
         run: |
           set -xe
           USER_ID=$(whoami)
-          CHART_MOUNT=/mnt/opea-models
+          CHART_MOUNT=/data2/hf_model
           echo "should_cleanup=true" >> $GITHUB_ENV
           value_file="${{ inputs.valuefile }}.yaml"
           if [[ ! -f ${{ env.CHART_FOLDER }}/${value_file} ]]; then
