@@ -47,8 +47,8 @@ podSecurityContext: {}
 securityContext:
   # container needs to be run as root to overwrite default nginx config template during launch time
   readOnlyRootFilesystem: false
-  runAsNonRoot: true
-  runAsUser: 101
+  runAsNonRoot: false
+  runAsUser: 0
   capabilities:
     drop:
     - ALL
