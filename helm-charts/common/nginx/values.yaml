@@ -47,8 +47,8 @@ podSecurityContext: {}
 securityContext:
   # container needs to be run as root to overwrite default nginx config template during launch time
   readOnlyRootFilesystem: false
-  runAsNonRoot: false
-  runAsUser: 0
+  runAsNonRoot: true
+  runAsUser: 101
   capabilities:
     drop:
     - ALL
@@ -66,7 +66,7 @@ service:
   # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
   type: ClusterIP
   # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
-  port: 80
+  port: 8080
 
 resources:
   # We usually recommend not to specify default resources and to leave this as a conscious
