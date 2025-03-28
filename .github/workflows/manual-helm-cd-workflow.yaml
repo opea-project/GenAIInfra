@@ -63,7 +63,7 @@ jobs:
                   if [[ "$filename" == *"gaudi"* ]]; then
                     run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"k8s-xeon\", \"valuefile\":\"${filename}\"},"
                   fi
                 fi
               done
@@ -84,7 +84,7 @@ jobs:
                   if [[ "$filename" == *"gaudi"* ]]; then
                     run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"k8s-xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                   fi
                 fi
               done
@@ -104,7 +104,7 @@ jobs:
                   if [[ "$filename" == *"gaudi"* ]]; then
                     run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"k8s-xeon\", \"valuefile\":\"${filename}\"},"
                   fi
                 fi
               done
