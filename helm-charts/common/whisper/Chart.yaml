@@ -8,3 +8,7 @@ type: application
 version: 0-latest
 # The whisper microservice server version
 appVersion: "v1.0"
+dependencies:
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"
