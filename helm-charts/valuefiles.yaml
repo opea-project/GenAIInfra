@@ -72,14 +72,6 @@ docsum:
     - gaudi-values.yaml
     - cpu-tgi-values.yaml
     - gaudi-tgi-values.yaml
-faqgen:
-  src_repo: GenAIInfra
-  src_dir: helm-charts/faqgen
-  dest_repo: GenAIExamples
-  dest_dir: FaqGen/kubernetes/helm
-  values:
-    - cpu-values.yaml
-    - gaudi-values.yaml
 searchqna:
   src_repo: GenAIInfra
   src_dir: helm-charts/searchqna
