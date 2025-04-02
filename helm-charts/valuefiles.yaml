@@ -66,6 +66,8 @@ docsum:
   values:
     - cpu-values.yaml
     - gaudi-values.yaml
+    - cpu-tgi-values.yaml
+    - gaudi-tgi-values.yaml
 faqgen:
   src_repo: GenAIInfra
   src_dir: helm-charts/faqgen
