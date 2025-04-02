@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 # Default values for docsum.
@@ -60,19 +60,19 @@ affinity: {}
 llm-uservice:
   image:
     repository: opea/llm-docsum
-  DOCSUM_BACKEND: "TGI"
+  DOCSUM_BACKEND: "vLLM"
   MAX_INPUT_TOKENS: "1024"
   MAX_TOTAL_TOKENS: "2048"
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 # To override values in TGI/vLLM subcharts
 tgi:
-  enabled: true
+  enabled: false
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
   MAX_INPUT_LENGTH: "1024"
   MAX_TOTAL_TOKENS: "2048"
 vllm:
-  enabled: false
+  enabled: true
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
 # Use docsum gradio UI

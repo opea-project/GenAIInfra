@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 llm-uservice:
-  DOCSUM_BACKEND: "vLLM"
+  DOCSUM_BACKEND: "TGI"
 tgi:
-  enabled: false
-vllm:
   enabled: true
+vllm:
+  enabled: false
