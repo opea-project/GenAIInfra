@@ -1,9 +1,12 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-image:
-  repository: opea/chatqna-guardrails
+# Accelerate inferencing in heaviest components to improve performance
+# by overriding their subchart values
 
+image:
+  repository: opea/chatqna
+CHATQNA_TYPE: "CHATQNA_GUARDRAILS"
 # guardrails related config
 guardrails-usvc:
   enabled: true
