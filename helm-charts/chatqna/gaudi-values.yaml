@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 # Accelerate inferencing in heaviest components to improve performance
@@ -44,7 +44,5 @@ teirerank:
       habana.ai/gaudi: 1
   securityContext:
     readOnlyRootFilesystem: false
-  livenessProbe:
-    timeoutSeconds: 1
   readinessProbe:
     timeoutSeconds: 1

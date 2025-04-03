@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 tgi:
@@ -19,10 +19,6 @@ tgi:
   LIMIT_HPU_GRAPH: true
   USE_FLASH_ATTENTION: true
   FLASH_ATTENTION_RECOMPUTE: true
-  livenessProbe:
-    initialDelaySeconds: 5
-    periodSeconds: 5
-    timeoutSeconds: 1
   readinessProbe:
     initialDelaySeconds: 5
     periodSeconds: 5

@@ -81,14 +81,6 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: /health
-    port: http
-  initialDelaySeconds: 8
-  periodSeconds: 8
-  timeoutSeconds: 4
-  failureThreshold: 24
 readinessProbe:
   httpGet:
     path: /health

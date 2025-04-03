@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 # Accelerate inferencing in heaviest components to improve performance
@@ -26,10 +26,6 @@ tgi:
   FLASH_ATTENTION_RECOMPUTE: true
   extraCmdArgs: ["--sharded", "true", "--num-shard", "4"]
 
-  livenessProbe:
-    initialDelaySeconds: 5
-    periodSeconds: 5
-    timeoutSeconds: 1
   readinessProbe:
     initialDelaySeconds: 5
     periodSeconds: 5
