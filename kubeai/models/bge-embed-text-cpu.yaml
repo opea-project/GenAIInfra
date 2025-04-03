@@ -1,0 +1,12 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: bge-embed-text-cpu
+spec:
+  features: [TextEmbedding]
+  url: hf://BAAI/bge-base-en-v1.5
+  cacheProfile: nfs
+  engine: VLLM
+  minReplicas: 1
+  resourceProfile: cpu:1
