@@ -14,6 +14,7 @@ chatqna:
   values:
     - cpu-values.yaml
     - cpu-qdrant-values.yaml
+    - cpu-milvus-values.yaml
     - cpu-tgi-values.yaml
     - gaudi-values.yaml
     - gaudi-tgi-values.yaml
