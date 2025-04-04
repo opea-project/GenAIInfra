@@ -1,6 +1,6 @@
 # KubeAI for OPEA
 
-[KubeAI](https://www.kubeai.org) is an open-source AI inferencing operator. This folder contains documentation, installation instructions and deployment files for running KubeAI with OPEA inference services. 
+[KubeAI](https://www.kubeai.org) is an open-source AI inferencing operator. This folder contains documentation, installation instructions and deployment files for running KubeAI with OPEA inference services.
 
 For now, OPEA enables a subset of the KubeAI features. In the future more KubeAI service will be added.
 
@@ -14,22 +14,22 @@ The following features are available at the moment.
 - Model downloading & inference engine deployment - tested/working
 - Scaling pods to/from zero - tested/working
 - Load based autoscaling - not tested/included
-- Integration with OPEA appplication - missing  
+- Integration with OPEA application - missing
 
 The following models are included.
 
-- Text generation model (llama-3.1-8b) for vLLM (CPU and Gaudi) using PVC  
-- Text embedding model (BAII/BGE) for vLLM (CPU) using PVC  
+- Text generation model (llama-3.1-8b) for vLLM (CPU and Gaudi) using PVC
+- Text embedding model (BAII/BGE) for vLLM (CPU) using PVC
 - Text generation model (qwen-2.5-0.5b) for OLlama (CPU)
 
 # Installation
 
 ## Prerequisites
 
-- Kubernetes cluster  
-- Helm  
+- Kubernetes cluster
+- Helm
 - HF_TOKEN environment variable defined
-- Dynamic Volume Provisioning (optional)  
+- Dynamic Volume Provisioning (optional)
 - Nodes with Gaudi accelerator (optional)
 
 ## Install KubeAI
@@ -76,7 +76,7 @@ The following command will deploy the `Meta-Llama-3.1-8B-Instruct` model with vL
 kubect apply -f models/llama-3.1-8b-instruct-cpu.yaml -n $NAMESPACE
 ```
 
-The deployment will first create a Kubernetes job, which will download the model to a Persistent Volume (PV). 
+The deployment will first create a Kubernetes job, which will download the model to a Persistent Volume (PV).
 
 After the model is downloaded the job is completed and the model server is started. You can verify the model server is running by running the following command.
 
@@ -84,7 +84,7 @@ After the model is downloaded the job is completed and the model server is start
  kubectl get pod -n $NAMESPACE
 ```
 
-You should see a pod running with the name `model-llama-3.1-8b-instruct-cpu-xxxx`. 
+You should see a pod running with the name `model-llama-3.1-8b-instruct-cpu-xxxx`.
 
 ## Text Generation with Llama-3 on Gaudi
 
@@ -114,7 +114,6 @@ Assuming you don’t have any ingress gateway available, you can use the below `
 kubectl port-forward svc/kubeai -n kubeai 8000:80
 ```
 
-   
 Query the models available:
 
 ```

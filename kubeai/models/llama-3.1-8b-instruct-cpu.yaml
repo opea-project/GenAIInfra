@@ -1,3 +1,6 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 # Source: models/templates/models.yaml
 apiVersion: kubeai.org/v1
 kind: Model
@@ -14,6 +17,6 @@ spec:
   env:
     VLLM_CPU_KVCACHE_SPACE: "4"
     https_proxy: http://proxy-chain.intel.com:911
-    no_proxy: .svc.cluster.local,.svc 
+    no_proxy: .svc.cluster.local,.svc
   minReplicas: 1
   resourceProfile: cpu:6
