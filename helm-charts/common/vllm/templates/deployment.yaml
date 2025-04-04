@@ -85,6 +85,12 @@ spec:
           {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           {{- end }}
+          {{- if .Values.extraCmd }}
+          command:
+            {{- range .Values.extraCmd.command }}
+            - {{ . | quote }}
+            {{- end }}
+          {{- end }}
           args:
           {{- if .Values.extraCmdArgs }}
             {{- range .Values.extraCmdArgs }}
