@@ -1,0 +1,43 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Use application E2E metrics for HorizontalPodAutoscaler (HPA)
+#
+# Intended to be used together with:
+# - hpa-values.yaml
+# - gaudi-(vllm|tgi)-values.yaml
+#
+# NOTE: this should be used _only_ after one has manually found
+# suitable backend scaling factors that best match:
+# - selected frontend metric
+# - given service setup
+# - engine version (TGI, TEI, vLLM)
+# - used inference model
+# - inferencing options
+# - used acceleration device (CPU, Gaudi, Nvidia etc)
+# and updated those factors here.
+
+autoscaling:
+  useFrontendMetric: true
+  frontendMetricFactor: 256
+  frontendMetric: megaservice_request_pending
+
+# "frontendMetricFactor" is divider for (average) "frontendMetric" value,
+# to get replica count HPA will apply to given deployment
+
+vllm:
+  autoscaling:
+    useFrontendMetric: true
+    frontendMetricFactor: 128
+tgi:
+  autoscaling:
+    useFrontendMetric: true
+    frontendMetricFactor: 96
+teirerank:
+  autoscaling:
+    useFrontendMetric: true
+    frontendMetricFactor: 512
+tei:
+  autoscaling:
+    useFrontendMetric: true
+    frontendMetricFactor: 512

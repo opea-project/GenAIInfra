@@ -12,9 +12,11 @@ replicaCount: 1
 # - Requires custom metrics ConfigMap available in the main application chart
 # - https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
+  enabled: false
   minReplicas: 1
   maxReplicas: 4
-  enabled: false
+  useFrontendMetric: false
+  frontendMetricFactor: 0
 
 # empty for CPU (longer latencies are tolerated before HPA scaling unaccelerated service)
 accelDevice: ""
