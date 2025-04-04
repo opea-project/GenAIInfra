@@ -1,0 +1,30 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+modelServers:
+  VLLM:
+    images:
+      cpu: "opea/vllm:latest"
+      gaudi: "opea/vllm-gaudi:latest"
+
+cacheProfiles:
+  # Admins can define their own profile settings (and profile names):
+  none: {} # i.e. No caching / used to be default
+  default:
+    sharedFilesystem:
+      storageClassName: ""
+  standard:
+    sharedFilesystem:
+      storageClassName: "standard"
+  nfs:
+    sharedFilesystem:
+      storageClassName: "nfs-csi"
+
+resourceProfiles:
+  gaudi-for-text-generation:
+    imageName: "gaudi"
+    limits:
+      habana.ai/gaudi: 1
+    requests:
+      cpu: "2"
+      memory: "2Gi"
