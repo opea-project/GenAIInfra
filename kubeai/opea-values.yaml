@@ -20,7 +20,8 @@ cacheProfiles:
 resourceProfiles:
   gaudi-for-text-generation:
     imageName: "gaudi"
-    requests:
+    limits:
       habana.ai/gaudi: 1
+    requests:
       cpu: "2"
       memory: "2Gi"
