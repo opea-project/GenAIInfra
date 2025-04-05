@@ -19,28 +19,25 @@ To install the chart, run the following:
 
 ```console
 cd GenAIInfra/helm-charts/
-scripts/update_dependency.sh
+./update_dependency.sh
 helm dependency update chatqna
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="meta-llama/Meta-Llama-3-8B-Instruct"
 # To use CPU with vLLM
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-values.yaml
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device with vLLM
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-vllm-values.yaml
 # To use CPU with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-tgi-values.yaml
 # To use Gaudi device with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-tgi-values.yaml
 # To use Nvidia GPU with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
-# To use CPU with Ollama
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set ollama.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-ollama-values.yaml
-# To include guardrail component in chatqna on Gaudi with vLLM
+# To include guardrail component in chatqna on Gaudi with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
 # To run chatqna with Intel TDX feature
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vllm.LLM_MODEL_ID=${MODELNAME} --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=4Gi --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=7Gi --set tei.tdxEnabled=true --set tei.resources.limits.memory=4Gi --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=6Gi --set nginx.tdxEnabled=true --set chatqna-ui.tdxEnabled=true --set chatqna-ui.resources.limits.memory=2Gi --set data-prep.tdxEnabled=true --set data-prep.resources.limits.memory=11Gi --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=80Gi
-
 # To use CPU with vLLM with Qdrant DB
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-qdrant-values.yaml
 # To use AMD ROCm device with vLLM
