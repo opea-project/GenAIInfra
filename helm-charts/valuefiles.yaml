@@ -158,7 +158,7 @@ llm-uservice:
   dest_dir: comps/llms/deployment/kubernetes
   values:
     - cpu-values.yaml
-    - faq-values.yaml
+    - faqgen-values.yaml
     - docsum-values.yaml
 lvm-uservice:
   src_repo: GenAIInfra
