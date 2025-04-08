@@ -108,7 +108,7 @@ The rest is the same as in the previous example. You should see a pod running wi
 
 # Using the Models
 
-Assuming you don’t have any ingress gateway available, you can use the below `kubectl port-forward` command to access the modes you have deployed.
+Assuming you don’t have any ingress gateway available, you can use the below `kubectl port-forward` command to access the models you have deployed.
 
 ```
 kubectl port-forward svc/kubeai -n kubeai 8000:80
