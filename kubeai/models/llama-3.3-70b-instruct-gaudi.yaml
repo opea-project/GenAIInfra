@@ -1,0 +1,23 @@
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: llama-3.3-70b-instruct-gaudi
+spec:
+  features: [TextGeneration]
+  url: hf://meta-llama/Llama-3.3-70B-Instruct
+  cacheProfile: nfs
+  engine: VLLM
+  args:
+    - --tensor-parallel-size=4
+    - --max-seq_len-to-capture=16384
+    - --enable-auto-tool-choice
+    - --tool-call-parser=llama3_json
+  env:
+    OMPI_MCA_btl_vader_single_copy_mechanism: none
+    PT_HPU_ENABLE_LAZY_COLLECTIVES: "true"
+    VLLM_SKIP_WARMUP: "true"
+
+  minReplicas: 1
+  maxReplicas: 2
+  resourceProfile: gaudi-for-text-generation:4
