@@ -38,12 +38,21 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
 # To run chatqna with Intel TDX feature
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vllm.LLM_MODEL_ID=${MODELNAME} --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=4Gi --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=7Gi --set tei.tdxEnabled=true --set tei.resources.limits.memory=4Gi --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=6Gi --set nginx.tdxEnabled=true --set chatqna-ui.tdxEnabled=true --set chatqna-ui.resources.limits.memory=2Gi --set data-prep.tdxEnabled=true --set data-prep.resources.limits.memory=11Gi --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=80Gi
-
 # To use CPU with vLLM with Qdrant DB
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-qdrant-values.yaml
+# To use AMD ROCm device with vLLM
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/rocm-values.yaml
+# To use AMD ROCm device with TGI
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/rocm-tgi-values.yaml
 
 # To deploy FaqGen
 #helm install faqgen chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/faqgen-cpu-values.yaml
+
+# To deploy FaqGen based application on AMD ROCm device with vLLM
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/faqgen-rocm-values.yaml
+# To deploy FaqGen based application on AMD ROCm device with TGI
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/faqgen-rocm-tgi-values.yaml
+
 ```
 
 ### IMPORTANT NOTE
