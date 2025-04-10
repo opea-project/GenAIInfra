@@ -79,7 +79,11 @@ terraform plan --var-file opea-chatqna.tfvars -out opea-chatqna.plan
 terraform apply "opea-chatqna.plan"
 ```
 
-Once the cluster is ready, the kubeconfig file to access the new cluster is updated automatically. By default, the file is `~/.kube/config`.
+Once the cluster is ready, update kubectl config
+
+```bash
+gcloud container clusters get-credentials "project_id"-gke --region us-central1 --project "project_id"
+```
 
 Now you should have access to the cluster via the `kubectl` command.
 

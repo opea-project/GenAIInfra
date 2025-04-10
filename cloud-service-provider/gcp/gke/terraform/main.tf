@@ -1,6 +1,3 @@
-# Copyright (c) HashiCorp, Inc.
-# SPDX-License-Identifier: MPL-2.0
-
 # GKE cluster
 data "google_container_engine_versions" "gke_version" {
   location       = var.region
