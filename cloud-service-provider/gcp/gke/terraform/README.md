@@ -14,7 +14,6 @@ The setup uses Terraform to create GKE cluster with the following properties:
 - 1-node GKE cluster with 100 GB disk and `n4-standard-8` preemptible SPOT instance (8 vCPU and 32 GB memory)
 - Cluster autoscaling up to 5 nodes
 
-
 Pre GKE Cluster setup
 
 - After you've installed the gcloud SDK, initialize it by running the following command.
@@ -22,8 +21,8 @@ Pre GKE Cluster setup
 ```bash
 gcloud init
 ```
-- This will authorize the SDK to access GCP using your user account credentials and add the SDK to your PATH. This steps requires you to login and select the project you want to work in. Finally, add your account to the Application Default Credentials (ADC). This will allow Terraform to access these credentials to provision resources on GCloud.
 
+- This will authorize the SDK to access GCP using your user account credentials and add the SDK to your PATH. This steps requires you to login and select the project you want to work in. Finally, add your account to the Application Default Credentials (ADC). This will allow Terraform to access these credentials to provision resources on GCloud.
 
 ```bash
 gcloud auth application-default login
@@ -42,17 +41,20 @@ In here, you will find four files used to provision a VPC, subnets and a GKE clu
 ## Update your terraform.tfvars file
 
 Replace the values in your terraform.tfvars file with your project_id and region. Terraform will use these values to target your project when provisioning your resources. Your terraform.tfvars file should look like the following.
+
 ```bash
  # terraform.tfvars
   project_id = "REPLACE_ME"
   region     = "us-central1"
 ```
+
 You can find the project your gcloud is configured to with this command.
+
 ```bash
  gcloud config get-value project
 ```
-The region has been defaulted to us-central1; you can find a full list of gcloud regions - https://cloud.google.com/compute/docs/regions-zones
 
+The region has been defaulted to us-central1; you can find a full list of gcloud regions - https://cloud.google.com/compute/docs/regions-zones
 
 Initialize the Terraform environment.
 
@@ -66,7 +68,7 @@ By default, 1-node cluster is created which is suitable for running the OPEA app
 
 ## Persistent Volume Claim
 
-OPEA needs a volume where to store the model. For that we need to create Kubernetes Persistent Volume Claim (PVC). OPEA requires `ReadWriteOnce` option since multiple pods needs access to the storage and they can be on different nodes. On GKE, We are installing Storage Class that support n4-standard-8 which is hyper-balanced . Thus, each OPEA application below uses the file `eks-fs-pvc.yaml` to create Storage Class and  PVC in its namespace.
+OPEA needs a volume where to store the model. For that we need to create Kubernetes Persistent Volume Claim (PVC). OPEA requires `ReadWriteOnce` option since multiple pods needs access to the storage and they can be on different nodes. On GKE, We are installing Storage Class that support n4-standard-8 which is hyper-balanced . Thus, each OPEA application below uses the file `eks-fs-pvc.yaml` to create Storage Class and PVC in its namespace.
 
 ## OPEA Applications
 
