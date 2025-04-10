@@ -89,7 +89,7 @@ You should see a pod running with the name `model-llama-3.1-8b-instruct-cpu-xxxx
 
 ## Text Generation with Llama-3 on Gaudi
 
-The following command will deploy the `Meta-Llama-3.1-8B-Instruct` and/or `Meta-Llama-3.3-70B-Instruct` model with vLLM engine using Gaudi accelerator.
+The following commands will deploy `Meta-Llama-3.1-8B-Instruct` and `Meta-Llama-3.3-70B-Instruct` models with the vLLM engine using Gaudi accelerators.
 
 ```
 # Meta-Llama-3.1-8B-Instruct model
@@ -98,7 +98,7 @@ kubect apply -f models/llama-3.1-8b-instruct-gaudi.yaml -n $NAMESPACE
 kubect apply -f models/llama-3.3-70b-instruct-gaudi.yaml -n $NAMESPACE
 ```
 
-The rest is the same as in the previous example. You should see a pod running with the name `model-llama-3.1-8b-instruct-gpu-xxxx` or `model-llama-3.3-70b-instruct-gpu-xxxx`.
+The rest is the same as in the previous example. You should see a pod running with the name `model-llama-3.1-8b-instruct-gpu-xxxx` and/or `model-llama-3.3-70b-instruct-gpu-xxxx`.
 
 ## Text Embeddings with BGE on CPU
 
