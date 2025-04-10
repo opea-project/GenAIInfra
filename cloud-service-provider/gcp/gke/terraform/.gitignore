@@ -9,3 +9,5 @@ compile_commands.json
 .gitconfig
 terraform.tfstate
 terraform.tfstate.backup
+.terraform
+.gitignore
