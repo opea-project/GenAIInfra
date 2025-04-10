@@ -64,3 +64,9 @@ data:
   {{- if .Values.BATCH_BUCKET_SIZE }}
   BATCH_BUCKET_SIZE: {{ .Values.BATCH_BUCKET_SIZE | quote }}
   {{- end }}
+  {{- if .Values.HIP_VISIBLE_DEVICES }}
+  HIP_VISIBLE_DEVICES: {{ .Values.HIP_VISIBLE_DEVICES | quote }}
+  {{- end }}
+  {{- if .Values.MAX_BATCH_SIZE }}
+  MAX_BATCH_SIZE: {{ .Values.MAX_BATCH_SIZE | quote }}
+  {{- end }}
