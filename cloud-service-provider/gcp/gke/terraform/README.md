@@ -12,7 +12,7 @@ This guide shows how to deploy OPEA applications on Google Cloud Platform (GCP) 
 The setup uses Terraform to create GKE cluster with the following properties:
 
 - 1-node GKE cluster with 100 GB disk and `n4-standard-8` preemptible SPOT instance (8 vCPU and 32 GB memory)
-- Cluster autoscaling up to 3 nodes
+- Cluster autoscaling up to 5 nodes
 
 
 Pre GKE Cluster setup
@@ -62,11 +62,11 @@ terraform init
 
 ## GKE cluster
 
-By default, 1-node cluster is created which is suitable for running the OPEA application. See `variables.tf` and `opea-<application-name>.tfvars` if you want to tune the cluster properties, e.g., number of nodes, instance types or disk size.
+By default, 1-node cluster is created which is suitable for running the OPEA application. See `main.tf` upto max_node_count = 5, if you want to tune the cluster properties, e.g., number of nodes, instance types or disk size.
 
 ## Persistent Volume Claim
 
-OPEA needs a volume where to store the model. For that we need to create Kubernetes Persistent Volume Claim (PVC). OPEA requires `ReadWriteMany` option since multiple pods needs access to the storage and they can be on different nodes. On GKE, only EFS supports `ReadWriteMany`. Thus, each OPEA application below uses the file `eks-efs-csi-pvc.yaml` to create PVC in its namespace.
+OPEA needs a volume where to store the model. For that we need to create Kubernetes Persistent Volume Claim (PVC). OPEA requires `ReadWriteOnce` option since multiple pods needs access to the storage and they can be on different nodes. On GKE, We are installing Storage Class that support n4-standard-8 which is hyper-balanced . Thus, each OPEA application below uses the file `eks-fs-pvc.yaml` to create Storage Class and  PVC in its namespace.
 
 ## OPEA Applications
 
@@ -89,10 +89,10 @@ Deploy ChatQnA Application with Helm
 helm install -n chatqna --create-namespace chatqna oci://ghcr.io/opea-project/charts/chatqna --set service.type=LoadBalancer --set global.modelUsePVC=model-volume --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 ```
 
-Create the PVC as mentioned [above](#-persistent-volume-claim)
+Create the Storage Class and PVC as mentioned [above](#-persistent-volume-claim)
 
 ```bash
-kubectl apply -f eks-efs-csi-pvc.yaml -n chatqna
+kubectl apply -f gke-fs-pvc.yaml -n chatqna
 ```
 
 After a while, the OPEA application should be running. You can check the status via `kubectl`.
