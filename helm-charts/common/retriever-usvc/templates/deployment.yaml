@@ -83,7 +83,8 @@ spec:
             - mountPath: /tmp
               name: tmp
             - mountPath: /home/user/nltk_data
-              name: nltk-data
+              subPath: nltk_data
+              name: model-volume
           {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
@@ -101,8 +102,21 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
-        - name: nltk-data
+        - name: model-volume
+          {{- if .Values.global.offline }}
+          {{- if .Values.global.modelUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
+          {{- else if .Values.global.modelUseHostPath }}
+          hostPath:
+             path: {{ .Values.global.modelUseHostPath }}
+             type: Directory
+          {{- else }}
+          {{- fail "Need to set global.modelUsePVC or global.modelUseHostPath in case of offline mode" }}
+          {{- end }}
+          {{- else }}
           emptyDir: {}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

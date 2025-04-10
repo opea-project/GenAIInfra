@@ -85,7 +85,11 @@ spec:
             - mountPath: /home/user/comps/dataprep/src/uploaded_files
               name: uploaded-files
             - mountPath: /home/user/nltk_data
-              name: nltk-data
+              subPath: nltk_data
+              name: model-volume
+            - mountPath: /home/user/comps/dataprep/src/unstructuredio/yolo_x_layout
+              subPath: unstructuredio/yolo_x_layout
+              name: model-volume
             - mountPath: /home/user/.config
               name: user-config-data
           {{- if .Values.livenessProbe }}
@@ -107,10 +111,23 @@ spec:
           emptyDir: {}
         - name: uploaded-files
           emptyDir: {}
-        - name: nltk-data
-          emptyDir: {}
         - name: user-config-data
           emptyDir: {}
+        - name: model-volume
+          {{- if .Values.global.offline }}
+          {{- if .Values.global.modelUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
+          {{- else if .Values.global.modelUseHostPath }}
+          hostPath:
+             path: {{ .Values.global.modelUseHostPath }}
+             type: Directory
+          {{- else }}
+          {{- fail "Need to set global.modelUsePVC or global.modelUseHostPath in case of offline mode" }}
+          {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
