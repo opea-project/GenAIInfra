@@ -54,6 +54,18 @@ If you want to try with latest version, use `helm pull oci://ghcr.io/opea-projec
 export HUGGINGFACEHUB_API_TOKEN="YourOwnToken"
 helm pull oci://ghcr.io/opea-project/charts/agentqna --untar
 helm install agentqna agentqna -f agentqna/gaudi-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+
+# To use AMD ROCm device
+cd GenAIInfra/helm-charts/
+./update_dependency.sh
+helm dependency update agentqna
+export HFTOKEN="your_huggingface_token"
+export MODELDIR="/mnt/opea-models"
+# with vLLM
+helm upgrade --install agentqna agentqna -f agentqna/rocm-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+
+# with TGI
+helm upgrade --install agentqna agentqna -f agentqna/rocm-tgi-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
 ```
 
 ## Verify
@@ -81,5 +93,5 @@ Open another terminal and run the following command to verify the service if wor
 curl http://localhost:9090/v1/chat/completions \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"messages": "How many albums does Iron Maiden have?"}'
+    -d '{"model": "meta-llama/Meta-Llama-3-8B-Instruct","messages": "How many albums does Iron Maiden have?"}'
 ```
