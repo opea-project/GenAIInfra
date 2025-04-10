@@ -13,7 +13,7 @@ resource "google_container_cluster" "primary" {
   # node pool and immediately delete it.
   remove_default_node_pool = true
   initial_node_count       = 1
-  node_locations = ["us-central1-a"]
+  node_locations           = ["us-central1-a"]
 
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
