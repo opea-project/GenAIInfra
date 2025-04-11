@@ -71,6 +71,9 @@ vllm:
   LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
   shmSize: 128Gi
   VLLM_TORCH_PROFILER_DIR: "/tmp/vllm_profile"
+ipexllm:
+  enabled: false
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 data-prep:
   # the following are for redis-vector-db
   DATAPREP_BACKEND: "REDIS"
