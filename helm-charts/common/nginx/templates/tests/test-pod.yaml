@@ -18,7 +18,7 @@ spec:
         - |
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
-            curl http://{{ include "nginx.fullname" . }}:{{ .Values.service.port }}/home -sS --fail-with-body && break;
+            curl http://{{ include "nginx.fullname" . }}:{{ .Values.service.port }}/home4 -sS --fail-with-body && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
