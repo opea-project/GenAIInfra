@@ -1,0 +1,34 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- if .Values.nginx.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nginx-config
+  labels:
+    {{- include "codegen.labels" . | nindent 4 }}
+data:
+  FRONTEND_SERVICE_IP: {{ include "ui.fullname" (index .Subcharts "codegen-ui") | quote }}
+  FRONTEND_SERVICE_PORT: {{ index .Values "codegen-ui" "service" "port" | quote }}
+  BACKEND_SERVICE_NAME: codegen
+  BACKEND_SERVICE_IP: {{ include "codegen.fullname" . | quote }}
+  BACKEND_SERVICE_PORT: {{ .Values.service.port | quote }}
+{{- else }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-opea-ui-config
+  labels:
+    {{- include "codegen.labels" . | nindent 4 }}
+data:
+  DATAPREP_ENDPOINT: {{ (printf "http://%s:%s/v1/dataprep" (include "data-prep.fullname" (index .Subcharts "data-prep")) (toString (index .Values "data-prep" "service" "port"))) | quote }}
+  BACKEND_SERVICE_ENDPOINT: {{ (printf "http://%s:%s/v1/codegen" (include "codegen.fullname" .) (toString .Values.service.port)) | quote }}
+  http_proxy: {{ .Values.global.http_proxy | quote }}
+  https_proxy: {{ .Values.global.https_proxy | quote }}
+  {{- if or .Values.global.http_proxy .Values.global.https_proxy }}
+  no_proxy: {{ (printf "%s,%s,%s" (include "codegen.fullname" .) (include "data-prep.fullname" (index .Subcharts "data-prep")) .Values.global.no_proxy) | quote }}
+  {{- else }}
+  no_proxy: {{ .Values.global.no_proxy | quote }}
+  {{- end }}
+{{- end }}
