@@ -149,9 +149,7 @@ jobs:
             echo "Skip validate"
           else
             chart=${{ env.CHART_NAME }}
-            helm test -n $NAMESPACE $RELEASE_NAME --logs --timeout "$TEST_TIMEOUT_SECONDS"
-            exit_code=$?
-            if [ $exit_code -ne 0 ]; then
+            if ! helm test -n $NAMESPACE $RELEASE_NAME --logs --timeout "$TEST_TIMEOUT_SECONDS" ; then
                 echo "Chart ${chart} test failed, dumping pods logs ..."
                 .github/workflows/scripts/e2e/chart_test.sh dump_all_pod_logs $NAMESPACE
                 exit 1
