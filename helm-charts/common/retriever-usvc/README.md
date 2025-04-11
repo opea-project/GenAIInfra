@@ -42,6 +42,31 @@ helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPO
 # helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set QDRANT_HOST=${DB_HOST}
 ```
 
+### Install the microservice in airgap offline mode
+
+To support running this microservice in airgap offline environment, users are required to manually download the offline data including the nltk data in a shared storage, below is the example to use node level local directory to download the offline data:
+
+Suppose we share the model data on node-level using local directory `/mnt/opea-models`
+
+```
+# On every K8s node, run the following command:
+export MODELDIR=/mnt/opea-models
+# Download nltk data, suppose you have installed python nltk modules
+python -m nltk.downloader -d ${MODELDIR}/nltk_data all && chmod -R a+r ${MODELDIR}/nltk_data
+
+# Install using helm with the following additional parameters:
+# helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODELDIR}
+```
+
+Suppose we share the model data on cluster level using a persistent volume(PV), first we need to create a persistent volume claim(PVC) with name `opea-model-pvc`:
+
+```
+# Download nltk data and model into the `nltk_data` directory at the root of the corresponding PV
+# Install using helm with the following additional parameters:
+# export PVC=opea-model-pvc
+# helm install ... ... --set global.offline=true,global.modelUsePVC=${PVC}
+```
+
 ## Verify
 
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.

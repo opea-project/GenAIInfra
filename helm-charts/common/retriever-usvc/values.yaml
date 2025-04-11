@@ -124,6 +124,17 @@ global:
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
   sharedSAName: ""
 
+  # Running service in airgap offline mode
+  # If offline is enabled, user must set either modelUseHostPath or modelUsePVC and
+  # download nltk data out of band.
+  offline: false
+  # To store offline data in local directory for one node K8s environment, set modelUseHostPath
+  # Download nltk data: python -m nltk.downloader -d <modelUseHostPath>/nltk_data all && chmod a+r <modelUseHostPath>/nltk_data
+  modelUseHostPath: ""
+  # To store offline data in persistent volume(PV) to be shared by multinode K8s environment, set modelUsePVC
+  # then follow the above similar steps to download nltk data to the root directory of that PV
+  modelUsePVC: ""
+
   # Install Prometheus serviceMonitor for service
   monitoring: false
 
