@@ -18,8 +18,9 @@ The following features are available at the moment.
 
 The following models are included.
 
-- Text generation model (llama-3.1-8b) for vLLM (CPU and Gaudi) using PVC
-- Text embedding model (BAII/BGE) for vLLM (CPU) using PVC
+- Text generation model (llama-3.1-8b) for vLLM (CPU and Gaudi)
+- Text generation model (llama-3.3-70b) for vLLM (Gaudi)
+- Text embedding model (BAII/BGE) for vLLM (CPU)
 - Text generation model (qwen-2.5-0.5b) for OLlama (CPU)
 
 # Installation
@@ -28,7 +29,7 @@ The following models are included.
 
 - Kubernetes cluster
 - Helm
-- HF_TOKEN environment variable defined
+- HF_TOKEN ([HuggingFace](https://huggingface.co/docs/hub/security-tokens)) token
 - Dynamic Volume Provisioning (optional)
 - Nodes with Gaudi accelerator (optional)
 
@@ -88,13 +89,16 @@ You should see a pod running with the name `model-llama-3.1-8b-instruct-cpu-xxxx
 
 ## Text Generation with Llama-3 on Gaudi
 
-The following command will deploy the `Meta-Llama-3.1-8B-Instruct` model with vLLM engine using Gaudi accelerator.
+The following commands will deploy `Meta-Llama-3.1-8B-Instruct` and `Meta-Llama-3.3-70B-Instruct` models with the vLLM engine using Gaudi accelerators.
 
 ```
+# Meta-Llama-3.1-8B-Instruct model
 kubect apply -f models/llama-3.1-8b-instruct-gaudi.yaml -n $NAMESPACE
+# Meta-Llama-3.3-70B-Instruct model
+kubect apply -f models/llama-3.3-70b-instruct-gaudi.yaml -n $NAMESPACE
 ```
 
-The rest is the same as in the previous example. You should see a pod running with the name `model-llama-3.1-8b-instruct-gpu-xxxx`.
+The rest is the same as in the previous example. You should see a pod running with the name `model-llama-3.1-8b-instruct-gpu-xxxx` and/or `model-llama-3.3-70b-instruct-gpu-xxxx`.
 
 ## Text Embeddings with BGE on CPU
 
