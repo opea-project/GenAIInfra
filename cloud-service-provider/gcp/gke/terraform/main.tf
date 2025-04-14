@@ -5,15 +5,15 @@ data "google_container_engine_versions" "gke_version" {
 }
 
 resource "google_container_cluster" "primary" {
-  name     = "${var.project_id}-gke"
+  name     = "${var.cluster_name}-gke"
   location = var.region
 
   # We can't create a cluster with no node pool defined, but we want to only use
   # separately managed node pools. So we create the smallest possible default
   # node pool and immediately delete it.
   remove_default_node_pool = true
-  initial_node_count       = 1
-  node_locations           = ["us-central1-a"]
+  initial_node_count       = var.initial_node_count
+  node_locations           = var.node_locations
 
   network    = google_compute_network.vpc.name
   subnetwork = google_compute_subnetwork.subnet.name
@@ -27,15 +27,15 @@ resource "google_container_node_pool" "primary_nodes" {
 
   version        = data.google_container_engine_versions.gke_version.release_channel_default_version["STABLE"]
   node_count     = var.gke_num_nodes
-  node_locations = ["us-central1-a"]
+  node_locations = var.node_locations
   autoscaling {
-    max_node_count = 5
-    min_node_count = 1
+    max_node_count = var.max_node_count
+    min_node_count = var.min_node_count
   }
 
 
   node_config {
-    disk_size_gb = 100
+    disk_size_gb = var.disk_size_gb
     disk_type    = "hyperdisk-balanced"
     oauth_scopes = [
       "https://www.googleapis.com/auth/logging.write",
@@ -43,35 +43,16 @@ resource "google_container_node_pool" "primary_nodes" {
     ]
 
     labels = {
-      env = var.project_id
+      env = var.cluster_name
     }
 
     preemptible  = true
-    image_type   = "COS_CONTAINERD"
-    machine_type = "n4-standard-8"
-    tags         = ["gke-node", "${var.project_id}-gke"]
+    image_type   = var.image_type
+    machine_type = var.machine_type
+    tags         = ["gke-node", "${var.cluster_name}-gke"]
     metadata = {
       disable-legacy-endpoints = "true"
     }
   }
 }
 
-
-# # Kubernetes provider
-# # The Terraform Kubernetes Provider configuration below is used as a learning reference only. 
-# # It references the variables and resources provisioned in this file. 
-# # We recommend you put this in another file -- so you can have a more modular configuration.
-# # https://learn.hashicorp.com/terraform/kubernetes/provision-gke-cluster#optional-configure-terraform-kubernetes-provider
-# # To learn how to schedule deployments and services using the provider, go here: https://learn.hashicorp.com/tutorials/terraform/kubernetes-provider.
-
-# provider "kubernetes" {
-#   load_config_file = "false"
-
-#   host     = google_container_cluster.primary.endpoint
-#   username = var.gke_username
-#   password = var.gke_password
-
-#   client_certificate     = google_container_cluster.primary.master_auth.0.client_certificate
-#   client_key             = google_container_cluster.primary.master_auth.0.client_key
-#   cluster_ca_certificate = google_container_cluster.primary.master_auth.0.cluster_ca_certificate
-# }

@@ -10,4 +10,7 @@ compile_commands.json
 terraform.tfstate
 terraform.tfstate.backup
 .terraform
+.terraform.lock.hcl
+.terraform/*
 .gitignore
+opea-chatqna.plan

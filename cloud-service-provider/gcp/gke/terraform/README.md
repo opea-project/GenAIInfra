@@ -34,16 +34,16 @@ In here, you will find four files used to provision a VPC, subnets and a GKE clu
 
 - main.tf provisions a GKE cluster and a separately managed node pool (recommended). Separately managed node pools allows you to customize your Kubernetes cluster profile — this is useful if some Pods require more resources than others. You can learn more here. The number of nodes in the node pool is defined also defined here.
 
-- terraform.tfvars is a template for the project_id and region variables.
+- opea-chatqna.tfvars is a template for the project_id and region variables.
 
 - versions.tf sets the Terraform version to at least 0.14.
 
-## Update your terraform.tfvars file
+## Update your opea-chatqna.tfvars file
 
-Replace the values in your terraform.tfvars file with your project_id and region. Terraform will use these values to target your project when provisioning your resources. Your terraform.tfvars file should look like the following.
+Replace the values in your opea-chatqna.tfvars file with your project_id and region. Terraform will use these values to target your project when provisioning your resources. Your opea-chatqna.tfvars file should look like the following.
 
 ```bash
- # terraform.tfvars
+ # opea-chatqna.tfvars
   project_id = "REPLACE_ME"
   region     = "us-central1"
 ```
