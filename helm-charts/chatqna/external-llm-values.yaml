@@ -1,0 +1,16 @@
+# External LLM configuration override
+externalLLM:
+  enabled: true  # Enable external LLM service
+  LLM_SERVER_HOST_IP: "http://your-llm-server"  # External LLM service host
+  LLM_MODEL: "your-model"  # LLM model to use
+  OPENAI_API_KEY: "your-api-key"  # OpenAI API key for authentication
+
+# Disable internal LLM services when using external LLM
+llm-uservice:
+  enabled: false
+
+vllm:
+  enabled: false
+
+tgi:
+  enabled: false
