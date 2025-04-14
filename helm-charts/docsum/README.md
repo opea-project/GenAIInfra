@@ -20,6 +20,8 @@ helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --se
 # helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-values.yaml ...
 # To use Gaudi device with TGI
 # helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-tgi-values.yaml ..
+# To use with external OpenAI compatible LLM endpoint
+# helm install docsum docsum -f docsum/external-llm-values.yaml --set externalLLM.LLM_SERVICE_HOST_IP="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
 ```
 
 ## Verify
