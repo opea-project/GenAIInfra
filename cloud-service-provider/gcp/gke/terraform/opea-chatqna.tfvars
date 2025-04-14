@@ -1,5 +1,7 @@
+#This value required as part of Google Project id.
 project_id = "arun-poc"
-cluster_name = "arun-poc"
+# Kubernetes cluster Name
+cluster_name = "opea-cluster"
 region     = "us-central1"
 initial_node_count = 1
 max_node_count = 5
