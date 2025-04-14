@@ -33,6 +33,13 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
+          {{- if and .Values.externalLLM (eq .Values.externalLLM.enabled true) }}
+          # External LLM configuration - use ConfigMap
+          envFrom:
+            - configMapRef:
+                name: {{ include "chatqna.fullname" . }}-external-llm
+          {{- else }}
+          # Standard internal LLM configuration
           env:
             - name: LLM_SERVER_HOST_IP
               # For FaqGen, llm-uservice is used.
@@ -71,10 +78,13 @@ spec:
               value: {{ .Release.Name }}-guardrails-usvc
             - name: GUARDRAIL_SERVICE_PORT
               value: "9090"
+            {{- if not (and .Values.externalLLM (eq .Values.externalLLM.enabled true)) }}
+            # LLM microservice connection - only used with internal LLM
             - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-uservice
             - name: LLM_SERVICE_PORT
               value: "9000"
+            {{- end }}
             - name: RERANK_SERVICE_HOST_IP
               value: {{ .Release.Name }}-reranking-usvc
             - name: RERANK_SERVICE_PORT
@@ -91,6 +101,7 @@ spec:
             - name: CHATQNA_TYPE
               value: {{ .Values.CHATQNA_TYPE | quote }}
             {{- end }}
+          {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
