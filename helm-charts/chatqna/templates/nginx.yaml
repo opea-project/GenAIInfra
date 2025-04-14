@@ -1,6 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+{{- if .Values.nginx.enabled }}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -15,3 +16,4 @@ data:
   BACKEND_SERVICE_PORT: {{ .Values.service.port | quote }}
   DATAPREP_SERVICE_IP: {{ include "data-prep.fullname" (index .Subcharts "data-prep") | quote }}
   DATAPREP_SERVICE_PORT: {{ index .Values "data-prep" "service" "port" | quote }}
+{{- end }}
