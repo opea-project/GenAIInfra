@@ -33,6 +33,13 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
+          {{- if and .Values.externalLLM (eq .Values.externalLLM.enabled true) }}
+          # External LLM configuration using ConfigMap
+          envFrom:
+            - configMapRef:
+                name: {{ include "codegen.fullname" . }}-external-llm
+          {{- else }}
+          # Internal LLM service configuration
           env:
             - name: LLM_SERVICE_HOST_IP
               value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") | quote }}
@@ -46,6 +53,7 @@ spec:
               value: {{ include "embedding-usvc.fullname" (index .Subcharts "embedding-usvc") | quote }}
             - name: EMBEDDER_PORT
               value: {{ index .Values "embedding-usvc" "service" "port" | quote }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

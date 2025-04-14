@@ -1,0 +1,17 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- if and .Values.externalLLM (eq .Values.externalLLM.enabled true) }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "codegen.fullname" . }}-external-llm
+  labels:
+    {{- include "codegen.labels" . | nindent 4 }}
+    app.kubernetes.io/component: external-llm
+data:
+  # External LLM service configuration
+  LLM_SERVER_HOST_IP: {{ .Values.externalLLM.LLM_SERVER_HOST_IP }}
+  LLM_MODEL: {{ .Values.externalLLM.LLM_MODEL }}
+  OPENAI_API_KEY: {{ .Values.externalLLM.OPENAI_API_KEY }}
+{{- end }}
