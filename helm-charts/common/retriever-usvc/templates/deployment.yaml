@@ -102,7 +102,20 @@ spec:
         - name: tmp
           emptyDir: {}
         - name: nltk-data
+          {{- if .Values.global.offline }}
+          {{- if .Values.global.nltkDataUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.nltkDataUsePVC }}
+          {{- else if .Values.global.nltkDataUseHostPath }}
+          hostPath:
+             path: {{ .Values.global.nltkDataUseHostPath }}
+             type: Directory
+          {{- else }}
+          {{- fail "'global.nltkDataUsePVC' or 'global.nltkDataUseHostPath' must be set in offline mode" }}
+          {{- end }}
+          {{- else }}
           emptyDir: {}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
