@@ -34,13 +34,13 @@ In here, you will find four files used to provision a VPC, subnets and a GKE clu
 
 - main.tf provisions a GKE cluster and a separately managed node pool (recommended). Separately managed node pools allows you to customize your Kubernetes cluster profile — this is useful if some Pods require more resources than others. You can learn more here. The number of nodes in the node pool is defined also defined here.
 
-- opea-chatqna.tfvars is a template for the project_id and region variables.
+- opea-chatqna.tfvars is a template for the project_id, cluster_name and region  variables.
 
 - versions.tf sets the Terraform version to at least 0.14.
 
 ## Update your opea-chatqna.tfvars file
 
-Replace the values in your opea-chatqna.tfvars file with your project_id and region. Terraform will use these values to target your project when provisioning your resources. Your opea-chatqna.tfvars file should look like the following.
+Replace the values in your opea-chatqna.tfvars file with your project_id, cluster_name and region. Terraform will use these values to target your project when provisioning your resources. Your opea-chatqna.tfvars file should look like the following.
 
 ```bash
  # opea-chatqna.tfvars
@@ -84,7 +84,7 @@ terraform apply "opea-chatqna.plan"
 Once the cluster is ready, update kubectl config
 
 ```bash
-gcloud container clusters get-credentials "project_id"-gke --region us-central1 --project "project_id"
+gcloud container clusters get-credentials "cluster_name"-gke --region us-central1 --project "project_id"
 ```
 
 Now you should have access to the cluster via the `kubectl` command.
