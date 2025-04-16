@@ -1,0 +1,31 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# External LLM configuration
+externalLLM:
+  enabled: true
+  LLM_SERVER_HOST_IP: "http://your-llm-server"
+  LLM_MODEL: "your-model"
+  OPENAI_API_KEY: "your-api-key"
+
+# Keep main codegen service but disable additional components
+tgi:
+  enabled: false
+vllm:
+  enabled: false
+llm-uservice:
+  enabled: false
+redis-vector-db:
+  enabled: false
+tei:
+  enabled: false
+data-prep:
+  enabled: false
+retriever-usvc:
+  enabled: false
+embedding-usvc:
+  enabled: false
+codegen-ui:
+  enabled: false
+nginx:
+  enabled: false
