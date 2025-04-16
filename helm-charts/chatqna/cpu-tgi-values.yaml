@@ -44,11 +44,6 @@ tgi:
   #    cpu: 6
   #    memory: 65Gi
 
-  livenessProbe:
-    initialDelaySeconds: 8
-    periodSeconds: 8
-    failureThreshold: 24
-    timeoutSeconds: 4
   readinessProbe:
     initialDelaySeconds: 16
     periodSeconds: 8
@@ -71,11 +66,6 @@ teirerank:
       cpu: 2
       memory: 25Gi
 
-  livenessProbe:
-    initialDelaySeconds: 8
-    periodSeconds: 8
-    failureThreshold: 24
-    timeoutSeconds: 4
   readinessProbe:
     initialDelaySeconds: 8
     periodSeconds: 8
@@ -97,11 +87,6 @@ tei:
       cpu: 2
       memory: 3Gi
 
-  livenessProbe:
-    initialDelaySeconds: 5
-    periodSeconds: 5
-    failureThreshold: 24
-    timeoutSeconds: 2
   readinessProbe:
     initialDelaySeconds: 5
     periodSeconds: 5
