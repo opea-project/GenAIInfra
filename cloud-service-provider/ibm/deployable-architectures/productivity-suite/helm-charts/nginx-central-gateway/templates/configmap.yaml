@@ -1,3 +1,6 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -10,24 +13,24 @@ data:
     server {
         listen 80 default_server;
         listen [::]:80 default_server;
-        
+
         # Server name and root settings
         server_name _;
         root /usr/share/nginx/html;
         index index.html index.htm;
-        
+
         # Default headers
         add_header X-Frame-Options SAMEORIGIN;
         add_header X-Content-Type-Options nosniff;
         add_header X-XSS-Protection "1; mode=block";
-        
+
         # Timeouts
         client_max_body_size 10G;
         proxy_connect_timeout 600;
         proxy_send_timeout 600;
         proxy_read_timeout 600;
         send_timeout 600;
-        
+
         # Root path goes to UI
         location / {
             proxy_pass http://${FRONTEND_SERVICE_IP}:${FRONTEND_SERVICE_PORT};
@@ -36,13 +39,13 @@ data:
             proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
             proxy_set_header X-Forwarded-Proto $scheme;
         }
-        
+
         # Health check endpoint
         location /v1/health_check {
             return 200 'healthy\n';
             add_header Content-Type text/plain;
         }
-        
+
         # ChatQnA service
         location /v1/chatqna {
             proxy_pass http://${CHATQNA_SERVICE_IP}:${CHATQNA_SERVICE_PORT}/v1/chatqna;
@@ -55,7 +58,7 @@ data:
             proxy_request_buffering off;
             gzip off;
         }
-        
+
         # CodeGen service
         location /v1/codegen {
             proxy_pass http://${CODEGEN_SERVICE_IP}:${CODEGEN_SERVICE_PORT}/v1/codegen;
@@ -68,7 +71,7 @@ data:
             proxy_request_buffering off;
             gzip off;
         }
-        
+
         # DocSum service
         location /v1/docsum {
             proxy_pass http://${DOCSUM_SERVICE_IP}:${DOCSUM_SERVICE_PORT}/v1/docsum;
@@ -81,7 +84,7 @@ data:
             proxy_request_buffering off;
             gzip off;
         }
-        
+
         # DataPrep service
         location /v1/dataprep {
             proxy_pass http://${DATAPREP_SERVICE_IP}:${DATAPREP_SERVICE_PORT}/v1/dataprep;
@@ -94,7 +97,7 @@ data:
             proxy_read_timeout 6000;
             send_timeout 6000;
         }
-        
+
         # Chathistory service
         location /v1/chathistory {
             proxy_pass http://${CHATHISTORY_SERVICE_IP}:${CHATHISTORY_SERVICE_PORT}/v1/chathistory;
@@ -107,7 +110,7 @@ data:
             proxy_request_buffering off;
             gzip off;
         }
-        
+
         # Prompt service
         location /v1/prompt {
             proxy_pass http://${PROMPT_SERVICE_IP}:${PROMPT_SERVICE_PORT}/v1/prompt;
@@ -133,13 +136,13 @@ data:
             proxy_request_buffering off;
             gzip off;
         }
-        
+
         # Error pages
         error_page 404 /404.html;
         location = /404.html {
             root /usr/share/nginx/html;
         }
-        
+
         error_page 500 502 503 504 /50x.html;
         location = /50x.html {
             root /usr/share/nginx/html;
@@ -149,7 +152,7 @@ data:
   # Environment variables for services
   FRONTEND_SERVICE_IP: {{ .Values.ui.host | quote }}
   FRONTEND_SERVICE_PORT: {{ .Values.ui.port | quote }}
-  
+
   {{- range $name, $service := .Values.services }}
   {{ $name | upper }}_SERVICE_IP: {{ $service.host | quote }}
   {{ $name | upper }}_SERVICE_PORT: {{ $service.port | quote }}
