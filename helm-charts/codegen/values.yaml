@@ -105,6 +105,13 @@ codegen-ui:
 #   service:
 #     type: ClusterIP
 
+# External LLM configuration
+externalLLM:
+  enabled: false
+  LLM_SERVICE_HOST_IP: "http://your-llm-server"
+  LLM_MODEL: "your-model"
+  OPENAI_API_KEY: "your-api-key"
+
 global:
   http_proxy: ""
   https_proxy: ""
