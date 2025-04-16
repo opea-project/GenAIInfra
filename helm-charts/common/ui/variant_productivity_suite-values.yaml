@@ -1,0 +1,9 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: opea/productivity-suite-ui
+  tag: "latest"
+
+containerPort: 5173
+APP_KEYCLOAK_SERVICE_ENDPOINT: "/auth"
