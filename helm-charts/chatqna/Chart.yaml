@@ -10,11 +10,11 @@ dependencies:
     version: 0-latest
     repository: "file://../common/dashboard"
     condition: global.monitoring
-  - name: tgi
+  - name: vllm
     version: 0-latest
-    alias: tgi-guardrails
-    repository: "file://../common/tgi"
-    condition: tgi-guardrails.enabled
+    alias: vllm-guardrails
+    repository: "file://../common/vllm"
+    condition: vllm-guardrails.enabled
   - name: guardrails-usvc
     version: 0-latest
     repository: "file://../common/guardrails-usvc"
