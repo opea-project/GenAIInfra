@@ -15,4 +15,3 @@ vllm:
   enabled: false
 tgi:
   enabled: false
-
