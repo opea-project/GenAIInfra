@@ -35,9 +35,17 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: LLM_SERVICE_HOST_IP
-              value: {{ .Release.Name }}-llm-uservice
-            #- name: MEGA_SERVICE_PORT
-            #  value: {{ .Values.port }}
+              value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") | quote }}
+            - name: LLM_SERVICE_PORT
+              value: {{ index .Values "llm-uservice" "service" "port" | quote }}
+            - name: RETRIEVAL_SERVICE_HOST_IP
+              value: {{ include "retriever-usvc.fullname" (index .Subcharts "retriever-usvc") | quote }}
+            - name: REDIS_RETRIEVER_PORT
+              value: {{ index .Values "retriever-usvc" "service" "port" | quote }}
+            - name: TEI_EMBEDDING_HOST_IP
+              value: {{ include "embedding-usvc.fullname" (index .Subcharts "embedding-usvc") | quote }}
+            - name: EMBEDDER_PORT
+              value: {{ index .Values "embedding-usvc" "service" "port" | quote }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
