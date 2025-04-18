@@ -11,7 +11,7 @@ This guide shows how to deploy OPEA applications on Amazon Web Service (AWS) Ela
 
 The setup uses Terraform to create EKS cluster with the following properties:
 
-- 1-node EKS cluster with 50 GB disk and `m7i.x8large` SPOT instance (16 vCPU and 32 GB memory)
+- 1-node EKS cluster with 50 GB disk and `i7ei.x12large` (or `i7ei.x6large`) SPOT instance (16 vCPU and 32 GB memory)
 - Cluster autoscaling up to 10 nodes
 - Storage Class (SC) `efs-sc` and Persistent Volume Claim (PVC) `model-volume` for storing the model data
 - `LoadBalancer` address type for the service for external consumption
@@ -49,7 +49,10 @@ Now you should have access to the cluster via the `kubectl` command.
 Deploy ChatQnA Application with Helm
 
 ```bash
-helm install -n chatqna --create-namespace chatqna oci://ghcr.io/opea-project/charts/chatqna --set service.type=LoadBalancer --set global.modelUsePVC=model-volume --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
+helm install -n chatqna --create-namespace chatqna oci://ghcr.io/opea-project/charts/chatqna \
+  --set nginx.service.type=LoadBalancer \
+  --set global.modelUsePVC=model-volume \
+  --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 ```
 
 Create the PVC as mentioned [above](#-persistent-volume-claim)
