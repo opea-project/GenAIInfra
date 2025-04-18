@@ -11,6 +11,10 @@ data:
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
-  NUMBA_CACHE_DIR: "/tmp/.cache/numba"
+  NUMBA_CACHE_DIR: "/tmp/numba_cache"
   HF_HOME: "/tmp/.cache/huggingface"
-  XDG_CACHE_HOME: "/tmp/.cache"
+  llm_download: "False"
+  {{- if .Values.global.HF_ENDPOINT }}
+  HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
+  {{- end }}
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
