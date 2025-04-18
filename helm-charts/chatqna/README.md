@@ -44,6 +44,9 @@ helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --
 # To use CPU with vLLM with Milvus DB
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-milvus-values.yaml
 
+# To use with external OpenAI compatible LLM endpoint
+#helm install chatqna chatqna -f chatqna/external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST_IP="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
+
 # To deploy FaqGen
 #helm install faqgen chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/faqgen-cpu-values.yaml
 ```
