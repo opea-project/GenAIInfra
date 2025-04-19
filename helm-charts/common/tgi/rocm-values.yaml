@@ -34,3 +34,4 @@ startupProbe:
   periodSeconds: 5
   timeoutSeconds: 1
   failureThreshold: 120
+
