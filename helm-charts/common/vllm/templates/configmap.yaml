@@ -42,3 +42,8 @@ data:
   {{- if .Values.PT_HPUGRAPH_DISABLE_TENSOR_CACHE }}
   PT_HPUGRAPH_DISABLE_TENSOR_CACHE: {{ .Values.PT_HPUGRAPH_DISABLE_TENSOR_CACHE | quote }}
   {{- end }}
+  {{- if .Values.env }}
+  {{- range $k,$v := .Values.env }}
+  {{ tpl (toString $k ) $ | trim }}: {{ tpl (toString $v ) $ | trim | quote }}
+  {{- end -}}
+  {{- end }}

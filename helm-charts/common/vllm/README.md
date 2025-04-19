@@ -11,13 +11,15 @@ To install the chart, run the following:
 Note that you cannot use vllm as the service release name due to [environment variables conflict](https://docs.vllm.ai/en/stable/serving/env_vars.html#environment-variables).
 
 ```console
-cd GenAIInfra/helm-charts/common
+cd GenAIInfra/helm-charts/common/vllm
 export MODELDIR=/mnt/opea-models
 export MODELNAME="Intel/neural-chat-7b-v3-3"
 export HFTOKEN="insert-your-huggingface-token-here"
-helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
+helm install myvllm . --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 # To deploy on Gaudi enabled kubernetes cluster
-# helm install myvllm vllm --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values gaudi-values.yaml
+# helm install myvllm . --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values gaudi-values.yaml
+# To deploy on AMD ROCm GPU kubernetes cluster
+# helm install vllm-rocm . --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values rocm-values.yaml
 ```
 
 By default, the vllm service will downloading the "Intel/neural-chat-7b-v3-3".
