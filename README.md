@@ -64,6 +64,7 @@ You can use [Terraform](https://www.terraform.io/) to create infrastructure to r
 
 - [AWS/EKS: Create managed Kubernetes cluster on AWS for OPEA](cloud-service-provider/aws/eks/terraform/README.md)
 - [Azure/AKS: Create managed Kubernetes cluster on Azure for OPEA](cloud-service-provider/azure/aks/terraform/README.md)
+- [GCP/GKE: Create managed Kubernetes cluster on GCP for OPEA](cloud-service-provider/gcp/gke/terraform/README.md)
 
 ## Additional Content
 

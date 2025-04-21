@@ -95,7 +95,7 @@ retriever-usvc:
 # See guardrails-values.yaml for guardrail related options
 guardrails-usvc:
   enabled: false
-tgi-guardrails:
+vllm-guardrails:
   enabled: false
 
 # reranking

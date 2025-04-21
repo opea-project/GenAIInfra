@@ -1,0 +1,16 @@
+**/bin/
+*.out
+*.swp
+**/Chart.lock
+**/charts/*.tgz
+
+bazel-*
+compile_commands.json
+.gitconfig
+terraform.tfstate
+terraform.tfstate.backup
+.terraform
+.terraform.lock.hcl
+.terraform/*
+.gitignore
+opea-chatqna.plan
