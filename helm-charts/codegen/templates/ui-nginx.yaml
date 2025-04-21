@@ -22,14 +22,14 @@ metadata:
   labels:
     {{- include "codegen.labels" . | nindent 4 }}
 data:
-  {{- if and (index .Values "data-prep") (index .Values "data-prep" "enabled") }}
+  {{- if (index .Values "data-prep" "enabled") }}
   DATAPREP_ENDPOINT: {{ (printf "http://%s:%s/v1/dataprep" (include "data-prep.fullname" (index .Subcharts "data-prep")) (toString (index .Values "data-prep" "service" "port"))) | quote }}
   {{- end }}
   BACKEND_SERVICE_ENDPOINT: {{ (printf "http://%s:%s/v1/codegen" (include "codegen.fullname" .) (toString .Values.service.port)) | quote }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   {{- if or .Values.global.http_proxy .Values.global.https_proxy }}
-  {{- if and (index .Values "data-prep") (index .Values "data-prep" "enabled") }}
+  {{- if (index .Values "data-prep" "enabled") }}
   no_proxy: {{ (printf "%s,%s,%s" (include "codegen.fullname" .) (include "data-prep.fullname" (index .Subcharts "data-prep")) .Values.global.no_proxy) | quote }}
   {{- else }}
   no_proxy: {{ (printf "%s,%s" (include "codegen.fullname" .) (.Values.global.no_proxy)) | quote }}
