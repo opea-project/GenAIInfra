@@ -3,6 +3,8 @@
 
 name: GenAIInfra Helm CD workflow on manual event
 on:
+  schedule:
+    - cron: "0 0 * * 6"
   workflow_dispatch:
     inputs:
       workloads:
@@ -39,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.opea_branch }}
+          ref: ${{ inputs.opea_branch || 'main' }}
 
       - name: Get test Services
         id: get-services
@@ -61,10 +63,9 @@ jobs:
                   fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    echo "Temporarily disable test with Gaudi for CI server setup"
-                    # run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"k8s-gaudi\", \"valuefile\":\"${filename}\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"k8s-xeon\", \"valuefile\":\"${filename}\"},"
                   fi
                 fi
               done
@@ -83,10 +84,9 @@ jobs:
                   fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    echo "Temporarily disable test with Gaudi for CI server setup"
-                    # run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"k8s-gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"k8s-xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                   fi
                 fi
               done
@@ -104,10 +104,9 @@ jobs:
                   fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    echo "Temporarily disable test with Gaudi for CI server setup"
-                    #run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"k8s-gaudi\", \"valuefile\":\"${filename}\"},"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"k8s-xeon\", \"valuefile\":\"${filename}\"},"
                   fi
                 fi
               done
@@ -123,8 +122,8 @@ jobs:
       matrix: ${{ fromJSON(needs.get-build-matrix.outputs.run_matrix) }}
     uses: ./.github/workflows/_helm-e2e.yaml
     with:
-      tag: ${{ inputs.tag }}
-      dockerhub: ${{ inputs.dockerhub }}
+      tag: ${{ inputs.tag || 'latest' }}
+      dockerhub: ${{ inputs.dockerhub || false }}
       workload: ${{ matrix.directory }}/${{ matrix.example }}
       hardware: ${{ matrix.hardware }}
       valuefile: ${{ matrix.valuefile }}

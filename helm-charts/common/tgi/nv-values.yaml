@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 # Default values for tgi.
@@ -9,7 +9,7 @@ accelDevice: "nvidia"
 
 image:
   repository: ghcr.io/huggingface/text-generation-inference
-  tag: "2.2.0"
+  tag: "2.4.1"
 
 resources:
   limits:
@@ -17,10 +17,6 @@ resources:
 
 CUDA_GRAPHS: ""
 
-livenessProbe:
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  timeoutSeconds: 1
 readinessProbe:
   initialDelaySeconds: 5
   periodSeconds: 5

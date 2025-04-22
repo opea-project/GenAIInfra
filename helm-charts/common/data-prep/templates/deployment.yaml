@@ -86,6 +86,9 @@ spec:
               name: uploaded-files
             - mountPath: /home/user/nltk_data
               name: nltk-data
+            - mountPath: /home/user/comps/dataprep/src/unstructuredio/yolo_x_layout
+              subPath: unstructuredio/yolo_x_layout
+              name: model-volume
             - mountPath: /home/user/.config
               name: user-config-data
           {{- if .Values.livenessProbe }}
@@ -107,10 +110,38 @@ spec:
           emptyDir: {}
         - name: uploaded-files
           emptyDir: {}
-        - name: nltk-data
-          emptyDir: {}
         - name: user-config-data
           emptyDir: {}
+        - name: model-volume
+          {{- if .Values.global.offline }}
+          {{- if .Values.global.modelUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
+          {{- else if .Values.global.modelUseHostPath }}
+          hostPath:
+             path: {{ .Values.global.modelUseHostPath }}
+             type: Directory
+          {{- else }}
+          {{- fail "'global.modelUsePVC' or 'global.modelUseHostPath' must be set in offline mode" }}
+          {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
+        - name: nltk-data
+          {{- if .Values.global.offline }}
+          {{- if .Values.global.nltkDataUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.nltkDataUsePVC }}
+          {{- else if .Values.global.nltkDataUseHostPath }}
+          hostPath:
+             path: {{ .Values.global.nltkDataUseHostPath }}
+             type: Directory
+          {{- else }}
+          {{- fail "'global.nltkDataUsePVC' or 'global.nltkDataUseHostPath' must be set in offline mode" }}
+          {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

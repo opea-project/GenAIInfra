@@ -14,17 +14,23 @@ chatqna:
   values:
     - cpu-values.yaml
     - cpu-qdrant-values.yaml
+    - cpu-milvus-values.yaml
     - cpu-tgi-values.yaml
-    - gaudi-vllm-values.yaml
+    - gaudi-values.yaml
     - gaudi-tgi-values.yaml
     - guardrails-gaudi-values.yaml
     - norerank-values.yaml
+    - faqgen-cpu-values.yaml
+    - faqgen-cpu-tgi-values.yaml
+    - faqgen-gaudi-values.yaml
+    - faqgen-gaudi-tgi-values.yaml
 agentqna:
   src_repo: GenAIInfra
   src_dir: helm-charts/agentqna
   dest_repo: GenAIExamples
   dest_dir: AgentQnA/kubernetes/helm
   values:
+    - cpu-values.yaml
     - gaudi-values.yaml
 audioqna:
   src_repo: GenAIInfra
@@ -33,7 +39,10 @@ audioqna:
   dest_dir: AudioQnA/kubernetes/helm
   values:
     - cpu-values.yaml
+    - cpu-tgi-values.yaml
+    - cpu-multilang-values.yaml
     - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
 codegen:
   src_repo: GenAIInfra
   src_dir: helm-charts/codegen
@@ -41,7 +50,9 @@ codegen:
   dest_dir: CodeGen/kubernetes/helm
   values:
     - cpu-values.yaml
+    - cpu-tgi-values.yaml
     - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
 codetrans:
   src_repo: GenAIInfra
   src_dir: helm-charts/codetrans
@@ -49,7 +60,9 @@ codetrans:
   dest_dir: CodeTrans/kubernetes/helm
   values:
     - cpu-values.yaml
+    - cpu-tgi-values.yaml
     - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
 docsum:
   src_repo: GenAIInfra
   src_dir: helm-charts/docsum
@@ -58,14 +71,8 @@ docsum:
   values:
     - cpu-values.yaml
     - gaudi-values.yaml
-faqgen:
-  src_repo: GenAIInfra
-  src_dir: helm-charts/faqgen
-  dest_repo: GenAIExamples
-  dest_dir: FaqGen/kubernetes/helm
-  values:
-    - cpu-values.yaml
-    - gaudi-values.yaml
+    - cpu-tgi-values.yaml
+    - gaudi-tgi-values.yaml
 searchqna:
   src_repo: GenAIInfra
   src_dir: helm-charts/searchqna
@@ -89,7 +96,9 @@ visualqna:
   dest_dir: VisualQnA/kubernetes/helm
   values:
     - cpu-values.yaml
+    - cpu-tgi-values.yaml
     - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
 
 # Components
 agent:
@@ -150,6 +159,8 @@ llm-uservice:
   dest_dir: comps/llms/deployment/kubernetes
   values:
     - cpu-values.yaml
+    - faqgen-values.yaml
+    - docsum-values.yaml
 lvm-uservice:
   src_repo: GenAIInfra
   src_dir: helm-charts/common/lvm-uservice

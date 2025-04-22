@@ -20,6 +20,8 @@ data:
   {{- end }}
   NUMBA_CACHE_DIR: "/tmp"
   HF_HOME: "/tmp/.cache/huggingface"
+  XDG_CONFIG_HOME: "/tmp"
+  TORCHINDUCTOR_CACHE_DIR: "/tmp/pytorchinductor_cache"
   # https://github.com/outlines-dev/outlines/blob/main/outlines/caching.py#L14-L29
   OUTLINES_CACHE_DIR: "/tmp/.cache/outlines"
   {{- if .Values.VLLM_CPU_KVCACHE_SPACE }}
@@ -36,4 +38,7 @@ data:
   {{- end }}
   {{- if .Values.VLLM_TORCH_PROFILER_DIR }}
   VLLM_TORCH_PROFILER_DIR: {{ .Values.VLLM_TORCH_PROFILER_DIR | quote }}
+  {{- end }}
+  {{- if .Values.PT_HPUGRAPH_DISABLE_TENSOR_CACHE }}
+  PT_HPUGRAPH_DISABLE_TENSOR_CACHE: {{ .Values.PT_HPUGRAPH_DISABLE_TENSOR_CACHE | quote }}
   {{- end }}

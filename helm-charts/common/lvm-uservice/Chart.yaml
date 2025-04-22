@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
@@ -13,6 +13,10 @@ dependencies:
     version: 0-latest
     repository: file://../tgi
     condition: tgi.enabled
+  - name: vllm
+    version: 0-latest
+    repository: file://../vllm
+    condition: vllm.enabled
   - name: lvm-serve
     version: 0-latest
     repository: file://../lvm-serve

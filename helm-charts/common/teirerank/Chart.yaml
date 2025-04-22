@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
@@ -11,4 +11,4 @@ dependencies:
     repository: "file://../commonlib"
 version: 0-latest
 # The HF TEI version
-appVersion: "cpu-1.5"
+appVersion: "cpu-1.6"

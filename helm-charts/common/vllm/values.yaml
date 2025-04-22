@@ -48,25 +48,23 @@ podAnnotations: {}
 podSecurityContext: {}
   # fsGroup: 2000
 
-securityContext: {}
-#  readOnlyRootFilesystem: true
-#  allowPrivilegeEscalation: false
-#  runAsNonRoot: true
-#  runAsUser: 1000
-#  capabilities:
-#    drop:
-#    - ALL
-#  seccompProfile:
-#    type: RuntimeDefault
+# Workaround for https://github.com/opea-project/GenAIComps/issues/1549
+# Need to run as root until upstream fixed and released.
+securityContext:
+  readOnlyRootFilesystem: true
+  allowPrivilegeEscalation: false
+  runAsNonRoot: false
+  runAsUser: 0
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
 
 service:
   type: ClusterIP
 
 resources:
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
@@ -76,13 +74,6 @@ resources:
 
 extraCmdArgs: []
 
-livenessProbe:
-  httpGet:
-    path: /health
-    port: http
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  failureThreshold: 24
 readinessProbe:
   httpGet:
     path: /health

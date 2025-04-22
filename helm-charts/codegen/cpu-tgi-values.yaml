@@ -2,4 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 
 tgi:
-  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
+  enabled: true
+vllm:
+  enabled: false
+llm-uservice:
+  TEXTGEN_BACKEND: TGI

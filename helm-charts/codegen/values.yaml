@@ -58,21 +58,52 @@ affinity: {}
 
 # To override values in subchart tgi
 tgi:
+  enabled: false
+  LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
+
+vllm:
+  enabled: true
   LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
 llm-uservice:
+  TEXTGEN_BACKEND: vLLM
   LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
+data-prep:
+  # the following are for redis-vector-db
+  DATAPREP_BACKEND: "REDIS"
+  INDEX_NAME: "CodeGen"
+retriever-usvc:
+  # the following are for redis-vector-db
+  RETRIEVER_BACKEND: "REDIS"
+  INDEX_NAME: "CodeGen"
+embedding-usvc:
+  EMBEDDING_BACKEND: "TEI"
+
+# Use codegen gradio UI
 nginx:
+  enabled: false
+codegen-ui:
+  image:
+    repository: opea/codegen-gradio-ui
+    tag: "latest"
+  containerPort: 5173
   service:
     type: NodePort
 
-codegen-ui:
-  image:
-    repository: opea/codegen-ui
-    tag: "latest"
-  BACKEND_SERVICE_ENDPOINT: "/v1/codegen"
-  containerPort: 5173
+# NOTE: uncomment the following settings to use other codegen UI
+# nginx:
+#   enabled: true
+#   service:
+#     type: NodePort
+# codegen-ui:
+#   image:
+#     repository: opea/codegen-ui
+#     tag: "latest"
+#   BACKEND_SERVICE_ENDPOINT: "/v1/codegen"
+#   containerPort: 5173
+#   service:
+#     type: ClusterIP
 
 global:
   http_proxy: ""

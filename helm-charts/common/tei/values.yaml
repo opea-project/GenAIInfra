@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 # Default values for tei.
@@ -27,7 +27,7 @@ image:
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "cpu-1.5"
+  tag: "cpu-1.6"
 
 # empty for CPU
 accelDevice: ""
@@ -81,14 +81,6 @@ resources:
     cpu: 100m
     memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: /health
-    port: http
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  failureThreshold: 24
-  timeoutSeconds: 2
 readinessProbe:
   httpGet:
     path: /health

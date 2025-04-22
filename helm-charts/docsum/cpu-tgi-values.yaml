@@ -1,8 +1,9 @@
 # Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-LVM_BACKEND: "LLaVA"
+llm-uservice:
+  DOCSUM_BACKEND: "TGI"
 tgi:
-  enabled: false
-lvm-serve:
   enabled: true
+vllm:
+  enabled: false
