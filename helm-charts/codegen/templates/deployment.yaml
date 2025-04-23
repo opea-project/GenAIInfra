@@ -33,7 +33,7 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
-          {{- if and .Values.externalLLM (eq .Values.externalLLM.enabled true) }}
+          {{- if .Values.externalLLM.enabled }}
           # External LLM configuration using ConfigMap
           envFrom:
             - configMapRef:

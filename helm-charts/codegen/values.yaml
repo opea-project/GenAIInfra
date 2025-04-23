@@ -70,6 +70,12 @@ llm-uservice:
   TEXTGEN_BACKEND: vLLM
   LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
+tei:
+  enabled: true
+
+redis-vector-db:
+  enabled: true
+
 data-prep:
   enabled: true
   # the following are for redis-vector-db

@@ -15,7 +15,7 @@ data:
   LLM_MODEL: {{ .Values.externalLLM.LLM_MODEL }}
   OPENAI_API_KEY: {{ .Values.externalLLM.OPENAI_API_KEY }}
   # ASR service configuration
-  {{- if and (index .Values "whisper") (index .Values "whisper" "enabled") }}
+  {{- if .Values.whisper.enabled }}
   ASR_SERVICE_HOST_IP: {{ include "whisper.fullname" (index .Subcharts "whisper") }}
   ASR_SERVICE_PORT: {{ index .Values "whisper" "service" "port" | quote }}
   {{- end }}
