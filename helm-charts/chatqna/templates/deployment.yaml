@@ -78,7 +78,7 @@ spec:
               value: {{ .Release.Name }}-guardrails-usvc
             - name: GUARDRAIL_SERVICE_PORT
               value: "9090"
-            {{- if not (and .Values.externalLLM (eq .Values.externalLLM.enabled true)) }}
+            {{- if not .Values.externalLLM.enabled }}
             # LLM microservice connection - only used with internal LLM
             - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-uservice

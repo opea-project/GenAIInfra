@@ -107,7 +107,7 @@ dashboard:
   prefix: "OPEA DocSum"
 
 whisper:
-  enabled: false
+  enabled: true
 
 # External LLM configuration
 externalLLM:
