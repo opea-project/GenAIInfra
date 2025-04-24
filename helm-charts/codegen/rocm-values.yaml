@@ -40,4 +40,3 @@ llm-uservice:
   TEXTGEN_BACKEND: vLLM
   retryTimeoutSeconds: 720
   LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
-
