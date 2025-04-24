@@ -43,7 +43,8 @@ jobs:
             exit 1
           fi
           mkdir -p ${DEST_DIR}
-          # git clone --branch charts-release https://github.com/opea-project/GenAIInfra.git charts
+          # Update dependency for components first
+          ${SRC_DIR}/update_dependency.sh
           # update components
           for chart in ${SRC_DIR}/common/*
           do
@@ -53,8 +54,6 @@ jobs:
                   helm package $chart --destination ${DEST_DIR}
           done
           # update E2E Applications
-          # Update dependency for components first
-          ${SRC_DIR}/update_dependency.sh
           for chart in ${SRC_DIR}/*
           do
                   if [ -f $chart ]; then continue; fi

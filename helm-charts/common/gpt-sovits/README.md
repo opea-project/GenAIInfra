@@ -6,8 +6,11 @@ Helm chart for deploying gpt-sovits microservice.
 
 ```console
 cd GenAIInfra/helm-charts/common/
-helm install gpt-sovits gpt-sovits
+export MODELDIR=/mnt/opea-models
+helm install gpt-sovits gpt-sovits --set global.modelUseHostPath=${MODELDIR}
 ```
+
+The gpt-sovits service will download model `lj1995/GPT-SoVITS` which is about 2.8GB.
 
 ## Verify
 
@@ -37,8 +40,9 @@ curl localhost:9880/ -XPOST -d '{
 
 ## Values
 
-| Key              | Type   | Default             | Description |
-| ---------------- | ------ | ------------------- | ----------- |
-| image.repository | string | `"opea/gpt-sovits"` |             |
-| service.port     | string | `"9880"`            |             |
-| TTS_ENDPOINT     | string | `""`                |             |
+| Key                             | Type   | Default                              | Description                                                                                                                                                                                                                                                                        |
+| ------------------------------- | ------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| image.repository                | string | `"opea/gpt-sovits"`                  |                                                                                                                                                                                                                                                                                    |
+| service.port                    | string | `"9880"`                             |                                                                                                                                                                                                                                                                                    |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here` | Hugging Face API token                                                                                                                                                                                                                                                             |
+| global.modelUseHostPath         | string | `""`                                 | Cached models directory, service will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to the container and the downloaded model will be saved to directory `lj1995/GPT-SoVITS`. Set this to null/empty will force it to download model. |
