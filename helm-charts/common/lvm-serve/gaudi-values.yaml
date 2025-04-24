@@ -4,7 +4,7 @@
 accelDevice: "gaudi"
 
 image:
-  repository: opea/llava-gaudi
+  repository: opea/lvm-llava-gaudi
 
 resources:
   limits:
