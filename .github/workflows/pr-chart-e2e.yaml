@@ -60,10 +60,13 @@ jobs:
                 fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"k8s-gaudi\", \"valuefile\":\"${filename}\"},"
+                  hardware="k8s-gaudi"
+                elif [[ "$filename" == *"rocm"* ]]; then
+                  hardware="k8s-rocm"
                 else
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"k8s-xeon\", \"valuefile\":\"${filename}\"},"
+                  hardware="k8s-xeon"
                 fi
+                run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"${hardware}\", \"valuefile\":\"${filename}\"},"
               fi
             done
           done
@@ -78,10 +81,13 @@ jobs:
                 fi
                 filename=$(basename "$file" .yaml)
                 if [[ "$filename" == *"gaudi"* ]]; then
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"k8s-gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                  hardware="k8s-gaudi"
+                elif [[ "$filename" == *"rocm"* ]]; then
+                  hardware="k8s-rocm"
                 else
-                  run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"k8s-xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                  hardware="k8s-xeon"
                 fi
+                run_matrix="${run_matrix}{\"example\":\"${chart}\",\"hardware\":\"${hardware}\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
               fi
             done
           done
