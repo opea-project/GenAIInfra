@@ -39,19 +39,27 @@ spec:
               {{- if eq .Values.CHATQNA_TYPE "CHATQNA_FAQGEN"}}
               value: {{ .Release.Name }}-llm-uservice
               {{- else }}
+              {{- if .Values.ollama.enabled }}
+              value: {{ .Release.Name }}-ollama
+              {{- else }}
               {{- if .Values.vllm.enabled }}
               value: {{ .Release.Name }}-vllm
               {{- else }}
               value: {{ .Release.Name }}-tgi
               {{- end }}
               {{- end }}
+              {{- end }}
             - name: LLM_SERVER_PORT
               value: "80"
             - name: LLM_MODEL
+              {{- if .Values.ollama.enabled }}
+              value: {{ .Values.ollama.LLM_MODEL_ID | quote }}
+              {{- else }}
               {{- if .Values.vllm.enabled }}
               value: {{ .Values.vllm.LLM_MODEL_ID | quote }}
               {{- else }}
               value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
+              {{- end }}
               {{- end }}
             - name: RERANK_SERVER_HOST_IP
               value: {{ .Release.Name }}-teirerank
