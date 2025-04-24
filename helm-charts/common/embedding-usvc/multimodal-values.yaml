@@ -1,0 +1,9 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+tei:
+  enabled: false
+mm-embedding:
+  enabled: true
+
+EMBEDDING_BACKEND: "BridgeTower"

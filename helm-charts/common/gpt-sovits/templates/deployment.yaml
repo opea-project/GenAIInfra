@@ -25,10 +25,49 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "gpt-sovits.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: {{ include "gpt-sovits.fullname" . }}-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            {{- if hasKey .Values.securityContext "runAsGroup" }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup }}
+            {{- end }}
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model lj1995/GPT-SoVITS ... ";
+              huggingface-cli download --local-dir-use-symlinks False --local-dir /data/lj1995/GPT-SoVITS lj1995/GPT-SoVITS;
+              echo "Change model files mode ...";
+              chmod -R a+r /data/lj1995/GPT-SoVITS;
+              # NOTE: Buggy logout command;
+              #huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
-        - name: {{ .Release.Name }}
+        - name: gpt-sovits
           envFrom:
             - configMapRef:
                 name: {{ include "gpt-sovits.fullname" . }}-config
@@ -38,18 +77,19 @@ spec:
                 optional: true
             {{- end }}
           securityContext:
-            {{- if .Values.global.modelUseHostPath }}
-            {}
-            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
-            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           ports:
             - name: gpt-sovits
               containerPort: 9880
               protocol: TCP
           volumeMounts:
+            - mountPath: /home/user/GPT-SoVITS/GPT_SoVITS/pretrained_models
+              subPath: lj1995/GPT-SoVITS
+              name: model-volume
             - mountPath: /tmp
               name: tmp
           {{- if .Values.livenessProbe }}
@@ -67,6 +107,17 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
+        - name: model-volume
+          {{- if .Values.global.modelUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
+          {{- else if .Values.global.modelUseHostPath }}
+          hostPath:
+            path: {{ .Values.global.modelUseHostPath }}
+            type: Directory
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
         - name: tmp
           emptyDir: {}
       {{- with .Values.nodeSelector }}

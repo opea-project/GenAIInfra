@@ -5,11 +5,11 @@ apiVersion: v2
 name: prompt-usvc
 description: The Helm chart for deploying prompt as microservice
 type: application
-version: 1.0.0
+version: 0-latest
 # The prompt microservice server version
 appVersion: "v1.0"
 dependencies:
   - name: mongodb
-    version: 1.0.0
+    version: 0-latest
     repository: file://../mongodb
     condition: mongodb.enabled

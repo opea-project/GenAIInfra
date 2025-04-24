@@ -1,0 +1,82 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+name: Update the helm charts 0-latest
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - helm-charts/**
+env:
+  CHARTS_DIR: "helm-charts"
+
+jobs:
+  release-on-push:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+
+      - name: Get the modified charts list
+        run: |
+          echo "This job runs after a PR is merged!"
+          if grep -r '^version: ' `find helm-charts/ -name "Chart.yaml"` | grep -v "0-latest"; then
+            echo "Version check failed, only update 0-latest"
+            exit 1
+          fi
+          base_commit=$(git rev-parse HEAD~1) # push event
+          merged_commit=$(git log -1 --format='%H')
+          charts_updated=()
+          build_push_chart() {
+            local chart="$1"
+            helm dependency update ${chart}
+            helm package $chart
+            helm push ${chart}-0-latest.tgz oci://ghcr.io/opea-project/chart
+          }
+          # args: <parent-dir|include-string> <path-cut-depth> <exclude-pattern>
+          update_charts () {
+            dir="$1"
+            depth=$2
+            exclude="$3"
+            common_charts=$(git diff --name-only ${base_commit} ${merged_commit} | \
+            grep "^$dir" | grep -vE "$exclude" | \
+            cut -d'/' -f$depth | sort -u )
+            echo "" && echo "Charts to be updated: $common_charts" && echo ""
+            echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin
+            pushd $dir > /dev/null
+            for chart in ${common_charts}; do
+              if [ ! -d $chart ]; then continue; fi
+              echo "Updating $chart"
+              charts_updated+=($chart)
+              build_push_chart $chart
+            done
+            popd > /dev/null
+          }
+          update_dependent_charts() {
+            local charts=`.github/workflows/scripts/get_chart_dependency.sh "${CHARTS_DIR}" ${charts_updated[@]} | sort -u`
+            echo "" && echo "Remaining dependent charts to be updated: $charts" && echo ""
+            echo "${{ secrets.ACTION_TOKEN }}" | helm registry login ghcr.io -u opea --password-stdin
+            for i in ${charts}; do
+              if [ ! -d $i ]; then continue; fi
+              local dir=$(dirname $i)
+              local chart=$(basename $i)
+              echo "Updating $chart in directory $dir"
+              pushd $dir > /dev/null
+              build_push_chart $chart
+              popd > /dev/null
+            done
+          }
+          # Update dependency for components first
+          ${CHARTS_DIR}/update_dependency.sh
+          # Update components: exclude other Helm chart docs than README.md
+          update_charts "$CHARTS_DIR/common/" 3 '.*/[^R][^/]*\.md$'
+          # Update Examples: exclude non-helm subdirs, files not in subdirs, other docs
+          update_charts "$CHARTS_DIR" 2 "$CHARTS_DIR"'/(common/|assets/|[^/]*$|.*/[^R][^/]*\.md$)'
+          # Update dependent chart
+          update_dependent_charts

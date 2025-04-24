@@ -1,0 +1,190 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for lvm-serve.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# Configurations for OPEA microservice lvm-serve
+# Set to "true" to enable verbose logging
+LOGFLAG: ""
+# The following settings is for image lvm-llava
+LVM_MODEL_ID: llava-hf/llava-1.5-7b-hf
+port: 8399
+
+# The following settings is for image lvm-video-llama
+# Model DAMO-NLP-SG/Video-LLaMA-2-7B-Finetuned is hard coded in the image
+# LLM_DOWNLOAD: "True"
+# port: 9009
+
+# The following settings is for image lvm-predictionguard
+# Model llava-1.5-7b-hf is hard coded in the image
+# PREDICTIONGUARD_API_KEY: ""
+# port: 9399
+# readinessProbe:
+#   httpGet:
+#     path: v1/health_check
+# startupProbe:
+#   httpGet:
+#     path: v1/health_check
+
+# The following settings is for image lvm-llama-vision
+# LVM_MODEL_ID: meta-llama/Llama-3.2-11B-Vision-Instruct
+# port: 9399
+# readinessProbe:
+#   httpGet:
+#     path: v1/health_check
+# startupProbe:
+#   httpGet:
+#     path: v1/health_check
+
+# The following settings is for image lvm-llama-vision-guard
+# LVM_MODEL_ID: meta-llama/Llama-Guard-3-11B-Vision
+# port: 9499
+# readinessProbe:
+#   httpGet:
+#     path: v1/health_check
+# startupProbe:
+#   httpGet:
+#     path: v1/health_check
+
+# The following settings is for image lvm-llama-vision-tp
+# LVM_MODEL_ID: meta-llama/Llama-3.2-11B-Vision-Instruct
+# port: 9599
+# readinessProbe:
+#   httpGet:
+#     path: v1/health_check
+# startupProbe:
+#   httpGet:
+#     path: v1/health_check
+
+
+accelDevice: ""
+
+# This will set the replicaset count more information can be found here: https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/
+replicaCount: 1
+
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  repository: opea/lvm-llava
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+# This is for the secretes for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# This section builds out the service account more information can be found here: https://kubernetes.io/docs/concepts/security/service-accounts/
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
+securityContext:
+  readOnlyRootFilesystem: false
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000
+  capabilities:
+    drop:
+    - ALL
+  seccompProfile:
+    type: RuntimeDefault
+  # Init container sets the downloaded model dir to be group writable, so that container
+  # can keep its lock file there. This relies on both containers using the same group ID.
+  runAsGroup: 0
+
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  # This sets the service type more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#publishing-services-service-types
+  type: ClusterIP
+  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+  port: 9399
+
+resources:
+  # limits:
+  #   cpu: 100m
+  #   memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+# Set up pod health monitoring probes, see https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+# Use TCP probe instead of HTTP health_check because lvm-gaudi would fail normal requests in HTTP probe
+readinessProbe:
+  httpGet:
+    path: health
+    port: lvm-serve
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 5
+startupProbe:
+  httpGet:
+    path: health
+    port: lvm-serve
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  failureThreshold: 120
+
+# Service autoscaling with HorizontalPodAutoscaler (HPA):
+# - Do not use "replicaCount" with HPA (value=1 is ignored as it's k8s default)
+# - https://kubernetes.io/docs/concepts/workloads/autoscaling/
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 4
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+global:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: ""
+
+  # Choose where to save your downloaded models
+  # Set modelUseHostPath for local directory, this is good for one node test, e.g /mnt/opea-models
+  # Set modelUsePVC for PersistentVolumeClaim(PVC), which is suitable for multinode deployment, e.g. model-volume
+  # You can only set one of the following variable, the behavior is not defined if both of them are set.
+  # By default, both are set to empty, the model will be downloaded every time and will not be saved into any permanent storage medium.
+  modelUseHostPath: ""
+  modelUsePVC: ""
+
+  monitoring: false
+  # Prometheus Helm install release name for serviceMonitor
+  prometheusRelease: prometheus-stack

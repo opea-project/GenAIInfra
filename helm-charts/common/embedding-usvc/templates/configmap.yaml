@@ -8,15 +8,34 @@ metadata:
   labels:
     {{- include "embedding-usvc.labels" . | nindent 4 }}
 data:
-  {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
-  TEI_EMBEDDING_ENDPOINT: {{ .Values.TEI_EMBEDDING_ENDPOINT | quote }}
+  {{- if eq "TEI" .Values.EMBEDDING_BACKEND }}
+  EMBEDDING_COMPONENT_NAME: "OPEA_TEI_EMBEDDING"
+  MULTIMODAL_EMBEDDING: "false"
+  {{- if .Values.EMBEDDING_ENDPOINT }}
+  TEI_EMBEDDING_ENDPOINT: {{ tpl .Values.EMBEDDING_ENDPOINT . | quote }}
   {{- else }}
   TEI_EMBEDDING_ENDPOINT: "http://{{ .Release.Name }}-tei"
+  {{- end }}
+  {{- else if eq "PredictionGuard" .Values.EMBEDDING_BACKEND }}
+  MULTIMODAL_EMBEDDING: "false"
+  EMBEDDING_COMPONENT_NAME: "OPEA_PREDICTIONGUARD_EMBEDDING"
+  PG_EMBEDDING_MODEL_NAME: {{ .Values.PG_EMBEDDING_MODEL_NAME | quote }}
+  PREDICTIONGUARD_API_KEY: {{ .Values.PREDICTIONGUARD_API_KEY | quote }}
+  {{- else if eq "BridgeTower" .Values.EMBEDDING_BACKEND }}
+  MULTIMODAL_EMBEDDING: "true"
+  EMBEDDING_COMPONENT_NAME: "OPEA_MULTIMODAL_EMBEDDING_BRIDGETOWER"
+  {{- if .Values.EMBEDDING_ENDPOINT }}
+  MMEI_EMBEDDING_ENDPOINT: {{ tpl .Values.EMBEDDING_ENDPOINT . | quote }}
+  {{- else }}
+  MMEI_EMBEDDING_ENDPOINT: "http://{{ .Release.Name }}-mm-embedding"
+  {{- end }}
+  {{- else }}
+  {{- cat "Invalid EMBEDDING_BACKEND:" .Values.EMBEDDING_BACKEND | fail }}
   {{- end }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   {{- if and (not .Values.TEI_EMBEDDING_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy) }}
-  no_proxy: "{{ .Release.Name }}-tei,{{ .Values.global.no_proxy }}"
+  no_proxy: "{{ .Release.Name }}-tei,{{ .Release.Name }}-mm-embedding,{{ .Values.global.no_proxy }}"
   {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}

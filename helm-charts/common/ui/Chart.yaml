@@ -5,5 +5,9 @@ apiVersion: v2
 name: ui
 description: Common Helm chart for the UI for various opea workload
 type: application
-version: 1.0.0
+dependencies:
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"
+version: 0-latest
 appVersion: "v1.0"

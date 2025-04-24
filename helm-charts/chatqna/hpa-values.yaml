@@ -4,26 +4,41 @@
 # Enable HorizontalPodAutoscaler (HPA)
 #
 # That will overwrite named PrometheusAdapter configMap with ChatQnA specific
-# custom metric queries for embedding, reranking, tgi services.
+# custom metric queries for embedding, reranking, and LLM services.
 #
 # Default upstream configMap is in:
 #  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
 
+dashboard:
+  scaling: true
+
 autoscaling:
   enabled: true
+
+global:
+  # K8s custom metrics (used for scaling thresholds) are based on metrics from service monitoring
+  monitoring: true
 
 # Override values in specific subcharts
 
 # Enabling "autoscaling" for any of the subcharts requires enabling it also above!
+vllm:
+  autoscaling:
+    minReplicas: 1
+    maxReplicas: 4
+    enabled: true
 tgi:
   autoscaling:
+    minReplicas: 1
     maxReplicas: 4
     enabled: true
 teirerank:
   autoscaling:
+    minReplicas: 1
     maxReplicas: 3
     enabled: true
 tei:
   autoscaling:
+    minReplicas: 1
     maxReplicas: 2
     enabled: true

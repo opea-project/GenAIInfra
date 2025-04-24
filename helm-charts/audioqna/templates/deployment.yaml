@@ -28,27 +28,47 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "audioqna.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
           env:
-            - name: LLM_SERVICE_HOST_IP
-              value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") }}
-            - name: LLM_SERVICE_PORT
-              value: {{ index .Values "llm-uservice" "service" "port" | quote }}
-            - name: ASR_SERVICE_HOST_IP
-              value: {{ include "asr.fullname" (index .Subcharts "asr") }}
-            - name: ASR_SERVICE_PORT
-              value: {{ index .Values "asr" "service" "port" | quote }}
-            - name: TTS_SERVICE_HOST_IP
-              value: {{ include "tts.fullname" (index .Subcharts "tts") }}
-            - name: TTS_SERVICE_PORT
-              value: {{ index .Values "tts" "service" "port" | quote }}
+            - name: LLM_SERVER_HOST_IP
+              {{- if .Values.tgi.enabled }}
+              value: {{ include "tgi.fullname" (index .Subcharts "tgi") }}
+              {{- else if .Values.vllm.enabled }}
+              value: {{ include "vllm.fullname" (index .Subcharts "vllm") }}
+              {{- end }}
+            - name: LLM_SERVER_PORT
+              value: "80"
+            - name: LLM_MODEL_ID
+              {{- if .Values.tgi.enabled }}
+              value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
+              {{- else if .Values.vllm.enabled }}
+              value: {{ .Values.vllm.LLM_MODEL_ID | quote }}
+              {{- end }}
+            - name: WHISPER_SERVER_HOST_IP
+              value: {{ include "whisper.fullname" (index .Subcharts "whisper") }}
+            - name: WHISPER_SERVER_PORT
+              value: {{ index .Values "whisper" "service" "port" | quote }}
+            {{- if .Values.speecht5.enabled }}
+            - name: SPEECHT5_SERVER_HOST_IP
+              value: {{ include "speecht5.fullname" (index .Subcharts "speecht5") }}
+            - name: SPEECHT5_SERVER_PORT
+              value: {{ index .Values "speecht5" "service" "port" | quote }}
+            {{- else if index .Values "gpt-sovits" "enabled" }}
+            - name: GPT_SOVITS_SERVER_HOST_IP
+              value: {{ include "gpt-sovits.fullname" (index .Subcharts "gpt-sovits") }}
+            - name: GPT_SOVITS_SERVER_PORT
+              value: {{ index .Values "gpt-sovits" "service" "port" | quote }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp

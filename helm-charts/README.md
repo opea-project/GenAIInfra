@@ -26,10 +26,13 @@ AI application examples you can run directly on Xeon and Gaudi. You can also ref
 
 | Helm chart                         | Link to GenAIExamples                                                                              | Description                                                                                     |
 | ---------------------------------- | -------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| [chatqna](./chatqna/README.md)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA/README.md)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
+| [agentqna](./agentqna/README.md)   | [Agent QnA](https://github.com/opea-project/GenAIExamples/tree/main/AgentQnA/README.md)            | A hierarchical multi-agent system for question-answering applications.                          |
+| [audioqna](./audioqna/README.md)   | [Audio QnA](https://github.com/opea-project/GenAIExamples/tree/main/AudioQnA/README.md)            | An example of chatbot for question and answering with audio file support.                       |
 | [codegen](./codegen/README.md)     | [Code Generation](https://github.com/opea-project/GenAIExamples/tree/main/CodeGen/README.md)       | An example of copilot designed for code generation in Visual Studio Code.                       |
 | [codetrans](./codetrans/README.md) | [Code Translation](https://github.com/opea-project/GenAIExamples/tree/main/CodeTrans/README.md)    | An example of programming language code translation.                                            |
-| [chatqna](./chatqna/README.md)     | [ChatQnA](https://github.com/opea-project/GenAIExamples/tree/main/ChatQnA/README.md)               | An example of chatbot for question and answering through retrieval argumented generation (RAG). |
 | [docsum](./docsum/README.md)       | [Document Summarization](https://github.com/opea-project/GenAIExamples/tree/main/DocSum/README.md) | An example of document summarization.                                                           |
+| [visualqna](./audioqna/README.md)  | [Visual QnA](https://github.com/opea-project/GenAIExamples/tree/main/VisualQnA/README.md)          | An example of answering open-ended questions based on an image.                                 |
 
 ### Components
 
@@ -79,6 +82,10 @@ There are global options (which should be shared across all components of a work
 | global     | modelUseHostPath                | If you don't have Persistent Volume in your k8s cluster and want to use local directory as HuggingFace hub cache, set modelUseHostPath to your local directory name. Note that this can't share across nodes. Default "". Only one of modelUsePVC/modelUseHostPath can be set. |
 | global     | monitoring                      | Enable monitoring for (ChatQnA) service components. See [Pre-conditions](monitoring.md#pre-conditions) before enabling!                                                                                                                                                        |
 | tgi        | LLM_MODEL_ID                    | The model id you want to use for tgi server. Default "Intel/neural-chat-7b-v3-3".                                                                                                                                                                                              |
+
+## Deploy the Helm Charts on Intel® Xeon® Processors with Intel® Trust Domain Extensions (Intel® TDX)
+
+See [TDX instructions](TDX.md) on how to deploy the Helm Charts on Intel® Xeon® processors with Intel® Trust Domain Extensions (Intel® TDX).
 
 ## Using HPA (autoscaling)
 
@@ -151,10 +158,7 @@ helm install tgi common/tgi --set global.modelUsePVC=model-volume
 ## Using Private Docker Hub
 
 By default, we're using Docker images from [official Docker hub](https://hub.docker.com/u/opea), with Docker image version aligned with OPEA releases.
-If you have private hub or would like to use different Docker image versions, see the following examples.
-
-To use the latest tag for all images:
-`find . -name '*values.yaml' -type f -exec sed -i 's#tag: ""#tag: latest#g' {} \;`
+If you have private hub, see the following examples.
 
 To use local Docker registry:
 

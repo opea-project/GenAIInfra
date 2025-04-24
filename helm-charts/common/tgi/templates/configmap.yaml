@@ -19,8 +19,10 @@ data:
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- if contains "tgi-gaudi" .Values.image.repository }}
   HABANA_LOGS: "/tmp/habana_logs"
+  TRITON_CACHE_DIR: "/tmp/triton_cache"
   {{- end }}
   NUMBA_CACHE_DIR: "/tmp"
+  HUGGINGFACE_HUB_CACHE: "/data"
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.MAX_INPUT_LENGTH }}
   MAX_INPUT_LENGTH: {{ .Values.MAX_INPUT_LENGTH | quote }}
@@ -55,4 +57,10 @@ data:
   {{- end }}
   {{- if .Values.FLASH_ATTENTION_RECOMPUTE }}
   FLASH_ATTENTION_RECOMPUTE: {{ .Values.FLASH_ATTENTION_RECOMPUTE | quote }}
+  {{- end }}
+  {{- if .Values.PREFILL_BATCH_BUCKET_SIZE }}
+  PREFILL_BATCH_BUCKET_SIZE: {{ .Values.PREFILL_BATCH_BUCKET_SIZE | quote }}
+  {{- end }}
+  {{- if .Values.BATCH_BUCKET_SIZE }}
+  BATCH_BUCKET_SIZE: {{ .Values.BATCH_BUCKET_SIZE | quote }}
   {{- end }}

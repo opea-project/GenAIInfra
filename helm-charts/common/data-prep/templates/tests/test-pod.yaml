@@ -17,19 +17,30 @@ spec:
       command: ['bash', '-c']
       args:
         - |
-          echo "test file" > /tmp/file1.txt;
-          max_retry=20;
+          filetypes=(docx pdf txt xlsx pptx doc);
+          for type in ${filetypes[@]}; do
+            echo "Get ingest file of type $type ...";
+            curl -sLJO "https://github.com/opea-project/GenAIComps/raw/refs/heads/main/tests/dataprep/ingest_dataprep.${type}";
+            max_retry=20;
+            echo "Test ingest file of type $type ...";
+            for ((i=1; i<=max_retry; i++)); do
+              curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep/ingest -sS --fail-with-body \
+                -X POST -H "Content-Type: multipart/form-data" \
+                -F "files=@./ingest_dataprep.${type}" && break;
+              curlcode=$?;
+              if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+            done;
+            if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+            echo "";
+          done;
+          echo "test delete...";
           for ((i=1; i<=max_retry; i++)); do
-            curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep -sS --fail-with-body \
-            -X POST \
-            -H "Content-Type: multipart/form-data" \
-            -F "files=@/tmp/file1.txt" && break;
+              curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep/delete -sS --fail-with-body \
+              -X POST \
+              -H "Content-Type: application/json" \
+              -d '{"file_path": "all"}' && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;
-          curl http://{{ include "data-prep.fullname" . }}:{{ .Values.service.port }}/v1/dataprep/delete_file -sS \
-          -X POST \
-          -H "Content-Type: application/json" \
-          -d '{"file_path": "file1.txt"}';
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
   restartPolicy: Never

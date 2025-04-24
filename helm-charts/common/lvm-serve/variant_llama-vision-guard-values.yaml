@@ -1,0 +1,28 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+accelDevice: "gaudi"
+
+image:
+  repository: opea/lvm-llama-vision-guard
+
+resources:
+  limits:
+    habana.ai/gaudi: 1
+
+LVM_MODEL_ID: meta-llama/Llama-Guard-3-11B-Vision
+port: 9499
+
+readinessProbe:
+  httpGet:
+    path: v1/health_check
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 1
+startupProbe:
+  httpGet:
+    path: v1/health_check
+  initialDelaySeconds: 5
+  periodSeconds: 5
+  timeoutSeconds: 1
+  failureThreshold: 120

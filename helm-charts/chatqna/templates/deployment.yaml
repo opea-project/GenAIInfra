@@ -28,17 +28,31 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "chatqna.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
           env:
             - name: LLM_SERVER_HOST_IP
+              # For FaqGen, llm-uservice is used.
+              {{- if eq .Values.CHATQNA_TYPE "CHATQNA_FAQGEN"}}
+              value: {{ .Release.Name }}-llm-uservice
+              {{- else }}
+              {{- if .Values.vllm.enabled }}
+              value: {{ .Release.Name }}-vllm
+              {{- else }}
               value: {{ .Release.Name }}-tgi
+              {{- end }}
+              {{- end }}
             - name: LLM_SERVER_PORT
               value: "80"
             - name: LLM_MODEL
+              {{- if .Values.vllm.enabled }}
+              value: {{ .Values.vllm.LLM_MODEL_ID | quote }}
+              {{- else }}
               value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
+              {{- end }}
             - name: RERANK_SERVER_HOST_IP
               value: {{ .Release.Name }}-teirerank
             - name: RERANK_SERVER_PORT
@@ -55,14 +69,32 @@ spec:
               value: {{ .Release.Name }}-guardrails-usvc
             - name: GUARDRAIL_SERVICE_PORT
               value: "9090"
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-llm-uservice
+            - name: LLM_SERVICE_PORT
+              value: "9000"
+            - name: RERANK_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-reranking-usvc
+            - name: RERANK_SERVICE_PORT
+              value: "8000"
+            - name: EMBEDDING_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-embedding-usvc
+            - name: EMBEDDING_SERVICE_PORT
+              value: "6000"
             {{- if .Values.LOGFLAG }}
             - name: LOGFLAG
               value: {{ .Values.LOGFLAG | quote }}
             {{- end }}
+            {{- if .Values.CHATQNA_TYPE }}
+            - name: CHATQNA_TYPE
+              value: {{ .Values.CHATQNA_TYPE | quote }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp

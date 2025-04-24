@@ -10,6 +10,7 @@ The GenAIInfra repository is organized under four main directories, which includ
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `authN-authZ`             | Authentication and Authorization scenarios for OPEA.                                                                                                                                                                                                                                                                                                                               |
 | `helm-charts`             | Helm charts for deploying [GenAIComponents](https://github.com/opea-project/GenAIComps) on Kubernetes.                                                                                                                                                                                                                                                                             |
+| `kubeai`                  | KubeAI operator for OPEA inference microservices (OIM) deployment, autoscaling and load balancing. More details in [README](kubeai/README.md)                                                                                                                                                                                                                                      |
 | `microservices-connector` | GenAI Microservices Connector (GMC) supports the launching, monitoring, and updating of GenAI microservice chains, such as those in [GenAIExamples](https://github.com/opea-project/GenAIExamples) on Kubernetes. It essentially supports a Kubernetes Custom Resource Definition for GenAI chains/pipelines that may be comprised of sequential, conditional, and parallel steps. |
 | `kubernetes-addons`       | Deploy Kubernetes add-ons for OPEA.                                                                                                                                                                                                                                                                                                                                                |
 | `proxy`                   | OPEA Pipeline Proxy is an enhancement of the default Istio proxy with additional features designed specifically for OPEA RAG pipelines.                                                                                                                                                                                                                                            |
@@ -39,23 +40,31 @@ The following steps are optional. They're only required if you want to run the w
 
    NOTE: Make sure you configure the appropriate container runtime based on the type of container runtime you installed during Kubernetes setup.
 
-4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Orchestration/Gaudi_Kubernetes/Device_Plugin_for_Kubernetes.html).
+4. [Install Intel Gaudi device plugin for Kubernetes](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Kubernetes_Installation/index.html).
 
-   Alternatively, Intel provides a base operator to manage the Gaudi software stack. Refer to [this file](kubernetes-addons/Intel-Gaudi-Base-Operator/README.md) for details.
+Alternatively, Intel provides a [base operator](https://docs.habana.ai/en/latest/Installation_Guide/Additional_Installation/Kubernetes_Installation/Kubernetes_Operator.html) to manage the Gaudi software stack.
 
 ## Usages
 
 ### Use GenAI Microservices Connector (GMC) to deploy and adjust GenAIExamples
 
-Follow [GMC README](https://github.com/opea-project/GenAIInfra/blob/main/microservices-connector/README.md)
+Follow [GMC README](microservices-connector/README.md)
 to install GMC into your kubernetes cluster. [GenAIExamples](https://github.com/opea-project/GenAIExamples) contains several sample GenAI example use case pipelines such as ChatQnA, DocSum, etc.
-Once you have deployed GMC in your Kubernetes cluster, you can deploy any of the example pipelines by following its Readme file (e.g. [Docsum](https://github.com/opea-project/GenAIExamples/blob/main/DocSum/kubernetes/intel/README_gmc.md)).
+Once you have deployed GMC in your Kubernetes cluster, you can deploy any of the example pipelines by following its Readme file (e.g. [Docsum](https://github.com/opea-project/GenAIExamples/blob/main/DocSum/kubernetes/gmc/README.md)).
 
 ### Use helm charts to deploy
 
 To deploy GenAIExamples to Kubernetes using helm charts, you need [Helm](https://helm.sh/docs/intro/install/) installed on your machine.
 
-For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/README.md)
+For a detailed version, see [Deploy GenAIExample/GenAIComps using helm charts](helm-charts/README.md)
+
+### Use terraform to deploy on cloud service providers
+
+You can use [Terraform](https://www.terraform.io/) to create infrastructure to run OPEA applications on various cloud service provider (CSP) environments.
+
+- [AWS/EKS: Create managed Kubernetes cluster on AWS for OPEA](cloud-service-provider/aws/eks/terraform/README.md)
+- [Azure/AKS: Create managed Kubernetes cluster on Azure for OPEA](cloud-service-provider/azure/aks/terraform/README.md)
+- [GCP/GKE: Create managed Kubernetes cluster on GCP for OPEA](cloud-service-provider/gcp/gke/terraform/README.md)
 
 ## Additional Content
 

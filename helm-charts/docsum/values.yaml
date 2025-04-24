@@ -1,4 +1,4 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 # Default values for docsum.
@@ -6,22 +6,33 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 1
-LLM_SERVICE_HOST_IP: ""
 
 image:
   repository: opea/docsum
-  pullPolicy: IfNotPresent
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
-port: 8888
-service:
-  type: ClusterIP
-  port: 8888
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
 
-nginx:
-  service:
-    type: NodePort
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
 
 securityContext:
   readOnlyRootFilesystem: true
@@ -34,6 +45,11 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
+port: 8888
+service:
+  type: ClusterIP
+  port: 8888
+
 nodeSelector: {}
 
 tolerations: []
@@ -43,31 +59,69 @@ affinity: {}
 # To override values in subchart llm-uservice
 llm-uservice:
   image:
-    repository: opea/llm-docsum-tgi
-
-# To override values in subchart tgi
-tgi:
+    repository: opea/llm-docsum
+  DOCSUM_BACKEND: "vLLM"
+  MAX_INPUT_TOKENS: "1024"
+  MAX_TOTAL_TOKENS: "2048"
   LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
 
+# To override values in TGI/vLLM subcharts
+tgi:
+  enabled: false
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  MAX_INPUT_LENGTH: "1024"
+  MAX_TOTAL_TOKENS: "2048"
+vllm:
+  enabled: true
+  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+
+# Use docsum gradio UI
+nginx:
+  enabled: false
 docsum-ui:
   image:
-    repository: opea/docsum-ui
+    repository: opea/docsum-gradio-ui
     tag: "latest"
-  BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
   containerPort: 5173
+  service:
+    type: NodePort
+
+# NOTE: uncomment the following settings to use other docsum UI
+# nginx:
+#   enabled: true
+#   service:
+#     type: NodePort
+# docsum-ui:
+#   image:
+#     repository: opea/docsum-ui
+#     tag: "latest"
+#   BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
+#   containerPort: 5173
+#   service:
+#     type: ClusterIP
+
+dashboard:
+  prefix: "OPEA DocSum"
 
 global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: "docsum"
   # set modelUseHostPath or modelUsePVC to use model cache.
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models
   # modelUsePVC: model-volume
 
-  # Install Prometheus serviceMonitors for service components
+  # Prometheus monitoring + Grafana dashboard(s) for service components?
   monitoring: false
+
+  # Prometheus/Grafana namespace for Dashboard installation
+  prometheusNamespace: monitoring
 
   # Prometheus Helm install release name needed for serviceMonitors
   prometheusRelease: prometheus-stack

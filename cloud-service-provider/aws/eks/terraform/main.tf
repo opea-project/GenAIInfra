@@ -3,7 +3,19 @@ provider "aws" {
 }
 
 provider "kubernetes" {
-  config_path = "~/.kube/config"
+    host                   = data.aws_eks_cluster.this.endpoint
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.this.certificate_authority[0].data)
+    token                  = data.aws_eks_cluster_auth.this.token
+}
+
+data "aws_eks_cluster" "this" {
+  name = module.eks.cluster_name
+  depends_on = [module.eks]
+}
+
+data "aws_eks_cluster_auth" "this" {
+  name = module.eks.cluster_name
+  depends_on = [module.eks]
 }
 
 data "aws_availability_zones" "available" {
@@ -158,7 +170,7 @@ resource "kubernetes_storage_class_v1" "eks_efs" {
   reclaim_policy      = "Retain"
   parameters = {
     provisioningMode = "efs-ap"
-    fileSystemId: "${module.efs.id}"
+    fileSystemId = "${module.efs.id}"
     directoryPerms = "700"
   }
   depends_on = [ 

@@ -28,23 +28,26 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "docsum.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
           env:
             - name: LLM_SERVICE_HOST_IP
-              {{- if .Values.LLM_SERVICE_HOST_IP }}
-              value: {{ .Values.LLM_SERVICE_HOST_IP | quote}}
-              {{- else }}
-              value: {{ .Release.Name }}-llm-uservice
-              {{- end }}
-            #- name: MEGA_SERVICE_PORT
-            #  value: {{ .Values.port }}
+              value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") }}
+            - name: LLM_SERVICE_PORT
+              value: {{ index .Values "llm-uservice" "service" "port" | quote }}
+            - name: ASR_SERVICE_HOST_IP
+              value: {{ include "whisper.fullname" (index .Subcharts "whisper") }}
+            - name: ASR_SERVICE_PORT
+              value: {{ index .Values "whisper" "service" "port" | quote }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           volumeMounts:
             - mountPath: /tmp
               name: tmp

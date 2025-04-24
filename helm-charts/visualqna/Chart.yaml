@@ -6,15 +6,23 @@ name: visualqna
 description: The Helm chart to deploy VisualQnA
 type: application
 dependencies:
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
   - name: tgi
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tgi"
+    condition: tgi.enabled
   - name: lvm-uservice
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/lvm-uservice"
   - name: ui
     alias: visualqna-ui
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/ui"
-version: 1.0.0
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
+version: 0-latest
 appVersion: "v1.0"

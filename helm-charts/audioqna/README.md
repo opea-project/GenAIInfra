@@ -7,8 +7,8 @@ AudioQnA depends on the following micro services:
 - [asr](../common/asr/README.md)
 - [whisper](../common/whisper/README.md)
 - [llm-uservice](../common/llm-uservice/README.md)
-- [tgi](../common/tgi/README.md)
-- [tts](../common/tts/README.md)
+- [tgi](../common/tgi/README.md) or [vllm](../common/vllm/README.md)
+- [tts](../common/tts/README.md) or [gpt-sovits](../common/gpt-sovits/README.md)
 - [speecht5](../common/speecht5/README.md)
 
 ## Installing the Chart
@@ -20,17 +20,23 @@ cd GenAIInfra/helm-charts/
 ./update_dependency.sh
 helm dependency update audioqna
 export HFTOKEN="insert-your-huggingface-token-here"
-export MODELDIR="/mnt/opea-models"
-export MODELNAME="Intel/neural-chat-7b-v3-3"
-# To run on Xeon
-helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
-# To run on Gaudi
-#helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f audioqna/gaudi-values.yaml
+# To use CPU with vLLM
+helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/cpu-values.yaml
+# To use CPU with TGI
+# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/cpu-tgi-values.yaml
+# To use CPU with vLLM with multilang tts
+# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f cpu-multilang-values.yaml
+# To use Gaudi device with vLLM
+# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/gaudi-values.yaml
+# To use Gaudi device with TGI
+# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/gaudi-tgi-values.yaml
 ```
 
 ### IMPORTANT NOTE
 
-1. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
+1. If you want to cache the downloaded model for later reuse, please set the bash environment variable `MODELDIR` to an existing directory on the node, then append `--set global.modelUseHostPath=${MODELDIR}` to the `helm install` commands.
+
+2. Make sure your `${MODELDIR}` and `${MODELDIR}/.locks` is writable to all the users if you want to use the cached downloaded models, i.e. `$ sudo chmod 0777 ${MODELDIR} && sudo chmod 0777 ${MODELDIR}/.locks `.
 
 ## Verify
 

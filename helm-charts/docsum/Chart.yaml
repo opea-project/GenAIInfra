@@ -6,15 +6,31 @@ name: docsum
 description: The Helm chart to deploy DocSum
 type: application
 dependencies:
+  - name: dashboard
+    version: 0-latest
+    repository: "file://../common/dashboard"
+    condition: global.monitoring
   - name: tgi
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tgi"
+    condition: tgi.enabled
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
   - name: llm-uservice
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/llm-uservice"
+  - name: whisper
+    version: 0-latest
+    repository: "file://../common/whisper"
   - name: ui
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/ui"
     alias: docsum-ui
-version: 1.0.0
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
+    condition: nginx.enabled
+version: 0-latest
 appVersion: "v1.0"

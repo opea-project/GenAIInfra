@@ -1,10 +1,14 @@
-# Copyright (C) 2024 Intel Corporation
+# Copyright (C) 2025 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
 apiVersion: v2
 name: tei
 description: The Helm chart for HuggingFace Text Embedding Inference Server
 type: application
-version: 1.0.0
+dependencies:
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"
+version: 0-latest
 # The HF TEI version
-appVersion: "cpu-1.5"
+appVersion: "cpu-1.6"

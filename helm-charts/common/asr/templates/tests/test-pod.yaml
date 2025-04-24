@@ -18,11 +18,11 @@ spec:
       args:
         - |
           max_retry=20;
+          wget https://github.com/intel/intel-extension-for-transformers/raw/main/intel_extension_for_transformers/neural_chat/assets/audio/sample.wav;
           for ((i=1; i<=max_retry; i++)); do
             curl -sS --fail-with-body http://{{ include "asr.fullname" . }}:{{ .Values.service.port }}/v1/audio/transcriptions \
-            -XPOST \
-            -d '{"byte_str": "UklGRigAAABXQVZFZm10IBIAAAABAAEARKwAAIhYAQACABAAAABkYXRhAgAAAAEA"}' \
-            -H 'Content-Type: application/json' && break;
+            -H "Content-Type: multipart/form-data" \
+            -F file="@./sample.wav" && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;

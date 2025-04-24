@@ -11,9 +11,16 @@ data:
   {{- if .Values.SAFETY_GUARD_ENDPOINT }}
   SAFETY_GUARD_ENDPOINT: {{ tpl .Values.SAFETY_GUARD_ENDPOINT . | quote}}
   {{- else }}
-  SAFETY_GUARD_ENDPOINT: "http://{{ .Release.Name }}-tgi"
+  SAFETY_GUARD_ENDPOINT: "http://{{ .Release.Name }}-tgi-guardrails"
   {{- end }}
   SAFETY_GUARD_MODEL_ID: {{ .Values.SAFETY_GUARD_MODEL_ID | quote }}
+  {{- if eq "LLAMA" .Values.GUARDRAIL_BACKEND }}
+  GUARDRAILS_COMPONENT_NAME: "OPEA_LLAMA_GUARD"
+  {{- else if eq "WILD" .Values.GUARDRAIL_BACKEND }}
+  GUARDRAILS_COMPONENT_NAME: "OPEA_WILD_GUARD"
+  {{- else }}
+  {{- cat "Invalid GUARDRAIL_BACKEND:" .Values.GUARDRAIL_BACKEND | fail }}
+  {{- end }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
   LOGFLAG: {{ .Values.LOGFLAG | quote }}
@@ -23,7 +30,7 @@ data:
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}
   {{- if and (not .Values.SAFETY_GUARD_ENDPOINT) (or .Values.global.http_proxy .Values.global.https_proxy) }}
-  no_proxy: "{{ .Release.Name }}-tgi,{{ .Values.global.no_proxy }}"
+  no_proxy: "{{ .Release.Name }}-tgi-guardrails,{{ .Values.global.no_proxy }}"
   {{- else }}
   no_proxy: {{ .Values.global.no_proxy | quote }}
   {{- end }}

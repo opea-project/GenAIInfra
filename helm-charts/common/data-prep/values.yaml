@@ -5,18 +5,54 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-tei:
-  enabled: false
-milvus:
-  enabled: false
-redis-vector-db:
-  enabled: false
+# Configurations for OPEA microservice data-prep
+# Set it as a non-null string, such as true, if you want to enable logging.
+LOGFLAG: ""
+
+# data-prep needs to talk to different vector-DB backend, i.e. Redis, Milvus
+# Default is to use Redis as vector-DB backend
+DATAPREP_BACKEND: "REDIS"
+REDIS_HOST: ""
+REDIS_PORT: 6379
+REDIS_SSL: false
+REDIS_PASSWORD: ""
+REDIS_USERNAME: ""
+INDEX_NAME: "rag_redis"
+KEY_INDEX_NAME: "file-keys"
+SEARCH_BATCH_SIZE: 10
+
+# Uncomment and set the following 4 settings to use Milvus as vector-DB backend
+# DATAPREP_BACKEND: "MILVUS"
+# MILVUS_HOST: ""
+# MILVUS_PORT: 19530
+# COLLECTION_NAME: "rag_milvus"
+
+# Uncomment and set the following 4 settings to use Qdrant as vector-DB backend
+# DATAPREP_BACKEND: "QDRANT"
+# QDRANT_HOST: ""
+# QDRANT_PORT: 6333
+# COLLECTION_NAME: "rag_qdrant"
+
+# data-prep can do embedding locally or talk to remote TEI service to do embedding.
+# TEI_EMBEDDING_ENDPOINT takes precedence over LOCAL_EMBEDDING_MODEL.
+# TEI inference service URL, e.g. http://<service-name>:<port>
+TEI_EMBEDDING_ENDPOINT: ""
+# local embedding model
+LOCAL_EMBEDDING_MODEL: ""
+
+# The following 2 settings are used to wait for dependency DB service to be ready.
+# Normally we don't need to set them unless the init-containers keeps failing.
+# Timeout in seconds for each wait
+# waitTimeout: 1
+# Total timeout in seconds for all wait
+# retryTimeoutSeconds: 60
 
 replicaCount: 1
 
 image:
-  repository: opea/dataprep-redis
-  pullPolicy: IfNotPresent
+  repository: opea/dataprep
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
@@ -24,13 +60,24 @@ imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
 podAnnotations: {}
 
 podSecurityContext: {}
   # fsGroup: 2000
 
 securityContext:
-  readOnlyRootFilesystem: false
+  readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
   runAsNonRoot: true
   runAsUser: 1000
@@ -40,30 +87,19 @@ securityContext:
   seccompProfile:
     type: RuntimeDefault
 
-port: 6007
+port: 5000
 service:
   type: ClusterIP
   port: 6007
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources:
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: v1/health_check
-    port: data-prep
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  failureThreshold: 24
 readinessProbe:
   httpGet:
     path: v1/health_check
@@ -84,31 +120,47 @@ tolerations: []
 
 affinity: {}
 
-# Set it as a non-null string, such as true, if you want to enable logging facility,
-# otherwise, keep it as "" to disable it.
-LOGFLAG: ""
-
-# text embedding inference service URL, e.g. http://<service-name>:<port>
-TEI_EMBEDDING_ENDPOINT: ""
-
-# local embedder's model
-LOCAL_EMBEDDING_MODEL: ""
-
-# redis DB service URL, e.g. redis://<service-name>:<port>
-REDIS_URL: ""
-INDEX_NAME: "rag-redis"
-KEY_INDEX_NAME: "file-keys"
-SEARCH_BATCH_SIZE: 10
-
-# milvus DB configurations
-MILVUS_HOST: ""
-MILVUS_PORT: ""
-COLLECTION_NAME: ""
-MOSEC_EMBEDDING_ENDPOINT: ""
-MOSEC_EMBEDDING_MODEL: ""
+tdxEnabled: false
 
 global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: ""
+
+  # Running service in air gapped(offline) mode
+  # If offline is enabled, user must set either modelUseHostPath or modelUsePVC and download model unstructuredio/yolo_x_layout out of band.
+  # If offline is enabled, user must set either nltkDataUseHostPath or nltkDataUsePVC and download nltk data out of band.
+  offline: false
+  # To store offline model data in local directory for one node K8s environment, set modelUseHostPath
+  # Download offline model: huggingface-cli download unstructuredio/yolo_x_layout --local-dir <modelUseHostPath>/unstructuredio/yolo_x_layout && chmod a+r <modelUseHostPath>/unstructuredio/yolo_x_layout
+  modelUseHostPath: ""
+  # To store offline data in persistent volume(PV) to be shared by multinode K8s environment, set modelUsePVC
+  # then follow the similar above steps to download the offline model to the root directory of that PV
+  modelUsePVC: ""
+  # To store offline nltk data in local directory for one node K8s environment, set nltkDataUseHostPath
+  # Download nltk data: python -m nltk.downloader -d <nltkDataUseHostPath> all && chmod a+r <nltkDataUseHostPath>
+  nltkDataUseHostPath: ""
+  # To store offline nltk data in persistent volume(PV) to be shared by multinode K8s environment, set nltkDataUsePVC
+  # and follow the similar above steps to download the nltk data to the root directory of that PV
+  nltkDataUsePVC: ""
+
+  # Install Prometheus serviceMonitors for service components
+  monitoring: false
+
+  # Prometheus Helm install release name needed for serviceMonitors
+  prometheusRelease: prometheus-stack
+
+# For CI tests only
+tei:
+  enabled: false
+milvus:
+  enabled: false
+redis-vector-db:
+  enabled: false
+qdrant:
+  enabled: false

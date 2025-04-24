@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: prompt-usvc-config
   labels:
-    helm.sh/chart: prompt-usvc-1.0.0
+    helm.sh/chart: prompt-usvc-0-latest
     app.kubernetes.io/name: prompt-usvc
     app.kubernetes.io/instance: prompt-usvc
     app.kubernetes.io/version: "v1.0"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: prompt-usvc
   labels:
-    helm.sh/chart: prompt-usvc-1.0.0
+    helm.sh/chart: prompt-usvc-0-latest
     app.kubernetes.io/name: prompt-usvc
     app.kubernetes.io/instance: prompt-usvc
     app.kubernetes.io/version: "v1.0"
@@ -57,7 +57,7 @@ kind: Deployment
 metadata:
   name: prompt-usvc
   labels:
-    helm.sh/chart: prompt-usvc-1.0.0
+    helm.sh/chart: prompt-usvc-0-latest
     app.kubernetes.io/name: prompt-usvc
     app.kubernetes.io/instance: prompt-usvc
     app.kubernetes.io/version: "v1.0"
@@ -95,7 +95,6 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/promptregistry-mongo-server:latest"
-          imagePullPolicy: IfNotPresent
           ports:
             - name: port
               containerPort: 6018

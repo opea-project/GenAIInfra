@@ -3,6 +3,8 @@
 
 name: GenAIInfra Helm CD workflow on manual event
 on:
+  schedule:
+    - cron: "0 0 * * 6"
   workflow_dispatch:
     inputs:
       workloads:
@@ -10,6 +12,11 @@ on:
         required: false
         type: string
         description: "workloads to test, empty for testing all helm charts"
+      dockerhub:
+        default: "false"
+        required: false
+        type: string
+        description: "Set to true if you want to use released docker images at dockerhub. By default using internal docker registry."
       tag:
         default: "latest"
         description: "Image tag to be tested"
@@ -34,7 +41,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          ref: ${{ inputs.opea_branch }}
+          ref: ${{ inputs.opea_branch || 'main' }}
 
       - name: Get test Services
         id: get-services
@@ -46,14 +53,23 @@ jobs:
               if [[ "$chart" == *"common" ]] || [[ -f $chart ]]; then
                 continue
               fi
-              for file in "$chart"/ci-*values.yaml; do
+              for file in "$chart"/*values.yaml; do
                 if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
+                    continue
+                  fi
+                  if [[ "$file" == *"variant_"* ]]; then
+                    continue
+                  fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    run_matrix="${run_matrix}{\"example\":\"$(basename "${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                    hardware="k8s-gaudi"
+                  elif [[ "$filename" == *"rocm"* ]]; then
+                    hardware="k8s-rocm"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$(basename "${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    hardware="k8s-xeon"
                   fi
+                  run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"${hardware}\", \"valuefile\":\"${filename}\"},"
                 fi
               done
             done
@@ -61,28 +77,46 @@ jobs:
               if [[ -f $chart ]]; then
                 continue
               fi
-              for file in "$chart"/ci-*values.yaml; do
+              for file in "$chart"/*values.yaml; do
                 if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
+                    continue
+                  fi
+                  if [[ "$file" == *"variant_"* ]]; then
+                    continue
+                  fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    run_matrix="${run_matrix}{\"example\":\"$(basename "${chart}\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                    hardware="k8s-gaudi"
+                  elif [[ "$filename" == *"rocm"* ]]; then
+                    hardware="k8s-rocm"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$(basename "${chart}\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
+                    hardware="k8s-xeon"
                   fi
+                  run_matrix="${run_matrix}{\"example\":\"$(basename ${chart})\",\"hardware\":\"${hardware}\", \"valuefile\":\"${filename}\",\"directory\":\"common\"},"
                 fi
               done
             done
           else
             service_list=($(echo ${{ github.event.inputs.workloads }} | tr ',' ' '))
             for service in $service_list; do
-              for file in "$CHARTS_DIR/$service"/ci-*values.yaml; do
+              for file in "$CHARTS_DIR/$service"/*values.yaml; do
                 if [ -f "$file" ]; then
+                  if [[ "$file" == *"nv-values.yaml" ]] || [[ "$file" == *"hpa-values.yaml" ]] || [[ "$file" == *"/values.yaml" ]]; then
+                    continue
+                  fi
+                  if [[ "$file" == *"variant_"* ]]; then
+                    continue
+                  fi
                   filename=$(basename "$file" .yaml)
                   if [[ "$filename" == *"gaudi"* ]]; then
-                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"gaudi\", \"valuefile\":\"${filename}\"},"
+                    hardware="k8s-gaudi"
+                  elif [[ "$filename" == *"rocm"* ]]; then
+                    hardware="k8s-rocm"
                   else
-                    run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"xeon\", \"valuefile\":\"${filename}\"},"
+                    hardware="k8s-xeon"
                   fi
+                  run_matrix="${run_matrix}{\"example\":\"$service\",\"hardware\":\"${hardware}\", \"valuefile\":\"${filename}\"},"
                 fi
               done
             done
@@ -97,8 +131,9 @@ jobs:
       matrix: ${{ fromJSON(needs.get-build-matrix.outputs.run_matrix) }}
     uses: ./.github/workflows/_helm-e2e.yaml
     with:
-      tag: ${{ inputs.tag }}
-      workload: ${{ matrix.example }}
+      tag: ${{ inputs.tag || 'latest' }}
+      dockerhub: ${{ inputs.dockerhub || false }}
+      workload: ${{ matrix.directory }}/${{ matrix.example }}
       hardware: ${{ matrix.hardware }}
       valuefile: ${{ matrix.valuefile }}
     secrets: inherit

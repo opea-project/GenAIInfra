@@ -1,0 +1,9 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# The following settings are for service embedding-multimodal-clip
+
+image:
+  repository: opea/embedding-multimodal-clip
+
+EMBEDDING_MODEL_ID: openai/clip-vit-base-patch32

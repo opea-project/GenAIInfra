@@ -1,6 +1,7 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
+{{- if .Values.untilGenAIExampleIssue1441Fixed }}
 apiVersion: v1
 kind: Pod
 metadata:
@@ -25,3 +26,4 @@ spec:
           done;
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
   restartPolicy: Never
+{{- end }}

@@ -5,34 +5,62 @@
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
 
-tei:
-  enabled: false
-milvus:
-  enabled: false
-redis-vector-db:
-  enabled: false
-
 replicaCount: 1
 
-# Set it as a non-null string, such as true, if you want to enable logging facility,
-# otherwise, keep it as "" to disable it.
+# Set it as a non-null string, such as true, if you want to enable logging.
 LOGFLAG: ""
 
+# retriever-usvc needs to use different vector-DB backend service, e.g. Redis, Milvus
+# Default is to use Redis as vector-DB backend
+RETRIEVER_BACKEND: "REDIS"
+REDIS_HOST: ""
+REDIS_PORT: 6379
+REDIS_SSL: false
+REDIS_PASSWORD: ""
+REDIS_USERNAME: ""
+INDEX_NAME: "rag_redis"
+
+# Uncomment and set the following settings to use Milvus as vector-DB backend
+# RETRIEVER_BACKEND: "MILVUS"
+MILVUS_HOST: ""
+MILVUS_PORT: 19530
+COLLECTION_NAME: "rag_milvus"
+
+# Uncomment and set the following settings to use Qdrant as vector-DB backend
+# RETRIEVER_BACKEND: "QDRANT"
+QDRANT_HOST: ""
+QDRANT_PORT: 6333
+QDRANT_EMBED_DIMENSION: 768
+QDRANT_INDEX_NAME: "rag_qdrant"
+
+# retriever-usvc can do embedding locally or talk to remote TEI service to do embedding.
+# TEI_EMBEDDING_ENDPOINT takes precedence over LOCAL_EMBEDDING_MODEL.
+# text embedding inference service URL, e.g. http://<service-name>:<port>
 TEI_EMBEDDING_ENDPOINT: ""
+# local embedding model
 LOCAL_EMBEDDING_MODEL: ""
 
-REDIS_URL: ""
-INDEX_NAME: "rag-redis"
-
 image:
-  repository: opea/retriever-redis
-  pullPolicy: IfNotPresent
+  repository: opea/retriever
+  # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+  # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
   tag: "latest"
 
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
 
 podAnnotations: {}
 
@@ -56,25 +84,14 @@ service:
   # The default port for retriever service is 7000
   port: 7000
 
-resources: {}
-  # We usually recommend not to specify default resources and to leave this as a conscious
-  # choice for the user. This also increases chances charts run on environments with little
-  # resources, such as Minikube. If you do want to specify resources, uncomment the following
-  # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
+resources:
   # limits:
   #   cpu: 100m
   #   memory: 128Mi
-  # requests:
-  #   cpu: 100m
-  #   memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
 
-livenessProbe:
-  httpGet:
-    path: v1/health_check
-    port: retriever-usvc
-  initialDelaySeconds: 5
-  periodSeconds: 5
-  failureThreshold: 24
 readinessProbe:
   httpGet:
     path: v1/health_check
@@ -95,21 +112,40 @@ tolerations: []
 
 affinity: {}
 
-# milvus DB configurations
-MILVUS_HOST: ""
-MILVUS_PORT: ""
-COLLECTION_NAME: ""
-MOSEC_EMBEDDING_ENDPOINT: ""
-MOSEC_EMBEDDING_MODEL: ""
+tdxEnabled: false
 
 global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: ""
+
+  # Running service in air gapped(offline) mode
+  # If offline is enabled, user must set either nltkDataUseHostPath or nltkDataUsePVC and download nltk data out of band.
+  offline: false
+  # To store offline nltk data in local directory for one node K8s environment, set nltkDataUseHostPath
+  # Download nltk data: python -m nltk.downloader -d <nltkDataUseHostPath> all && chmod a+r <nltkDataUseHostPath>
+  nltkDataUseHostPath: ""
+  # To store offline nltk data in persistent volume(PV) to be shared by multinode K8s environment, set nltkDataUsePVC
+  # and follow the similar above steps to download the nltk data to the root directory of that PV
+  nltkDataUsePVC: ""
 
   # Install Prometheus serviceMonitor for service
   monitoring: false
 
   # Prometheus Helm install release name for serviceMonitor
   prometheusRelease: prometheus-stack
+
+# For CI tests only
+tei:
+  enabled: false
+milvus:
+  enabled: false
+redis-vector-db:
+  enabled: false
+qdrant:
+  enabled: false

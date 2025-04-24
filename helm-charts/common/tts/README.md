@@ -38,8 +38,8 @@ Open another terminal and run the following command to verify the service if wor
 ```console
 curl http://localhost:9088/v1/audio/speech \
   -XPOST \
-  -d '{"text": "Who are you?"}' \
-  -H 'Content-Type: application/json'
+  -d '{"input":"Who are you?", "voice": "male"}' \
+  -H 'Content-Type: application/json' --output speech.wav
 ```
 
 ## Values

@@ -25,6 +25,7 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "agent.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
@@ -40,13 +41,15 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           ports:
             - name: agent
               containerPort: 9090
               protocol: TCP
           volumeMounts:
-            {{- if .Values.toolPath }}
+            {{- if or .Values.toolPVC .Values.toolHostPath }}
             - mountPath: /home/user/tools
               name: tool
             {{- end }}
@@ -67,10 +70,14 @@ spec:
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       volumes:
-        {{- if .Values.toolPath }}
+        {{- if .Values.toolPVC }}
+        - name: tool
+          persistentVolumeClaim:
+            claimName: {{ .Values.toolPVC }}
+        {{- else if .Values.toolHostPath }}
         - name: tool
           hostPath:
-            path: {{ .Values.toolPath }}
+            path: {{ .Values.toolHostPath }}
             type: Directory
         {{- end }}
         - name: tmp

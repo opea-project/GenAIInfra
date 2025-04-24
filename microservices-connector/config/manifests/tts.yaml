@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: tts-config
   labels:
-    helm.sh/chart: tts-1.0.0
+    helm.sh/chart: tts-0-latest
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
     app.kubernetes.io/version: "v1.0"
@@ -29,7 +29,7 @@ kind: Service
 metadata:
   name: tts
   labels:
-    helm.sh/chart: tts-1.0.0
+    helm.sh/chart: tts-0-latest
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
     app.kubernetes.io/version: "v1.0"
@@ -54,7 +54,7 @@ kind: Deployment
 metadata:
   name: tts
   labels:
-    helm.sh/chart: tts-1.0.0
+    helm.sh/chart: tts-0-latest
     app.kubernetes.io/name: tts
     app.kubernetes.io/instance: tts
     app.kubernetes.io/version: "v1.0"
@@ -92,7 +92,6 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/tts:latest"
-          imagePullPolicy: IfNotPresent
           ports:
             - name: tts
               containerPort: 9088

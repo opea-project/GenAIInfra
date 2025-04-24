@@ -1,0 +1,29 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "txt2img.fullname" . }}-testpod"
+  labels:
+    {{- include "txt2img.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+spec:
+  containers:
+    - name: curl
+      image: python:3.10
+      command: ['bash', '-c']
+      args:
+        - |
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ include "txt2img.fullname" (index .Subcharts "text2image") }}:{{ .Values.text2image.service.port }}/v1/text2image -sS --fail-with-body \
+              -X POST \
+              -d '{"prompt":"An astronaut riding a green horse", "num_images_per_prompt":1}' \
+              -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+  restartPolicy: Never

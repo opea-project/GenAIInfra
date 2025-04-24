@@ -1,6 +1,6 @@
 # ChatQnA
 
-Helm chart for deploying ChatQnA service. ChatQnA depends on the following services:
+Helm chart for deploying ChatQnA/FaqGen service. ChatQnA depends on the following services:
 
 - [data-prep](../common/data-prep/README.md)
 - [embedding-usvc](../common/embedding-usvc/README.md)
@@ -11,6 +11,7 @@ Helm chart for deploying ChatQnA service. ChatQnA depends on the following servi
 - [teirerank](../common/teirerank/README.md)
 - [llm-uservice](../common/llm-uservice/README.md)
 - [tgi](../common/tgi/README.md)
+- [vllm](../common/vllm/README.md)
 
 ## Installing the Chart
 
@@ -22,18 +23,29 @@ cd GenAIInfra/helm-charts/
 helm dependency update chatqna
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
-export MODELNAME="Intel/neural-chat-7b-v3-3"
-# If you would like to use the traditional UI, please change the image as well as the containerport within the values
-# append these at the end of the command "--set chatqna-ui.image.repository=opea/chatqna-ui,chatqna-ui.image.tag=latest,chatqna-ui.containerPort=5173"
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME}
-# To use Gaudi device
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
-# To use Nvidia GPU
+export MODELNAME="meta-llama/Meta-Llama-3-8B-Instruct"
+# To use CPU with vLLM
+helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-values.yaml
+# To use Gaudi device with vLLM
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
+# To use CPU with TGI
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-tgi-values.yaml
+# To use Gaudi device with TGI
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-tgi-values.yaml
+# To use Nvidia GPU with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
-# To include guardrail component in chatqna on Xeon
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-values.yaml
-# To include guardrail component in chatqna on Gaudi
+# To include guardrail component in chatqna on Gaudi with vLLM
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
+# To run chatqna with Intel TDX feature
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vllm.LLM_MODEL_ID=${MODELNAME} --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=4Gi --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=7Gi --set tei.tdxEnabled=true --set tei.resources.limits.memory=4Gi --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=6Gi --set nginx.tdxEnabled=true --set chatqna-ui.tdxEnabled=true --set chatqna-ui.resources.limits.memory=2Gi --set data-prep.tdxEnabled=true --set data-prep.resources.limits.memory=11Gi --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=80Gi
+
+# To use CPU with vLLM with Qdrant DB
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-qdrant-values.yaml
+# To use CPU with vLLM with Milvus DB
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-milvus-values.yaml
+
+# To deploy FaqGen
+#helm install faqgen chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/faqgen-cpu-values.yaml
 ```
 
 ### IMPORTANT NOTE
@@ -71,12 +83,13 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 
 ## Values
 
-| Key               | Type   | Default                       | Description                                                                            |
-| ----------------- | ------ | ----------------------------- | -------------------------------------------------------------------------------------- |
-| image.repository  | string | `"opea/chatqna"`              |                                                                                        |
-| service.port      | string | `"8888"`                      |                                                                                        |
-| tgi.LLM_MODEL_ID  | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory               |
-| global.monitoring | bool   | `false`                       | Enable usage metrics for the service components. See ../monitoring.md before enabling! |
+| Key               | Type   | Default                                 | Description                                                                            |
+| ----------------- | ------ | --------------------------------------- | -------------------------------------------------------------------------------------- |
+| image.repository  | string | `"opea/chatqna"`                        |                                                                                        |
+| service.port      | string | `"8888"`                                |                                                                                        |
+| tgi.LLM_MODEL_ID  | string | `"meta-llama/Meta-Llama-3-8B-Instruct"` | Inference models for TGI                                                               |
+| vllm.LLM_MODEL_ID | string | `"meta-llama/Meta-Llama-3-8B-Instruct"` | Inference models for vLLM                                                              |
+| global.monitoring | bool   | `false`                                 | Enable usage metrics for the service components. See ../monitoring.md before enabling! |
 
 ## Troubleshooting
 

@@ -7,14 +7,38 @@ description: The Helm chart to deploy CodeGen
 type: application
 dependencies:
   - name: tgi
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tgi"
+    condition: tgi.enabled
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
   - name: llm-uservice
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/llm-uservice"
+  - name: tei
+    version: 0-latest
+    repository: "file://../common/tei"
+  - name: embedding-usvc
+    version: 0-latest
+    repository: "file://../common/embedding-usvc"
+  - name: redis-vector-db
+    version: 0-latest
+    repository: "file://../common/redis-vector-db"
+  - name: retriever-usvc
+    version: 0-latest
+    repository: "file://../common/retriever-usvc"
+  - name: data-prep
+    version: 0-latest
+    repository: "file://../common/data-prep"
   - name: ui
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/ui"
     alias: codegen-ui
-version: 1.0.0
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
+    condition: nginx.enabled
+version: 0-latest
 appVersion: "v1.0"

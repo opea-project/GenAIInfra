@@ -14,21 +14,53 @@ spec:
       {{- include "retriever-usvc.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "common.annotations" . | nindent 6 }}
       labels:
         {{- include "retriever-usvc.selectorLabels" . | nindent 8 }}
     spec:
+      {{- include "common.runtimeClassName" . | indent 6 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "retriever-usvc.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      initContainers:
+        - name: wait-for-db
+          envFrom:
+            - configMapRef:
+                name: {{ include "retriever-usvc.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              {{- if eq "REDIS" .Values.RETRIEVER_BACKEND }}
+              TESTHOST=$(REDIS_HOST);
+              TESTPORT=$(REDIS_PORT);
+              {{- else if eq "MILVUS" .Values.RETRIEVER_BACKEND }}
+              TESTHOST=$(MILVUS_HOST);
+              TESTPORT=$(MILVUS_PORT);
+              {{- else if eq "QDRANT" .Values.RETRIEVER_BACKEND }}
+              TESTHOST=$(QDRANT_HOST);
+              TESTPORT=$(QDRANT_PORT);
+              {{- end }}
+              wait_timeout={{ .Values.waitTimeout | default 1 }};
+              total_timeout={{ .Values.retryTimeoutSeconds | default 60 }};
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${TESTHOST} ${TESTPORT}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${TESTHOST}:${TESTPORT} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
+              done;
+              echo "${TESTHOST}:${TESTPORT} is reachable within $j seconds.";
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
                 name: {{ include "retriever-usvc.fullname" . }}-config
@@ -40,7 +72,9 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           ports:
             - name: retriever-usvc
               containerPort: {{ .Values.port }}
@@ -48,6 +82,8 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+            - mountPath: /home/user/nltk_data
+              name: nltk-data
           {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
@@ -65,6 +101,21 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+        - name: nltk-data
+          {{- if .Values.global.offline }}
+          {{- if .Values.global.nltkDataUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.nltkDataUsePVC }}
+          {{- else if .Values.global.nltkDataUseHostPath }}
+          hostPath:
+             path: {{ .Values.global.nltkDataUseHostPath }}
+             type: Directory
+          {{- else }}
+          {{- fail "'global.nltkDataUsePVC' or 'global.nltkDataUseHostPath' must be set in offline mode" }}
+          {{- end }}
+          {{- else }}
+          emptyDir: {}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}

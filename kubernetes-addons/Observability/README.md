@@ -1,46 +1,20 @@
-# How-To Setup Observability for OPEA Workload in Kubernetes
+# Metrics / visualization add-ons
 
-This guide provides a step-by-step approach to setting up observability for the OPEA workload in a Kubernetes environment. We will cover the setup of Prometheus and Grafana, as well as the collection of metrics for Gaudi hardware, OPEA/chatqna including TGI, TEI-Embedding, TEI-Reranking and other microservices, and PCM.
+Table of Contents
 
-For monitoring Helm installed OPEA applications, see [Helm monitoring option](../../helm-charts/monitoring.md).
+- [Pre-conditions](#pre-conditions)
+- [Device metrics for Gaudi HW](#device-metrics-for-gaudi-hw)
+- [Extra metrics for OPEA applications](#extra-metrics-for-opea-applications)
+- [CPU metrics from PCM](#cpu-metrics-from-pcm)
+- [Importing dashboards to Grafana](#importing-dashboards-to-grafana)
+- [More dashboards](#more-dashboards)
 
-## Prepare
+## Pre-conditions
 
-```
-git clone https://github.com/opea-project/GenAIInfra.git
-cd kubernetes-addons/Observability
-```
+Monitoring for Helm installed OPEA applications is already working,
+see [Helm monitoring option](../../helm-charts/monitoring.md).
 
-## 1. Setup Prometheus & Grafana
-
-Setting up Prometheus and Grafana is essential for monitoring and visualizing your workloads. Follow these steps to get started:
-
-### Step 1: Install Prometheus&Grafana
-
-```
-kubectl create ns monitoring
-helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
-helm repo update
-helm install prometheus-stack prometheus-community/kube-prometheus-stack --version 55.5.1 -n monitoring
-```
-
-### Step 2: Verify the installation
-
-```
-kubectl get pods -n monitoring
-```
-
-### Step 3: Port-forward to access Grafana
-
-```
-kubectl port-forward service/grafana 3000:80
-```
-
-### Step 4: Access Grafana
-
-Open your browser and navigate to http://localhost:3000. Use "admin/prom-operator" as the username and the password to login.
-
-## 2. Metrics for Gaudi Hardware (v1.16.2)
+## Device metrics for Gaudi HW
 
 To monitor Gaudi hardware metrics, you can use the following steps:
 
@@ -93,46 +67,25 @@ promhttp_metric_handler_requests_total{code="503"} 0
 
 ### Step 5: Import the dashboard into Grafana
 
-Manually import the [`Dashboard-Gaudi-HW.json`](./habana/Dashboard-Gaudi-HW.json) file into Grafana
+Import the [`Dashboard-Gaudi-HW.json`](./habana/Dashboard-Gaudi-HW.json) file into Grafana
 ![Gaudi HW dashboard](./assets/habana.png)
 
-## 3. Metrics for OPEA applications
+## Extra metrics for OPEA applications
 
-To monitor OPEA application metrics including TGI-gaudi, TEI, TEI-Reranking and other micro services, you can use the following steps:
+Here are few Grafana dashboards for monitoring additional aspects of OPEA applications:
 
-### Step 1: Install application with Helm
+- [`queue_size_embedding_rerank_tgi.json`](./chatqna/queue_size_embedding_rerank_tgi.json): queue size of TGI-gaudi, TEI-Embedding, TEI-reranking
+- [`tgi_grafana.json`](./chatqna/tgi_grafana.json): `tgi-gaudi` text generation inferencing service utilization
 
-Install Helm (version >= 3.15) first. Refer to the [Helm Installation Guide](https://helm.sh/docs/intro/install/) for more information.
+Which can be imported to Grafana.
 
-Install OPEA application as described in [Helm charts README](../../helm-charts/README.md).
-
-For example, to install ChatQnA, follow [ChatQnA helm chart](https://github.com/opea-project/GenAIInfra/tree/main/helm-charts/chatqna/README.md) for instructions on deploying it to Kubernetes.
-
-Make sure to enable [Helm monitoring option](../../helm-charts/monitoring.md).
-
-### Step 2: Install dashboards
-
-Here are few Grafana dashboards for monitoring different aspects of OPEA applications:
-
-- [`queue_size_embedding_rerank_tgi.json`](./chatqna/dashboard/queue_size_embedding_rerank_tgi.json): queue size of TGI-gaudi, TEI-Embedding, TEI-reranking
-- [`tgi_grafana.json`](./chatqna/dashboard/tgi_grafana.json): `tgi-gaudi` text generation inferencing service utilization
-- [`opea-scaling.json`](./opea-apps/opea-scaling.json): scaling, request rates and failures for OPEA application megaservice, TEI-reranking, TEI-embedding, and TGI
-
-You can either:
-
-- Import them manually to Grafana,
-- Use [`update-dashboards.sh`](./update-dashboards.sh) script to add them to Kubernetes as Grafana dashboard configMaps
-  - (Script assumes Prometheus / Grafana to be installed according to above instructions)
-- Or create your own dashboards based on them
-
-Note: when dashboard is imported to Grafana, you can directly save changes to it, but those dashboards go away if Grafana is removed / re-installed.
-
-Whereas with dashboard configMaps, Grafana saves changes to a selected file, but you need to remember to re-apply them to Kubernetes / Grafana, for your changes to be there when that dashboard is reloaded.
+NOTE: Services provide metrics only after they have processed at least one query, before that dashboards can be empty!
 
 ![TGI dashboard](./assets/tgi.png)
-![Scaling dashboard](./assets/opea-scaling.png)
 
-## 4. Metrics for PCM (Intel® Performance Counter Monitor)
+## CPU mmetrics from PCM
+
+To monitor PCM (Intel® Performance Counter Monitor) metrics, you can use the following steps:
 
 ### Step 1: Install PCM
 
@@ -154,8 +107,25 @@ kubectl apply -f pcm/pcm-serviceMonitor.yaml
 
 ### Step 4: Install the PCM dashboard
 
-manually import the [`pcm-dashboard.json`](./pcm/pcm-dashboard.json) file into the Grafana
+Import the [`pcm-dashboard.json`](./pcm/pcm-dashboard.json) file into the Grafana
 ![PCM dashboard](./assets/pcm.png)
+
+## Importing dashboards to Grafana
+
+You can either:
+
+- Import them manually to Grafana,
+- Use [`update-dashboards.sh`](./update-dashboards.sh) script to add them to Kubernetes as (more persistent) Grafana dashboard `configMap`s
+  - Script uses `$USER-<file name>` as dashboard `configMap` names, and overwrites any pre-existing `configMap` with the same name
+- Or create your own dashboards based on them
+
+When dashboard is imported to Grafana, you can directly save changes to it, but such dashboards go away if Grafana is removed / re-installed. When dashboard is in `configMap`, Grafana saves its changes to a (selected) file, but you need to re-apply those files to Kubernetes with the script, for your changes to be there when that Grafana dashboard page is reloaded in browser.
+
+Gotchas for dashboard `configMap` script usage:
+
+- If you change dashboard file name, you need to change also its 'uid' field (at end of the file), otherwise Grafana will see multiple `configMap`s for the same dashboard ID
+- If there's no `uid` specified for the dashboard, Grafana will generate one on `configMap` load. Meaning that dashboard ID, and Grafana URL to it, will change on every reload
+- Script assumes default Prometheus / Grafana install (`monitoring` namespace, `grafana_dasboard=1` label identifying dashboard `configMap`s)
 
 ## More dashboards
 

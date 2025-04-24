@@ -1,0 +1,92 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "searchqna.fullname" . }}
+  labels:
+    {{- include "searchqna.labels" . | nindent 4 }}
+    app: {{ include "searchqna.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "searchqna.selectorLabels" . | nindent 6 }}
+      app: {{ include "searchqna.fullname" . }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "searchqna.selectorLabels" . | nindent 8 }}
+        app: {{ include "searchqna.fullname" . }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "searchqna.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: EMBEDDING_SERVICE_HOST_IP
+              value: {{ include "embedding-usvc.fullname" (index .Subcharts "embedding-usvc") }}
+            - name: EMBEDDING_SERVICE_PORT
+              value: {{ index .Values "embedding-usvc" "service" "port" | quote }}
+            - name: WEB_RETRIEVER_SERVICE_HOST_IP
+              value: {{ include "web-retriever.fullname" (index .Subcharts "web-retriever") }}
+            - name: WEB_RETRIEVER_SERVICE_PORT
+              value: {{ index .Values "web-retriever" "service" "port" | quote }}
+            - name: RERANK_SERVICE_HOST_IP
+              value: {{ include "reranking-usvc.fullname" (index .Subcharts "reranking-usvc") }}
+            - name: RERANK_SERVICE_PORT
+              value: {{ index .Values "reranking-usvc" "service" "port" | quote }}
+            - name: LLM_SERVICE_HOST_IP
+              value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") }}
+            - name: LLM_SERVICE_PORT
+              value: {{ index .Values "llm-uservice" "service" "port" | quote }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: searchqna
+              containerPort: {{ .Values.port }}
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      volumes:
+        - name: tmp
+          emptyDir: {}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.evenly_distributed }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "searchqna.selectorLabels" . | nindent 14 }}
+              app: {{ include "searchqna.fullname" . }}
+      {{- end }}

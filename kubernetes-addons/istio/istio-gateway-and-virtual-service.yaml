@@ -1,0 +1,45 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: networking.istio.io/v1
+kind: Gateway
+metadata:
+  name: opea-gateway
+spec:
+  selector:
+    app: istio-ingress
+  servers:
+  - port:
+      number: 80
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+    tls:
+      httpsRedirect: true # sends 301 redirect for http requests
+  - port:
+      number: 443
+      name: https
+      protocol: HTTPS
+    hosts:
+    - "*.intel.com"
+    tls:
+      mode: SIMPLE
+      credentialName: istio-gateway
+---
+apiVersion: networking.istio.io/v1
+kind: VirtualService
+metadata:
+  name: opea
+spec:
+  gateways:
+  - opea-gateway
+  hosts:
+    - "*"
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: chatqna-nginx.chatqna.svc.cluster.local

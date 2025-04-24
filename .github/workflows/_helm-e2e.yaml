@@ -11,12 +11,17 @@ on:
         required: true
         type: string
         description: "workload to test, chatqna or common/asr"
+      dockerhub:
+        default: "false"
+        required: false
+        type: string
+        description: "Set to true if you want to use released docker images at dockerhub. By default using internal docker registry."
       tag:
         default: "latest"
         required: false
         type: string
       hardware:
-        default: "xeon"
+        default: "k8s-xeon"
         required: true
         type: string
       valuefile:
@@ -63,8 +68,8 @@ jobs:
         run: |
           CHART_NAME="${workload_path##*/}"
           echo "CHART_NAME=$CHART_NAME" >> $GITHUB_ENV
-          echo "RELEASE_NAME=${CHART_NAME}$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
-          echo "NAMESPACE=${CHART_NAME}-$(date +%Y%m%d%H%M%S)" >> $GITHUB_ENV
+          echo "RELEASE_NAME=${CHART_NAME}$(date +%d%H%M%S)" >> $GITHUB_ENV
+          echo "NAMESPACE=infra-${CHART_NAME}-$(head -c 4 /dev/urandom | xxd -p)" >> $GITHUB_ENV
           echo "ROLLOUT_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "TEST_TIMEOUT_SECONDS=600s" >> $GITHUB_ENV
           echo "KUBECTL_TIMEOUT_SECONDS=60s" >> $GITHUB_ENV
@@ -77,20 +82,16 @@ jobs:
       - name: Initialize chart testing
         run: |
           # Replace values for CI test environment
-          USER_ID=$(whoami)
-          CHART_MOUNT=/home/$USER_ID/.cache/huggingface/hub
-          HFTOKEN=$(cat /home/$USER_ID/.cache/huggingface/token)
           pushd helm-charts
-          # insert a prefix before opea/.*, the prefix is OPEA_IMAGE_REPO
-          find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
+          if [ "${{ inputs.dockerhub }}" = "true" ]; then
+            echo "Use released docker images"
+          else
+            echo "Use internal docker registry"
+            # insert a prefix before opea/.*, the prefix is OPEA_IMAGE_REPO
+            find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repository: ${OPEA_IMAGE_REPO}opea/#g" {} \;
+          fi
           # set OPEA image tag to ${{ inputs.tag }}
           find . -name '*values.yaml' -type f -exec sed -i 's#tag: "latest"#tag: ${{ inputs.tag }}#g' {} \;
-          # set huggingface token
-          find . -name '*values.yaml' -type f -exec sed -i "s#insert-your-huggingface-token-here#${HFTOKEN}#g" {} \;
-          # replace the mount dir "Volume: *" with "Volume: $CHART_MOUNT"
-          find . -name '*values.yaml' -type f -exec sed -i "s#modelUseHostPath: .*#modelUseHostPath: $CHART_MOUNT#g" {} \;
-          # replace the pull policy "IfNotPresent" with "Always"
-          find . -name '*values.yaml' -type f -exec sed -i "s#pullPolicy: IfNotPresent#pullPolicy: Always#g" {} \;
           popd
 
       - name: Helm install
@@ -98,8 +99,11 @@ jobs:
         env:
           GOOGLE_CSE_ID: ${{ secrets.GOOGLE_CSE_ID }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
+          HFTOKEN: ${{ secrets.HF_TOKEN }}
         run: |
-          set -xe
+          set -x
+          USER_ID=$(whoami)
+          CHART_MOUNT=/data2/hf_model
           echo "should_cleanup=true" >> $GITHUB_ENV
           value_file="${{ inputs.valuefile }}.yaml"
           if [[ ! -f ${{ env.CHART_FOLDER }}/${value_file} ]]; then
@@ -109,10 +113,26 @@ jobs:
             exit 0
           fi
           helm-charts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER }}
+          for img in `helm template -n $NAMESPACE -f ${{ env.CHART_FOLDER }}/${value_file} $RELEASE_NAME ${{ env.CHART_FOLDER }} | grep 'image:' | grep 'opea/' | awk '{print $2}' | xargs`;
+          do
+            if ! .github/workflows/scripts/e2e/chart_test.sh check_local_opea_image "$img"; then
+            echo "skip_validate=true" >> $GITHUB_ENV
+            echo "should_cleanup=false" >> $GITHUB_ENV
+            exit 1
+            fi
+            # increase helm install wait for for vllm-gaudi case
+            if [[ $img == *"vllm-gaudi"* ]]; then
+                ROLLOUT_TIMEOUT_SECONDS=900s
+            fi
+          done
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
-              --set GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY}} \
-              --set GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID}} \
+              --set GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY }} \
+              --set GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID }} \
+              --set web-retriever.GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY }} \
+              --set web-retriever.GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID }} \
+              --set global.HUGGINGFACEHUB_API_TOKEN=${{ env.HFTOKEN }} \
+              --set global.modelUseHostPath=${CHART_MOUNT} \
               --values ${{ env.CHART_FOLDER }}/${value_file} \
               $RELEASE_NAME ${{ env.CHART_FOLDER }} ; then
             echo "Failed to install chart ${{ inputs.workload }}"
@@ -124,34 +144,17 @@ jobs:
       - name: Validate e2e test
         if: always()
         run: |
-          set -xe
+          set -x
           if $skip_validate; then
             echo "Skip validate"
           else
-            LOG_PATH=/home/$(whoami)/logs
             chart=${{ env.CHART_NAME }}
-            helm test -n $NAMESPACE $RELEASE_NAME --logs --timeout "$TEST_TIMEOUT_SECONDS" | tee ${LOG_PATH}/charts-${chart}.log
-            exit_code=$?
-            if [ $exit_code -ne 0 ]; then
-                echo "Chart ${chart} test failed, please check the logs in ${LOG_PATH}!"
-                exit 1
-            fi
-
-            echo "Checking response results, make sure the output is reasonable. "
-            teststatus=false
-            if [[ -f $LOG_PATH/charts-${chart}.log ]] && \
-            [[ $(grep -c "^Phase:.*Failed" $LOG_PATH/charts-${chart}.log) != 0 ]]; then
-                teststatus=false
+            if ! helm test -n $NAMESPACE $RELEASE_NAME --logs --timeout "$TEST_TIMEOUT_SECONDS" ; then
+                echo "Chart ${chart} test failed, dumping pods logs ..."
                 .github/workflows/scripts/e2e/chart_test.sh dump_all_pod_logs $NAMESPACE
-            else
-                teststatus=true
-            fi
-
-            if [ $teststatus == false ]; then
-                echo "Response check failed, please check the logs in artifacts!"
                 exit 1
             else
-                echo "Response check succeed!"
+                echo "Chart ${chart} test succeed!"
                 exit 0
             fi
           fi

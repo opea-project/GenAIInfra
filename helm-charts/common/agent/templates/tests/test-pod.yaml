@@ -17,12 +17,16 @@ spec:
       command: ['bash', '-c']
       args:
         - |
+          if [[ {{ include "agent.fullname" . }} == "agentqna"* ]]; then
+            echo "Skip agent component tests in agentqna e2e example test."
+            exit 0
+          fi
           max_retry=20;
           for ((i=1; i<=max_retry; i++)); do
           curl http://{{ include "agent.fullname" . }}:{{ .Values.service.port }}/v1/chat/completions -sS --fail-with-body \
             -X POST \
             -H 'Content-Type: application/json' \
-            -d '{"query":"What is OPEA?"}' && break;
+            -d '{"messages":"What is OPEA?", "stream":"true"}' && break;
             curlcode=$?
             if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
           done;

@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: retriever-usvc-config
   labels:
-    helm.sh/chart: retriever-usvc-1.0.0
+    helm.sh/chart: retriever-usvc-0-latest
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
@@ -37,7 +37,7 @@ kind: Service
 metadata:
   name: retriever-usvc
   labels:
-    helm.sh/chart: retriever-usvc-1.0.0
+    helm.sh/chart: retriever-usvc-0-latest
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
@@ -62,7 +62,7 @@ kind: Deployment
 metadata:
   name: retriever-usvc
   labels:
-    helm.sh/chart: retriever-usvc-1.0.0
+    helm.sh/chart: retriever-usvc-0-latest
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
@@ -100,7 +100,6 @@ spec:
             seccompProfile:
               type: RuntimeDefault
           image: "opea/retriever-redis:latest"
-          imagePullPolicy: IfNotPresent
           ports:
             - name: retriever-usvc
               containerPort: 7000

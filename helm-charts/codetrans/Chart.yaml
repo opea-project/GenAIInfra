@@ -7,14 +7,22 @@ description: The Helm chart to deploy CodeTrans
 type: application
 dependencies:
   - name: tgi
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tgi"
+    condition: tgi.enabled
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
   - name: llm-uservice
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/llm-uservice"
   - name: ui
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/ui"
     alias: codetrans-ui
-version: 1.0.0
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
+version: 0-latest
 appVersion: "v1.0"

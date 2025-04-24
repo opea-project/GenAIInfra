@@ -8,23 +8,72 @@ metadata:
   labels:
     {{- include "llm-uservice.labels" . | nindent 4 }}
 data:
-  {{- if .Values.TGI_LLM_ENDPOINT }}
-  TGI_LLM_ENDPOINT: {{ .Values.TGI_LLM_ENDPOINT | quote}}
-  {{- else }}
-  TGI_LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
+  {{- if hasSuffix "llm-textgen" .Values.image.repository }}
+  {{- if eq "TGI" .Values.TEXTGEN_BACKEND }}
+  LLM_COMPONENT_NAME: "OpeaTextGenService"
+  {{- if not .Values.LLM_ENDPOINT }}
+  LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
   {{- end }}
-  {{- if .Values.vLLM_ENDPOINT }}
-  vLLM_ENDPOINT: {{ .Values.vLLM_ENDPOINT | quote}}
+  {{- else if eq "vLLM" .Values.TEXTGEN_BACKEND }}
+  LLM_COMPONENT_NAME: "OpeaTextGenService"
+  {{- if not .Values.LLM_ENDPOINT }}
+  LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
+  {{- end }}
+  {{- else if eq "BEDROCK" .Values.TEXTGEN_BACKEND }}
+  LLM_COMPONENT_NAME: "OpeaTextGenBedrock"
+  BEDROCK_REGION: {{ .Values.bedrock.BEDROCK_REGION }}
+  LLM_ENDPOINT: "https://bedrock.{{ .Values.bedrock.BEDROCK_REGION }}.amazonaws.com"
+  {{- if .Values.LLM_MODEL_ID }}
+  MODEL_ID: {{ .Values.LLM_MODEL_ID | quote }}
+  {{- end }}
+  {{- if and .Values.bedrock.AWS_ACCESS_KEY_ID .Values.bedrock.AWS_SECRET_ACCESS_KEY }}
+  AWS_ACCESS_KEY_ID: {{ .Values.bedrock.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: {{ .Values.bedrock.AWS_SECRET_ACCESS_KEY }}
+  {{- end }}
   {{- else }}
-  vLLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
+  {{- cat "Invalid TEXTGEN_BACKEND:" .Values.TEXTGEN_BACKEND | fail }}
+  {{- end }}
+  {{- else if hasSuffix "llm-docsum" .Values.image.repository }}
+  MAX_INPUT_TOKENS: {{ .Values.MAX_INPUT_TOKENS | default "" | quote }}
+  MAX_TOTAL_TOKENS: {{ .Values.MAX_TOTAL_TOKENS | default "" | quote }}
+  {{- if eq "TGI" .Values.DOCSUM_BACKEND }}
+  DocSum_COMPONENT_NAME: "OpeaDocSumTgi"
+  {{- if not .Values.LLM_ENDPOINT }}
+  LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
+  {{- end }}
+  {{- else if eq "vLLM" .Values.DOCSUM_BACKEND }}
+  DocSum_COMPONENT_NAME: "OpeaDocSumvLLM"
+  {{- if not .Values.LLM_ENDPOINT }}
+  LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
+  {{- end }}
+  {{- else }}
+  {{- cat "Invalid DOCUSM_BACKEND:" .Values.DOCSUM_BACKEND | fail }}
+  {{- end }}
+  {{- else if hasSuffix "llm-faqgen" .Values.image.repository }}
+  {{- if eq "TGI" .Values.FAQGEN_BACKEND }}
+  FAQGen_COMPONENT_NAME: "OpeaFaqGenTgi"
+  {{- if not .Values.LLM_ENDPOINT }}
+  LLM_ENDPOINT: "http://{{ .Release.Name }}-tgi"
+  {{- end }}
+  {{- else if eq "vLLM" .Values.FAQGEN_BACKEND }}
+  FAQGen_COMPONENT_NAME: "OpeaFaqGenvLLM"
+  {{- if not .Values.LLM_ENDPOINT }}
+  LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
+  {{- end }}
+  {{- else }}
+  {{- cat "Invalid FAQGEN_BACKEND:" .Values.FAQGEN_BACKEND | fail }}
+  {{- end }}
+  {{- end }}
+  {{- if .Values.LLM_ENDPOINT }}
+  LLM_ENDPOINT: {{ tpl .Values.LLM_ENDPOINT . | quote }}
   {{- end }}
   {{- if .Values.LLM_MODEL_ID }}
-  LLM_MODEL: {{ .Values.LLM_MODEL_ID | quote}}
+  LLM_MODEL_ID: {{ .Values.LLM_MODEL_ID | quote }}
   {{- end }}
-  HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote }}
   {{- if .Values.global.HF_ENDPOINT }}
-  HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
+  HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote }}
   {{- end }}
   http_proxy: {{ .Values.global.http_proxy | quote }}
   https_proxy: {{ .Values.global.https_proxy | quote }}

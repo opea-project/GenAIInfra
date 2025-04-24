@@ -6,36 +6,70 @@ name: chatqna
 description: The Helm chart to deploy ChatQnA
 type: application
 dependencies:
-  - name: tgi
-    version: 1.0.0
-    alias: tgi-guardrails
-    repository: "file://../common/tgi"
-    condition: guardrails-usvc.enabled
+  - name: dashboard
+    version: 0-latest
+    repository: "file://../common/dashboard"
+    condition: global.monitoring
+  - name: vllm
+    version: 0-latest
+    alias: vllm-guardrails
+    repository: "file://../common/vllm"
+    condition: vllm-guardrails.enabled
   - name: guardrails-usvc
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/guardrails-usvc"
     condition: guardrails-usvc.enabled
   - name: tgi
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tgi"
+    condition: tgi.enabled
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
+  - name: llm-uservice
+    version: 0-latest
+    repository: "file://../common/llm-uservice"
+    condition: llm-uservice.enabled
   - name: tei
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/tei"
+  - name: embedding-usvc
+    version: 0-latest
+    repository: "file://../common/embedding-usvc"
+    condition: embedding-usvc.enabled
   - name: teirerank
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/teirerank"
+    condition: teirerank.enabled
+  - name: reranking-usvc
+    version: 0-latest
+    repository: "file://../common/reranking-usvc"
+    condition: reranking-usvc.enabled
   - name: redis-vector-db
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/redis-vector-db"
+    condition: redis-vector-db.enabled
+  - name: qdrant
+    version: 1.13.1
+    repository: https://qdrant.github.io/qdrant-helm
+    condition: qdrant.enabled
+  - name: milvus
+    version: 4.2.12
+    repository: https://zilliztech.github.io/milvus-helm/
+    condition: milvus.enabled
   - name: retriever-usvc
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/retriever-usvc"
   - name: data-prep
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/data-prep"
   - name: ui
     alias: chatqna-ui
-    version: 1.0.0
+    version: 0-latest
     repository: "file://../common/ui"
-version: 1.0.0
+  - name: nginx
+    version: 0-latest
+    repository: "file://../common/nginx"
+version: 0-latest
 appVersion: "v1.0"

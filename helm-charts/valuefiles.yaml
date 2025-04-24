@@ -1,0 +1,292 @@
+# Copyright (C) 2025 Intel Corporation
+# # SPDX-License-Identifier: Apache-2.0
+
+# This file maintains the values files need to be synced to GenAIExamples and GenAIComps.
+# URL is https://raw.githubusercontent.com/opea-project/GenAIExamples/refs/heads/main/ChatQnA/kubernetes/helm/cpu-values.yaml
+# https://raw.githubusercontent.com/opea-project/${dest_repo}/refs/heads/main/${dest_dir}/${values}
+
+# Examples
+chatqna:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/chatqna
+  dest_repo: GenAIExamples
+  dest_dir: ChatQnA/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - cpu-qdrant-values.yaml
+    - cpu-milvus-values.yaml
+    - cpu-tgi-values.yaml
+    - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
+    - guardrails-gaudi-values.yaml
+    - norerank-values.yaml
+    - faqgen-cpu-values.yaml
+    - faqgen-cpu-tgi-values.yaml
+    - faqgen-gaudi-values.yaml
+    - faqgen-gaudi-tgi-values.yaml
+agentqna:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/agentqna
+  dest_repo: GenAIExamples
+  dest_dir: AgentQnA/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+audioqna:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/audioqna
+  dest_repo: GenAIExamples
+  dest_dir: AudioQnA/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - cpu-tgi-values.yaml
+    - cpu-multilang-values.yaml
+    - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
+codegen:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/codegen
+  dest_repo: GenAIExamples
+  dest_dir: CodeGen/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - cpu-tgi-values.yaml
+    - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
+codetrans:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/codetrans
+  dest_repo: GenAIExamples
+  dest_dir: CodeTrans/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - cpu-tgi-values.yaml
+    - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
+docsum:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/docsum
+  dest_repo: GenAIExamples
+  dest_dir: DocSum/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+    - cpu-tgi-values.yaml
+    - gaudi-tgi-values.yaml
+searchqna:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/searchqna
+  dest_repo: GenAIExamples
+  dest_dir: SearchQnA/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+txt2img:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/txt2img
+  dest_repo: GenAIExamples
+  dest_dir: Text2Image/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+visualqna:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/visualqna
+  dest_repo: GenAIExamples
+  dest_dir: VisualQnA/kubernetes/helm
+  values:
+    - cpu-values.yaml
+    - cpu-tgi-values.yaml
+    - gaudi-values.yaml
+    - gaudi-tgi-values.yaml
+
+# Components
+agent:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/agent
+  dest_repo: GenAIComps
+  dest_dir: comps/agent/deployment/kubernetes
+  values:
+    - gaudi-values.yaml
+asr:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/asr
+  dest_repo: GenAIComps
+  dest_dir: comps/asr/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+chathistory-usvc:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/chathistory-usvc
+  dest_repo: GenAIComps
+  dest_dir: comps/chathistory/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+data-prep:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/data-prep
+  dest_repo: GenAIComps
+  dest_dir: comps/dataprep/deployment/kubernetes
+  values:
+    - milvus-values.yaml
+    - redis-values.yaml
+    - qdrant-values.yaml
+embedding-usvc:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/embedding-usvc
+  dest_repo: GenAIComps
+  dest_dir: comps/embeddings/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+gpt-sovits:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/gpt-sovits
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/gpt-sovits/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+guardrails-usvc:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/guardrails-usvc
+  dest_repo: GenAIComps
+  dest_dir: comps/guardrails/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+llm-uservice:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/llm-uservice
+  dest_repo: GenAIComps
+  dest_dir: comps/llms/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - faqgen-values.yaml
+    - docsum-values.yaml
+lvm-uservice:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/lvm-uservice
+  dest_repo: GenAIComps
+  dest_dir: comps/lvms/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+mm-embedding:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/mm-embedding
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/bridgetower/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+mongodb:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/mongodb
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/mongodb/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+nginx:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/nginx
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/nginx/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+prompt-usvc:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/prompt-usvc
+  dest_repo: GenAIComps
+  dest_dir: comps/prompt_registry/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+redis-vector-db:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/redis-vector-db
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/redis/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+reranking-usvc:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/reranking-usvc
+  dest_repo: GenAIComps
+  dest_dir: comps/rerankings/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+retriever-usvc:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/retriever-usvc
+  dest_repo: GenAIComps
+  dest_dir: comps/retrievers/deployment/kubernetes
+  values:
+    - milvus-values.yaml
+    - redis-values.yaml
+    - qdrant-values.yaml
+speecht5:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/speecht5
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/speecht5/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+tei:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/tei
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/tei/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+teirerank:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/teirerank
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/teirerank/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+text2image:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/text2image
+  dest_repo: GenAIComps
+  dest_dir: comps/text2image/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+tgi:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/tgi
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/tgi/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+tts:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/tts
+  dest_repo: GenAIComps
+  dest_dir: comps/tts/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+vllm:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/vllm
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/vllm/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml
+web-retriever:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/web-retriever
+  dest_repo: GenAIComps
+  dest_dir: comps/web_retrievers/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+whisper:
+  src_repo: GenAIInfra
+  src_dir: helm-charts/common/whisper
+  dest_repo: GenAIComps
+  dest_dir: comps/third_parties/whisper/deployment/kubernetes
+  values:
+    - cpu-values.yaml
+    - gaudi-values.yaml

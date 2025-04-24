@@ -14,21 +14,59 @@ spec:
       {{- include "embedding-usvc.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- with .Values.podAnnotations }}
-      annotations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{- include "common.annotations" . | nindent 6 }}
       labels:
         {{- include "embedding-usvc.selectorLabels" . | nindent 8 }}
     spec:
+      {{- include "common.runtimeClassName" . | indent 6 }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "embedding-usvc.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if or (eq "TEI" .Values.EMBEDDING_BACKEND) (eq "BridgeTower" .Values.EMBEDDING_BACKEND) }}
+      initContainers:
+        - name: wait-for-embedding
+          envFrom:
+            - configMapRef:
+                name: {{ include "embedding-usvc.fullname" . }}-config
+            {{- if .Values.global.extraEnvConfig }}
+            - configMapRef:
+                name: {{ .Values.global.extraEnvConfig }}
+                optional: true
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              {{- if eq "TEI" .Values.EMBEDDING_BACKEND }}
+              endpoint=${TEI_EMBEDDING_ENDPOINT};
+              {{- else }}
+              endpoint=${MMEI_EMBEDDING_ENDPOINT};
+              {{- end }}
+              proto=$(echo $endpoint | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\1/p');
+              host=$(echo $endpoint | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\2/p');
+              port=$(echo $endpoint | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\3/p');
+              if [ -z "$port" ]; then
+                  port=80;
+                  [[ "$proto" = "https" ]] && port=443;
+              fi;
+              wait_timeout={{ .Values.waitTimeout | default 1 }};
+              total_timeout={{ .Values.retryTimeoutSeconds | default 60 }};
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${host} ${port}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${host}:${port} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
+              done;
+              echo "${host}:${port} is reachable within $j seconds.";
+      {{- end }}
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
                 name: {{ include "embedding-usvc.fullname" . }}-config
@@ -40,7 +78,9 @@ spec:
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           ports:
             - name: embedding-usvc
               containerPort: 6000

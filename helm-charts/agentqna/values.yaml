@@ -7,6 +7,26 @@
 
 replicaCount: 1
 
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+  # fsGroup: 2000
+
 securityContext:
   readOnlyRootFilesystem: true
   allowPrivilegeEscalation: false
@@ -32,72 +52,98 @@ horizontalPodAutoscaler:
 docretriever:
   image:
     repository: opea/doc-index-retriever
-    pullPolicy: IfNotPresent
+    # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+    # pullPolicy: ""
     # Overrides the image tag whose default is the chart appVersion.
     tag: "latest"
 
-worker:
-  toolPath: "/mnt/tools"
+sqlagent:
+  toolHostPath: "/mnt/tools"
+  db_name: "Chinook"
+  db_path: "sqlite:////home/user/tools/Chinook_Sqlite.sqlite"
+  service:
+    port: 9096
+  strategy: sql_agent_llama
+  with_memory: false
+  use_hints: "false"
+  recursion_limit: "6"
+  llm_engine: vllm
+  llm_endpoint_url: ""
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: "0"
+  max_new_tokens: "4096"
+  stream: "false"
+  tools: ""
+  require_human_feedback: "false"
+
+ragagent:
+  toolHostPath: "/mnt/tools"
   service:
     port: 9095
-  image:
-    repository: opea/agent-langchain
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
   strategy: rag_agent_llama
-  recursion_limit: "12"
-  llm_engine: tgi
+  with_memory: false
+  recursion_limit: "6"
+  llm_engine: vllm
   llm_endpoint_url: ""
-  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
-  temperature: "0.01"
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: "0"
   max_new_tokens: "4096"
-  streaming: "false"
+  stream: "false"
   tools: "/home/user/tools/worker_agent_tools.yaml"
   require_human_feedback: "false"
   RETRIEVAL_TOOL_URL: ""
 
 supervisor:
-  toolPath: "/mnt/tools"
+  toolHostPath: "/mnt/tools"
   service:
     port: 9090
-  image:
-    repository: opea/agent-langchain
-    pullPolicy: IfNotPresent
-    # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
   strategy: react_llama
+  with_memory: true
   recursion_limit: 10
-  llm_engine: tgi
+  llm_engine: vllm
   llm_endpoint_url: ""
-  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
-  temperature: "0.01"
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: "0"
   max_new_tokens: "4096"
-  streaming: "false"
+  stream: "true"
   tools: /home/user/tools/supervisor_agent_tools.yaml
   require_human_feedback: false
   CRAG_SERVER: ""
   WORKER_AGENT_URL: ""
+  SQL_AGENT_URL: ""
 
 crag:
   image:
     repository: aicrowd/kdd-cup-24-crag-mock-api
-    pullPolicy: IfNotPresent
+    # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
+    # pullPolicy: ""
     # Overrides the image tag whose default is the chart appVersion.
     tag: "v0"
 
 # Override values in specific subcharts
 tgi:
   enabled: false
-  LLM_MODEL_ID: "meta-llama/Meta-Llama-3.1-70B-Instruct"
-  MAX_INPUT_LENGTH: "4096"
-  MAX_TOTAL_TOKENS: "8192"
+
+vllm:
+  enabled: false
+
+agentqna-ui:
+  image:
+    repository: opea/agent-ui
+    tag: "latest"
+  containerPort: 8080
+  service:
+    type: NodePort
 
 global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: "agentqna"
   # set modelUseHostPath or modelUsePVC to use model cache.
   modelUseHostPath: ""
   # modelUseHostPath: /mnt/opea-models

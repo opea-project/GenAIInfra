@@ -5,6 +5,10 @@ apiVersion: v2
 name: vllm
 description: The Helm chart for vLLM Inference Server
 type: application
-version: 1.0.0
+dependencies:
+  - name: commonlib
+    version: 0-latest
+    repository: "file://../commonlib"
+version: 0-latest
 # The vLLM version
 appVersion: "0.5"

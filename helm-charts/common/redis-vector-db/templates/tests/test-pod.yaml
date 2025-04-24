@@ -17,9 +17,14 @@ spec:
       command: ['sh', '-c']
       args:
         - |
-          redis-cli -h {{ include "redis-vector-db.fullname" . }} \
-                    {{- with (first .Values.service.ports) }}
-                    -p {{ .port }} \
-                    {{- end }}
-                    ping
+          host={{ include "redis-vector-db.fullname" . }};
+          {{- with (first .Values.service.ports) }}
+          port={{ .port }};
+          {{- end }}
+          max_retry=10;
+          j=0;
+          while ! redis-cli -h "${host}" -p ${port} ping; do
+            [[ $j -ge ${max_retry} ]] && echo "ERROR: redis ping to ${host}:${port} error" && exit 1;
+            j=$((j+1)); sleep 1;
+          done;
   restartPolicy: Never

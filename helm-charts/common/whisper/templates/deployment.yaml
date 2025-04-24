@@ -25,10 +25,51 @@ spec:
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
       {{- end }}
+      serviceAccountName: {{ include "whisper.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if not (hasPrefix "/data/" .Values.ASR_MODEL_PATH) }}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: {{ include "whisper.fullname" . }}-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            {{- if hasKey .Values.securityContext "runAsGroup" }}
+            runAsGroup: {{ .Values.securityContext.runAsGroup }}
+            {{- end }}
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model {{ .Values.ASR_MODEL_PATH }} ... ";
+              huggingface-cli download --cache-dir /data {{ .Values.ASR_MODEL_PATH | quote }};
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--{{ replace "/" "--" .Values.ASR_MODEL_PATH }}
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      {{- end }}
       containers:
-        - name: {{ .Release.Name }}
+        - name: {{ .Chart.Name }}
           envFrom:
             - configMapRef:
                 name: {{ include "whisper.fullname" . }}-config
@@ -38,13 +79,11 @@ spec:
                 optional: true
             {{- end }}
           securityContext:
-            {{- if .Values.global.modelUseHostPath }}
-            {}
-            {{- else }}
             {{- toYaml .Values.securityContext | nindent 12 }}
-            {{- end }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
           imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
           ports:
             - name: whisper
               containerPort: 7066
