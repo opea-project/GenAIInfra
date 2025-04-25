@@ -54,4 +54,3 @@ sqlagent:
   llm_endpoint_url: http://{{ .Release.Name }}-tgi
   llm_engine: tgi
   model: "meta-llama/Meta-Llama-3-8B-Instruct"
-
