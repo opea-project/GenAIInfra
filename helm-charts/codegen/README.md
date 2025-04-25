@@ -1,8 +1,15 @@
 # CodeGen
 
-Helm chart for deploying CodeGen service.
+Helm chart for deploying CodeGen service. CodeGen depends on the following services:
 
-CodeGen depends on LLM and tgi microservice, refer to [llm-uservice](../common/llm-uservice/README.md) and [tgi](../common/tgi/README.md) for more config details.
+- [tgi](../common/tgi/README.md)
+- [vllm](../common/vllm/README.md)
+- [llm-uservice](../common/llm-uservice/README.md)
+- [tei](../common/tei/README.md)
+- [embedding-usvc](../common/embedding-usvc/README.md)
+- [redis-vector-db](../common/redis-vector-db/README.md)
+- [data-prep](../common/data-prep/README.md)
+- [retriever-usvc](../common/retriever-usvc/README.md)
 
 ## Installing the Chart
 
@@ -16,13 +23,18 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="Qwen/Qwen2.5-Coder-7B-Instruct"
 # To use CPU with vLLM
-helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f cpu-values.yaml
+helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codegen/cpu-values.yaml
 # To use CPU with TGI
-# helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f cpu-tgi-values.yaml
+# helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codegen/cpu-tgi-values.yaml
 # To use Gaudi device with vLLM
-# helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f gaudi-values.yaml
+# helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codegen/gaudi-values.yaml
 # To use Gaudi device with TGI
-# helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f gaudi-tgi-values.yaml
+# helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codegen/gaudi-tgi-values.yaml
+# To use AMD ROCm device with vLLM
+# helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codegen/rocm-values.yaml
+# To use AMD ROCm device with TGI
+# helm install codegen codegen --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codegen/rocm-tgi-values.yaml
+
 ```
 
 ### IMPORTANT NOTE
@@ -49,9 +61,12 @@ curl http://localhost:7778/v1/codegen \
 
 ### Verify the workload through UI
 
-The UI has already been installed via the Helm chart. To access it, use the external IP of one your Kubernetes node along with the NGINX port. You can find the NGINX port using the following command:
+The UI has already been installed via the Helm chart. To access it, use the external IP of one your Kubernetes node along with codegen-ui service nodePort (if using the default codegen gradio UI) or along with the NGINX service nodePort. You can find the corresponding port using the following command:
 
 ```bash
+# For codgen gradio UI
+export port=$(kubectl get service codegen-codegen-ui --output='jsonpath={.spec.ports[0].nodePort}')
+# For other codegen UI
 export port=$(kubectl get service codegen-nginx --output='jsonpath={.spec.ports[0].nodePort}')
 echo $port
 ```
