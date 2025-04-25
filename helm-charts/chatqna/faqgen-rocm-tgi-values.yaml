@@ -30,8 +30,8 @@ tgi:
       cpu: 1
       memory: 16Gi
   securityContext:
-    readOnlyRootFilesystem: false
-    runAsNonRoot: false
+    readOnlyRootFilesystem: true
+    runAsNonRoot: true
     runAsUser: 0
     capabilities:
       add:
