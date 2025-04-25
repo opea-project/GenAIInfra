@@ -55,7 +55,7 @@ docretriever:
     # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
     # pullPolicy: ""
     # Overrides the image tag whose default is the chart appVersion.
-    tag: "latest"
+    tag: "1.3"
 
 sqlagent:
   toolHostPath: "/mnt/tools"
@@ -130,7 +130,7 @@ vllm:
 agentqna-ui:
   image:
     repository: opea/agent-ui
-    tag: "latest"
+    tag: "1.3"
   containerPort: 8080
   service:
     type: NodePort

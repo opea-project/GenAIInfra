@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: speecht5-config
   labels:
-    helm.sh/chart: speecht5-0-latest
+    helm.sh/chart: speecht5-1.3.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
     app.kubernetes.io/version: "v1.0"
@@ -21,6 +21,7 @@ data:
   no_proxy: ""
   HF_HOME: "/tmp/.cache/huggingface"
   HUGGINGFACE_HUB_CACHE: "/data"
+  HF_TOKEN: "insert-your-huggingface-token-here"
 ---
 # Source: speecht5/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -31,7 +32,7 @@ kind: Service
 metadata:
   name: speecht5
   labels:
-    helm.sh/chart: speecht5-0-latest
+    helm.sh/chart: speecht5-1.3.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
     app.kubernetes.io/version: "v1.0"
@@ -56,7 +57,7 @@ kind: Deployment
 metadata:
   name: speecht5
   labels:
-    helm.sh/chart: speecht5-0-latest
+    helm.sh/chart: speecht5-1.3.0
     app.kubernetes.io/name: speecht5
     app.kubernetes.io/instance: speecht5
     app.kubernetes.io/version: "v1.0"
@@ -73,8 +74,47 @@ spec:
         app.kubernetes.io/name: speecht5
         app.kubernetes.io/instance: speecht5
     spec:
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: speecht5-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download models microsoft/speecht5_tts microsoft/speecht5_hifigan ... ";
+              huggingface-cli download --cache-dir /data "microsoft/speecht5_tts";
+              huggingface-cli download --cache-dir /data "microsoft/speecht5_hifigan";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--microsoft--speecht5_tts;
+              chmod -R g+w /data/models--microsoft--speecht5_hifigan
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
         - name: speecht5
           envFrom:
@@ -84,8 +124,17 @@ spec:
                 name: extra-env-config
                 optional: true
           securityContext:
-            {}
-          image: "opea/speecht5-gaudi:latest"
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/speecht5-gaudi:1.3"
           ports:
             - name: speecht5
               containerPort: 7055
@@ -95,29 +144,25 @@ spec:
               name: model-volume
             - mountPath: /tmp
               name: tmp
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: /v1/health
-              port: speecht5
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
-              path: /v1/health
+              path: /health
               port: speecht5
             initialDelaySeconds: 5
             periodSeconds: 5
           startupProbe:
             failureThreshold: 120
             httpGet:
-              path: /v1/health
+              path: /health
               port: speecht5
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
             limits:
               habana.ai/gaudi: 1
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: model-volume
           hostPath:
@@ -125,3 +170,7 @@ spec:
             type: Directory
         - name: tmp
           emptyDir: {}
+---
+# Source: speecht5/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

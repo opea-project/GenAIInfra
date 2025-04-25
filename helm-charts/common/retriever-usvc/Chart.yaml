@@ -5,16 +5,16 @@ apiVersion: v2
 name: retriever-usvc
 description: The Helm chart for deploying retriever as microservice
 type: application
-version: 0-latest
+version: 1.3.0
 # The retriever microservice server version
 appVersion: "v1.0"
 dependencies:
   - name: tei
-    version: 0-latest
+    version: 1.3.0
     repository: file://../tei
     condition: tei.enabled
   - name: redis-vector-db
-    version: 0-latest
+    version: 1.3.0
     repository: file://../redis-vector-db
     condition: redis-vector-db.enabled
   - name: milvus
@@ -26,5 +26,5 @@ dependencies:
     repository: https://qdrant.github.io/qdrant-helm
     condition: qdrant.enabled
   - name: commonlib
-    version: 0-latest
+    version: 1.3.0
     repository: "file://../commonlib"

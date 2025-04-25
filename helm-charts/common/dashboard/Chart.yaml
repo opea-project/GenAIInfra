@@ -5,5 +5,5 @@ apiVersion: v2
 name: dashboard
 description: Grafana dashboard(s) Helm chart for OPEA application(s)
 type: application
-version: 0-latest
+version: 1.3.0
 appVersion: "1.0"

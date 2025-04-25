@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: prompt-usvc-config
   labels:
-    helm.sh/chart: prompt-usvc-0-latest
+    helm.sh/chart: prompt-usvc-1.3.0
     app.kubernetes.io/name: prompt-usvc
     app.kubernetes.io/instance: prompt-usvc
     app.kubernetes.io/version: "v1.0"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: prompt-usvc
   labels:
-    helm.sh/chart: prompt-usvc-0-latest
+    helm.sh/chart: prompt-usvc-1.3.0
     app.kubernetes.io/name: prompt-usvc
     app.kubernetes.io/instance: prompt-usvc
     app.kubernetes.io/version: "v1.0"
@@ -57,7 +57,7 @@ kind: Deployment
 metadata:
   name: prompt-usvc
   labels:
-    helm.sh/chart: prompt-usvc-0-latest
+    helm.sh/chart: prompt-usvc-1.3.0
     app.kubernetes.io/name: prompt-usvc
     app.kubernetes.io/instance: prompt-usvc
     app.kubernetes.io/version: "v1.0"
@@ -74,6 +74,7 @@ spec:
         app.kubernetes.io/name: prompt-usvc
         app.kubernetes.io/instance: prompt-usvc
     spec:
+      serviceAccountName: default
       securityContext:
         {}
       containers:
@@ -89,12 +90,12 @@ spec:
             capabilities:
               drop:
               - ALL
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/promptregistry-mongo-server:latest"
+          image: "opea/promptregistry-mongo:1.3"
           ports:
             - name: port
               containerPort: 6018
@@ -123,7 +124,13 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: prompt-usvc/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

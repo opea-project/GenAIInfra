@@ -8,10 +8,10 @@ kind: ConfigMap
 metadata:
   name: teirerank-config
   labels:
-    helm.sh/chart: teirerank-0-latest
+    helm.sh/chart: teirerank-1.3.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
-    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/version: "cpu-1.6"
     app.kubernetes.io/managed-by: Helm
 data:
   MODEL_ID: "BAAI/bge-reranker-base"
@@ -27,6 +27,7 @@ data:
   # More options for HPU
   OMPI_MCA_btl_vader_single_copy_mechanism: "none"
   MAX_WARMUP_SEQUENCE_LENGTH: "512"
+  HF_TOKEN: "insert-your-huggingface-token-here"
 ---
 # Source: teirerank/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -37,10 +38,10 @@ kind: Service
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-0-latest
+    helm.sh/chart: teirerank-1.3.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
-    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/version: "cpu-1.6"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -62,10 +63,10 @@ kind: Deployment
 metadata:
   name: teirerank
   labels:
-    helm.sh/chart: teirerank-0-latest
+    helm.sh/chart: teirerank-1.3.0
     app.kubernetes.io/name: teirerank
     app.kubernetes.io/instance: teirerank
-    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/version: "cpu-1.6"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -74,12 +75,50 @@ spec:
       app.kubernetes.io/instance: teirerank
   template:
     metadata:
+      
       labels:
         app.kubernetes.io/name: teirerank
         app.kubernetes.io/instance: teirerank
-    spec:
+    spec:      
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: teirerank-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model BAAI/bge-reranker-base ... ";
+              huggingface-cli download --cache-dir /data "BAAI/bge-reranker-base";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--BAAI--bge-reranker-base;
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
         - name: teirerank
           envFrom:
@@ -104,14 +143,6 @@ spec:
             - name: http
               containerPort: 2082
               protocol: TCP
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 8
-            periodSeconds: 8
-            timeoutSeconds: 1
           readinessProbe:
             httpGet:
               path: /health
@@ -129,6 +160,9 @@ spec:
           resources:
             limits:
               habana.ai/gaudi: 1
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: model-volume
           hostPath:
@@ -142,6 +176,10 @@ spec:
           emptyDir: {}
 ---
 # Source: teirerank/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: teirerank/templates/serviceaccount.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---

@@ -1,0 +1,298 @@
+---
+# Source: asr/charts/whisper/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: asr-whisper-config
+  labels:
+    helm.sh/chart: whisper-1.3.0
+    app.kubernetes.io/name: whisper
+    app.kubernetes.io/instance: asr
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
+  ASR_MODEL_PATH: "openai/whisper-small"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HF_HOME: "/tmp/.cache/huggingface"
+  HUGGINGFACE_HUB_CACHE: "/data"
+  HF_TOKEN: "insert-your-huggingface-token-here"
+---
+# Source: asr/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: asr-config
+  labels:
+    helm.sh/chart: asr-1.3.0
+    app.kubernetes.io/name: asr
+    app.kubernetes.io/instance: asr
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  ASR_ENDPOINT: "http://asr-whisper:7066"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+---
+# Source: asr/charts/whisper/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: asr-whisper
+  labels:
+    helm.sh/chart: whisper-1.3.0
+    app.kubernetes.io/name: whisper
+    app.kubernetes.io/instance: asr
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 7066
+      targetPort: 7066
+      protocol: TCP
+      name: whisper
+  selector:
+    app.kubernetes.io/name: whisper
+    app.kubernetes.io/instance: asr
+---
+# Source: asr/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: asr
+  labels:
+    helm.sh/chart: asr-1.3.0
+    app.kubernetes.io/name: asr
+    app.kubernetes.io/instance: asr
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9099
+      targetPort: 9099
+      protocol: TCP
+      name: asr
+  selector:
+    app.kubernetes.io/name: asr
+    app.kubernetes.io/instance: asr
+---
+# Source: asr/charts/whisper/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asr-whisper
+  labels:
+    helm.sh/chart: whisper-1.3.0
+    app.kubernetes.io/name: whisper
+    app.kubernetes.io/instance: asr
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: whisper
+      app.kubernetes.io/instance: asr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: whisper
+        app.kubernetes.io/instance: asr
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: asr-whisper-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model openai/whisper-small ... ";
+              huggingface-cli download --cache-dir /data "openai/whisper-small";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--openai--whisper-small
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      containers:
+        - name: whisper
+          envFrom:
+            - configMapRef:
+                name: asr-whisper-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/whisper:1.3"
+          ports:
+            - name: whisper
+              containerPort: 7066
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: whisper
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: /health
+              port: whisper
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: tmp
+          emptyDir: {}
+---
+# Source: asr/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: asr
+  labels:
+    helm.sh/chart: asr-1.3.0
+    app.kubernetes.io/name: asr
+    app.kubernetes.io/instance: asr
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: asr
+      app.kubernetes.io/instance: asr
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: asr
+        app.kubernetes.io/instance: asr
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: asr
+          envFrom:
+            - configMapRef:
+                name: asr-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/asr:1.3"
+          ports:
+            - name: asr
+              containerPort: 9099
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: asr
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: asr
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Source: asr/charts/whisper/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: asr/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

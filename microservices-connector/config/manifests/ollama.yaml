@@ -1,0 +1,145 @@
+---
+# Source: ollama/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: ollama-config
+  labels:
+    helm.sh/chart: ollama-1.3.0
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/instance: ollama
+    app.kubernetes.io/version: "0.5.7"
+    app.kubernetes.io/managed-by: Helm
+data:
+  https_proxy: ""
+  http_proxy: ""
+  no_proxy: ""
+  LLM_MODEL_ID: "llama3.2:1b"
+---
+# Source: ollama/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  labels:
+    helm.sh/chart: ollama-1.3.0
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/instance: ollama
+    app.kubernetes.io/version: "0.5.7"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 11434
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/instance: ollama
+---
+# Source: ollama/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  labels:
+    helm.sh/chart: ollama-1.3.0
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/instance: ollama
+    app.kubernetes.io/version: "0.5.7"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+      app.kubernetes.io/instance: ollama
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ollama
+        app.kubernetes.io/instance: ollama
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: ollama-config
+          securityContext:
+            capabilities:
+              add:
+              - DAC_OVERRIDE
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ollama/ollama:0.5.7"
+          imagePullPolicy: 
+          command: ['bash', '-c']
+          args:
+            - ollama serve & sleep 10 && ollama pull ${LLM_MODEL_ID}
+          volumeMounts:
+            # Running as non-root sets $HOME to /
+            - mountPath: /.ollama
+              name: model-volume
+      containers:
+        - name: ollama
+          command: ["bash", "-c"]
+          args: ["ollama serve & sleep 10 && ollama run llama3.2:1b & wait"]
+          envFrom:
+            - configMapRef:
+                name: ollama-config
+          securityContext:
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ollama/ollama:0.5.7"
+          imagePullPolicy: 
+          ports:
+            - name: http
+              containerPort: 11434
+              protocol: TCP
+          startupProbe:
+            httpGet:
+              # Ollama uses lazy loading for models, but this verifies the model has been downloaded
+              path: /v1/models/llama3.2:1b
+              port: http
+          resources:
+            {}
+          volumeMounts:
+            # Running as non-root sets $HOME to /
+            - mountPath: /.ollama
+              name: model-volume
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+---
+# Source: ollama/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: ollama/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

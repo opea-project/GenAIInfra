@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: whisper-config
   labels:
-    helm.sh/chart: whisper-0-latest
+    helm.sh/chart: whisper-1.3.0
     app.kubernetes.io/name: whisper
     app.kubernetes.io/instance: whisper
     app.kubernetes.io/version: "v1.0"
@@ -21,6 +21,7 @@ data:
   no_proxy: ""
   HF_HOME: "/tmp/.cache/huggingface"
   HUGGINGFACE_HUB_CACHE: "/data"
+  HF_TOKEN: "insert-your-huggingface-token-here"
 ---
 # Source: whisper/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -31,7 +32,7 @@ kind: Service
 metadata:
   name: whisper
   labels:
-    helm.sh/chart: whisper-0-latest
+    helm.sh/chart: whisper-1.3.0
     app.kubernetes.io/name: whisper
     app.kubernetes.io/instance: whisper
     app.kubernetes.io/version: "v1.0"
@@ -56,7 +57,7 @@ kind: Deployment
 metadata:
   name: whisper
   labels:
-    helm.sh/chart: whisper-0-latest
+    helm.sh/chart: whisper-1.3.0
     app.kubernetes.io/name: whisper
     app.kubernetes.io/instance: whisper
     app.kubernetes.io/version: "v1.0"
@@ -73,8 +74,45 @@ spec:
         app.kubernetes.io/name: whisper
         app.kubernetes.io/instance: whisper
     spec:
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: whisper-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model openai/whisper-small ... ";
+              huggingface-cli download --cache-dir /data "openai/whisper-small";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--openai--whisper-small
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
         - name: whisper
           envFrom:
@@ -84,8 +122,17 @@ spec:
                 name: extra-env-config
                 optional: true
           securityContext:
-            {}
-          image: "opea/whisper-gaudi:latest"
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/whisper-gaudi:1.3"
           ports:
             - name: whisper
               containerPort: 7066
@@ -95,29 +142,25 @@ spec:
               name: model-volume
             - mountPath: /tmp
               name: tmp
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: /v1/health
-              port: whisper
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
-              path: /v1/health
+              path: /health
               port: whisper
             initialDelaySeconds: 5
             periodSeconds: 5
           startupProbe:
             failureThreshold: 120
             httpGet:
-              path: /v1/health
+              path: /health
               port: whisper
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
             limits:
               habana.ai/gaudi: 1
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: model-volume
           hostPath:
@@ -125,3 +168,7 @@ spec:
             type: Directory
         - name: tmp
           emptyDir: {}
+---
+# Source: whisper/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

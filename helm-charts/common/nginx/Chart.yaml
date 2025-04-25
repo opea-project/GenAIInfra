@@ -8,6 +8,6 @@ name: nginx
 type: application
 dependencies:
   - name: commonlib
-    version: 0-latest
+    version: 1.3.0
     repository: "file://../commonlib"
-version: 0-latest
+version: 1.3.0

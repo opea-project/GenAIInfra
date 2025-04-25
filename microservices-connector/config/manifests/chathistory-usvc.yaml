@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: chathistory-usvc-config
   labels:
-    helm.sh/chart: chathistory-usvc-0-latest
+    helm.sh/chart: chathistory-usvc-1.3.0
     app.kubernetes.io/name: chathistory-usvc
     app.kubernetes.io/instance: chathistory-usvc
     app.kubernetes.io/version: "v1.0"
@@ -32,7 +32,7 @@ kind: Service
 metadata:
   name: chathistory-usvc
   labels:
-    helm.sh/chart: chathistory-usvc-0-latest
+    helm.sh/chart: chathistory-usvc-1.3.0
     app.kubernetes.io/name: chathistory-usvc
     app.kubernetes.io/instance: chathistory-usvc
     app.kubernetes.io/version: "v1.0"
@@ -57,7 +57,7 @@ kind: Deployment
 metadata:
   name: chathistory-usvc
   labels:
-    helm.sh/chart: chathistory-usvc-0-latest
+    helm.sh/chart: chathistory-usvc-1.3.0
     app.kubernetes.io/name: chathistory-usvc
     app.kubernetes.io/instance: chathistory-usvc
     app.kubernetes.io/version: "v1.0"
@@ -74,6 +74,7 @@ spec:
         app.kubernetes.io/name: chathistory-usvc
         app.kubernetes.io/instance: chathistory-usvc
     spec:
+      serviceAccountName: default
       securityContext:
         {}
       containers:
@@ -89,12 +90,12 @@ spec:
             capabilities:
               drop:
               - ALL
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/chathistory-mongo-server:latest"
+          image: "opea/chathistory-mongo:1.3"
           ports:
             - name: port
               containerPort: 6012
@@ -123,7 +124,13 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: chathistory-usvc/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

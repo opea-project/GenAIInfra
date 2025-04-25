@@ -12,7 +12,7 @@ image:
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.3"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -74,7 +74,7 @@ nginx:
 searchqna-ui:
   image:
     repository: opea/searchqna-ui
-    tag: "latest"
+    tag: "1.3"
   BACKEND_SERVICE_ENDPOINT: "/v1/searchqna"
   containerPort: 5173
 
