@@ -12,7 +12,7 @@ vllm:
   image:
     repository: opea/vllm-rocm
     tag: latest
-  LLM_MODEL_ID: "meta-llama/Llama-3.3-70B-Instruct"
+  LLM_MODEL_ID: "meta-llama/Meta-Llama-3-8B-Instruct"
   env:
     HIP_VISIBLE_DEVICES: "0,1"
     TENSOR_PARALLEL_SIZE: "2"
@@ -41,13 +41,13 @@ vllm:
 supervisor:
   llm_endpoint_url: http://{{ .Release.Name }}-vllm
   llm_engine: vllm
-  model: "meta-llama/Llama-3.3-70B-Instruct"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
 ragagent:
   llm_endpoint_url: http://{{ .Release.Name }}-vllm
   llm_engine: vllm
-  model: "meta-llama/Llama-3.3-70B-Instruct"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
 sqlagent:
   llm_endpoint_url: http://{{ .Release.Name }}-vllm
   llm_engine: vllm
-  model: "meta-llama/Llama-3.3-70B-Instruct"
+  model: "meta-llama/Meta-Llama-3-8B-Instruct"
 
