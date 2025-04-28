@@ -33,13 +33,6 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Release.Name }}
-          {{- if .Values.externalLLM.enabled }}
-          # External LLM configuration - use ConfigMap
-          envFrom:
-            - configMapRef:
-                name: {{ include "chatqna.fullname" . }}-external-llm
-          {{- else }}
-          # Standard internal LLM configuration
           env:
             - name: LLM_SERVER_HOST_IP
               # For FaqGen, llm-uservice is used.
@@ -98,6 +91,11 @@ spec:
             - name: CHATQNA_TYPE
               value: {{ .Values.CHATQNA_TYPE | quote }}
             {{- end }}
+          {{- if .Values.externalLLM.enabled }}
+          # External LLM configuration - use ConfigMap
+          envFrom:
+            - configMapRef:
+                name: {{ include "chatqna.fullname" . }}-external-llm
           {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
