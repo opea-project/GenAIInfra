@@ -26,7 +26,7 @@ tgi:
   securityContext:
     readOnlyRootFilesystem: true
     runAsNonRoot: true
-    runAsUser: 0
+    runAsUser: 1000
     capabilities:
       add:
         - SYS_PTRACE
