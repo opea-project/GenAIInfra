@@ -127,23 +127,6 @@ resource "azurerm_kubernetes_cluster" "main" {
 
 }
 
-# Azure Files Storage Account
-resource "azurerm_storage_account" "main" {
-  name                     = replace(lower("${var.cluster_name}st"), "-", "")
-  resource_group_name      = azurerm_resource_group.main.name
-  location                 = azurerm_resource_group.main.location
-  account_tier             = "Premium"
-  account_replication_type = "LRS"
-  account_kind            = "FileStorage"
-}
-
-# Azure Files Share
-resource "azurerm_storage_share" "main" {
-  name                 = "aksshare"
-  storage_account_id   = azurerm_storage_account.main.id
-  quota               = 100
-}
-
 # Key Vault
 resource "azurerm_key_vault" "main" {
   name                       = "${var.cluster_name}-kv"
