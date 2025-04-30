@@ -66,6 +66,9 @@ autoscaling:
 tgi:
   enabled: false
   LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
+ollama:
+  enabled: false
+  LLM_MODEL_ID: llama3.2:1b
 vllm:
   enabled: true
   LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
