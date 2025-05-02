@@ -23,6 +23,8 @@ global:
 
 # Enabling "autoscaling" for any of the subcharts requires enabling it also above!
 vllm:
+  # vLLM startup takes too long for autoscaling, especially with Gaudi
+  VLLM_SKIP_WARMUP: "true"
   autoscaling:
     minReplicas: 1
     maxReplicas: 4
