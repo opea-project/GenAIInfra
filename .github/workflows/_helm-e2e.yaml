@@ -112,7 +112,7 @@ jobs:
             echo "should_cleanup=false" >> $GITHUB_ENV
             exit 0
           fi
-          helm-charts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER }}
+          helm-charts/scripts/update_dependency.sh && helm dependency update ${{ env.CHART_FOLDER }}
           for img in `helm template -n $NAMESPACE -f ${{ env.CHART_FOLDER }}/${value_file} $RELEASE_NAME ${{ env.CHART_FOLDER }} | grep 'image:' | grep 'opea/' | awk '{print $2}' | xargs`;
           do
             if ! .github/workflows/scripts/e2e/chart_test.sh check_local_opea_image "$img"; then
