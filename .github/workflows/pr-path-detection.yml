@@ -23,6 +23,8 @@ jobs:
       - name: Check the Validity of Hyperlinks
         run: |
           cd ${{github.workspace}}
+          delay=15   # minimum consecutive URL request delay to pass Fortinet Proxy checks
+          timeout=15 # max connect timeout
           fail="FALSE"
           merged_commit=$(git log -1 --format='%H')
           changed_files="$(git diff --name-status --diff-filter=ARM ${{ github.event.pull_request.base.sha }} ${merged_commit} | awk '/\.md$/ {print $NF}')"
@@ -35,10 +37,11 @@ jobs:
                   url=$(echo "$url_line"|cut -d '(' -f2 | cut -d ')' -f1|sed 's/\.git$//')
                   path=$(echo "$url_line"|cut -d':' -f1 | cut -d'/' -f2-)
                   echo "- $url"
-                  response=$(curl -L -s -o /dev/null -w "%{http_code}" "$url")
+                  sleep $delay
+                  response=$(curl --connect-timeout $timeout -L -s -o /dev/null -w "%{http_code}" "$url")
                   if [ "$response" -ne 200 ]; then
                     echo "**********Validation failed ($response), try again**********"
-                    response_retry=$(curl -s -o /dev/null -w "%{http_code}" "$url")
+                    response_retry=$(curl --connect-timeout $timeout -s -o /dev/null -w "%{http_code}" "$url")
                     if [ "$response_retry" -eq 200 ]; then
                       echo "*****Retry successful*****"
                     else
