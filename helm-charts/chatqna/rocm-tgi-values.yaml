@@ -29,6 +29,8 @@ tgi:
     runAsNonRoot: true
     runAsUser: 1000
     capabilities:
+      add:
+        - SYS_PTRACE
       drop:
         - ALL
     seccompProfile:
