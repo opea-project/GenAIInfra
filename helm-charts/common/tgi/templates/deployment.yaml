@@ -98,7 +98,7 @@ spec:
               name: shm
             - mountPath: /tmp
               name: tmp
-            - mountPath: /usr/src/out
+            - mountPath: {{ .Values.tokenizerMountPath | default /usr/src/out }}
               name: tokenizer
           ports:
             - name: http

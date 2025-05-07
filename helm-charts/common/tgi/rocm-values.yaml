@@ -2,8 +2,8 @@
 
 accelDevice: "rocm"
 image:
-  repository: ghcr.io/huggingface/text-generation-inference
-  tag: "2.4.1-rocm"
+  repository: opea/tgi-rocm
+  tag: latest
 MAX_INPUT_LENGTH: "1024"
 MAX_TOTAL_TOKENS: "2048"
 USE_FLASH_ATTENTION: "false"
@@ -11,6 +11,7 @@ FLASH_ATTENTION_RECOMPUTE: "false"
 HIP_VISIBLE_DEVICES: "0"
 MAX_BATCH_SIZE: "4"
 extraCmdArgs: ["--num-shard","1"]
+tokenizerMountPath: /usr/src/out
 resources:
   limits:
     amd.com/gpu: "1"
@@ -18,9 +19,8 @@ resources:
     cpu: 1
     memory: 16Gi
 securityContext:
-  readOnlyRootFilesystem: false
-  runAsNonRoot: false
-  runAsUser: 0
+  runAsUser: 2000
+  runAsGroup: 2000
   capabilities:
     add:
       - SYS_PTRACE
