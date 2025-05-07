@@ -3,8 +3,8 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-CUR_DIR=$(cd $(dirname "$0") && pwd)
-OUTPUTDIR=${CUR_DIR}/../microservices-connector/config/manifests
+CHARTS_DIR=$(cd $(dirname "$0")/.. && pwd)
+OUTPUTDIR=${CHARTS_DIR}/../microservices-connector/config/manifests
 MODELPATH="/mnt/opea-models"
 
 NEWTAG="${NEWTAG:-latest}"
@@ -45,9 +45,9 @@ function generate_yaml {
 }
 
 mkdir -p $OUTPUTDIR
-${CUR_DIR}/update_dependency.sh
-cd $CUR_DIR
-for chart in ${CUR_DIR}/common/*
+${CHARTS_DIR}/scripts/update_dependency.sh
+cd $CHARTS_DIR
+for chart in ${CHARTS_DIR}/common/*
 do
 	chartname=`basename $chart`
 	echo "Update manifest for $chartname..."

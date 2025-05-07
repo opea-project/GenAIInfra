@@ -12,7 +12,7 @@ To install the chart, run the following:
 git clone https://github.com/opea-project/GenAIInfra.git
 cd GenAIInfra/helm-charts/
 mkdir /mnt/opea-models && chmod -R 664 /mnt/opea-models
-./update_dependency.sh
+scripts/update_dependency.sh
 helm dependency update docsum
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
