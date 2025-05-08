@@ -1,0 +1,21 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: opea/productivity-suite-react-ui-server
+  tag: "latest"
+
+containerPort: 5173
+APP_BACKEND_SERVICE_ENDPOINT_CHATQNA: "/v1/chatqna"
+APP_DATAPREP_DELETE_FILE_ENDPOINT: "/v1/dataprep/delete"
+APP_BACKEND_SERVICE_ENDPOINT_CODEGEN: "/v1/codegen"
+APP_BACKEND_SERVICE_ENDPOINT_DOCSUM: "/v1/docsum"
+APP_DATAPREP_SERVICE_ENDPOINT: "/v1/dataprep/ingest"
+APP_DATAPREP_GET_FILE_ENDPOINT: "/v1/dataprep/get"
+APP_CHAT_HISTORY_CREATE_ENDPOINT: "/v1/chathistory/create"
+APP_CHAT_HISTORY_DELETE_ENDPOINT: "/v1/chathistory/delete"
+APP_CHAT_HISTORY_GET_ENDPOINT: "/v1/chathistory/get"
+APP_PROMPT_SERVICE_GET_ENDPOINT: "/v1/prompt/get"
+APP_PROMPT_SERVICE_CREATE_ENDPOINT: "/v1/prompt/create"
+APP_PROMPT_SERVICE_DELETE_ENDPOINT: "/v1/prompt/delete"
+APP_KEYCLOAK_SERVICE_ENDPOINT: "/auth"

@@ -91,6 +91,12 @@ spec:
             - name: CHATQNA_TYPE
               value: {{ .Values.CHATQNA_TYPE | quote }}
             {{- end }}
+          {{- if .Values.externalLLM.enabled }}
+          # External LLM configuration - use ConfigMap
+          envFrom:
+            - configMapRef:
+                name: {{ include "chatqna.fullname" . }}-external-llm
+          {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

@@ -1,0 +1,17 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# External LLM configuration
+externalLLM:
+  enabled: true
+  LLM_SERVER_HOST_IP: "http://your-llm-server"
+  LLM_MODEL: "your-model"
+  OPENAI_API_KEY: "your-api-key"
+
+# Disable internal LLM services when using external LLM
+tgi:
+  enabled: false
+vllm:
+  enabled: false
+llm-uservice:
+  enabled: false
