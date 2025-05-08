@@ -1,0 +1,52 @@
+# ChatQNA Configuration
+chatqna_model_dir = ""
+chatqna_helm_chart_path = "../../../../helm-charts/chatqna"
+chatqna_model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+chatqna_embedding_model_name = "BAAI/bge-base-en-v1.5"
+chatqna_reranker_model_name = "BAAI/bge-reranker-base"
+chatqna_llm_service_host_ip = "http://your-llm-server/Meta-Llama-3.1-8B-Instruct"
+
+# Codegen Configuration
+codegen_model_dir = ""
+codegen_helm_chart_path = "../../../../helm-charts/codegen"
+codegen_model_name = "codellama/CodeLlama-34b-Instruct-hf"
+codegen_llm_service_host_ip = "http://your-llm-server/CodeLlama-34b-Instruct"
+
+# Docsum Configuration
+docsum_model_dir = ""
+docsum_helm_chart_path = "../../../../helm-charts/docsum"
+docsum_model_name = "meta-llama/Meta-Llama-3.1-8B-Instruct"
+docsum_llm_service_host_ip = "http://your-llm-server/Meta-Llama-3.1-8B-Instruct"
+
+# Nginx Configuration
+nginx_helm_chart_path = "helm-charts/nginx-central-gateway"
+
+# UI Configuration
+ui_helm_chart_path = "../../../../helm-charts/common/ui"
+
+# Chathistory Configuration
+chathistory_helm_chart_path = "../../../../helm-charts/common/chathistory-usvc"
+enable_chathistory_mongodb = true
+
+# Prompt Configuration
+prompt_helm_chart_path = "../../../../helm-charts/common/prompt-usvc"
+enable_prompt_mongodb = true
+
+# Feature Flags - ChatQnA
+enable_chatqna_vllm    = false
+enable_chatqna_ui      = false
+enable_chatqna_nginx = false
+
+# Feature Flags - Codegen
+enable_codegen_ui      = false
+enable_codegen_tgi     = false
+enable_codegen_llm-uservice   = false
+enable_codegen_nginx   = false
+
+# Feature Flags - Docsum
+enable_docsum_tgi     = false
+enable_docsum_vllm    = false
+enable_docsum_nginx   = false
+enable_docsum_ui      = false
+enable_docsum_llm-uservice = false
+enable_docsum_whisper = false
