@@ -1,0 +1,85 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "codegen-react-ui.fullname" . }}
+  labels:
+    {{- include "codegen-react-ui.labels" . | nindent 4 }}
+  annotations:
+    image.openshift.io/triggers: '[{"from":{"kind":"ImageStreamTag","name":"react-ui:{{ .Values.image.tag }}"},"fieldPath":"spec.template.spec.containers[?(@.name==\"{{ .Chart.Name }}\")].image"}]'
+spec:
+  selector:
+    matchLabels:
+      {{- include "codegen-react-ui.selectorLabels" . | nindent 8 }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "codegen-react-ui.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      securityContext: {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+      - command: ["/bin/sh", "-c"]
+        args:
+        - |
+          cp -v /etc/nginx/nginx.conf /tmp/nginx.conf && \
+          sed -i "s/pid .*;/pid \/tmp\/nginx.pid;/" /tmp/nginx.conf && \
+          nginx -c /tmp/nginx.conf -g "daemon off;"
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        name: {{ .Chart.Name }}
+        ports:
+        - name: http
+          containerPort: {{ .Values.service.port }}
+          protocol: TCP
+        livenessProbe:
+          httpGet:
+            path: /
+            port: http
+        readinessProbe:
+          httpGet:
+            path: /
+            port: http
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        securityContext:
+          {{- toYaml .Values.securityContext | nindent 10 }}
+        volumeMounts:
+          - mountPath: /var/cache/nginx/
+            name: nginx-cache-dir
+          - mountPath: /etc/nginx/conf.d/default.conf
+            name: default-conf
+            subPath: default.conf
+          - mountPath: /etc/nginx/nginx.conf
+            name: nginx-conf
+            subPath: nginx.conf
+      volumes:
+        - name: nginx-cache-dir
+          emptyDir: {}
+        - name: default-conf
+          configMap:
+            name: {{ include "codegen-react-ui.fullname" . }}-default-conf
+        - name: nginx-conf
+          configMap:
+            name: {{ include "codegen-react-ui.fullname" . }}-nginx-conf
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
