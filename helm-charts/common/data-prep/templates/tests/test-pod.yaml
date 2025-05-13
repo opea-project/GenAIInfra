@@ -17,6 +17,11 @@ spec:
       command: ['bash', '-c']
       args:
         - |
+          # Skip test for REDISFINANCE BACKEND, doesn't support delete file_path: all
+          if [ {{ .Values.DATAPREP_BACKEND }} = "REDISFINANCE" ]; then
+            echo "Skip test for REDISFINANCE BACKEND";
+            exit 0;
+          fi
           filetypes=(docx pdf txt xlsx pptx doc);
           for type in ${filetypes[@]}; do
             echo "Get ingest file of type $type ...";
