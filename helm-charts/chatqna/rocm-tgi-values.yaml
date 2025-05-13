@@ -24,18 +24,12 @@ tgi:
       cpu: 1
       memory: 16Gi
   securityContext:
-    readOnlyRootFilesystem: true
-    allowPrivilegeEscalation: false
-    runAsNonRoot: true
-    runAsUser: 1000
+    readOnlyRootFilesystem: false
+    runAsNonRoot: false
+    runAsUser: 0
     capabilities:
       add:
         - SYS_PTRACE
-      drop:
-        - ALL
-    seccompProfile:
-      type: RuntimeDefault
-    runAsGroup: 0
   readinessProbe:
     initialDelaySeconds: 60
     periodSeconds: 5

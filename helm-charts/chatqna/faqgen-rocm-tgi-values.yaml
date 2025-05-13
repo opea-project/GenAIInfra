@@ -30,9 +30,9 @@ tgi:
       cpu: 1
       memory: 16Gi
   securityContext:
-    readOnlyRootFilesystem: true
-    runAsNonRoot: true
-    runAsUser: 1000
+    readOnlyRootFilesystem: false
+    runAsNonRoot: false
+    runAsUser: 0
     capabilities:
       add:
         - SYS_PTRACE
