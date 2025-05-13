@@ -1,0 +1,47 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: financeagent
+description: The Helm chart to deploy FinanceAgent
+type: application
+dependencies:
+  - name: agent
+    version: 0-latest
+    alias: finqa-agent
+    repository: "file://../common/agent"
+  - name: agent
+    version: 0-latest
+    alias: research-agent
+    repository: "file://../common/agent"
+  - name: agent
+    version: 0-latest
+    alias: supervisor
+    repository: "file://../common/agent"
+  - name: llm-uservice
+    version: 0-latest
+    alias: docsum
+    repository: "file://../common/llm-uservice"
+  - name: ui
+    alias: agent-ui
+    version: 0-latest
+    repository: "file://../common/ui"
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
+  - name: tei
+    version: 0-latest
+    repository: "file://../common/tei"
+  - name: redis-vector-db
+    version: 0-latest
+    repository: "file://../common/redis-vector-db"
+  - name: redis-vector-db
+    version: 0-latest
+    alias: redis-kv-store
+    repository: "file://../common/redis-vector-db"
+  - name: data-prep
+    version: 0-latest
+    repository: "file://../common/data-prep"
+version: 0-latest
+appVersion: "v1.0"

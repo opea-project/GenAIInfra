@@ -1,0 +1,124 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Default values for financeagent.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Automatically mount a ServiceAccount's API credentials?
+  automount: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+finqa-agent:
+  toolHostPath: "/mnt/tools/financeagent"
+  service:
+    port: 9095
+  strategy: react_llama
+  with_memory: false
+  recursion_limit: "12"
+  llm_engine: vllm
+  llm_endpoint_url: ""
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: "0.5"
+  max_new_tokens: "4096"
+  stream: "false"
+  tools: "/home/user/tools/finqa_agent_tools.yaml"
+  custom_prompt: "/home/user/tools/finqa_prompt.py"
+  require_human_feedback: "false"
+
+research-agent:
+  toolHostPath: "/mnt/tools/financeagent"
+  service:
+    port: 9096
+  strategy: react_llama
+  with_memory: false
+  recursion_limit: "25"
+  llm_engine: vllm
+  llm_endpoint_url: ""
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+#  temperature: "0.5"
+  max_new_tokens: "4096"
+  stream: "false"
+  tools: "/home/user/tools/research_agent_tools.yaml"
+  custom_prompt: "/home/user/tools/research_prompt.py"
+  require_human_feedback: "false"
+  FINNHUB_API_KEY: ""
+  FINANCIAL_DATASETS_API_KEY: ""
+
+supervisor:
+  toolHostPath: "/mnt/tools/financeagent"
+  service:
+    port: 9090
+  strategy: react_llama
+  with_memory: true
+  recursion_limit: 10
+  llm_engine: vllm
+  llm_endpoint_url: ""
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  temperature: "0.5"
+  max_new_tokens: "4096"
+  stream: "true"
+  tools: /home/user/tools/supervisor_agent_tools.yaml
+  custom_prompt: /home/user/tools/supervisor_prompt.py
+  require_human_feedback: false
+  WORKER_FINQA_AGENT_URL: ""
+  WORKER_RESEARCH_AGENT_URL: ""
+  DOCSUM_ENDPOINT: ""
+#  REDIS_URL_VECTOR: $REDIS_URL_VECTOR
+#  REDIS_URL_KV: $REDIS_URL_KV
+#  TEI_EMBEDDING_ENDPOINT: $TEI_EMBEDDING_ENDPOINT
+docsum:
+  image:
+    repository: opea/llm-docsum
+  DOCSUM_BACKEND: "vLLM"
+  LLM_MODEL_ID: "meta-llama/Llama-3.3-70B-Instruct"
+  MAX_INPUT_TOKENS: 2048
+  MAX_TOTAL_TOKENS: 4096
+# tei:
+# redis-vector-db:
+# redis-kv-store:
+data-prep:
+  DATAPREP_BACKEND: "REDISFINANCE"
+  securityContext:
+    # Need to download files for EasyOCR
+    readOnlyRootFilesystem: false
+
+agent-ui:
+  image:
+    repository: opea/agent-ui
+  containerPort: 8080
+  service:
+    type: NodePort
+
+vllm:
+  enabled: true
+  LLM_MODEL_ID: "meta-llama/Meta-Llama-3-8B-Instruct"
+  extraCmdArgs: ["--max-seq-len-to-capture", "16384", "--enable-auto-tool-choice", "--tool-call-parser", "llama3_json"]
+  VLLM_SKIP_WARMUP: true
+
+global:
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  # service account name to be shared with all parent/child charts.
+  # If set, it will overwrite serviceAccount.name.
+  # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
+  sharedSAName: "financeagent"
+  # set modelUseHostPath or modelUsePVC to use model cache.
+  modelUseHostPath: ""
+  # modelUseHostPath: /mnt/opea-models
+  # modelUsePVC: model-volume
+
+  # Install Prometheus serviceMonitors for service components
+  monitoring: false
+
+  # Prometheus Helm install release name needed for serviceMonitors
+  prometheusRelease: prometheus-stack
