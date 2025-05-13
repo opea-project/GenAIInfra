@@ -35,15 +35,19 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: LLM_SERVER_HOST_IP
-              # For FaqGen, llm-uservice is used.
-              {{- if eq .Values.CHATQNA_TYPE "CHATQNA_FAQGEN"}}
+              # For FaqGen, llm-uservice is used
+              {{- if eq .Values.CHATQNA_TYPE "CHATQNA_FAQGEN" }}
               value: {{ .Release.Name }}-llm-uservice
               {{- else if .Values.ollama.enabled }}
               value: {{ .Release.Name }}-ollama
               {{- else if .Values.vllm.enabled }}
               value: {{ .Release.Name }}-vllm
-              {{- else }}
+              {{- else if .Values.tgi.enabled }}
               value: {{ .Release.Name }}-tgi
+              {{- else if .Values.externalLLM.enabled }}
+              value: {{ .Values.externalLLM.LLM_SERVER_HOST_IP }}
+              {{- else }}
+              {{- fail "ChatQnA needs a LLM inference backend!" }}
               {{- end }}
             - name: LLM_SERVER_PORT
               value: "80"
@@ -52,9 +56,15 @@ spec:
               value: {{ .Values.ollama.LLM_MODEL_ID | quote }}
               {{- else if .Values.vllm.enabled }}
               value: {{ .Values.vllm.LLM_MODEL_ID | quote }}
-              {{- else }}
+              {{- else if .Values.tgi.enabled }}
               value: {{ .Values.tgi.LLM_MODEL_ID | quote }}
+              {{- else if .Values.externalLLM.enabled }}
+              value: {{ .Values.externalLLM.LLM_MODEL }}
               {{- end }}
+            {{- if .Values.externalLLM.enabled }}
+            - name: OPENAI_API_KEY
+              value: {{ .Values.externalLLM.OPENAI_API_KEY }}
+            {{- end }}
             - name: RERANK_SERVER_HOST_IP
               value: {{ .Release.Name }}-teirerank
             - name: RERANK_SERVER_PORT
@@ -91,12 +101,6 @@ spec:
             - name: CHATQNA_TYPE
               value: {{ .Values.CHATQNA_TYPE | quote }}
             {{- end }}
-          {{- if .Values.externalLLM.enabled }}
-          # External LLM configuration - use ConfigMap
-          envFrom:
-            - configMapRef:
-                name: {{ include "chatqna.fullname" . }}-external-llm
-          {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
