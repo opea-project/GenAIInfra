@@ -11,7 +11,7 @@ To install the chart, run the following:
 
 ```console
 cd GenAIInfra/helm-charts/
-./update_dependency.sh
+scripts/update_dependency.sh
 helm dependency update visualqna
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"

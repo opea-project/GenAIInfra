@@ -4,6 +4,9 @@
 
 #set -xe
 
+CHARTS_DIR=$(cd $(dirname "$0")/.. && pwd)
+configfile=$CHARTS_DIR/valuefiles.yaml
+
 function check_chart {
   chart=$1
   valuefiles=$(yq eval ".$chart.values" $configfile |sed 's/^- //')
@@ -29,9 +32,7 @@ function check_chart {
   done
 }
 
-configfile=valuefiles.yaml
-
-charts_list=${1:-$(cat valuefiles.yaml |grep -v "^#" |grep -v "^  " |grep -v "^$" |sed 's/:/ /')}
+charts_list=${1:-$(cat $configfile |grep -v "^#" |grep -v "^  " |grep -v "^$" |sed 's/:/ /')}
 
 echo $charts_list
 mkdir -p tmp
