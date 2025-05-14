@@ -1,0 +1,11 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+metrics:
+  prometheusOperator:
+    vLLMPodMonitor:
+      # Enable Prometheus PodMonitor resource for scraping vLLM metrics endpoint
+      enabled: true
+      labels:
+        # Prometheus Helm Chart release name
+        release: prometheus-stack
