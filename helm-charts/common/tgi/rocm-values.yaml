@@ -2,16 +2,16 @@
 
 accelDevice: "rocm"
 image:
-  repository: opea/tgi-rocm
-  tag: latest
-MAX_INPUT_LENGTH: "1024"
-MAX_TOTAL_TOKENS: "2048"
+  repository: ghcr.io/huggingface/text-generation-inference
+  tag: "3.0.0-rocm"
+MAX_INPUT_LENGTH: "2048"
+MAX_TOTAL_TOKENS: "4096"
+PYTORCH_TUNABLEOP_ENABLED: "0"
 USE_FLASH_ATTENTION: "false"
 FLASH_ATTENTION_RECOMPUTE: "false"
 HIP_VISIBLE_DEVICES: "0"
 MAX_BATCH_SIZE: "4"
 extraCmdArgs: ["--num-shard","1"]
-tokenizerMountPath: /usr/src/out
 resources:
   limits:
     amd.com/gpu: "1"
