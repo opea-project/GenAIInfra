@@ -70,6 +70,6 @@ data:
   {{- if .Values.MAX_BATCH_SIZE }}
   MAX_BATCH_SIZE: {{ .Values.MAX_BATCH_SIZE | quote }}
   {{- end }}
-  {{- if .Values.MAX_BATCH_SIZE }}
+  {{- if .Values.PYTORCH_TUNABLEOP_ENABLED }}
   PYTORCH_TUNABLEOP_ENABLED: {{ .Values.PYTORCH_TUNABLEOP_ENABLED | quote }}
   {{- end }}
