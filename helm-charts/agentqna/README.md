@@ -93,5 +93,5 @@ Open another terminal and run the following command to verify the service if wor
 curl http://localhost:9090/v1/chat/completions \
     -X POST \
     -H "Content-Type: application/json" \
-    -d '{"model": "meta-llama/Meta-Llama-3-8B-Instruct","messages": "How many albums does Iron Maiden have?"}'
+    -d '{"model": "meta-llama/Llama-3.3-70B-Instruct","messages": "How many albums does Iron Maiden have?"}'
 ```
