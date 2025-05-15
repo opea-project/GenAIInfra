@@ -20,12 +20,12 @@ tgi:
   MAX_TOTAL_TOKENS: "4096"
   USE_FLASH_ATTENTION: "false"
   FLASH_ATTENTION_RECOMPUTE: "false"
-  HIP_VISIBLE_DEVICES: "0"
+  HIP_VISIBLE_DEVICES: "0,1"
   MAX_BATCH_SIZE: "4"
-  extraCmdArgs: [ "--num-shard","1" ]
+  extraCmdArgs: [ "--num-shard","2" ]
   resources:
     limits:
-      amd.com/gpu: "1"
+      amd.com/gpu: "2"
     requests:
       cpu: 1
       memory: 16Gi
