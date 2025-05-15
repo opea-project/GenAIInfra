@@ -10,11 +10,11 @@ dependencies:
     version: 0-latest
     repository: "file://../common/dashboard"
     condition: global.monitoring
-  - name: tgi
+  - name: vllm
     version: 0-latest
-    alias: tgi-guardrails
-    repository: "file://../common/tgi"
-    condition: tgi-guardrails.enabled
+    alias: vllm-guardrails
+    repository: "file://../common/vllm"
+    condition: vllm-guardrails.enabled
   - name: guardrails-usvc
     version: 0-latest
     repository: "file://../common/guardrails-usvc"
@@ -31,6 +31,10 @@ dependencies:
     version: 0-latest
     repository: "file://../common/llm-uservice"
     condition: llm-uservice.enabled
+  - name: ollama
+    version: 0-latest
+    repository: "file://../common/ollama"
+    condition: ollama.enabled
   - name: tei
     version: 0-latest
     repository: "file://../common/tei"
@@ -54,6 +58,10 @@ dependencies:
     version: 1.13.1
     repository: https://qdrant.github.io/qdrant-helm
     condition: qdrant.enabled
+  - name: milvus
+    version: 4.2.12
+    repository: https://zilliztech.github.io/milvus-helm/
+    condition: milvus.enabled
   - name: retriever-usvc
     version: 0-latest
     repository: "file://../common/retriever-usvc"
