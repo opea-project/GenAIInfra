@@ -13,6 +13,7 @@ vllm:
     repository: opea/vllm-rocm
     tag: latest
   env:
+    LLM_MODEL_ID: meta-llama/Llama-3.3-70B-Instruct
     HIP_VISIBLE_DEVICES: "0,1"
     TENSOR_PARALLEL_SIZE: "2"
     HF_HUB_DISABLE_PROGRESS_BARS: "1"
