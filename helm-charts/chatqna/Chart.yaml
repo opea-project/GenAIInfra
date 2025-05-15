@@ -31,6 +31,10 @@ dependencies:
     version: 0-latest
     repository: "file://../common/llm-uservice"
     condition: llm-uservice.enabled
+  - name: ollama
+    version: 0-latest
+    repository: "file://../common/ollama"
+    condition: ollama.enabled
   - name: tei
     version: 0-latest
     repository: "file://../common/tei"

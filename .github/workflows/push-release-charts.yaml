@@ -73,7 +73,7 @@ jobs:
             done
           }
           # Update dependency for components first
-          ${CHARTS_DIR}/update_dependency.sh
+          ${CHARTS_DIR}/scripts/update_dependency.sh
           # Update components: exclude other Helm chart docs than README.md
           update_charts "$CHARTS_DIR/common/" 3 '.*/[^R][^/]*\.md$'
           # Update Examples: exclude non-helm subdirs, files not in subdirs, other docs
