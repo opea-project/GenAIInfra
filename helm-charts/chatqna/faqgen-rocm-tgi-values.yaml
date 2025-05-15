@@ -19,8 +19,8 @@ tgi:
   LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
   MAX_INPUT_LENGTH: "2048"
   MAX_TOTAL_TOKENS: "4096"
-  USE_FLASH_ATTENTION: "false"
-  FLASH_ATTENTION_RECOMPUTE: "false"
+  USE_FLASH_ATTENTION: "true"
+  FLASH_ATTENTION_RECOMPUTE: "true"
   HIP_VISIBLE_DEVICES: "0,1"
   MAX_BATCH_SIZE: "4"
   extraCmdArgs: [ "--num-shard","2" ]
