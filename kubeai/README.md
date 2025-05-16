@@ -177,3 +177,20 @@ Script requires Prometheus Helm chart release name for that, e.g.:
 release=prometheus-stack
 ./install.sh $release
 ```
+
+Install dashboard for vLLM metrics to same namespace as Grafana.
+
+```
+ns=monitoring
+kubectl apply -n $ns -f grafana/vllm-metrics.yaml
+```
+
+Port-forward Grafana
+
+```
+kubectl port-forward -n $ns svc/$release-grafana 3000:80
+```
+
+And open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login.
+
+Note: metrics will be available only after first request has been processed.
