@@ -24,6 +24,10 @@ chatqna:
     - faqgen-cpu-tgi-values.yaml
     - faqgen-gaudi-values.yaml
     - faqgen-gaudi-tgi-values.yaml
+    - rocm-values.yaml
+    - rocm-tgi-values.yaml
+    - faqgen-rocm-values.yaml
+    - faqgen-rocm-tgi-values.yaml
 agentqna:
   src_repo: GenAIInfra
   src_dir: helm-charts/agentqna
