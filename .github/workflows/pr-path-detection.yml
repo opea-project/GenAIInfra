@@ -79,8 +79,8 @@ jobs:
           fail="FALSE"
           repo_name=${{ github.event.pull_request.head.repo.full_name }}
           if [ "$(echo "$repo_name"|cut -d'/' -f1)" != "opea-project" ]; then
-            owner=$(echo "${{ github.event.pull_request.head.repo.full_name }}" |cut -d'/' -f1)
-            branch="https://github.com/$owner/GenAIInfra/tree/${{ github.event.pull_request.head.ref }}"
+            repo_fork=$(echo "${{ github.event.pull_request.head.repo.full_name }}" |cut -d/ -f-2)
+            branch="https://github.com/$repo_fork/tree/${{ github.event.pull_request.head.ref }}"
           else
             branch="https://github.com/opea-project/GenAIInfra/blob/${{ github.event.pull_request.head.ref }}"
           fi
@@ -88,7 +88,7 @@ jobs:
 
           merged_commit=$(git log -1 --format='%H')
           changed_files="$(git diff --name-status --diff-filter=ARM ${{ github.event.pull_request.base.sha }} ${merged_commit} | awk '/\.md$/ {print $NF}')"
-          png_lines=$(grep -Eo '\]\([^)]+\)' --include='*.md' -r .|grep -Ev 'http')
+          png_lines=$(grep -Eo '\]\([^)]+\)' --include='*.md' -r .|grep -Ev 'http'|sort -u)
           if [ -n "$png_lines" ]; then
             for png_line in $png_lines; do
               refer_path=$(echo "$png_line"|cut -d':' -f1 | cut -d'/' -f2-)
