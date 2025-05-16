@@ -98,6 +98,8 @@ spec:
               name: shm
             - mountPath: /tmp
               name: tmp
+            - mountPath: /usr/src/out
+              name: tokenizer
           ports:
             - name: http
               containerPort: {{ .Values.port }}
@@ -133,6 +135,8 @@ spec:
             medium: Memory
             sizeLimit: {{ .Values.shmSize }}
         - name: tmp
+          emptyDir: {}
+        - name: tokenizer
           emptyDir: {}
       {{- with .Values.nodeSelector }}
       nodeSelector:
