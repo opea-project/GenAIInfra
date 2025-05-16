@@ -28,7 +28,6 @@ linters:
     - ineffassign
     - lll
     - misspell
-    - misspell
     - nakedret
     - prealloc
     - revive
