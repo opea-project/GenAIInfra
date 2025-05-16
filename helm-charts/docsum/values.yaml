@@ -58,6 +58,7 @@ affinity: {}
 
 # To override values in subchart llm-uservice
 llm-uservice:
+  enabled: true
   image:
     repository: opea/llm-docsum
   DOCSUM_BACKEND: "vLLM"
@@ -79,6 +80,7 @@ vllm:
 nginx:
   enabled: false
 docsum-ui:
+  enabled: true
   image:
     repository: opea/docsum-gradio-ui
     tag: "latest"
@@ -101,7 +103,18 @@ docsum-ui:
 #     type: ClusterIP
 
 dashboard:
+  enabled: true
   prefix: "OPEA DocSum"
+
+whisper:
+  enabled: true
+
+# External LLM configuration
+externalLLM:
+  enabled: false
+  LLM_SERVICE_HOST_IP: "http://your-llm-server"
+  LLM_MODEL: "your-model"
+  OPENAI_API_KEY: "your-api-key"
 
 global:
   http_proxy: ""
