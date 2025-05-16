@@ -28,3 +28,8 @@ resourceProfiles:
     requests:
       cpu: "2"
       memory: "2Gi"
+    nodeSelector:
+      #kubeai-inference: "true"
+
+nodeSelector:
+  #kubeai-frontend: "true"
