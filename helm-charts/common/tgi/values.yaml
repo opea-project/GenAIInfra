@@ -107,8 +107,6 @@ startupProbe:
 #   periodSeconds: 5
 #   failureThreshold: 120
 
-tokenizerMountPath: /usr/src/out
-
 nodeSelector: {}
 
 tolerations: []
