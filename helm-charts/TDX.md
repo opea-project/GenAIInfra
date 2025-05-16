@@ -76,7 +76,7 @@ Follow the steps below to deploy ChatQnA:
    export MODELNAME="Intel/neural-chat-7b-v3-3"
    export myrelease=chatqna
    export chartname=chatqna
-   ./update_dependency.sh
+   scripts/update_dependency.sh
    helm dependency update $chartname
    ```
 

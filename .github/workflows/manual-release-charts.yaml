@@ -44,7 +44,7 @@ jobs:
           fi
           mkdir -p ${DEST_DIR}
           # Update dependency for components first
-          ${SRC_DIR}/update_dependency.sh
+          ${SRC_DIR}/scripts/update_dependency.sh
           # update components
           for chart in ${SRC_DIR}/common/*
           do

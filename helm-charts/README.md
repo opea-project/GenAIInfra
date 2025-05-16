@@ -170,7 +170,7 @@ find . -name '*values.yaml' -type f -exec sed -i "s#repository: opea/*#repositor
 ## Generate manifests from Helm Charts
 
 Some users may want to use Kubernetes manifests (YAML files) for workload deployment, we do not maintain manifests itself, and will generate them using `helm template`.
-See `update_genaiexamples.sh` for how the manifests are generated for supported _GenAIExamples_.
-See `update_manifests.sh` for how the manifests are generated for supported _GenAIComps_.
+See `scripts/update_genaiexamples.sh` for how the manifests are generated for supported _GenAIExamples_.
+See `scripts/update_manifests.sh` for how the manifests are generated for supported _GenAIComps_.
 Please note that the above scripts have hardcoded settings to reduce user configuration effort.
 They are not supposed to be directly used by users.

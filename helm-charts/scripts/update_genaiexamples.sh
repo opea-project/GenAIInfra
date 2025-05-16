@@ -5,10 +5,10 @@
 
 set -e
 
-CUR_DIR=$(cd $(dirname "$0") && pwd)
+CHARTS_DIR=$(cd $(dirname "$0")/.. && pwd)
 MODELPATH="/mnt/opea-models"
 
-GENAIEXAMPLEDIR=${CUR_DIR}/../../GenAIExamples
+GENAIEXAMPLEDIR=${CHARTS_DIR}/../../GenAIExamples
 
 if [ "f$1" != "f" ]; then
 	GENAIEXAMPLEDIR=$1
@@ -41,8 +41,8 @@ function generate_yaml {
 }
 
 
-${CUR_DIR}/update_dependency.sh
-pushd ${CUR_DIR}
+${CHARTS_DIR}/scripts/update_dependency.sh
+pushd ${CHARTS_DIR}
 generate_yaml chatqna 	values.yaml	 		ChatQnA/kubernetes/manifests/xeon	chatqna.yaml
 generate_yaml chatqna 	guardrails-values.yaml	 	ChatQnA/kubernetes/manifests/xeon	chatqna-guardrails.yaml
 generate_yaml chatqna 	gaudi-values.yaml 		ChatQnA/kubernetes/manifests/gaudi	chatqna.yaml

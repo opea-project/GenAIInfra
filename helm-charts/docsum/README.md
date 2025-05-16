@@ -9,17 +9,24 @@ DocSum depends on LLM microservice, refer to llm-uservice for more config detail
 To install the chart, run the following:
 
 ```console
+git clone https://github.com/opea-project/GenAIInfra.git
 cd GenAIInfra/helm-charts/
-./update_dependency.sh
+mkdir /mnt/opea-models && chmod -R 664 /mnt/opea-models
+scripts/update_dependency.sh
 helm dependency update docsum
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="Intel/neural-chat-7b-v3-3"
 helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device with vLLM
-# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-values.yaml ...
+# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-values.yaml
 # To use Gaudi device with TGI
-# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-tgi-values.yaml ..
+# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-tgi-values.yaml
+# To use AMD ROCm device with vLLM
+# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/rocm-values.yaml
+# To use AMD ROCm device with TGI
+# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/rocm-tgi-values.yaml
+
 ```
 
 ## Verify

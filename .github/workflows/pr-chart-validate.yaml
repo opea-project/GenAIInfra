@@ -52,7 +52,7 @@ jobs:
       - name: Run chart-testing (lint)
         if: steps.list-changed.outputs.changed == 'true'
         run: |
-          helm-charts/update_dependency.sh
+          helm-charts/scripts/update_dependency.sh
           exclude_param=""
           for libchart in `find helm-charts/ -name "Chart.yaml" | xargs grep -rl '^type:.*library' | xargs grep '^name:' | awk '{print $2}' `
           do
