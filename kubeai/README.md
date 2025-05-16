@@ -15,6 +15,7 @@ The following features are available at the moment.
 - Scaling pods to/from zero - tested/working
 - Load based autoscaling - not tested/included
 - Integration with OPEA application - missing
+- Observability - tested/working
 
 The following models are included.
 
@@ -165,3 +166,14 @@ curl "http://localhost:8000/openai/v1/chat/completions" \
 ```
 
 Enjoy the answer!
+
+# Observability
+
+With [Prometheus](../helm-charts/monitoring.md) running, install script can enable monitoring of the vLLM inference engine instances.
+
+Script requires Prometheus Helm chart release name for that, e.g.:
+
+```
+release=prometheus-stack
+./install.sh $release
+```
