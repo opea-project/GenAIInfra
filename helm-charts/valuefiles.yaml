@@ -36,6 +36,8 @@ agentqna:
   values:
     - cpu-values.yaml
     - gaudi-values.yaml
+    - rocm-values.yaml
+    - rocm-tgi-values.yaml
 audioqna:
   src_repo: GenAIInfra
   src_dir: helm-charts/audioqna
