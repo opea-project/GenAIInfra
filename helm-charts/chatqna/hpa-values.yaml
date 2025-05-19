@@ -3,8 +3,9 @@
 
 # Enable HorizontalPodAutoscaler (HPA)
 #
-# That will overwrite named PrometheusAdapter configMap with ChatQnA specific
-# custom metric queries for embedding, reranking, and LLM services.
+# Will create configMap with ChatQnA specific custom metric queries for embedding, reranking,
+# and LLM services, which can be used to overwrite current PrometheusAdapter rules.  This
+# will then provide custom metrics used by HorizontalPodAutoscaler rules of each service.
 #
 # Default upstream configMap is in:
 #  - https://github.com/kubernetes-sigs/prometheus-adapter/blob/master/deploy/manifests/config-map.yaml
@@ -20,27 +21,43 @@ global:
   monitoring: true
 
 # Override values in specific subcharts
+#
+# Note: enabling "autoscaling" for any of the subcharts requires enabling it also above!
 
-# Enabling "autoscaling" for any of the subcharts requires enabling it also above!
 vllm:
   # vLLM startup takes too long for autoscaling, especially with Gaudi
   VLLM_SKIP_WARMUP: "true"
   autoscaling:
+    enabled: true
     minReplicas: 1
     maxReplicas: 4
-    enabled: true
+    queueSizeTarget:
+      accel: 10
+      cpu: 10
+
 tgi:
   autoscaling:
+    enabled: true
     minReplicas: 1
     maxReplicas: 4
-    enabled: true
+    queueSizeTarget:
+      accel: 10
+      cpu: 10
+
 teirerank:
   autoscaling:
+    enabled: true
     minReplicas: 1
     maxReplicas: 3
-    enabled: true
+    queueSizeTarget:
+      accel: 10
+      cpu: 10
+
 tei:
   autoscaling:
+    enabled: true
     minReplicas: 1
     maxReplicas: 2
-    enabled: true
+    queueSizeTarget:
+      accel: 10
+      cpu: 10
