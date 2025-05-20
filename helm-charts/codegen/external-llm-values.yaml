@@ -4,7 +4,7 @@
 # External LLM configuration
 externalLLM:
   enabled: true
-  LLM_SERVER_HOST_IP: "http://your-llm-server"
+  LLM_SERVICE_HOST_IP: "http://your-llm-server"
   LLM_MODEL: "your-model"
   OPENAI_API_KEY: "your-api-key"
 

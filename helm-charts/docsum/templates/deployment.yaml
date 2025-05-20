@@ -35,19 +35,23 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: LLM_SERVICE_HOST_IP
+              {{- if .Values.externalLLM.enabled }}
+              value: {{ .Values.externalLLM.LLM_SERVICE_HOST_IP }}
+              {{- else }}
               value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") }}
+              {{- end }}
             - name: LLM_SERVICE_PORT
               value: {{ index .Values "llm-uservice" "service" "port" | quote }}
             - name: ASR_SERVICE_HOST_IP
               value: {{ include "whisper.fullname" (index .Subcharts "whisper") }}
             - name: ASR_SERVICE_PORT
               value: {{ index .Values "whisper" "service" "port" | quote }}
-          {{- if .Values.externalLLM.enabled }}
-          # External LLM configuration using ConfigMap
-          envFrom:
-            - configMapRef:
-                name: {{ include "docsum.fullname" . }}-external-llm
-          {{- end }}
+            {{- if .Values.externalLLM.enabled }}
+            - name: LLM_MODEL
+              value: {{ .Values.externalLLM.LLM_MODEL }}
+            - name: OPENAI_API_KEY
+              value: {{ .Values.externalLLM.OPENAI_API_KEY }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"

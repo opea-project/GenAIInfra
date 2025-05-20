@@ -35,9 +35,19 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: LLM_SERVICE_HOST_IP
+              {{- if .Values.externalLLM.enabled }}
+              value: {{ .Values.externalLLM.LLM_SERVICE_HOST_IP }}
+              {{- else }}
               value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") | quote }}
+              {{- end }}
             - name: LLM_SERVICE_PORT
               value: {{ index .Values "llm-uservice" "service" "port" | quote }}
+            {{- if .Values.externalLLM.enabled }}
+            - name: LLM_MODEL
+              value: {{ .Values.externalLLM.LLM_MODEL }}
+            - name: OPENAI_API_KEY
+              value: {{ .Values.externalLLM.OPENAI_API_KEY }}
+            {{- end }}
             - name: RETRIEVAL_SERVICE_HOST_IP
               value: {{ include "retriever-usvc.fullname" (index .Subcharts "retriever-usvc") | quote }}
             - name: REDIS_RETRIEVER_PORT
@@ -46,12 +56,6 @@ spec:
               value: {{ include "embedding-usvc.fullname" (index .Subcharts "embedding-usvc") | quote }}
             - name: EMBEDDER_PORT
               value: {{ index .Values "embedding-usvc" "service" "port" | quote }}
-          {{- if .Values.externalLLM.enabled }}
-          # External LLM configuration using ConfigMap
-          envFrom:
-            - configMapRef:
-                name: {{ include "codegen.fullname" . }}-external-llm
-          {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
