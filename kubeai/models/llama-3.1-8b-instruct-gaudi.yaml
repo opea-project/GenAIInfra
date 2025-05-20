@@ -22,4 +22,5 @@ spec:
     VLLM_SKIP_WARMUP: "true"
   minReplicas: 1
   maxReplicas: 4
+  targetRequests: 120
   resourceProfile: gaudi-for-text-generation:1
