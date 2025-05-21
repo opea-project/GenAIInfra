@@ -121,7 +121,7 @@ kubectl port-forward svc/kubeai -n kubeai 8000:80
 Query the models available:
 
 ```
-curl localhost:8000/opeanai/v1/models
+curl localhost:8000/openai/v1/models
 ```
 
 Depending on your configuration you should have something like this as an answer to the above command.
