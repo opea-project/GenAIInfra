@@ -1,6 +1,6 @@
 # ChatQnA
 
-Helm chart for deploying ChatQnA/FaqGen service. ChatQnA depends on the following services:
+Helm chart for deploying ChatQnA/FaqGen service. Helm options dictate which of its dependencies are required:
 
 - [data-prep](../common/data-prep/README.md)
 - [embedding-usvc](../common/embedding-usvc/README.md)
@@ -27,7 +27,7 @@ export MODELNAME="meta-llama/Meta-Llama-3-8B-Instruct"
 # To use CPU with vLLM
 helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device with vLLM
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-vllm-values.yaml
+#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
 # To use CPU with TGI
 #helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-tgi-values.yaml
 # To use Gaudi device with TGI
