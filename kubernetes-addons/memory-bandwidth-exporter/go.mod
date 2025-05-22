@@ -1,8 +1,6 @@
 module github.com/opea-project/GenAIInfra/kubernetes-addons/memory-bandwidth-exporter
 
-go 1.22.0
-
-toolchain go1.22.4
+go 1.23.0
 
 require (
 	github.com/alecthomas/kingpin/v2 v2.4.0
@@ -34,12 +32,12 @@ require (
 	github.com/rogpeppe/go-internal v1.11.0 // indirect
 	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/xhit/go-str2duration/v2 v2.1.0 // indirect
-	golang.org/x/crypto v0.23.0 // indirect
+	golang.org/x/crypto v0.35.0 // indirect
 	golang.org/x/net v0.25.0 // indirect
 	golang.org/x/oauth2 v0.16.0 // indirect
-	golang.org/x/sync v0.7.0 // indirect
-	golang.org/x/sys v0.20.0 // indirect
-	golang.org/x/text v0.15.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/text v0.22.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20240318140521-94a12d6c2237 // indirect
 	google.golang.org/grpc v1.62.1 // indirect
