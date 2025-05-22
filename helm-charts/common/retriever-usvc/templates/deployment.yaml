@@ -82,8 +82,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-            - mountPath: /home/user/nltk_data
-              name: nltk-data
           {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
@@ -101,21 +99,6 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
-        - name: nltk-data
-          {{- if .Values.global.offline }}
-          {{- if .Values.global.nltkDataUsePVC }}
-          persistentVolumeClaim:
-            claimName: {{ .Values.global.nltkDataUsePVC }}
-          {{- else if .Values.global.nltkDataUseHostPath }}
-          hostPath:
-             path: {{ .Values.global.nltkDataUseHostPath }}
-             type: Directory
-          {{- else }}
-          {{- fail "'global.nltkDataUsePVC' or 'global.nltkDataUseHostPath' must be set in offline mode" }}
-          {{- end }}
-          {{- else }}
-          emptyDir: {}
-          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
