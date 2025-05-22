@@ -42,31 +42,6 @@ helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPO
 # helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set QDRANT_HOST=${DB_HOST}
 ```
 
-### Install the microservice in air gapped(offline) mode
-
-To support running this microservice in an air gapped environment, users are required to download the `nltk` data to a shared storage. Below is an example for using node level local directory to download the offline data:
-
-Assuming the `nltk` data is ahred using node-local directory `/mnt/nltk_data`.
-
-```
-# On every K8s node, run the following command:
-export NLTKDATA=/mnt/nltk_data
-# Download nltk data, assumes Python nltk module(s) are already installed
-python -m nltk.downloader -d $NLTKDATA all && chmod -R a+r $NLTKDATA
-
-# Install using Helm with the following additional parameters:
-# helm install ... ... --set global.offline=true,global.nltkDataUseHostPath=${NLTKDATA}
-```
-
-Assuming we share the `nltk` data on cluster level using a persistent volume(PV), first we need to create a persistent volume claim(PVC) with name `opea-nltk-pvc`:
-
-```
-# Download nltk data at the root of the corresponding PV
-# Install using Helm with the following additional parameters:
-# export NLTKPVC=opea-nltk-pvc
-# helm install ... ... --set global.offline=true,global.nltkDataUsePVC=${NLTKPVC}
-```
-
 ## Verify
 
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
