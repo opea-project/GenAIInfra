@@ -35,9 +35,19 @@ spec:
         - name: {{ .Release.Name }}
           env:
             - name: LLM_SERVICE_HOST_IP
+              {{- if .Values.externalLLM.enabled }}
+              value: {{ .Values.externalLLM.LLM_SERVICE_HOST_IP }}
+              {{- else }}
               value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") | quote }}
+              {{- end }}
             - name: LLM_SERVICE_PORT
               value: {{ index .Values "llm-uservice" "service" "port" | quote }}
+            {{- if .Values.externalLLM.enabled }}
+            - name: LLM_MODEL
+              value: {{ .Values.externalLLM.LLM_MODEL }}
+            - name: OPENAI_API_KEY
+              value: {{ .Values.externalLLM.OPENAI_API_KEY }}
+            {{- end }}
             - name: RETRIEVAL_SERVICE_HOST_IP
               value: {{ include "retriever-usvc.fullname" (index .Subcharts "retriever-usvc") | quote }}
             - name: REDIS_RETRIEVER_PORT
