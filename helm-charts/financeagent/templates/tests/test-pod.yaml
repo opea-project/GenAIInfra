@@ -1,0 +1,74 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "financeagent.fullname" . }}-testpod"
+  labels:
+    {{- include "financeagent.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test
+    #"helm.sh/hook-delete-policy": "hook-succeeded, hook-failure"
+spec:
+  containers:
+    - name: curl
+      image: python:3.10.14
+      command: ['bash', '-c']
+      args:
+        - |
+          cd /mnt/tools
+          # Ingest data
+          curl http://{{ .Release.Name }}-data-prep:6007/v1/dataprep/ingest -sS --fail-with-body \
+            -X POST -H "Content-Type: multipart/form-data" \
+            -F 'link_list=["https://www.fool.com/earnings/call-transcripts/2025/03/06/costco-wholesale-cost-q2-2025-earnings-call-transc/", \
+            "https://www.fool.com/earnings/call-transcripts/2025/03/07/gap-gap-q4-2024-earnings-call-transcript/"]'
+          # pip install requests tqdm
+          # Test finqa-agent
+          max_retry=10;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ .Release.Name }}-finqa-agent:9095/v1/chat/completions -sS --fail-with-body \
+            -X POST \
+            -d '{"role": "user", "messages": "What was the revenue of GAP in 2024?"}' \
+            -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+          # Test research-agent
+          max_retry=10;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ .Release.Name }}-research-agent:9096/v1/chat/completions \
+            -sS --fail-with-body -X POST \
+            -d '{"role": "user", "messages": "Generate NVDA financial research report"}' \
+            -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+          # Test supervisor
+          max_retry=20;
+          for ((i=1; i<=max_retry; i++)); do
+            curl http://{{ .Release.Name }}-supervisor:9090/v1/chat/completions -sS --fail-with-body \
+            -X POST \
+            -d '{"role": "user", "messages": "Can you summarize Costco 2025 Q2 earnings call?"}' \
+            -H 'Content-Type: application/json' && break;
+            curlcode=$?
+            if [[ $curlcode -eq 7 ]]; then sleep 10; else echo "curl failed with code $curlcode"; exit 1; fi;
+          done;
+          if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
+
+      volumeMounts:
+        - mountPath: /mnt/tools
+          name: test
+  volumes:
+    - name: test
+      hostPath:
+        path: /mnt/tools/financeagent
+        type: Directory
+  {{- with .Values.nodeSelector }}
+  nodeSelector:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
+
+  restartPolicy: Never
