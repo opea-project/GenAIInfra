@@ -15,6 +15,7 @@ The following features are available at the moment.
 - Scaling pods to/from zero - tested/working
 - Load based autoscaling - tested/working
 - Integration with OPEA application - missing
+- Observability - tested/working
 
 The following models are included.
 
@@ -167,3 +168,31 @@ curl "http://localhost:8000/openai/v1/chat/completions" \
 ```
 
 Enjoy the answer!
+
+# Observability
+
+With [Prometheus](../helm-charts/monitoring.md) running, install script can enable monitoring of the vLLM inference engine instances.
+
+Script requires Prometheus Helm chart release name for that, e.g.:
+
+```
+release=prometheus-stack
+./install.sh $release
+```
+
+Install dashboard for vLLM metrics to same namespace as Grafana.
+
+```
+ns=monitoring
+kubectl apply -n $ns -f grafana/vllm-metrics.yaml
+```
+
+Port-forward Grafana
+
+```
+kubectl port-forward -n $ns svc/$release-grafana 3000:80
+```
+
+And open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login.
+
+Note: metrics will be available only after first request has been processed.
