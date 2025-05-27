@@ -17,6 +17,10 @@ spec:
     - --max-num-seqs=256
     - --max-seq-len-to-capture=2048
   env:
-    OMPI_MCA_btl_vader_single_copy_mechanism: none
+    OMPI_MCA_btl_vader_single_copy_mechanism: "none"
+    # vLLM startup takes too long for autoscaling, especially with Gaudi
+    VLLM_SKIP_WARMUP: "true"
   minReplicas: 1
+  maxReplicas: 4
+  targetRequests: 120
   resourceProfile: gaudi-for-text-generation:1

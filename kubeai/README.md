@@ -13,7 +13,7 @@ The following features are available at the moment.
 - Persistent Volume cache for models - tested/working
 - Model downloading & inference engine deployment - tested/working
 - Scaling pods to/from zero - tested/working
-- Load based autoscaling - not tested/included
+- Load based autoscaling - tested/working
 - Integration with OPEA application - missing
 
 The following models are included.
@@ -60,7 +60,7 @@ kubectl explain models.kubeai.org
 
 # Deploying the Models
 
-This section describes how to deploy various models. All the examples below use Kubernetes Persistent Volumes and Claims (PV/PVC) to store the models. The Kubernetes Storage Class (SC) is called `standard`. You can tune the storage configuration to match your environment during the installation (see `opea-values.yaml`, `cacheProfiles` for more information).
+This section describes how to deploy various models. All the examples below use Kubernetes Persistent Volumes and Claims (PV/PVC) to store the models. The Kubernetes Storage Class (SC) is called `standard`. You can tune the storage configuration to match your environment during the installation (see `cacheProfiles` in `opea-values.yaml`).
 
 The models in the examples below are deployed to `$NAMESPACE`. Please set that according to your needs.
 
@@ -98,7 +98,9 @@ kubect apply -f models/llama-3.1-8b-instruct-gaudi.yaml -n $NAMESPACE
 kubect apply -f models/llama-3.3-70b-instruct-gaudi.yaml -n $NAMESPACE
 ```
 
-The rest is the same as in the previous example. You should see a pod running with the name `model-llama-3.1-8b-instruct-gpu-xxxx` and/or `model-llama-3.3-70b-instruct-gpu-xxxx`.
+The rest is the same as in the previous example. You should see a pod running with the name `model-llama-3.1-8b-instruct-gaudi-xxxx`. When request load for that model increases enough, KubeAI will automatically deploy more instances (model `maxReplicas` > `minReplicas`).
+
+Latter model is set to scale from zero (`minReplicas` = 0), so `model-llama-3.3-70b-instruct-gaudi-xxxx` pod(s) will be present only when KubeAI gets requests for that model (avoids multiple devices being exclusively reserved for idle pods, but significantly slows down first response).
 
 ## Text Embeddings with BGE on CPU
 
