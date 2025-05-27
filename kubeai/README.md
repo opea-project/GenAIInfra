@@ -75,7 +75,7 @@ kubectl create namespace $NAMESPACE
 The following command will deploy the `Meta-Llama-3.1-8B-Instruct` model with vLLM engine using CPU.
 
 ```
-kubect apply -f models/llama-3.1-8b-instruct-cpu.yaml -n $NAMESPACE
+kubectl apply -f models/llama-3.1-8b-instruct-cpu.yaml -n $NAMESPACE
 ```
 
 The deployment will first create a Kubernetes job, which will download the model to a Persistent Volume (PV).
@@ -94,9 +94,9 @@ The following commands will deploy `Meta-Llama-3.1-8B-Instruct` and `Meta-Llama-
 
 ```
 # Meta-Llama-3.1-8B-Instruct model
-kubect apply -f models/llama-3.1-8b-instruct-gaudi.yaml -n $NAMESPACE
+kubectl apply -f models/llama-3.1-8b-instruct-gaudi.yaml -n $NAMESPACE
 # Meta-Llama-3.3-70B-Instruct model
-kubect apply -f models/llama-3.3-70b-instruct-gaudi.yaml -n $NAMESPACE
+kubectl apply -f models/llama-3.3-70b-instruct-gaudi.yaml -n $NAMESPACE
 ```
 
 The rest is the same as in the previous example. You should see a pod running with the name `model-llama-3.1-8b-instruct-gaudi-xxxx`. When request load for that model increases enough, KubeAI will automatically deploy more instances (model `maxReplicas` > `minReplicas`).
@@ -108,7 +108,7 @@ Latter model is set to scale from zero (`minReplicas` = 0), so `model-llama-3.3-
 The following command will deploy the `BAAI/bge-base-en-v1.5` model with vLLM engine using CPU.
 
 ```
-kubect apply -f models/bge-embed-text-cpu.yaml -n $NAMESPACE
+kubectl apply -f models/bge-embed-text-cpu.yaml -n $NAMESPACE
 ```
 
 The rest is the same as in the previous example. You should see a pod running with the name `model-bge-embed-text-cpu-xxxx`.
