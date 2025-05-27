@@ -50,7 +50,11 @@ spec:
               {{- fail "ChatQnA needs a LLM inference backend!" }}
               {{- end }}
             - name: LLM_SERVER_PORT
+              {{- if .Values.externalLLM.enabled }}
+              value: {{ .Values.externalLLM.LLM_SERVER_PORT | default "80" | quote }}
+              {{- else }}
               value: "80"
+              {{- end }}
             - name: LLM_MODEL
               {{- if .Values.ollama.enabled }}
               value: {{ .Values.ollama.LLM_MODEL_ID | quote }}

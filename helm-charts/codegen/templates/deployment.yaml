@@ -41,21 +41,29 @@ spec:
               value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") | quote }}
               {{- end }}
             - name: LLM_SERVICE_PORT
+              {{- if .Values.externalLLM.enabled }}
+              value: {{ .Values.externalLLM.LLM_SERVICE_PORT | default "80" | quote }}
+              {{- else }}
               value: {{ index .Values "llm-uservice" "service" "port" | quote }}
+              {{- end }}
             {{- if .Values.externalLLM.enabled }}
             - name: LLM_MODEL
               value: {{ .Values.externalLLM.LLM_MODEL }}
             - name: OPENAI_API_KEY
               value: {{ .Values.externalLLM.OPENAI_API_KEY }}
             {{- end }}
+            {{- if index .Values "retriever-usvc" "enabled" }}
             - name: RETRIEVAL_SERVICE_HOST_IP
               value: {{ include "retriever-usvc.fullname" (index .Subcharts "retriever-usvc") | quote }}
             - name: REDIS_RETRIEVER_PORT
               value: {{ index .Values "retriever-usvc" "service" "port" | quote }}
+            {{- end }}
+            {{- if index .Values "embedding-usvc" "enabled" }}
             - name: TEI_EMBEDDING_HOST_IP
               value: {{ include "embedding-usvc.fullname" (index .Subcharts "embedding-usvc") | quote }}
             - name: EMBEDDER_PORT
               value: {{ index .Values "embedding-usvc" "service" "port" | quote }}
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
