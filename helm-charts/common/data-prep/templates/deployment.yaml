@@ -43,6 +43,9 @@ spec:
               {{- if eq "REDIS" .Values.DATAPREP_BACKEND }}
               TESTHOST=$(REDIS_HOST);
               TESTPORT=$(REDIS_PORT);
+              {{- else if eq "REDISFINANCE" .Values.DATAPREP_BACKEND }}
+              TESTHOST=$(echo $REDIS_URL_VECTOR | awk -F '[/:]' '{print $4}');
+              TESTPORT=${REDIS_PORT:-6379};
               {{- else if eq "MILVUS" .Values.DATAPREP_BACKEND }}
               TESTHOST=$(MILVUS_HOST);
               TESTPORT=$(MILVUS_PORT);
