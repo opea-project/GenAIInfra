@@ -124,16 +124,6 @@ global:
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
   sharedSAName: ""
 
-  # Running service in air gapped(offline) mode
-  # If offline is enabled, user must set either nltkDataUseHostPath or nltkDataUsePVC and download nltk data out of band.
-  offline: false
-  # To store offline nltk data in local directory for one node K8s environment, set nltkDataUseHostPath
-  # Download nltk data: python -m nltk.downloader -d <nltkDataUseHostPath> all && chmod a+r <nltkDataUseHostPath>
-  nltkDataUseHostPath: ""
-  # To store offline nltk data in persistent volume(PV) to be shared by multinode K8s environment, set nltkDataUsePVC
-  # and follow the similar above steps to download the nltk data to the root directory of that PV
-  nltkDataUsePVC: ""
-
   # Install Prometheus serviceMonitor for service
   monitoring: false
 
