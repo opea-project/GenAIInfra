@@ -31,8 +31,8 @@ vllm:
     enabled: true
     minReplicas: 1
     maxReplicas: 4
-    queueSizeTarget:
-      accel: 10
+    activeRequestsTarget:
+      accel: 120
       cpu: 10
 
 tgi:
