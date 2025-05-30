@@ -15,8 +15,9 @@ autoscaling:
   enabled: false
   minReplicas: 1
   maxReplicas: 4
-  queueSizeTarget:
-    accel: 10
+  # targeted active requests average per engine pod instance
+  activeRequestsTarget:
+    accel: 100
     cpu: 10
 
 # empty for CPU (longer latencies are tolerated before HPA scaling unaccelerated service)

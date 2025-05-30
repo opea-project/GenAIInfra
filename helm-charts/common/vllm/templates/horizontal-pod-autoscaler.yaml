@@ -29,12 +29,12 @@ spec:
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
         type: AverageValue
 {{- if .Values.accelDevice }}
-        averageValue: {{ .Values.autoscaling.queueSizeTarget.accel }}
+        averageValue: {{ .Values.autoscaling.activeRequestsTarget.accel }}
 {{- else }}
-        averageValue: {{ .Values.autoscaling.queueSizeTarget.cpu }}
+        averageValue: {{ .Values.autoscaling.activeRequestsTarget.cpu }}
 {{- end }}
       metric:
-        name: {{ include "vllm.metricPrefix" . }}_queue_size_sum
+        name: {{ include "vllm.metricPrefix" . }}_active_request_sum
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 180

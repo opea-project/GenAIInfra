@@ -18,11 +18,11 @@ data:
     #
     {{- if and .Values.vllm.enabled .Values.vllm.autoscaling.enabled }}
     - seriesQuery: '{__name__="vllm:num_requests_waiting",service="{{ include "vllm.fullname" .Subcharts.vllm }}"}'
-      # Sum of requests waiting to be processed in pods
-      metricsQuery: 'sum by (<<.GroupBy>>)(<<.Series>>{<<.LabelMatchers>>})'
+      # Sum of active requests in pods, both ones already being processed, and ones waiting to be processed
+      metricsQuery: 'sum by (<<.GroupBy>>)(vllm:num_requests_running{<<.LabelMatchers>>} + <<.Series>>{<<.LabelMatchers>>})'
       name:
         matches: ^vllm:num_requests_waiting
-        as: "{{ include "vllm.metricPrefix" .Subcharts.vllm }}_queue_size_sum"
+        as: "{{ include "vllm.metricPrefix" .Subcharts.vllm }}_active_request_sum"
       resources:
         # HPA needs both namespace + suitable object resource for its query paths:
         # /apis/custom.metrics.k8s.io/v1beta1/namespaces/default/service/*/<metric>
