@@ -122,6 +122,15 @@ global:
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
   sharedSAName: ""
+  # Running llm-docsum service in air gapped(offline) mode
+  # If offline is enabled, user must set either modelUseHostPath or modelUsePVC and download models `gpt2` as well as the model corresponding the LLM inference backend.
+  offline: false
+  # To store offline model data in local directory for one node K8s environment, set modelUseHostPath
+  # Download offline models: huggingface-cli download --cache-dir <modelUseHostPath> <model>
+  modelUseHostPath: ""
+  # To store offline model data in persistent volume (PV) to be shared by multinode K8s environment, set modelUsePVC
+  # then follow the similar above steps to download the offline model to the root directory of that PV
+  modelUsePVC: ""
 
   # Install Prometheus serviceMonitor for service
   monitoring: false
