@@ -73,14 +73,14 @@ Assuming the model data is shared using node-local directory `/mnt/opea-models`.
 
 ```
 # On every K8s node, run the following command:
-export MODELDIR=/mnt/opea-models
+export MODEL_DIR=/mnt/opea-models
 # Download model, assumes Python huggingface_hub[cli] module is already installed
 huggingface-cli download --cache-dir "${MODEL_DIR}" gpt2
 huggingface-cli download --cache-dir "${MODEL_DIR}" ${LLM_MODEL_ID}
 
 # On K8s master node, run the following command:
 # Install using Helm with the following additional parameters:
-helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODELDIR}
+helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODEL_DIR}
 
 ```
 
@@ -90,8 +90,8 @@ Assuming we share the offline data on cluster level using a persistent volume (P
 # Download model data at the root directory of the corresponding PV
 # ... ...
 # Install using Helm with the following additional parameters:
-# export MODELPVC=opea-model-pvc
-# helm install ... ... --set global.offline=true,global.modelUsePVC=${MOELPVC}
+# export MODEL_PVC=opea-model-pvc
+# helm install ... ... --set global.offline=true,global.modelUsePVC=${MODEL_PVC}
 ```
 
 There is no special step or setting needed to run `llm-textgen` or `llm-faqgen` microservice in an air gapped environment.
