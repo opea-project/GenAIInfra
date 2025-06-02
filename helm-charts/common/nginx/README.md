@@ -29,6 +29,7 @@ curl http://nginx-gateway/v1/health_check
 ### Configuration
 
 The `gateway-values.yaml` file contains:
+
 - Service endpoint definitions for routing
 - UI service configuration
 - Custom nginx configuration template

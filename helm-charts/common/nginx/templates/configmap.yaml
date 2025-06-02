@@ -11,11 +11,11 @@ metadata:
 data:
   default.conf.template: |
 {{- .Values.nginxConfig.template | nindent 4 }}
-  
+
   # Environment variables for services
   FRONTEND_SERVICE_IP: {{ .Values.ui.host | quote }}
   FRONTEND_SERVICE_PORT: {{ .Values.ui.port | quote }}
-  
+
   {{- range $name, $service := .Values.services }}
   {{ $name | upper }}_SERVICE_IP: {{ $service.host | quote }}
   {{ $name | upper }}_SERVICE_PORT: {{ $service.port | quote }}
