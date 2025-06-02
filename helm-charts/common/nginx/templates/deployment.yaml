@@ -33,10 +33,20 @@ spec:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
       containers:
         - name: {{ .Chart.Name }}
+          {{- if .Values.customCommand.enabled }}
+          command:
+            {{- toYaml .Values.customCommand.command | nindent 12 }}
+          args:
+            {{- toYaml .Values.customCommand.args | nindent 12 }}
+          {{- end }}
           envFrom:
             - configMapRef:
                 name: {{ .Release.Name }}-nginx-config
                 optional: true
+            {{- if .Values.nginxConfig.enabled }}
+            - configMapRef:
+                name: {{ include "nginx.fullname" . }}-config
+            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -61,13 +71,29 @@ spec:
           {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
-          {{- with .Values.volumeMounts }}
+          {{- if or .Values.volumeMounts .Values.nginxConfig.enabled }}
           volumeMounts:
+            {{- if .Values.nginxConfig.enabled }}
+            - name: nginx-conf
+              mountPath: /etc/nginx/templates/
+            {{- end }}
+            {{- with .Values.volumeMounts }}
             {{- toYaml . | nindent 12 }}
+            {{- end }}
           {{- end }}
-      {{- with .Values.volumes }}
+      {{- if or .Values.volumes .Values.nginxConfig.enabled }}
       volumes:
+        {{- if .Values.nginxConfig.enabled }}
+        - name: nginx-conf
+          configMap:
+            name: {{ include "nginx.fullname" . }}-config
+            items:
+              - key: default.conf.template
+                path: default.conf.template
+        {{- end }}
+        {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
+        {{- end }}
       {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
