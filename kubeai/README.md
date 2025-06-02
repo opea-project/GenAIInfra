@@ -4,6 +4,18 @@
 
 For now, OPEA enables a subset of the KubeAI features. In the future more KubeAI service will be added.
 
+- [KubeAI for OPEA](#kubeai-for-opea)
+  - [Features](#features)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Install KubeAI](#install-kubeai)
+- [Deploying the Models](#deploying-the-models)
+  - [Text Generation with Llama-3 on CPU](#text-generation-with-llama-3-on-cpu)
+  - [Text Generation with Llama-3 on Gaudi](#text-generation-with-llama-3-on-gaudi)
+  - [Text Embeddings with BGE on CPU](#text-embeddings-with-bge-on-cpu)
+- [Using the Models](#using-the-models)
+- [Observability](#observability)
+
 ## Features
 
 The following features are available at the moment.
