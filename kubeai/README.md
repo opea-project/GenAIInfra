@@ -180,19 +180,26 @@ release=prometheus-stack
 ./install.sh $release
 ```
 
-Install dashboard for vLLM metrics to same namespace as Grafana.
-
-```
-ns=monitoring
-kubectl apply -n $ns -f grafana/vllm-metrics.yaml
-```
-
 Port-forward Grafana
 
 ```
 kubectl port-forward -n $ns svc/$release-grafana 3000:80
 ```
 
-And open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login.
+Install "vLLM scaling" and "vLLM details" dashboards, to same namespace as Grafana.
 
-Note: metrics will be available only after first request has been processed.
+```
+ns=monitoring
+kubectl apply -n $ns -f grafana/vllm-scaling.yaml -f grafana/vllm-details.yaml
+```
+
+Open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login, to view the dashboards.
+
+Scaling dashboard shows trends for totals statistics of all the vLLM instances using the selected model, and best & worst metrics from those instances at given moment.
+
+Whereas details dashboard shows more detailed engine metrics for the selected vLLM instance(s).
+
+Note:
+
+- Dashboards should be visible in Grafana within minute of them being applied, but
+- vLLM metrics will be available for them only after the first inference request has been processed

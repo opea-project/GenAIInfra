@@ -6,9 +6,9 @@ kind: ConfigMap
 metadata:
   labels:
     grafana_dashboard: "1"
-  name: opea-kubeai-vllm-metrics
+  name: opea-vllm-details
 data:
-  opea-kubeai-vllm-metrics.json: |
+  opea-vllm-details.json: |
     {
       "annotations": {
         "list": [
@@ -32,7 +32,7 @@ data:
           }
         ]
       },
-      "description": "vLLM inference engine",
+      "description": "vLLM inference engine details",
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
@@ -1612,7 +1612,7 @@ data:
       },
       "timepicker": {},
       "timezone": "",
-      "title": "KubeAI-vLLM",
+      "title": "vLLM details",
       "uid": "a74126aa-112d-506c-4137-969737e7f598",
       "version": 1,
       "weekStart": ""
