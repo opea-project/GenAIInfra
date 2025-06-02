@@ -196,8 +196,10 @@ kubectl apply -n $ns -f grafana/vllm-scaling.yaml -f grafana/vllm-details.yaml
 Open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login, to view the dashboards.
 
 Scaling dashboard shows trends for totals statistics of all the vLLM instances using the selected model, and best & worst metrics from those instances at given moment.
+![Scaling dashboard](grafana/vllm-scaling.png)
 
 Whereas details dashboard shows more detailed engine metrics for the selected vLLM instance(s).
+![Details dashboard](grafana/vllm-details.png)
 
 Note:
 
