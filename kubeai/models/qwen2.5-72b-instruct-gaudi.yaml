@@ -1,0 +1,25 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+# Source: models/templates/models.yaml
+apiVersion: kubeai.org/v1
+kind: Model
+metadata:
+  name: qwen2.5-72b-instruct-gaudi
+spec:
+  features: [TextGeneration]
+  url: hf://Qwen/Qwen2.5-72B-Instruct
+  cacheProfile: nfs
+  engine: VLLM
+  args:
+    - --tensor-parallel-size=4
+  env:
+    OMPI_MCA_btl_vader_single_copy_mechanism: none
+    PT_HPU_ENABLE_LAZY_COLLECTIVES: "true"
+    # vLLM startup takes too long for autoscaling, especially with Gaudi
+    VLLM_SKIP_WARMUP: "true"
+
+  # scale-from-zero avoids idle instance occupying half a node, but causes long delay
+  minReplicas: 0
+  maxReplicas: 2
+  resourceProfile: gaudi-for-text-generation:4
