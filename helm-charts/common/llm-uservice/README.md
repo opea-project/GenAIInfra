@@ -135,7 +135,7 @@ curl http://localhost:9000/v1/faqgen \
 | TEXTGEN_BACKEND                 | string | `"TGI"`                       | backend inference engine, only valid for llm-textgen image, one of "TGI", "vLLM", "BEDROCK"                                       |
 | DOCSUM_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-docsum image, one of "TGI", "vLLM"                                                   |
 | FAQGEN_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-faqgen image, one of "TGi", "vLLM"                                                   |
-| global.offline                  | bool   | `false`   | Whether to run the microservice in air gapped environment
+| global.offline                  | bool   | `false`                       | Whether to run the microservice in air gapped environment                                                                         |
 | global.monitoring               | bool   | `false`                       | Service usage metrics                                                                                                             |
 | bedrock.BEDROCK_REGION          | string | `"us-east-1"`                 | The AWS Region to use when accessing the Bedrock service                                                                          |
 | bedrock.AWS_ACCESS_KEY_ID       | string | `""`                          | The AWS Access Key to use when authenticating with the Bedrock service. If set, bedrock.AWS_SECRET_ACCESS_KEY must also be set    |
