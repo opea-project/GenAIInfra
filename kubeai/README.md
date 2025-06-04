@@ -185,20 +185,20 @@ Enjoy the answer!
 
 With [Prometheus](../helm-charts/monitoring.md) running, install script can enable monitoring of the vLLM inference engine instances.
 
-Script requires Prometheus Helm chart release name for that, e.g.:
+Script requires Prometheus Helm chart release name for that, e.g.
 
 ```
 release=prometheus-stack
 ./install.sh $release
 ```
 
-Port-forward Grafana
+Port-forward Grafana.
 
 ```
 kubectl port-forward -n $ns svc/$release-grafana 3000:80
 ```
 
-Install "vLLM scaling" and "vLLM details" dashboards, to same namespace as Grafana.
+Install "vLLM scaling" and "vLLM details" dashboards, to the same namespace as Grafana.
 
 ```
 ns=monitoring
@@ -207,13 +207,15 @@ kubectl apply -n $ns -f grafana/vllm-scaling.yaml -f grafana/vllm-details.yaml
 
 Open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login, to view the dashboards.
 
-Scaling dashboard shows trends for totals statistics of all the vLLM instances using the selected model, and best & worst metrics from those instances at given moment.
+Both dashboards filter the viewed vLLM instances by the selected namespace (e.g. `kubeai`) and the model they use.
+
+The scaling dashboard shows trends both for sum of metrics across all these instances, as well as the best and worst per-instance metric values at a given moment.
 ![Scaling dashboard](grafana/vllm-scaling.png)
 
-Whereas details dashboard shows more detailed engine metrics for the selected vLLM instance(s).
+Whereas details dashboard shows more detailed engine metrics for the selected vLLM instance (or all of them).
 ![Details dashboard](grafana/vllm-details.png)
 
 Note:
 
-- Dashboards should be visible in Grafana within minute of them being applied, but
-- vLLM metrics will be available for them only after the first inference request has been processed
+- Dashboards should be visible in Grafana within a minute of them being applied, but
+- vLLM metrics will be available only after the first inference request has been processed
