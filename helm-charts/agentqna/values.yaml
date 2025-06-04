@@ -44,11 +44,6 @@ tolerations: []
 
 affinity: {}
 
-# This is just to avoid Helm errors when HPA is NOT used
-# (use hpa-values.yaml files to actually enable HPA).
-horizontalPodAutoscaler:
-  enabled: false
-
 docretriever:
   image:
     repository: opea/doc-index-retriever
