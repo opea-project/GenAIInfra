@@ -4,6 +4,18 @@
 
 For now, OPEA enables a subset of the KubeAI features. In the future more KubeAI service will be added.
 
+- [KubeAI for OPEA](#kubeai-for-opea)
+  - [Features](#features)
+- [Installation](#installation)
+  - [Prerequisites](#prerequisites)
+  - [Install KubeAI](#install-kubeai)
+- [Deploying the Models](#deploying-the-models)
+  - [Text Generation with Llama-3 on CPU](#text-generation-with-llama-3-on-cpu)
+  - [Text Generation with Llama-3 on Gaudi](#text-generation-with-llama-3-on-gaudi)
+  - [Text Embeddings with BGE on CPU](#text-embeddings-with-bge-on-cpu)
+- [Using the Models](#using-the-models)
+- [Observability](#observability)
+
 ## Features
 
 The following features are available at the moment.
@@ -173,26 +185,37 @@ Enjoy the answer!
 
 With [Prometheus](../helm-charts/monitoring.md) running, install script can enable monitoring of the vLLM inference engine instances.
 
-Script requires Prometheus Helm chart release name for that, e.g.:
+Script requires Prometheus Helm chart release name for that, e.g.
 
 ```
 release=prometheus-stack
 ./install.sh $release
 ```
 
-Install dashboard for vLLM metrics to same namespace as Grafana.
-
-```
-ns=monitoring
-kubectl apply -n $ns -f grafana/vllm-metrics.yaml
-```
-
-Port-forward Grafana
+Port-forward Grafana.
 
 ```
 kubectl port-forward -n $ns svc/$release-grafana 3000:80
 ```
 
-And open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login.
+Install "vLLM scaling" and "vLLM details" dashboards, to the same namespace as Grafana.
 
-Note: metrics will be available only after first request has been processed.
+```
+ns=monitoring
+kubectl apply -n $ns -f grafana/vllm-scaling.yaml -f grafana/vllm-details.yaml
+```
+
+Open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login, to view the dashboards.
+
+Both dashboards filter the viewed vLLM instances by the selected namespace (e.g. `kubeai`) and the model they use.
+
+The scaling dashboard shows trends both for sum of metrics across all these instances, as well as the best and worst per-instance metric values at a given moment.
+![Scaling dashboard](grafana/vllm-scaling.png)
+
+Whereas details dashboard shows more detailed engine metrics for the selected vLLM instance (or all of them).
+![Details dashboard](grafana/vllm-details.png)
+
+Note:
+
+- Dashboards should be visible in Grafana within a minute of them being applied, but
+- vLLM metrics will be available only after the first inference request has been processed
