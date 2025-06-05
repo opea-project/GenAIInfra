@@ -100,6 +100,8 @@ jobs:
           GOOGLE_CSE_ID: ${{ secrets.GOOGLE_CSE_ID }}
           GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
           HFTOKEN: ${{ secrets.HF_TOKEN }}
+          FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
+          FINANCIAL_DATASETS_API_KEY: ${{ secrets.FINANCIAL_DATASETS_API_KEY }}
         run: |
           set -x
           USER_ID=$(whoami)
@@ -131,6 +133,8 @@ jobs:
               --set GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID }} \
               --set web-retriever.GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY }} \
               --set web-retriever.GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID }} \
+              --set research-agent.FINNHUB_API_KEY=${{ env.FINNHUB_API_KEY }} \
+              --set research-agent.FINANCIAL_DATASETS_API_KEY=${{ env.FINANCIAL_DATASETS_API_KEY }} \
               --set global.HUGGINGFACEHUB_API_TOKEN=${{ env.HFTOKEN }} \
               --set global.modelUseHostPath=${CHART_MOUNT} \
               --values ${{ env.CHART_FOLDER }}/${value_file} \
