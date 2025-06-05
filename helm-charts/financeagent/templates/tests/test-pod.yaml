@@ -17,13 +17,10 @@ spec:
       command: ['bash', '-c']
       args:
         - |
-          cd /mnt/tools
           # Ingest data
           curl http://{{ .Release.Name }}-data-prep:6007/v1/dataprep/ingest -sS --fail-with-body \
-            -X POST -H "Content-Type: multipart/form-data" \
-            -F 'link_list=["https://www.fool.com/earnings/call-transcripts/2025/03/06/costco-wholesale-cost-q2-2025-earnings-call-transc/", \
-            "https://www.fool.com/earnings/call-transcripts/2025/03/07/gap-gap-q4-2024-earnings-call-transcript/"]'
-          # pip install requests tqdm
+            -X POST -H "Content-Type: application/x-www-form-urlencoded" \
+            -d 'link_list=%5B%22https%3A%2F%2Fwww.fool.com%2Fearnings%2Fcall-transcripts%2F2025%2F03%2F06%2Fcostco-wholesale-cost-q2-2025-earnings-call-transc%2F%22%2C%22https%3A%2F%2Fwww.fool.com%2Fearnings%2Fcall-transcripts%2F2025%2F03%2F07%2Fgap-gap-q4-2024-earnings-call-transcript%2F%22%5D'
           # Test finqa-agent
           max_retry=10;
           for ((i=1; i<=max_retry; i++)); do
@@ -58,14 +55,6 @@ spec:
           done;
           if [ $i -gt $max_retry ]; then echo "test failed with maximum retry"; exit 1; fi
 
-      volumeMounts:
-        - mountPath: /mnt/tools
-          name: test
-  volumes:
-    - name: test
-      hostPath:
-        path: /mnt/tools/financeagent
-        type: Directory
   {{- with .Values.nodeSelector }}
   nodeSelector:
     {{- toYaml . | nindent 8 }}

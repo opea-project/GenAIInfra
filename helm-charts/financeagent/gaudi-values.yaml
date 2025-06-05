@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: Apache-2.0
 
 vllm:
-  enabled: true
   accelDevice: "gaudi"
   LLM_MODEL_ID: "meta-llama/Llama-3.3-70B-Instruct"
   image:

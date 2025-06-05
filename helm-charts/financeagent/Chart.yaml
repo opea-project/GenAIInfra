@@ -29,7 +29,6 @@ dependencies:
   - name: vllm
     version: 0-latest
     repository: "file://../common/vllm"
-    condition: vllm.enabled
   - name: tei
     version: 0-latest
     repository: "file://../common/tei"

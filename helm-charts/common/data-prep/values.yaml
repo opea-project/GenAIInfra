@@ -33,6 +33,15 @@ SEARCH_BATCH_SIZE: 10
 # QDRANT_PORT: 6333
 # COLLECTION_NAME: "rag_qdrant"
 
+# Uncomment and set the following 5 settings to use Redis_finance backend
+# DATAPREP_BACKEND: "REDISFINANCE"
+# REDIS_URL_VECTOR: ""
+# REDIS_URL_KV: ""
+# LLM_ENDPOINT: ""
+# LLM_MODEL: "meta-llama/Llama-3.3-70B-Instruct"
+# MAX_TOKENS: ""
+# TEMPERATURE: ""
+
 # data-prep can do embedding locally or talk to remote TEI service to do embedding.
 # TEI_EMBEDDING_ENDPOINT takes precedence over LOCAL_EMBEDDING_MODEL.
 # TEI inference service URL, e.g. http://<service-name>:<port>

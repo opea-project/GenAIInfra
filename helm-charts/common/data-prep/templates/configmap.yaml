@@ -67,6 +67,12 @@ data:
   LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
   LLM_MODEL: "meta-llama/Llama-3.3-70B-Instruct"
   {{- end }}
+  {{- if .Values.MAX_TOKENS }}
+  MAX_TOKENS: {{ .Values.MAX_TOKENS | quote}}
+  {{- end }}
+  {{- if .Values.TEMPERATURE }}
+  TEMPERATURE: {{ .Values.TEMPERATURE | quote}}
+  {{- end }}
   {{- else }}
   {{- cat "Invalid DATAPREP_BACKEND:" .Values.DATAPREP_BACKEND | fail }}
   {{- end }}
