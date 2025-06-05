@@ -1,0 +1,18 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "nginx-central-gateway.fullname" . }}
+  labels:
+    {{- include "nginx-central-gateway.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: nginx-gateway
+      protocol: TCP
+      name: nginx-central-gateway
+  selector:
+    {{- include "nginx-central-gateway.selectorLabels" . | nindent 4 }}
