@@ -81,6 +81,10 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
+            {{- if and .Values.global.offline (hasSuffix "llm-docsum" .Values.image.repository) }}
+            - mountPath: /data
+              name: model-volume
+            {{- end }}
           {{- if .Values.livenessProbe }}
           livenessProbe:
             {{- toYaml .Values.livenessProbe | nindent 12 }}
@@ -98,6 +102,19 @@ spec:
       volumes:
         - name: tmp
           emptyDir: {}
+        {{- if and .Values.global.offline (hasSuffix "llm-docsum" .Values.image.repository) }}
+        - name: model-volume
+          {{- if .Values.global.modelUsePVC }}
+          persistentVolumeClaim:
+            claimName: {{ .Values.global.modelUsePVC }}
+          {{- else if .Values.global.modelUseHostPath }}
+          hostPath:
+            path: {{ .Values.global.modelUseHostPath }}
+            type: Directory
+          {{- else }}
+          {{- fail "Either global.modelUsePVC or global.modelUseHostPath must be set in offline environment" }}
+          {{- end }}
+        {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
