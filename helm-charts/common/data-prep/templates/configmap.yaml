@@ -48,10 +48,36 @@ data:
   QDRANT_PORT: {{ .Values.QDRANT_PORT | quote }}
   COLLECTION_NAME: {{ .Values.COLLECTION_NAME | quote }}
   EMBED_MODEL: {{ .Values.LOCAL_EMBEDDING_MODEL | default "" | quote }}
+  {{- else if eq "REDISFINANCE" .Values.DATAPREP_BACKEND }}
+  DATAPREP_COMPONENT_NAME: "OPEA_DATAPREP_REDIS_FINANCE"
+  {{- if .Values.REDIS_URL_VECTOR }}
+  REDIS_URL_VECTOR: {{ tpl .Values.REDIS_URL_VECTOR . | quote}}
+  {{- else }}
+  REDIS_URL_VECTOR: "redis://{{ .Release.Name }}-redis-vector-db:6379"
+  {{- end }}
+  {{- if .Values.REDIS_URL_KV }}
+  REDIS_URL_KV: {{ tpl .Values.REDIS_URL_KV . | quote}}
+  {{- else }}
+  REDIS_URL_KV: "redis://{{ .Release.Name }}-redis-kv-store:6379"
+  {{- end }}
+  {{- if .Values.LLM_ENDPOINT }}
+  LLM_ENDPOINT: {{ tpl .Values.LLM_ENDPOINT . | quote}}
+  LLM_MODEL: {{ .Values.LLM_MODEL | quote}}
+  {{- else }}
+  LLM_ENDPOINT: "http://{{ .Release.Name }}-vllm"
+  LLM_MODEL: "meta-llama/Llama-3.3-70B-Instruct"
+  {{- end }}
+  {{- if .Values.MAX_TOKENS }}
+  MAX_TOKENS: {{ .Values.MAX_TOKENS | quote}}
+  {{- end }}
+  {{- if .Values.TEMPERATURE }}
+  TEMPERATURE: {{ .Values.TEMPERATURE | quote}}
+  {{- end }}
   {{- else }}
   {{- cat "Invalid DATAPREP_BACKEND:" .Values.DATAPREP_BACKEND | fail }}
   {{- end }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.global.HF_ENDPOINT }}
   HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}

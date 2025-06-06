@@ -1,0 +1,12 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-opea-ui-config
+  labels:
+    {{- include "financeagent.labels" . | nindent 4 }}
+data:
+  WEBUI_AUTH: "False"
+  OPENAI_API_BASE_URL: "http://{{ .Release.Name }}-supervisor:9090/v1"

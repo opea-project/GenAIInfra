@@ -17,10 +17,28 @@ data:
   {{- if .Values.tools }}
   tools: {{ .Values.tools | quote }}
   {{- end }}
+  {{- if .Values.custom_prompt }}
+  custom_prompt: {{ .Values.custom_prompt | quote }}
+  {{- end }}
   {{- if .Values.llm_endpoint_url }}
   llm_endpoint_url: {{ tpl .Values.llm_endpoint_url . | quote }}
   {{- else }}
   llm_endpoint_url: "http://{{ .Release.Name }}-vllm"
+  {{- end }}
+  {{- if .Values.REDIS_URL_VECTOR }}
+  REDIS_URL_VECTOR: {{ tpl .Values.REDIS_URL_VECTOR . | quote }}
+  {{- else }}
+  REDIS_URL_VECTOR: "redis://{{ .Release.Name }}-redis-vector-db:6379"
+  {{- end }}
+  {{- if .Values.REDIS_URL_KV }}
+  REDIS_URL_KV: {{ tpl .Values.REDIS_URL_KV . | quote }}
+  {{- else }}
+  REDIS_URL_KV: "redis://{{ .Release.Name }}-redis-kv-store:6379"
+  {{- end }}
+  {{- if .Values.TEI_EMBEDDING_ENDPOINT }}
+  TEI_EMBEDDING_ENDPOINT: {{ tpl .Values.TEI_EMBEDDING_ENDPOINT . | quote }}
+  {{- else }}
+  TEI_EMBEDDING_ENDPOINT: "http://{{ .Release.Name }}-tei"
   {{- end }}
   # {{- if .Values.port }}
   # port: {{ .Values.port | quote }}
@@ -54,6 +72,21 @@ data:
   {{- else }}
   SQL_AGENT_URL: "http://{{ .Release.Name }}-sqlagent:9096/v1/chat/completions"
   {{- end }}
+  {{- if .Values.WORKER_FINQA_AGENT_URL }}
+  WORKER_FINQA_AGENT_URL: {{ .Values.WORKER_FINQA_AGENT_URL | quote }}
+  {{- else }}
+  WORKER_FINQA_AGENT_URL: "http://{{ .Release.Name }}-finqa-agent:9095/v1/chat/completions"
+  {{- end }}
+  {{- if .Values.WORKER_RESEARCH_AGENT_URL }}
+  WORKER_RESEARCH_AGENT_URL: {{ .Values.WORKER_RESEARCH_AGENT_URL | quote }}
+  {{- else }}
+  WORKER_RESEARCH_AGENT_URL: "http://{{ .Release.Name }}-research-agent:9096/v1/chat/completions"
+  {{- end }}
+  {{- if .Values.DOCSUM_ENDPOINT }}
+  DOCSUM_ENDPOINT: {{ .Values.DOCSUM_ENDPOINT | quote }}
+  {{- else }}
+  DOCSUM_ENDPOINT: "http://{{ .Release.Name }}-docsum:9000/v1/docsum"
+  {{- end }}
   require_human_feedback: {{ .Values.require_human_feedback | quote }}
   recursion_limit: {{ .Values.recursion_limit | quote }}
   llm_engine: {{ .Values.llm_engine | quote }}
@@ -63,6 +96,12 @@ data:
   max_new_tokens: {{ .Values.max_new_tokens | quote }}
   {{- if .Values.OPENAI_API_KEY }}
   OPENAI_API_KEY: {{ .Values.OPENAI_API_KEY | quote }}
+  {{- end }}
+  {{- if .Values.FINNHUB_API_KEY }}
+  FINNHUB_API_KEY: {{ .Values.FINNHUB_API_KEY | quote }}
+  {{- end }}
+  {{- if .Values.FINANCIAL_DATASETS_API_KEY }}
+  FINANCIAL_DATASETS_API_KEY: {{ .Values.FINANCIAL_DATASETS_API_KEY | quote }}
   {{- end }}
   HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote }}
   HF_HOME: "/tmp/.cache/huggingface"
