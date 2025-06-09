@@ -60,6 +60,42 @@ helm install llm-uservice . --set TEXTGEN_BACKEND="BEDROCK" --set LLM_MODEL_ID=$
 # helm install llm-uservice . --set image.repository="opea/llm-faqgen" --set FAQGEN_BACKEND="vLLM" --set LLM_ENDPOINT=${LLM_ENDPOINT} --set LLM_MODEL_ID=${LLM_MODEL_ID} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --wait
 ```
 
+### Install the microservice in air gapped (offline) mode
+
+To run `llm-docsum` microservice in an air gapped environment, users are required to pre-download the following models to a shared storage:
+
+- gpt2
+- the same model as the inference backend engine
+
+Below is an example for using node level local directory to download the model data:
+
+Assuming the model data is shared using node-local directory `/mnt/opea-models`.
+
+```
+# On every K8s node, run the following command:
+export MODEL_DIR=/mnt/opea-models
+# Download model, assumes Python huggingface_hub[cli] module is already installed
+huggingface-cli download --cache-dir "${MODEL_DIR}" gpt2
+huggingface-cli download --cache-dir "${MODEL_DIR}" ${LLM_MODEL_ID}
+
+# On K8s master node, run the following command:
+# Install using Helm with the following additional parameters:
+helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODEL_DIR}
+
+```
+
+Assuming we share the offline data on cluster level using a persistent volume (PV), first we need to create the persistent volume claim (PVC) with name `opea-model-pvc` to store the model data.
+
+```
+# Download model data at the root directory of the corresponding PV
+# ... ...
+# Install using Helm with the following additional parameters:
+# export MODEL_PVC=opea-model-pvc
+# helm install ... ... --set global.offline=true,global.modelUsePVC=${MODEL_PVC}
+```
+
+There is no special step or setting needed to run `llm-textgen` or `llm-faqgen` microservice in an air gapped environment.
+
 ## Verify
 
 To verify the installation, run the command `kubectl get pod` to make sure all pods are running.
@@ -99,6 +135,7 @@ curl http://localhost:9000/v1/faqgen \
 | TEXTGEN_BACKEND                 | string | `"TGI"`                       | backend inference engine, only valid for llm-textgen image, one of "TGI", "vLLM", "BEDROCK"                                       |
 | DOCSUM_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-docsum image, one of "TGI", "vLLM"                                                   |
 | FAQGEN_BACKEND                  | string | `"TGI"`                       | backend inference engine, only valid for llm-faqgen image, one of "TGi", "vLLM"                                                   |
+| global.offline                  | bool   | `false`                       | Whether to run the microservice in air gapped environment                                                                         |
 | global.monitoring               | bool   | `false`                       | Service usage metrics                                                                                                             |
 | bedrock.BEDROCK_REGION          | string | `"us-east-1"`                 | The AWS Region to use when accessing the Bedrock service                                                                          |
 | bedrock.AWS_ACCESS_KEY_ID       | string | `""`                          | The AWS Access Key to use when authenticating with the Bedrock service. If set, bedrock.AWS_SECRET_ACCESS_KEY must also be set    |
