@@ -14,6 +14,10 @@ For now, OPEA enables a subset of the KubeAI features. In the future more KubeAI
   - [Text Generation with Llama-3 on Gaudi](#text-generation-with-llama-3-on-gaudi)
   - [Text Embeddings with BGE on CPU](#text-embeddings-with-bge-on-cpu)
 - [Using the Models](#using-the-models)
+- [CPU Performance Optimization with NRI](#cpu-performance-optimization-with-nri)
+  - [Overview](#overview)
+  - [Installation of Balloons Policy Plugin](#installation-of-balloons-policy-plugin)
+  - [Configuration of Balloons Policy Plugin](#configuration-of-balloons-policy-plugin)
 - [Observability](#observability)
 
 ## Features
@@ -180,6 +184,119 @@ curl "http://localhost:8000/openai/v1/chat/completions" \
 ```
 
 Enjoy the answer!
+
+# CPU Performance Optimization with NRI
+
+## Overview
+
+[NRI plugins][nri-plugins] provide a way to
+optimize the resource placement of applications in a Kubernetes cluster. They
+connect to the container runtime and are able, for example, to adjust the CPU
+and memory pinning of containers.
+
+This section provides a guide on how to use the
+[Balloons Policy][balloons-policy] plugin from the [NRI Plugins][nri-plugins]
+project to optimize the performance of CPU-backed KubeAI profiles.
+
+## Installation of Balloons Policy Plugin
+
+> **NOTE:** To avoid disturbing already running workloads it is recommended to
+> install the NRI plugin to an empty node (do it right after node bootstrap, or
+> drain the node before installation).
+
+Install the balloons policy plugin with Helm:
+
+```bash
+helm repo add nri-plugins https://containers.github.io/nri-plugins
+helm repo update nri-plugins
+helm install -n kube-system balloons nri-plugins/nri-resource-policy-balloons
+```
+
+> **NOTE**: With containerd version earlier than v2.0 you need to enable
+> the NRI support in the containerd configuration file. Instead of manual
+> configuration you can provide `--set nri.runtime.patchConfig=true` to the Helm
+> command above, which will automatically patch the containerd configuration
+> file on each node.
+
+Verify that the balloons policy plugin is running on every node:
+
+```bash
+$ kubectl -n kube-system get ds nri-resource-policy-balloons
+NAME                           DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR            AGE
+nri-resource-policy-balloons   2         2         2       2            2           kubernetes.io/os=linux   77s
+```
+
+## Configuration of Balloons Policy Plugin
+
+The aim of the balloons policy configuration is to isolate the model (inference
+engine) containers to minimize the impact of containers on each other.
+
+An example configuration for the current CPU-backed model profiles:
+
+```yaml
+cat <<EOF | kubectl apply -f -
+apiVersion: config.nri/v1alpha1
+kind: BalloonsPolicy
+metadata:
+  name: default
+  namespace: kube-system
+spec:
+  allocatorTopologyBalancing: true
+  balloonTypes:
+  - name: kubeai-inference
+    allocatorPriority: high
+    preferNewBalloons: true
+    hideHyperthreads: true
+    matchExpressions:
+    - key: labels/app.kubernetes.io/name
+      operator: In
+      values: ["vllm", "ollama"]
+    - key: name
+      operator: In
+      values: ["server"]
+    # Enables container-level information for the balloon in NodeResourceTopology objects
+    # if agent.nodeResourceTopology is enabled.
+    showContainersInNrt: true
+  - name: default
+    namespaces:
+    - "*"
+    shareIdleCPUsInSame: numa
+  pinCPU: true
+  pinMemory: false
+  reservedPoolNamespaces:
+  - kube-system
+  reservedResources:
+    cpu: "2"
+  log:
+    debug: ["policy"]
+  instrumentation:
+    httpEndpoint: :8891
+    prometheusExport: true
+  # NodeResourceTopology custom resource objects can be enabled for debugging
+  # and to examine the CPU pinning of inference containers. Not recommended
+  # for production because it can cause excessive load on the kube-apiserver.
+  #agent:
+  #  nodeResourceTopology: true
+EOF
+```
+
+The configuration above allocates full CPU cores to inference engine
+containers by hiding hyperthreads from them. For example, if a pod requests 6
+CPUs, the balloon will reserve 6 full physical CPU cores (i.e., 12 logical
+CPUs), but configure the cpuset so that the inference instance can only use 6
+logical CPUs -- one per core -- while the sibling hyperthreads remain unused.
+A new dedicated `kubeai-inference` balloon is created for each inference engine
+container, as long as enough free CPUs are available on the system.
+Additionally, it distributes the `kubeai-inference` balloons across CPU
+sockets.
+
+See [balloons-policy documentation][balloons-policy] and the
+[OPEA platform optimization guide][opea-platform-optimization] for more details
+on the configuration options.
+
+[balloons-policy]: https://containers.github.io/nri-plugins/stable/docs/resource-policy/policy/balloons.html
+[nri-plugins]: https://github.com/containers/nri-plugins
+[opea-platform-optimization]: https://github.com/opea-project/GenAIEval/tree/main/doc/platform-optimization#configure
 
 # Observability
 
