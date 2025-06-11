@@ -1,4 +1,4 @@
-variable "helm_chart_path" {
+variable "helm_repo" {
   description = "Path to the ChatQNA Helm chart"
   type        = string
 }
@@ -54,8 +54,15 @@ variable "enable_ui" {
   default     = false
 }
 
+
 variable "enable_nginx" {
   description = "Enable Nginx component"
   type        = bool
   default     = false
+}
+
+variable "storage_class_name" {
+  description = "Storage class name for persistent volumes"
+  type        = string
+  default     = "ibmc-vpc-file-retain-500-iops"
 }

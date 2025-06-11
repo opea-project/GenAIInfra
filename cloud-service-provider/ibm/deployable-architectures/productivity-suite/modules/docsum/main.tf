@@ -1,31 +1,42 @@
+# Determine if helm_repo is a local path or remote URI
+locals {
+  is_remote = can(regex("^([a-zA-Z0-9.-]+)/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)$", var.helm_repo))
+  repo_parts = local.is_remote ? regex("^([a-zA-Z0-9.-]+)/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)$", var.helm_repo) : []
+}
+
 resource "helm_release" "docsum" {
   name             = "docsum"
-  chart            = var.helm_chart_path
+  chart      = local.is_remote ? local.repo_parts[3] : var.helm_repo
+  repository = local.is_remote ? "oci://${local.repo_parts[1]}/${local.repo_parts[2]}" : null
   namespace        = "docsum"
-  create_namespace = true
+  create_namespace = false
   timeout          = 600
   
   values = [
-    file("${var.helm_chart_path}/values.yaml"),
-    file("${path.root}/helm-values/docsum_values.yaml")
+    file("${var.helm_repo}/values.yaml"),
+    file("${path.root}/helm_values/docsum_values.yaml")
   ]
 
 # DocSum Backend Server
   set {
     name  = "image.repository"
-    value = "opea/docsum"
+    value = "us.icr.io/ibm-opea-terraform/docsum"
   }
 
   set {
     name  = "image.tag"
-    value = "error_handle"
+    value = "ibm"
   }
 
   set {
     name  = "image.pullPolicy"
-    value = "Never"
+    value = "Always"
   }
 
+  set {
+    name  = "imagePullSecrets[0].name"
+    value = "regcred"
+  }
 
   # Global Configuration
   set_sensitive {
@@ -33,15 +44,7 @@ resource "helm_release" "docsum" {
     value = var.hf_token
   }
 
-  set {
-    name  = "global.modelUseHostPath"
-    value = var.model_dir
-  }
-
-  set {
-    name  = "global.modelStorageClass"
-    value = "standard"
-  }
+  # No additional settings needed - already configured above
 
   # External LLM Configuration - updated to use externalLLM prefix
   set {

@@ -1,12 +1,19 @@
+# Determine if helm_repo is a local path or remote URI
+locals {
+  is_remote = can(regex("^([a-zA-Z0-9.-]+)/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)$", var.helm_repo))
+  repo_parts = local.is_remote ? regex("^([a-zA-Z0-9.-]+)/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)$", var.helm_repo) : []
+}
+
 resource "helm_release" "prompt-usvc" {
   name             = "prompt-usvc"
-  chart            = var.helm_chart_path
+  chart      = local.is_remote ? local.repo_parts[3] : var.helm_repo
+  repository = local.is_remote ? "oci://${local.repo_parts[1]}/${local.repo_parts[2]}" : null
   namespace        = "prompt"
-  create_namespace = true
+  create_namespace = false
   timeout          = 600
   
   values = [
-    file("${var.helm_chart_path}/values.yaml")
+    file("${var.helm_repo}/values.yaml")
   ]
 
   # Prompt Backend Server
@@ -17,12 +24,7 @@ resource "helm_release" "prompt-usvc" {
 
   set {
     name  = "image.tag"
-    value = "1.2"
-  }
-
-  set {
-    name  = "image.pullPolicy"
-    value = "IfNotPresent"
+    value = "latest"
   }
 
   # MongoDB dependency configuration - enabled by default per README
@@ -34,6 +36,22 @@ resource "helm_release" "prompt-usvc" {
   # Global storage class configuration
   set {
     name  = "global.modelStorageClass"
-    value = "standard"
+    value = var.storage_class_name
+  }
+
+  # MongoDB persistence configuration
+  set {
+    name  = "mongodb.persistence.enabled"
+    value = "true"
+  }
+
+  set {
+    name  = "mongodb.persistence.storageClass"
+    value = var.database_storage_class_name
+  }
+
+  set {
+    name  = "mongodb.persistence.size"
+    value = var.mongodb_storage_size
   }
 }

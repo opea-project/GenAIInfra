@@ -6,4 +6,7 @@ image:
   tag: "latest"
 
 containerPort: 5173
+service:
+  type: ClusterIP
+  port: 5173
 APP_KEYCLOAK_SERVICE_ENDPOINT: "/auth"

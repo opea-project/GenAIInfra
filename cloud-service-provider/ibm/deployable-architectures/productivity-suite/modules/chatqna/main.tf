@@ -1,29 +1,41 @@
+# Determine if helm_repo is a local path or remote URI
+locals {
+  is_remote = can(regex("^([a-zA-Z0-9.-]+)/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)$", var.helm_repo))
+  repo_parts = local.is_remote ? regex("^([a-zA-Z0-9.-]+)/([a-zA-Z0-9-]+)/([a-zA-Z0-9-]+)$", var.helm_repo) : []
+}
+
 resource "helm_release" "chatqna" {
   name             = "chatqna"
-  chart            = var.helm_chart_path
+  chart      = local.is_remote ? local.repo_parts[3] : var.helm_repo
+  repository = local.is_remote ? "oci://${local.repo_parts[1]}/${local.repo_parts[2]}" : null
   namespace        = "chatqna"
-  create_namespace = true
+  create_namespace = false
   timeout          = 600
   
   values = [
-    file("${var.helm_chart_path}/values.yaml"),
-    file("${path.root}/helm-values/chatqna_values.yaml")
+    file("${var.helm_repo}/values.yaml"),
+    file("${path.root}/helm_values/chatqna_values.yaml")
   ]
 
-  # ChatQnA Backend Server
+# ChatQnA Backend Server
   set {
     name  = "image.repository"
-    value = "opea/chatqna"
+    value = "us.icr.io/ibm-opea-terraform/chatqna"
   }
 
   set {
     name  = "image.tag"
-    value = "rag_template"
+    value = "accelerate"
   }
 
   set {
     name  = "image.pullPolicy"
-    value = "Never"
+    value = "Always"
+  }
+
+  set {
+    name  = "imagePullSecrets[0].name"
+    value = "regcred"
   }
 
   # VLLM Configuration
@@ -39,7 +51,7 @@ resource "helm_release" "chatqna" {
   
   set {
     name  = "vllm.image.tag"
-    value = "1.2"
+    value = "latest"
   }
 
   # Global Configuration
@@ -49,13 +61,13 @@ resource "helm_release" "chatqna" {
   }
 
   set {
-    name  = "global.modelUseHostPath"
-    value = var.model_dir
+    name  = "global.modelUsePVC"
+    value = "chatqna-storage"
   }
 
   set {
     name  = "global.modelStorageClass"
-    value = "standard"
+    value = var.storage_class_name
   }
 
   # External LLM Configuration - updated to use externalLLM prefix

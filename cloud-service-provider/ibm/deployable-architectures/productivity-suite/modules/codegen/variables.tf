@@ -1,4 +1,4 @@
-variable "helm_chart_path" {
+variable "helm_repo" {
   description = "Path to the Codegen Helm chart"
   type        = string
 }
@@ -47,6 +47,7 @@ variable "enable_llm-uservice" {
   type        = bool
   default     = false
 }
+
 
 variable "enable_nginx" {
   description = "Enable Codegen NGINX"

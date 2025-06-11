@@ -1,10 +1,42 @@
+# IBM Cloud Provider Variables
+variable "ibmcloud_api_key" {
+  description = "IBM Cloud API key"
+  type        = string
+}
+
+variable "email" {
+  description = "IBM cloud email address"
+  type        = string
+  default     = ""
+}
+
+# Kubeconfig file variable
+variable "kubeconfig_file" {
+  description = "Path to the kubeconfig file for the target Kubernetes cluster."
+  type        = string
+  default     = "~/.kube/config"
+}
+
+# API Tokens
+variable "hf_token" {
+  description = "HuggingFace API token for model access"
+  type        = string
+  sensitive   = true
+}
+
+variable "openai_api_key" {
+  description = "OpenAI API key for LLM services"
+  type        = string
+  sensitive   = true
+}
+
 # ChatQNA Variables
 variable "chatqna_model_dir" {
   description = "Directory path for ChatQNA models"
   type        = string
 }
 
-variable "chatqna_helm_chart_path" {
+variable "chatqna_helm_repo" {
   description = "Path to the ChatQNA Helm chart"
   type        = string
 }
@@ -35,7 +67,7 @@ variable "codegen_model_dir" {
   type        = string
 }
 
-variable "codegen_helm_chart_path" {
+variable "codegen_helm_repo" {
   description = "Path to the Codegen Helm chart"
   type        = string
 }
@@ -56,7 +88,7 @@ variable "docsum_model_dir" {
   type        = string
 }
 
-variable "docsum_helm_chart_path" {
+variable "docsum_helm_repo" {
   description = "Path to the Docsum Helm chart"
   type        = string
 }
@@ -152,7 +184,7 @@ variable "enable_docsum_whisper" {
 }
 
 # Chathistory Variables
-variable "chathistory_helm_chart_path" {
+variable "chathistory_helm_repo" {
   description = "Path to the Chathistory Helm chart"
   type        = string
 }
@@ -164,7 +196,7 @@ variable "enable_chathistory_mongodb" {
 }
 
 # Prompt Variables
-variable "prompt_helm_chart_path" {
+variable "prompt_helm_repo" {
   description = "Path to the Prompt Helm chart"
   type        = string
 }
@@ -176,12 +208,64 @@ variable "enable_prompt_mongodb" {
 }
 
 # Nginx and UI Variables
-variable "nginx_helm_chart_path" {
+variable "nginx_helm_repo" {
   description = "Path to the Nginx Helm chart"
   type        = string
 }
 
-variable "ui_helm_chart_path" {
+variable "ui_helm_repo" {
   description = "Path to the UI Helm chart"
   type        = string
+}
+
+# Storage Variables
+variable "enable_storage_csi_driver" {
+  description = "Enable IBM Cloud File Storage for VPC v2.0"
+  type        = bool
+  default     = false
+}
+
+variable "model_storage_size" {
+  description = "Size of the storage volume for models"
+  type        = string
+  default     = "100Gi"
+}
+
+# Storage class to use for persistent volumes
+variable "storage_class_name" {
+  description = "Storage class name for RWX volumes like HuggingFace cache (e.g., ibmc-vpc-file-retain-500-iops)"
+  type        = string
+  default     = "ibmc-vpc-file-retain-500-iops"
+}
+
+# Storage class for database volumes (RWO)
+variable "database_storage_class_name" {
+  description = "Storage class name for database RWO volumes (e.g., ibmc-vpc-block-retain-10iops-tier)"
+  type        = string
+  default     = "ibmc-vpc-block-retain-10iops-tier"
+}
+
+# Individual service storage sizes
+variable "chatqna_storage_size" {
+  description = "Storage size for ChatQnA service HuggingFace cache"
+  type        = string
+  default     = "20Gi"
+}
+
+variable "chathistory_storage_size" {
+  description = "Storage size for ChatHistory MongoDB"
+  type        = string
+  default     = "10Gi"
+}
+
+variable "prompt_storage_size" {
+  description = "Storage size for Prompt MongoDB"
+  type        = string
+  default     = "10Gi"
+}
+
+variable "keycloak_storage_size" {
+  description = "Storage size for Keycloak PostgreSQL"
+  type        = string
+  default     = "5Gi"
 }

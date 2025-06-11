@@ -1,4 +1,4 @@
-variable "helm_chart_path" {
+variable "helm_repo" {
   description = "Path to the Docsum Helm chart"
   type        = string
 }
