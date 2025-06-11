@@ -85,13 +85,13 @@ flowchart LR
     VDB{{Vector DB<br><br>}}:::blue
     R_RET{{Retriever service <br>}}
     DP([Data Preparation MicroService]):::blue
-    
+
     %% Gateway components
     GW_C([ChatQnA GateWay<br>]):::orange
     GW_D([DocSum GateWay<br>]):::orange
     GW_CG([CodeGen GateWay<br>]):::orange
     GW_MM([MultiModal GateWay<br>]):::orange
-    
+
     %% LLM Services
     LLM_gen_C{{<span style='font-size:0.8em'>Intel® AI for Enterprise Inference LLM Service</span> <br>}}
     LLM_gen_D{{<span style='font-size:0.8em'>Intel® AI for Enterprise Inference LLM Service</span> <br>}}
@@ -123,7 +123,7 @@ flowchart LR
     direction TB
     R_RET <-.-> VDB
     DP <-.-> VDB
-    
+
     %% Embedding service flow
     direction LR
     EM <-.-> TEI_EM
@@ -150,12 +150,12 @@ flowchart LR
     %% Embedding service flow
     direction LR
     LLM_CG <-.-> LLM_gen_CG
-    
+
     %% Questions interaction
     direction LR
     UI --> GW_MM
     GW_MM <==> MultiModal-MegaService
-    
+
     %% Multi-Modal service flow
     direction LR
     LLM_MM <-.-> LLM_gen_MM
@@ -181,16 +181,18 @@ flowchart LR
 The solution architecture consists of two main layers:
 
 ### Infrastructure Layer
+
 - IBM Cloud VPC with public and private subnets
 - IBM Kubernetes Service (IKS) cluster deployed within the VPC
 - Storage volumes for persistent data
 - Load balancers for service exposure
 
 ### Application Layer
+
 The OPEA Productivity Suite follows a microservices architecture with these key components:
 
 1. **UI Layer**: Unified interface for all services
-2. **Gateway Layer**: Central ingress with authentication 
+2. **Gateway Layer**: Central ingress with authentication
 3. **Megaservices**:
    - **ChatQnA**: Conversational AI with RAG capabilities
    - **DocSum**: Document summarization
@@ -203,16 +205,19 @@ The OPEA Productivity Suite follows a microservices architecture with these key 
 Each megaservice comprises multiple specialized microservices:
 
 ### ChatQnA Components
+
 - LLM Service
 - Embedding Service
 - Retriever Service
 - Reranking Service
 
 ### DocSum Components
+
 - Document Processing
 - Summarization Service
 
 ### CodeGen Components
+
 - Code Understanding
 - LLM Code Generation
 
@@ -228,6 +233,7 @@ The solution includes the following Terraform modules:
 - 'prompt': Deploys the prompt registry service
 
 Supporting infrastructure:
+
 - Keycloak: Identity and access management
 - Nginx: Central gateway for all services
 - UI: Unified user interface
@@ -246,67 +252,69 @@ The infrastructure provisioning creates IBM Cloud VPC resources with the followi
 
 ### Core Infrastructure Variables
 
-| Name | Description | Type | Required |
-|------|-------------|------|:--------:|
-| ibmcloud_api_key | IBM Cloud API key | string | yes |
-| HuggingFace Token | HF Token with access to desired models | string | yes |
-| Intel® AI for Enterprise Inference API Key | API Keys for LLM endpoints | string | yes |
-| email | IBM Cloud email address | string | no |
-| region | IBM Cloud region | string | yes |
-| vpc_name | Name of the VPC to create | string | yes |
-| cluster_name | Name of the IKS cluster | string | yes |
-| worker_count | Number of worker nodes | number | yes |
-| machine_type | Worker node instance profile | string | yes |
-| cluster_version | Kubernetes version for IKS cluster | string | yes |
+| Name                                        | Description                            | Type   | Required |
+| ------------------------------------------- | -------------------------------------- | ------ | :------: |
+| ibmcloud_api_key                            | IBM Cloud API key                      | string |   yes    |
+| HuggingFace Token                           | HF Token with access to desired models | string |   yes    |
+| Intel® AI for Enterprise Inference API Key | API Keys for LLM endpoints             | string |   yes    |
+| email                                       | IBM Cloud email address                | string |    no    |
+| region                                      | IBM Cloud region                       | string |   yes    |
+| vpc_name                                    | Name of the VPC to create              | string |   yes    |
+| cluster_name                                | Name of the IKS cluster                | string |   yes    |
+| worker_count                                | Number of worker nodes                 | number |   yes    |
+| machine_type                                | Worker node instance profile           | string |   yes    |
+| cluster_version                             | Kubernetes version for IKS cluster     | string |   yes    |
 
 ### Application Variables
 
-| Name | Description | Type | Required |
-|------|-------------|------|:--------:|
-| chatqna_model_dir | Directory path for ChatQNA models | string | yes |
-| chatqna_helm_chart_path | Path to the ChatQNA Helm chart | string | yes |
-| chatqna_model_name | Name of the main ChatQNA model | string | yes |
-| chatqna_embedding_model_name | Name of the embedding model for ChatQNA | string | yes |
-| chatqna_reranker_model_name | Name of the reranker model for ChatQNA | string | yes |
-| chatqna_llm_service_host_ip | LLM Service Host IP for ChatQNA | string | yes |
-| codegen_model_dir | Directory path for Codegen models | string | yes |
-| codegen_helm_chart_path | Path to the Codegen Helm chart | string | yes |
-| codegen_model_name | Name of the Codegen model | string | yes |
-| codegen_llm_service_host_ip | LLM Service Host IP for Codegen | string | yes |
-| docsum_model_dir | Directory path for Docsum models | string | yes |
-| docsum_helm_chart_path | Path to the Docsum Helm chart | string | yes |
-| docsum_model_name | Name of the Docsum model | string | yes |
-| docsum_llm_service_host_ip | LLM Service Host IP for Docsum | string | yes |
-| nginx_helm_chart_path | Path to the Nginx Helm chart | string | yes |
-| ui_helm_chart_path | Path to the UI Helm chart | string | yes |
+| Name                         | Description                             | Type   | Required |
+| ---------------------------- | --------------------------------------- | ------ | :------: |
+| chatqna_model_dir            | Directory path for ChatQNA models       | string |   yes    |
+| chatqna_helm_chart_path      | Path to the ChatQNA Helm chart          | string |   yes    |
+| chatqna_model_name           | Name of the main ChatQNA model          | string |   yes    |
+| chatqna_embedding_model_name | Name of the embedding model for ChatQNA | string |   yes    |
+| chatqna_reranker_model_name  | Name of the reranker model for ChatQNA  | string |   yes    |
+| chatqna_llm_service_host_ip  | LLM Service Host IP for ChatQNA         | string |   yes    |
+| codegen_model_dir            | Directory path for Codegen models       | string |   yes    |
+| codegen_helm_chart_path      | Path to the Codegen Helm chart          | string |   yes    |
+| codegen_model_name           | Name of the Codegen model               | string |   yes    |
+| codegen_llm_service_host_ip  | LLM Service Host IP for Codegen         | string |   yes    |
+| docsum_model_dir             | Directory path for Docsum models        | string |   yes    |
+| docsum_helm_chart_path       | Path to the Docsum Helm chart           | string |   yes    |
+| docsum_model_name            | Name of the Docsum model                | string |   yes    |
+| docsum_llm_service_host_ip   | LLM Service Host IP for Docsum          | string |   yes    |
+| nginx_helm_chart_path        | Path to the Nginx Helm chart            | string |   yes    |
+| ui_helm_chart_path           | Path to the UI Helm chart               | string |   yes    |
 
 ## Outputs
 
 ### Infrastructure Outputs
 
-| Name | Description |
-|------|-------------|
-| vpc_id | ID of the created VPC |
-| cluster_id | ID of the provisioned IKS cluster |
-| cluster_endpoint | API endpoint URL for the IKS cluster |
-| cluster_ingress_hostname | Ingress hostname for the IKS cluster |
-| kubeconfig_path | Path to the generated kubeconfig file |
+| Name                     | Description                           |
+| ------------------------ | ------------------------------------- |
+| vpc_id                   | ID of the created VPC                 |
+| cluster_id               | ID of the provisioned IKS cluster     |
+| cluster_endpoint         | API endpoint URL for the IKS cluster  |
+| cluster_ingress_hostname | Ingress hostname for the IKS cluster  |
+| kubeconfig_path          | Path to the generated kubeconfig file |
 
 ### Application Outputs
 
-| Name | Description |
-|------|-------------|
-| keycloak_endpoint | LoadBalancer endpoint for Keycloak |
-| ui_endpoint | UI Service Endpoint |
-| deployment_status | Status of all deployments |
+| Name              | Description                         |
+| ----------------- | ----------------------------------- |
+| keycloak_endpoint | LoadBalancer endpoint for Keycloak  |
+| ui_endpoint       | UI Service Endpoint                 |
+| deployment_status | Status of all deployments           |
 | chatqna_namespace | Namespace where ChatQnA is deployed |
 | codegen_namespace | Namespace where CodeGen is deployed |
-| docsum_namespace | Namespace where DocSum is deployed |
+| docsum_namespace  | Namespace where DocSum is deployed  |
 
 ## Configuration Options
 
 ### Infrastructure Configuration
+
 The IBM Cloud VPC and IKS infrastructure can be customized through:
+
 - Region and zone selection
 - VPC networking configuration
 - Worker node machine types and counts
@@ -314,7 +322,9 @@ The IBM Cloud VPC and IKS infrastructure can be customized through:
 - Kubernetes version selection
 
 ### Application Configuration
+
 The application deployment can be customized through various feature flags:
+
 - Enable/disable specific components (UI, Embedding, Re-ranking etc.)
 - Configure model sources and endpoints
 - Set authentication parameters
@@ -323,12 +333,14 @@ The application deployment can be customized through various feature flags:
 ## Security Considerations
 
 ### Infrastructure Security
+
 - VPC security groups automatically configured to restrict network access
 - Private subnets used for worker nodes with controlled ingress/egress
 - Kubernetes RBAC enabled by default
 - IBM cloud IAM integration for cluster access control
 
 ### Application Security
+
 - Keycloak is configured with default admin credentials (should be changed in production)
 - Access to services is protected through authentication
 - Network policies applied to restrict pod-to-pod communication
