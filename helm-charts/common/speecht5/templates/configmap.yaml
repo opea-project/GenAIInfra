@@ -18,7 +18,7 @@ data:
   HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
   {{- end }}
   HUGGINGFACE_HUB_CACHE: "/data"
-  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote }}
   {{- if .Values.global.offline }}
   HF_HUB_OFFLINE: "1"
   {{- end }}
