@@ -215,7 +215,7 @@ helm install -n kube-system balloons nri-plugins/nri-resource-policy-balloons
 > **NOTE**: With containerd version prior to v2.0, first enable
 > NRI support in the containerd configuration file. Instead of manually
 > editing the configuration file, you can pass in `--set
-> nri.runtime.patchConfig=true` to the Helm command above, which will
+nri.runtime.patchConfig=true` to the Helm command above, which will
 > automatically patch the containerd configuration file on each node.
 
 Verify that the balloons policy plugin is running on every node:
