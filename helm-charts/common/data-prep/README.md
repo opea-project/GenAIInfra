@@ -42,33 +42,40 @@ helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} 
 # helm install data-prep . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set DATAPREP_BACKEND=${DATAPREP_BACKEND} --set QDRANT_HOST=${DB_HOST},QDRANT_PORT=6333,COLLECTION_NAME=rag_qdrant
 ```
 
-### Install the microservice in air gapped(offline) mode
+### Install the microservice in air gapped (offline) mode
 
-To support running this microservice in an air gapped environment, users are required to download the offline data including the `nltk` data and model `unstructuredio/yolo_x_layout` to a shared storage. Below is an example for using node level local directory to download the offline data:
+To support running this microservice in an air gapped environment, users are required to pre-download the following models to a shared storage:
 
-Assuming the `nltk` data is shared using node-local directory `/mnt/nltk_data`, and the model data is shared using node-local directory `/mnt/opea-models`.
+- microsoft/table-transformer-structure-recognition
+- timm/resnet18.a1_in1k
+- unstructuredio/yolo_x_layout
+
+Below is an example for using node level local directory to download the offline data:
+
+Assuming the model data is shared using node-local directory `/mnt/opea-models`.
 
 ```
 # On every K8s node, run the following command:
 export MODELDIR=/mnt/opea-models
-export NLTKDATA=/mnt/nltk_data
-# Download nltk data, assumes Python nltk module(s) are already installed
-python -m nltk.downloader -d $NLTKDATA all && chmod -R a+r $NLTKDATA
-# Download model,  assumes Python huggingface_hub[cli] module are already installed
-huggingface-cli download unstructuredio/yolo_x_layout --local-dir ${MODELDIR}/unstructuredio/yolo_x_layout && chmod -R a+r ${MODELDIR}/unstructuredio/yolo_x_layout
+# Download model, assumes Python huggingface_hub[cli] module is already installed
+DATAPREP_MODELS=(microsoft/table-transformer-structure-recognition timm/resnet18.a1_in1k unstructuredio/yolo_x_layout)
+for model in ${DATAPREP_MODELS[@]}; do
+    huggingface-cli download --cache-dir "${MODEL_DIR}" $model
+done
 
+# On K8s master node, run the following command:
 # Install using Helm with the following additional parameters:
-# helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODELDIR},global.nltkDataUseHostPath=${NLTKDATA}
+helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODELDIR}
 ```
 
-Assuming we share the offline data on cluster level using a persistent volume(PV), first we need to create the persistent volume claim(PVC) with name `opea-model-pvc` to store model data, the PVC with name `opea-nltk-pvc` to store nltk data:
+Assuming we share the offline data on cluster level using a persistent volume (PV), first we need to create the persistent volume claim (PVC) with name `opea-model-pvc` to store the model data.
 
 ```
-# Download nltk data and model into the root and `unstructuredio/yolo_x_layout` directory at the root of the corresponding PVs respectively
+# Download model data at the root directory of the corresponding PV
+# ... ...
 # Install using Helm with the following additional parameters:
 # export MODELPVC=opea-model-pvc
-# export NLTKPVC=opea-nltk-pvc
-# helm install ... ... --set global.offline=true,global.modelUsePVC=${MOELPVC},global.nltkDataUsePVC=${NLTKPVC}
+# helm install ... ... --set global.offline=true,global.modelUsePVC=${MOELPVC}
 ```
 
 ## Verify
@@ -92,6 +99,7 @@ curl http://localhost:6007/v1/dataprep/ingest  \
 | ------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
 | service.port                    | string | `"6007"`  |                                                                                                         |
 | global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                         |
+| global.offline                  | bool   | `false`   | Whether to run the microservice in air gapped environment                                               |
 | DATAPREP_BACKEND                | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT"                                            |
 | REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration    |
 | MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration |
