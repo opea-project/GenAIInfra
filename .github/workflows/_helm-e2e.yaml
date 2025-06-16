@@ -133,6 +133,8 @@ jobs:
               --set GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID }} \
               --set web-retriever.GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY }} \
               --set web-retriever.GOOGLE_CSE_ID=${{ env.GOOGLE_CSE_ID }} \
+              --set VLLM_SKIP_WARMUP=true \
+              --set vllm.VLLM_SKIP_WARMUP=true \
               --set research-agent.FINNHUB_API_KEY=${{ env.FINNHUB_API_KEY }} \
               --set research-agent.FINANCIAL_DATASETS_API_KEY=${{ env.FINANCIAL_DATASETS_API_KEY }} \
               --set global.HUGGINGFACEHUB_API_TOKEN=${{ env.HFTOKEN }} \
