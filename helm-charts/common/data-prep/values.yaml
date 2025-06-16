@@ -142,21 +142,14 @@ global:
   sharedSAName: ""
 
   # Running service in air gapped(offline) mode
-  # If offline is enabled, user must set either modelUseHostPath or modelUsePVC and download model unstructuredio/yolo_x_layout out of band.
-  # If offline is enabled, user must set either nltkDataUseHostPath or nltkDataUsePVC and download nltk data out of band.
+  # If offline is enabled, user must set either modelUseHostPath or modelUsePVC and download models `microsoft/table-transformer-structure-recognition`, `timm/resnet18.a1_in1k`, `unstructuredio/yolo_x_layout`
   offline: false
   # To store offline model data in local directory for one node K8s environment, set modelUseHostPath
-  # Download offline model: huggingface-cli download unstructuredio/yolo_x_layout --local-dir <modelUseHostPath>/unstructuredio/yolo_x_layout && chmod a+r <modelUseHostPath>/unstructuredio/yolo_x_layout
+  # Download offline models: huggingface-cli download --cache-dir <modelUseHostPath> <model>
   modelUseHostPath: ""
-  # To store offline data in persistent volume(PV) to be shared by multinode K8s environment, set modelUsePVC
+  # To store offline model data in persistent volume (PV) to be shared by multinode K8s environment, set modelUsePVC
   # then follow the similar above steps to download the offline model to the root directory of that PV
   modelUsePVC: ""
-  # To store offline nltk data in local directory for one node K8s environment, set nltkDataUseHostPath
-  # Download nltk data: python -m nltk.downloader -d <nltkDataUseHostPath> all && chmod a+r <nltkDataUseHostPath>
-  nltkDataUseHostPath: ""
-  # To store offline nltk data in persistent volume(PV) to be shared by multinode K8s environment, set nltkDataUsePVC
-  # and follow the similar above steps to download the nltk data to the root directory of that PV
-  nltkDataUsePVC: ""
 
   # Install Prometheus serviceMonitors for service components
   monitoring: false
