@@ -1,0 +1,53 @@
+Thank you for installing the Neo4j Helm chart!
+
+1. Get the application URL by running these commands:
+
+{{- if .Values.ingress.enabled }}
+{{- range $host := .Values.ingress.hosts }}
+  {{- range .paths }}
+  http{{ if $.Values.ingress.tls }}s{{ end }}://{{ $host.host }}{{ .path }}
+  {{- end }}
+{{- end }}
+{{- else if contains "NodePort" .Values.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "neo4j.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch its status by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "neo4j.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "neo4j.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.neo4j.ports.http }}
+{{- else if contains "ClusterIP" .Values.service.type }}
+  export POD_NAME=$(kubectl get pods --namespace {{ .Release.Namespace }} -l "app.kubernetes.io/name={{ include "neo4j.name" . }},app.kubernetes.io/instance={{ .Release.Name }}" -o jsonpath="{.items[0].metadata.name}")
+  export CONTAINER_PORT=$(kubectl get pod --namespace {{ .Release.Namespace }} $POD_NAME -o jsonpath="{.spec.containers[0].ports[0].containerPort}")
+  echo "Visit http://127.0.0.1:8080 to use your application"
+  kubectl --namespace {{ .Release.Namespace }} port-forward $POD_NAME 8080:$CONTAINER_PORT
+{{- end }}
+
+2. **Authentication:**
+
+   - The default credentials are:
+     - **Username:** `{{ .Values.neo4j.username }}`
+     - **Password:** `{{ .Values.neo4j.password }}`
+   - Ensure you change these credentials in `values.yaml` for production deployments.
+
+3. **Persistent Storage:**
+
+   - Your Neo4j data is stored in a PersistentVolumeClaim named `neo4j-data`.
+   - This ensures data persistence across pod restarts.
+
+4. **Configuration:**
+
+   - Neo4j configuration is managed via a ConfigMap named `neo4j-config`.
+   - You can update the configuration by modifying the `neo4j.conf` data in the ConfigMap.
+
+5. **Plugins:**
+
+   - The APOC plugin is enabled by default. You can manage plugins via the `NEO4J_PLUGINS` environment variable in `values.yaml`.
+
+For more information on Neo4j, visit the official documentation: https://neo4j.com/docs/
+
+If you encounter any issues, please check the logs by running:
+
+kubectl logs -l app=neo4j
+Thank you for using Neo4j!

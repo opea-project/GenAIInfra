@@ -1,0 +1,18 @@
+image:
+  repository: neo4j
+  tag: latest
+
+neo4j:
+  username: neo4j
+  password: password
+  plugins: ["apoc"]
+  ports:
+    http: 7474
+    bolt: 7687
+
+persistence:
+  enabled: true
+  accessMode: ReadWriteOnce
+  size: 10Gi
+
+resources: {}

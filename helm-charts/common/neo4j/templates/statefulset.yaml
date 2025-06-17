@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: neo4j
+spec:
+  serviceName: "neo4j"
+  replicas: 1
+  selector:
+    matchLabels:
+      app: neo4j
+  template:
+    metadata:
+      labels:
+        app: neo4j
+    spec:
+      containers:
+        - name: neo4j-apoc
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          ports:
+            - containerPort: 7474
+              name: http
+            - containerPort: 7687
+              name: bolt
+          env:
+            - name: NEO4J_AUTH
+              value: "{{ .Values.neo4j.username }}/{{ .Values.neo4j.password }}"
+            - name: NEO4J_PLUGINS
+              value: "{{ .Values.neo4j.plugins | toJson }}"
+          volumeMounts:
+            - name: neo4j-data
+              mountPath: /data
+            - name: neo4j-config
+              mountPath: /config
+            - name: neo4j-logs
+              mountPath: /logs
+            - name: neo4j-plugins
+              mountPath: /plugins
+      volumes:
+        - name: neo4j-config
+          configMap:
+            name: neo4j-config
+        - name: neo4j-data
+          persistentVolumeClaim:
+            claimName: neo4j-data
+        - name: neo4j-logs
+          emptyDir: {}
+        - name: neo4j-plugins
+          emptyDir: {}
