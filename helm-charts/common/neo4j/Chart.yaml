@@ -1,3 +1,6 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 apiVersion: v2
 name: neo4j-opea-chart
 description: A Helm chart for Kubernetes

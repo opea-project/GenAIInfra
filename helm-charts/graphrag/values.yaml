@@ -1,3 +1,6 @@
+# Copyright (C) 2025 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
 # Default values for graphrag.
 # This is a YAML-formatted file.
 # Declare variables to be passed into your templates.
