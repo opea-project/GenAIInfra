@@ -1,51 +1,35 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# Gateway mode values for nginx chart
-# This file enables nginx to act as a central gateway/router
-# Use with: helm install nginx . -f gateway-values.yaml
+# Gateway mode example for nginx chart
+# This demonstrates how to use nginx as a central gateway/router
+# 
+# IMPORTANT: This is an example only. In practice, you should:
+# 1. Create your own E2E chart that includes this nginx chart as a dependency
+# 2. Define environment variables in your E2E chart's {{ .Release.Name }}-nginx-config ConfigMap
+# 3. Use the nginx template configuration shown below
+#
+# For a complete example, see how chatqna chart implements this pattern.
 
 # Override service type for gateway mode
 service:
   type: NodePort
   port: 80
 
-# Define the services to route to
-services:
-  chatqna:
-    host: "chatqna.chatqna.svc.cluster.local"
-    port: "8888"
-  codegen:
-    host: "codegen.codegen.svc.cluster.local"
-    port: "7778"
-  docsum:
-    host: "docsum.docsum.svc.cluster.local"
-    port: "8888"
-  dataprep:
-    host: "chatqna-data-prep.chatqna.svc.cluster.local"
-    port: "6007"
-  chathistory:
-    host: "chathistory-usvc.chathistory.svc.cluster.local"
-    port: "6012"
-  prompt:
-    host: "prompt-usvc.prompt.svc.cluster.local"
-    port: "6018"
-
-# UI service configuration
-ui:
-  host: "ui.ui.svc.cluster.local"
-  port: "5173"
-
-# Custom container startup for gateway mode
+# Example: Custom container startup for gateway mode
+# The E2E chart should provide environment variables via {{ .Release.Name }}-nginx-config ConfigMap
 customCommand:
   enabled: true
   command: ["/bin/sh", "-c"]
   args:
     - |
-      envsubst '${FRONTEND_SERVICE_IP} ${FRONTEND_SERVICE_PORT} ${CHATQNA_SERVICE_IP} ${CHATQNA_SERVICE_PORT} ${CODEGEN_SERVICE_IP} ${CODEGEN_SERVICE_PORT} ${DOCSUM_SERVICE_IP} ${DOCSUM_SERVICE_PORT} ${DATAPREP_SERVICE_IP} ${DATAPREP_SERVICE_PORT} ${CHATHISTORY_SERVICE_IP} ${CHATHISTORY_SERVICE_PORT} ${PROMPT_SERVICE_IP} ${PROMPT_SERVICE_PORT}' < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && 
+      # Environment variables are provided by the E2E chart's ConfigMap
+      # Example variables: FRONTEND_SERVICE_IP, FRONTEND_SERVICE_PORT, CHATQNA_SERVICE_IP, etc.
+      envsubst < /etc/nginx/templates/default.conf.template > /etc/nginx/conf.d/default.conf && 
       nginx -g 'daemon off;'
 
-# Custom nginx configuration template
+# Example: Custom nginx configuration template for gateway mode
+# This template uses environment variables that should be provided by the E2E chart
 nginxConfig:
   enabled: true
   template: |
@@ -189,7 +173,7 @@ nginxConfig:
         }
     }
 
-# Ingress configuration for gateway mode
+# Optional: Ingress configuration for gateway mode
 ingress:
   enabled: false
   className: ""
@@ -233,3 +217,27 @@ securityContext: {}
   #   - ALL
   # seccompProfile:
   #   type: RuntimeDefault
+
+# ---
+# Example ConfigMap that your E2E chart should create
+# This should be in your E2E chart's templates directory, not in the nginx chart
+#
+# apiVersion: v1
+# kind: ConfigMap
+# metadata:
+#   name: {{ .Release.Name }}-nginx-config
+# data:
+#   FRONTEND_SERVICE_IP: "ui.ui.svc.cluster.local"
+#   FRONTEND_SERVICE_PORT: "5173"
+#   CHATQNA_SERVICE_IP: "chatqna.chatqna.svc.cluster.local"
+#   CHATQNA_SERVICE_PORT: "8888"
+#   CODEGEN_SERVICE_IP: "codegen.codegen.svc.cluster.local"
+#   CODEGEN_SERVICE_PORT: "7778"
+#   DOCSUM_SERVICE_IP: "docsum.docsum.svc.cluster.local"
+#   DOCSUM_SERVICE_PORT: "8888"
+#   DATAPREP_SERVICE_IP: "chatqna-data-prep.chatqna.svc.cluster.local"
+#   DATAPREP_SERVICE_PORT: "6007"
+#   CHATHISTORY_SERVICE_IP: "chathistory-usvc.chathistory.svc.cluster.local"
+#   CHATHISTORY_SERVICE_PORT: "6012"
+#   PROMPT_SERVICE_IP: "prompt-usvc.prompt.svc.cluster.local"
+#   PROMPT_SERVICE_PORT: "6018"

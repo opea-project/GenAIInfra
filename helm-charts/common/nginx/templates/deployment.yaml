@@ -43,10 +43,6 @@ spec:
             - configMapRef:
                 name: {{ .Release.Name }}-nginx-config
                 optional: true
-            {{- if .Values.nginxConfig.enabled }}
-            - configMapRef:
-                name: {{ include "nginx.fullname" . }}-config
-            {{- end }}
           securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
@@ -86,7 +82,7 @@ spec:
         {{- if .Values.nginxConfig.enabled }}
         - name: nginx-conf
           configMap:
-            name: {{ include "nginx.fullname" . }}-config
+            name: {{ include "nginx.fullname" . }}-template-config
             items:
               - key: default.conf.template
                 path: default.conf.template

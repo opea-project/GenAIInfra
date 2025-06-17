@@ -116,15 +116,6 @@ customCommand:
   command: []
   args: []
 
-# Service routing configuration (optional)
-# Used in gateway mode to define backend services
-services: {}
-
-# UI service configuration (optional)
-# Used in gateway mode for frontend routing
-ui:
-  host: ""
-  port: ""
 
 # Ingress configuration (optional, disabled by default)
 ingress:

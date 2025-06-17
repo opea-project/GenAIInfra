@@ -15,30 +15,54 @@ The nginx chart can be configured to act as a central gateway/router for OPEA se
 - Health check endpoints
 - Optional ingress and monitoring support
 
-### Quick Start
+### How to Use Gateway Mode
 
-```bash
-# Deploy as gateway
-helm install nginx-gateway . -f gateway-values.yaml
+Gateway mode is designed to be used within E2E (end-to-end) charts. The pattern is:
 
-# Access OPEA services through the gateway
-curl http://nginx-gateway/v1/chatqna -d '{"query": "Hello"}'
-curl http://nginx-gateway/v1/health_check
+1. **Create an E2E chart** that includes nginx as a dependency
+2. **Define environment variables** in your E2E chart's `{{ .Release.Name }}-nginx-config` ConfigMap
+3. **Use custom nginx template** with environment variable substitution
+
+### Example Implementation
+
+```yaml
+# In your E2E chart's templates/nginx-config.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-nginx-config
+data:
+  FRONTEND_SERVICE_IP: "ui.ui.svc.cluster.local"
+  FRONTEND_SERVICE_PORT: "5173"
+  CHATQNA_SERVICE_IP: "chatqna.chatqna.svc.cluster.local"
+  CHATQNA_SERVICE_PORT: "8888"
+  # ... other service endpoints
 ```
 
-### Configuration
+```yaml
+# In your E2E chart's values.yaml
+nginx:
+  nginxConfig:
+    enabled: true
+    template: |
+      server {
+        location / {
+          proxy_pass http://${FRONTEND_SERVICE_IP}:${FRONTEND_SERVICE_PORT};
+        }
+        location /v1/chatqna {
+          proxy_pass http://${CHATQNA_SERVICE_IP}:${CHATQNA_SERVICE_PORT}/v1/chatqna;
+        }
+        # ... other routes
+      }
+```
 
-The `gateway-values.yaml` file contains:
-- Service endpoint definitions for routing
-- UI service configuration
-- Custom nginx configuration template
-- Optional ingress and monitoring settings
+See `gateway-values.yaml` for a complete example template.
 
 ## Deployment Modes
 
 This chart supports two deployment modes:
 
 - **Simple Proxy Mode** (default): Acts as a reverse proxy within OPEA application charts
-- **Gateway Mode**: Central router providing unified access to multiple OPEA services
+- **Gateway Mode**: Central router providing unified access to multiple OPEA services (used within E2E charts)
 
-All existing deployments continue to work unchanged. Gateway mode is opt-in and only activated when using `gateway-values.yaml`.
+All existing deployments continue to work unchanged. Gateway mode requires creating an E2E chart that follows the pattern shown above.
