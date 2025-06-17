@@ -21,6 +21,10 @@ dependencies:
     version: 4.2.12
     repository: https://zilliztech.github.io/milvus-helm/
     condition: milvus.enabled
+  - name: neo4j
+    version: 0-latest
+    repository: file://../neo4j
+    condition: neo4j.enabled
   - name: qdrant
     version: 1.13.1
     repository: https://qdrant.github.io/qdrant-helm
