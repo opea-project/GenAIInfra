@@ -1,0 +1,31 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: graphrag
+description: The Helm chart to deploy GraphRAG
+type: application
+dependencies:
+  - name: vllm
+    version: 0-latest
+    repository: "file://../common/vllm"
+    condition: vllm.enabled
+  - name: tei
+    version: 0-latest
+    repository: "file://../common/tei"
+  - name: neo4j
+    version: 0-latest
+    repository: "file://../common/neo4j"
+    condition: neo4j.enabled
+  - name: retriever-usvc
+    version: 0-latest
+    repository: "file://../common/retriever-usvc"
+  - name: data-prep
+    version: 0-latest
+    repository: "file://../common/data-prep"
+  - name: ui
+    alias: graphrag-ui
+    version: 0-latest
+    repository: "file://../common/ui"
+version: 0-latest
+appVersion: "v0.1.0"

@@ -1,0 +1,89 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "graphrag-backend.fullname" . }}
+  labels:
+    {{- include "graphrag-backend.labels" . | nindent 4 }}
+    app: {{ include "graphrag-backend.fullname" . }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "graphrag-backend.selectorLabels" . | nindent 6 }}
+      app: {{ include "graphrag-backend.fullname" . }}
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "graphrag-backend.selectorLabels" . | nindent 8 }}
+        app: {{ include "graphrag-backend.fullname" . }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "graphrag-backend.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Release.Name }}
+          env:
+            - name: no_proxy
+              value: {{ .Values.no_proxy | quote }}
+            - name: https_proxy
+              value: {{ .Values.https_proxy | quote }}
+            - name: http_proxy
+              value: {{ .Values.http_proxy | quote }}
+            - name: MEGA_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-graphrag-backend-server
+            - name: RETRIEVER_SERVICE_HOST_IP
+              value: {{ .Release.Name }}-retriever
+            - name: RETRIEVER_SERVICE_PORT
+              value: "7000"
+            - name: LLM_SERVER_HOST_IP
+              value: {{ .Release.Name }}-vllm-service
+            - name: LLM_SERVER_PORT
+              value: "80"
+            - name: LLM_MODEL_ID
+              value: {{ .Values.FINAL_LLM_MODEL_ID | quote }}
+            {{- if .Values.LOGFLAG }}
+            - name: LOGFLAG
+              value: {{ .Values.LOGFLAG | quote }}
+            {{- end }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          {{- if .Values.image.pullPolicy }}
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          {{- end }}
+          ports:
+            - name: graphrag-backend
+              containerPort: 8888
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.evenly_distributed }}
+      topologySpreadConstraints:
+        - maxSkew: 1
+          topologyKey: kubernetes.io/hostname
+          whenUnsatisfiable: ScheduleAnyway
+          labelSelector:
+            matchLabels:
+              {{- include "graphrag-backend.selectorLabels" . | nindent 14 }}
+              app: {{ include "graphrag-backend.fullname" . }}
+      {{- end }}
