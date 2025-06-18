@@ -36,6 +36,10 @@ data:
   FRONTEND_SERVICE_PORT: "5173"
   CHATQNA_SERVICE_IP: "chatqna.chatqna.svc.cluster.local"
   CHATQNA_SERVICE_PORT: "8888"
+  EMBEDDING_SERVICE_IP: "embedding-usvc.default.svc.cluster.local"
+  EMBEDDING_SERVICE_PORT: "6000"
+  DATAPREP_SERVICE_IP: "data-prep.default.svc.cluster.local"
+  DATAPREP_SERVICE_PORT: "6007"
   # ... other service endpoints
 ```
 
@@ -51,6 +55,12 @@ nginx:
         }
         location /v1/chatqna {
           proxy_pass http://${CHATQNA_SERVICE_IP}:${CHATQNA_SERVICE_PORT}/v1/chatqna;
+        }
+        location /v1/embeddings {
+          proxy_pass http://${EMBEDDING_SERVICE_IP}:${EMBEDDING_SERVICE_PORT}/v1/embeddings;
+        }
+        location /v1/dataprep {
+          proxy_pass http://${DATAPREP_SERVICE_IP}:${DATAPREP_SERVICE_PORT}/v1/dataprep;
         }
         # ... other routes
       }
