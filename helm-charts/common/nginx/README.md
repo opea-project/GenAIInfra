@@ -4,7 +4,7 @@ Helm chart for deploying OPEA nginx service.
 
 ## Integration with OPEA Applications
 
-When used as a simple proxy within OPEA application charts (ChatQnA, CodeGen, etc.), parent charts should provide a ConfigMap named `{{ .Release.Name }}-nginx-config` containing environment variables for the [OPEA nginx microservice](https://github.com/opea-project/GenAIComps/blob/main/comps/nginx/nginx.conf.template).
+When used as a simple proxy within OPEA application charts (ChatQnA, CodeGen, etc.), parent charts should provide a ConfigMap named `{{ .Release.Name }}-nginx-config` containing environment variables for the [OPEA nginx microservice](https://github.com/opea-project/GenAIComps/blob/main/comps/third_parties/nginx/src/nginx.conf.template).
 
 ## Gateway Mode (Central Router)
 
