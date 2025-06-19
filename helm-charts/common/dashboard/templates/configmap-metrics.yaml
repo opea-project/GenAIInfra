@@ -1690,6 +1690,30 @@ data:
               "legendFormat": "vLLM: used",
               "range": true,
               "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Metrics}"
+              },
+              "editorMode": "code",
+              "expr": "count(up{service=\"$release\",namespace=\"$namespace\"})",
+              "hide": false,
+              "legendFormat": "MegaService: instances",
+              "range": true,
+              "refId": "I"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Metrics}"
+              },
+              "editorMode": "code",
+              "expr": "count(megaservice_first_token_latency_count{service=\"$release\",namespace=\"$namespace\"})",
+              "hide": false,
+              "legendFormat": "MegaService: used",
+              "range": true,
+              "refId": "J"
             }
           ],
           "title": "Replicas",
