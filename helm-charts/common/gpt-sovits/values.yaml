@@ -85,6 +85,9 @@ global:
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
   sharedSAName: ""
 
+  # Running microservice in air gapped (offline) mode
+  # If offline is enabled, user must set either modelUseHostPath or modelUsePVC and download model `lj1995/GPT-SoVITS`, i.e.
+  # huggingface-cli download --local-dir-use-symlinks False --local-dir <modelUseHostPath>/lj1995/GPT-SoVITS lj1995/GPT-SoVITS
   # Choose where to save your downloaded models
   # Set modelUseHostPath for local directory, this is good for one node test. Example:
   # modelUseHostPath: /mnt/opea-models

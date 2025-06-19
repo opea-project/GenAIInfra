@@ -28,6 +28,7 @@ spec:
       serviceAccountName: {{ include "gpt-sovits.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      {{- if not .Values.global.offline }}
       initContainers:
         - name: model-downloader
           envFrom:
@@ -66,6 +67,7 @@ spec:
               name: model-volume
             - mountPath: /tmp
               name: tmp
+      {{- end }}
       containers:
         - name: gpt-sovits
           envFrom:
@@ -115,8 +117,10 @@ spec:
           hostPath:
             path: {{ .Values.global.modelUseHostPath }}
             type: Directory
-          {{- else }}
+          {{- else if not .Values.global.offline }}
           emptyDir: {}
+          {{- else }}
+          {{- fail "'global.modelUsePVC' or 'global.modelUseHostPath' must be set in offline mode" }}
           {{- end }}
         - name: tmp
           emptyDir: {}
