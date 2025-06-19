@@ -12,6 +12,10 @@
   - [Install](#install)
   - [Post-install](#post-install)
 - [Verify](#verify)
+- [Scaling metric considerations](#scaling-metric-considerations)
+  - [Autoscaling principles](#autoscaling-principles)
+  - [Current scaling metrics](#current-scaling-metrics)
+  - [Other potential metrics](#other-potential-metrics)
 
 ## Introduction
 
@@ -133,3 +137,64 @@ watch -n 5 scale-monitor-helm.sh default chatqna
 **NOTE**: inferencing services provide metrics only after they've processed their first request.
 The reranking service is used only after the query context data has been uploaded. Until then,
 no metrics will be available for them.
+
+## Scaling metric considerations
+
+### Autoscaling principles
+
+The used model, underlying HW and engine parameters are supposed to be selected so that engine
+instance can satisfy service SLA (Service Level Agreement) requirements for its own requests,
+also when it's becoming saturated. Autoscaling is then intended to scale up the service so that
+requests can be directed to unsaturated instances.
+
+Problem is finding a good metric, and its threshold, for indicatating this saturation point.
+Preferably it should be something that can anticipate this point, so that startup delay for
+the new engine instances does not cause SLA breakage (or in worse case requests being rejected,
+if engine queue fills up).
+
+Note: Another problem is Kubernetes service routing sending requests (also) to already saturated
+instances, instead of idle ones. Using [KubeAI](../kubeai/#readme) (instead of HPA) to manage
+both engine scaling + query routing can solve that.
+
+### Current scaling metrics
+
+Currently following inference engine metrics are used to autoscale their replica counts:
+
+- vLLM: Active requests i.e. count of waiting (queued) + (already) running requests
+  - Good overall scaling metric, used also by [KubeAI](../kubeai/#readme) for scaling vLLM
+  - Threshold depends on how many requests underlying HW / engine config can process for given model in parallel
+- TGI / TEI: Queue size, i.e. how many requests are waiting to be processed
+  - Used because TGI and TEI do not offer metric for (already) running requests, just waiting ones
+  - Independent of the used model, so works well as an example, but not that good for production because
+    scaling happens late and fluctuates a lot (due to metric dropping to zero when engine is not saturated)
+
+### Other potential metrics
+
+All the metrics provided by the inference engines are listed in their documentation:
+
+- [vLLM metrics](https://docs.vllm.ai/en/v0.8.5/serving/metrics.html)
+  - [Metric design](https://docs.vllm.ai/en/v0.8.5/design/v1/metrics.html)
+- [TGI metrics](https://huggingface.co/docs/text-generation-inference/en/reference/metrics)
+  - TEI (embed and reranking) services provide a subset of these TGI metrics
+
+OPEA application [dashboard](monitoring.md#dashboards) provides (Prometheus query) examples
+for deriving service performance metrics out of engine Histogram metrics.
+
+Their suitability for autoscaling:
+
+- Request latency, request per second (RPS) - not suitable
+  - Depends completely on input and output token counts and is an indicator for past performance, not incoming load
+- First token latency (TTFT) - potential
+  - Relevancy depends on use-case; number of used tokens and what's important
+- Next token latency (TPOT, ITL), tokens per second (TPS) - potential
+  - Relevancy depends on use-case; number of used tokens and what's important
+
+Performance metrics will be capped by the performance of the underlying engine setup
+=> at some point, they stop corresponding to incoming load / how much scaling would be needed.
+
+Therefore such metrics could be used in production _when_ their thresholds are carefully
+fine-tuned and rechecked every time underlying setup (model, HW, engine config) changes.
+In OPEA Helm charts that setup is user selectable, so such metrics are unsuitable for
+autoscaling examples.
+
+(General [explanation](https://docs.nvidia.com/nim/benchmarking/llm/latest/metrics.html) on how these metrics are measured.)
