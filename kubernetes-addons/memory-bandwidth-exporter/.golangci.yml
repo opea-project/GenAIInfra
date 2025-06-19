@@ -15,12 +15,10 @@ issues:
 linters:
   disable-all: true
   enable:
+    - copyloopvar
     - depguard
-    - misspell
-    - revive
     - dupl
     - errcheck
-    - exportloopref
     - goconst
     - gocyclo
     - gofmt
@@ -32,6 +30,7 @@ linters:
     - misspell
     - nakedret
     - prealloc
+    - revive
     - staticcheck
     - typecheck
     - unconvert
