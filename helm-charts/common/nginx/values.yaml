@@ -102,3 +102,25 @@ global:
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
   sharedSAName: ""
+
+# Custom nginx configuration (optional)
+# Allows overriding the default nginx configuration template
+nginxConfig:
+  enabled: false
+  template: ""
+
+# Custom container startup commands (optional)
+# Allows overriding default container startup behavior
+customCommand:
+  enabled: false
+  command: []
+  args: []
+
+
+# Ingress configuration (optional, disabled by default)
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts: []
+  tls: []
