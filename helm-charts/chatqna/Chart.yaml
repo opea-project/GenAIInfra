@@ -38,6 +38,7 @@ dependencies:
   - name: tei
     version: 0-latest
     repository: "file://../common/tei"
+    condition: tei.enabled
   - name: embedding-usvc
     version: 0-latest
     repository: "file://../common/embedding-usvc"
@@ -65,15 +66,19 @@ dependencies:
   - name: retriever-usvc
     version: 0-latest
     repository: "file://../common/retriever-usvc"
+    condition: retriever-usvc.enabled
   - name: data-prep
     version: 0-latest
     repository: "file://../common/data-prep"
+    condition: data-prep.enabled
   - name: ui
     alias: chatqna-ui
     version: 0-latest
     repository: "file://../common/ui"
+    condition: chatqna-ui.enabled
   - name: nginx
     version: 0-latest
     repository: "file://../common/nginx"
+    condition: nginx.enabled
 version: 0-latest
 appVersion: "v1.0"
