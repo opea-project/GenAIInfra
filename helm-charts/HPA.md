@@ -66,8 +66,8 @@ $ helm install  prometheus-adapter prometheus-community/prometheus-adapter --ver
   --set prometheus.prometheusSpec.serviceMonitorSelectorNilUsesHelmValues=false
 ```
 
-NOTE: the service name given above in `prometheus.url` must match the listed Prometheus service name,
-otherwise adapter cannot access it!
+> **NOTE**: the service name given above in `prometheus.url` must match the listed Prometheus
+> service name, otherwise adapter cannot access it!
 
 (Alternative for setting the above `prometheusSpec` variable to `false` is making sure that
 `prometheusRelease` value in top-level chart matches the release name given to the Prometheus
@@ -134,9 +134,9 @@ watch -n 5 scale-monitor-helm.sh default chatqna
 
 (Assumes that HPA scaled chart is installed to `default` namespace with `chatqna` release name.)
 
-**NOTE**: inferencing services provide metrics only after they've processed their first request.
-The reranking service is used only after the query context data has been uploaded. Until then,
-no metrics will be available for them.
+> **NOTE**: inferencing services provide metrics only after they've processed their first request.
+> The reranking service is used only after the query context data has been uploaded. Until then,
+> no metrics will be available for them.
 
 ## Scaling metric considerations
 
@@ -149,16 +149,16 @@ requests can be directed to unsaturated instances.
 
 Problem is finding a good metric, and its threshold, for indicatating this saturation point.
 Preferably it should be something that can anticipate this point, so that startup delay for
-the new engine instances does not cause SLA breakage (or in worse case requests being rejected,
-if engine queue fills up).
+the new engine instances does not cause SLA breakage (or in the worst case requests being
+rejected, if the engine queue fills up).
 
-Note: Another problem is Kubernetes service routing sending requests (also) to already saturated
-instances, instead of idle ones. Using [KubeAI](../kubeai/#readme) (instead of HPA) to manage
-both engine scaling + query routing can solve that.
+> **NOTE**: Another problem is Kubernetes service routing sending requests (also) to already saturated
+> instances, instead of idle ones. Using [KubeAI](../kubeai/#readme) (instead of HPA) to manage
+> both engine scaling + query routing can solve that.
 
 ### Current scaling metrics
 
-Currently following inference engine metrics are used to autoscale their replica counts:
+The following inference engine metrics are used to autoscale their replica counts:
 
 - vLLM: Active requests i.e. count of waiting (queued) + (already) running requests
   - Good overall scaling metric, used also by [KubeAI](../kubeai/#readme) for scaling vLLM
@@ -166,7 +166,7 @@ Currently following inference engine metrics are used to autoscale their replica
 - TGI / TEI: Queue size, i.e. how many requests are waiting to be processed
   - Used because TGI and TEI do not offer metric for (already) running requests, just waiting ones
   - Independent of the used model, so works well as an example, but not that good for production because
-    scaling happens late and fluctuates a lot (due to metric dropping to zero when engine is not saturated)
+    scaling happens late and fluctuates a lot (due to metric being zero when engine is not saturated)
 
 ### Other potential metrics
 
@@ -189,8 +189,9 @@ Their suitability for autoscaling:
 - Next token latency (TPOT, ITL), tokens per second (TPS) - potential
   - Relevancy depends on use-case; number of used tokens and what's important
 
-Performance metrics will be capped by the performance of the underlying engine setup
-=> at some point, they stop corresponding to incoming load / how much scaling would be needed.
+Performance metrics will be capped by the performance of the underlying engine setup.
+Beyond a certain point, they no longer reflect the actual incoming load or indicate how
+much scaling is needed.
 
 Therefore such metrics could be used in production _when_ their thresholds are carefully
 fine-tuned and rechecked every time underlying setup (model, HW, engine config) changes.
