@@ -28,7 +28,7 @@ spec:
       serviceAccountName: {{ include "speecht5.serviceAccountName" . }}
       securityContext:
         {{- toYaml .Values.podSecurityContext | nindent 8 }}
-      {{- if not (hasPrefix "/data/" .Values.TTS_MODEL_PATH) }}
+      {{- if and (not .Values.global.offline) (not (hasPrefix "/data/" .Values.TTS_MODEL_PATH)) }}
       initContainers:
         - name: model-downloader
           envFrom:
@@ -118,8 +118,10 @@ spec:
           hostPath:
             path: {{ .Values.global.modelUseHostPath }}
             type: Directory
-          {{- else }}
+          {{- else if not .Values.global.offline }}
           emptyDir: {}
+          {{- else }}
+          {{- fail "'global.modelUsePVC' or 'global.modelUseHostPath' must be set in offline mode" }}
           {{- end }}
         - name: tmp
           emptyDir: {}
