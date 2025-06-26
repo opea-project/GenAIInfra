@@ -1137,7 +1137,7 @@ data:
                 "uid": "${Metrics}"
               },
               "editorMode": "code",
-              "expr": "sum by (service)(rate(tgi_request_mean_time_per_token_duration_count{service=\"$release-tgi\",namespace=\"$namespace\"}[$__rate_interval]))",
+              "expr": "sum by (service)(rate(tgi_request_generated_tokens_sum{service=\"$release-tgi\",namespace=\"$namespace\"}[$__rate_interval]))",
               "hide": false,
               "instant": false,
               "legendFormat": "TGI",

@@ -1,7 +1,7 @@
+{{- if and .Values.global.monitoring .Values.autoscaling.enabled }}
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-{{- if and .Values.global.monitoring .Values.autoscaling.enabled }}
 apiVersion: autoscaling/v2
 kind: HorizontalPodAutoscaler
 metadata:
@@ -23,18 +23,18 @@ spec:
         name: {{ include "vllm.fullname" . }}
       target:
         # Metric is sum from all pods. "AverageValue" divides value returned from
-        # the custom metrics API by the number of Pods before comparing to the target:
+        # the custom metrics API by the number of Pods before comparing to the target
+        # (pods need to be in Ready state faster than specified stabilization window):
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/#algorithm-details
         #  https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale-walkthrough/#autoscaling-on-multiple-metrics-and-custom-metrics
         type: AverageValue
 {{- if .Values.accelDevice }}
-        averageValue: 0.1
+        averageValue: {{ .Values.autoscaling.activeRequestsTarget.accel }}
 {{- else }}
-        # allow larger latencies with unaccelerated service
-        averageValue: 1.0
+        averageValue: {{ .Values.autoscaling.activeRequestsTarget.cpu }}
 {{- end }}
       metric:
-        name: {{ include "vllm.metricPrefix" . }}_token_latency
+        name: {{ include "vllm.metricPrefix" . }}_active_request_sum
   behavior:
     scaleDown:
       stabilizationWindowSeconds: 180
