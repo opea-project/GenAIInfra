@@ -190,9 +190,9 @@ Enjoy the answer!
 ## Overview
 
 [NRI plugins][nri-plugins] provide a way to
-optimize the resource placement of applications in a Kubernetes cluster. They
-connect to the container runtime and are able, for example, to adjust the CPU
-and memory pinning of containers.
+optimize the node-level resource assignment of applications in a Kubernetes
+cluster. They connect to the container runtime and are able, for example, to
+adjust the CPU and memory pinning of containers.
 
 This section provides a guide on how to use the
 [Balloons Policy][balloons-policy] plugin from the [NRI Plugins][nri-plugins]
@@ -200,9 +200,9 @@ project to optimize the performance of CPU-backed KubeAI profiles.
 
 ## Installation of Balloons Policy Plugin
 
-> **NOTE:** To avoid disturbing already running workloads it is recommended to
-> install the NRI plugin to an empty node (do it right after node bootstrap, or
-> drain the node before installation).
+> **NOTE:** To avoid disturbing already running workloads, it is recommended to
+> install the NRI plugin on an empty node, that is, before deploying workloads
+> (do it right after node bootstrap, or drain the node before installation).
 
 Install the balloons policy plugin with Helm:
 
@@ -212,11 +212,11 @@ helm repo update nri-plugins
 helm install -n kube-system balloons nri-plugins/nri-resource-policy-balloons
 ```
 
-> **NOTE**: With containerd version earlier than v2.0 you need to enable
-> the NRI support in the containerd configuration file. Instead of manual
-> configuration you can provide `--set nri.runtime.patchConfig=true` to the Helm
-> command above, which will automatically patch the containerd configuration
-> file on each node.
+> **NOTE**: With containerd version prior to v2.0, first enable
+> NRI support in the containerd configuration file. Instead of manually
+> editing the configuration file, you can pass in `--set
+nri.runtime.patchConfig=true` to the Helm command above, which will
+> automatically patch the containerd configuration file on each node.
 
 Verify that the balloons policy plugin is running on every node:
 
@@ -228,8 +228,8 @@ nri-resource-policy-balloons   2         2         2       2            2       
 
 ## Configuration of Balloons Policy Plugin
 
-The aim of the balloons policy configuration is to isolate the model (inference
-engine) containers to minimize the impact of containers on each other.
+The aim of the balloons policy configuration is to isolate the model inference
+engine containers, to minimize noisy neighbor effects between containers.
 
 An example configuration for the current CPU-backed model profiles:
 
@@ -280,7 +280,7 @@ spec:
 EOF
 ```
 
-The configuration above allocates full CPU cores to inference engine
+The configuration above allocates full CPU cores to the inference engine
 containers by hiding hyperthreads from them. For example, if a pod requests 6
 CPUs, the balloon will reserve 6 full physical CPU cores (i.e., 12 logical
 CPUs), but configure the cpuset so that the inference instance can only use 6
