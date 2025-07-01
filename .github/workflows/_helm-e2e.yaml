@@ -102,6 +102,13 @@ jobs:
           HFTOKEN: ${{ secrets.HF_TOKEN }}
           FINNHUB_API_KEY: ${{ secrets.FINNHUB_API_KEY }}
           FINANCIAL_DATASETS_API_KEY: ${{ secrets.FINANCIAL_DATASETS_API_KEY }}
+          # External LLM configuration for external-llm-values.yaml testing
+          LLM_SERVER_HOST_IP: ${{ secrets.LLM_SERVER_HOST_IP }}
+          LLM_SERVICE_HOST_IP: ${{ secrets.LLM_SERVER_HOST_IP }}
+          LLM_MODEL: ${{ secrets.LLM_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          LLM_SERVER_PORT: ${{ secrets.LLM_SERVER_PORT }}
+          LLM_SERVICE_PORT: ${{ secrets.LLM_SERVER_PORT }}
         run: |
           set -x
           USER_ID=$(whoami)
@@ -127,6 +134,40 @@ jobs:
                 ROLLOUT_TIMEOUT_SECONDS=900s
             fi
           done
+          
+          # Prepare external LLM arguments for external-llm-values.yaml files
+          external_llm_args=""
+          if [[ "${value_file}" == *"external-llm"* ]]; then
+            # Chart-specific mapping for environment variables (use LLM_SERVER_HOST_IP for all)
+            if [[ "${{ env.CHART_NAME }}" == "chatqna" ]]; then
+              if [[ -n "${{ env.LLM_SERVER_HOST_IP }}" ]]; then
+                external_llm_args="$external_llm_args --set externalLLM.LLM_SERVER_HOST_IP=${{ env.LLM_SERVER_HOST_IP }}"
+              fi
+              if [[ -n "${{ env.LLM_SERVER_PORT }}" ]]; then
+                external_llm_args="$external_llm_args --set externalLLM.LLM_SERVER_PORT=${{ env.LLM_SERVER_PORT }}"
+              fi
+            else
+              # DocSum/CodeGen use LLM_SERVICE_HOST_IP but we map from LLM_SERVER_HOST_IP
+              if [[ -n "${{ env.LLM_SERVER_HOST_IP }}" ]]; then
+                external_llm_args="$external_llm_args --set externalLLM.LLM_SERVICE_HOST_IP=${{ env.LLM_SERVER_HOST_IP }}"
+              fi
+              if [[ -n "${{ env.LLM_SERVER_PORT }}" ]]; then
+                external_llm_args="$external_llm_args --set externalLLM.LLM_SERVICE_PORT=${{ env.LLM_SERVER_PORT }}"
+              fi
+            fi
+            if [[ -n "${{ env.LLM_MODEL }}" ]]; then
+              external_llm_args="$external_llm_args --set externalLLM.LLM_MODEL=${{ env.LLM_MODEL }}"
+              # CodeGen also needs LLM_MODEL_ID
+              if [[ "${{ env.CHART_NAME }}" == "codegen" ]]; then
+                external_llm_args="$external_llm_args --set externalLLM.LLM_MODEL_ID=${{ env.LLM_MODEL }}"
+              fi
+            fi
+            if [[ -n "${{ env.OPENAI_API_KEY }}" ]]; then
+              external_llm_args="$external_llm_args --set externalLLM.OPENAI_API_KEY=${{ env.OPENAI_API_KEY }}"
+            fi
+            echo "External LLM configuration detected for ${{ env.CHART_NAME }}, adding arguments: $external_llm_args"
+          fi
+          
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
               --set GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY }} \
@@ -139,6 +180,7 @@ jobs:
               --set research-agent.FINANCIAL_DATASETS_API_KEY=${{ env.FINANCIAL_DATASETS_API_KEY }} \
               --set global.HUGGINGFACEHUB_API_TOKEN=${{ env.HFTOKEN }} \
               --set global.modelUseHostPath=${CHART_MOUNT} \
+              ${external_llm_args} \
               --values ${{ env.CHART_FOLDER }}/${value_file} \
               $RELEASE_NAME ${{ env.CHART_FOLDER }} ; then
             echo "Failed to install chart ${{ inputs.workload }}"
