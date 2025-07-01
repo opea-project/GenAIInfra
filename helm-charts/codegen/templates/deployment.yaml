@@ -47,8 +47,8 @@ spec:
               value: {{ index .Values "llm-uservice" "service" "port" | quote }}
               {{- end }}
             {{- if .Values.externalLLM.enabled }}
-            - name: LLM_MODEL
-              value: {{ .Values.externalLLM.LLM_MODEL }}
+            - name: LLM_MODEL_ID
+              value: {{ .Values.externalLLM.LLM_MODEL_ID }}
             - name: OPENAI_API_KEY
               value: {{ .Values.externalLLM.OPENAI_API_KEY }}
             {{- end }}

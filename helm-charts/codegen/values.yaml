@@ -120,7 +120,7 @@ codegen-ui:
 externalLLM:
   enabled: false
   LLM_SERVICE_HOST_IP: "http://your-llm-server"
-  LLM_MODEL: "your-model"
+  LLM_MODEL_ID: "your-model"
   OPENAI_API_KEY: "your-api-key"
 
 global:
