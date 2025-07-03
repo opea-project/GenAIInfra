@@ -134,7 +134,7 @@ jobs:
                 ROLLOUT_TIMEOUT_SECONDS=900s
             fi
           done
-          
+
           # Prepare external LLM arguments for external-llm-values.yaml files
           external_llm_args=""
           if [[ "${value_file}" == *"external-llm"* ]]; then
@@ -167,7 +167,7 @@ jobs:
             fi
             echo "External LLM configuration detected for ${{ env.CHART_NAME }}, adding arguments: $external_llm_args"
           fi
-          
+
           if ! helm install --create-namespace --namespace $NAMESPACE --wait \
               --timeout "$ROLLOUT_TIMEOUT_SECONDS" \
               --set GOOGLE_API_KEY=${{ env.GOOGLE_API_KEY }} \
