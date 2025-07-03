@@ -1,0 +1,14 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- if .Values.nginxConfig.enabled }}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "nginx.fullname" . }}-template-config
+  labels:
+    {{- include "nginx.labels" . | nindent 4 }}
+data:
+  default.conf.template: |
+{{- .Values.nginxConfig.template | nindent 4 }}
+{{- end }}

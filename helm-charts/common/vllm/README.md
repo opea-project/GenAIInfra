@@ -13,7 +13,7 @@ Note that you cannot use vllm as the service release name due to [environment va
 ```console
 cd GenAIInfra/helm-charts/common/vllm
 export MODELDIR=/mnt/opea-models
-export MODELNAME="Intel/neural-chat-7b-v3-3"
+export MODELNAME="meta-llama/Meta-Llama-3-8B-Instruct"
 export HFTOKEN="insert-your-huggingface-token-here"
 helm install myvllm . --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
 # To deploy on Gaudi enabled kubernetes cluster
@@ -22,7 +22,7 @@ helm install myvllm . --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_
 # helm install vllm-rocm . --set global.modelUseHostPath=${MODELDIR} --set LLM_MODEL_ID=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values rocm-values.yaml
 ```
 
-By default, the vllm service will downloading the "Intel/neural-chat-7b-v3-3".
+By default, the vllm service will downloading the "meta-llama/Meta-Llama-3-8B-Instruct".
 
 If you already cached the model locally, you can pass it to container like this example:
 
@@ -41,17 +41,17 @@ Open another terminal and run the following command to verify the service if wor
 ```console
 curl http://localhost:2080/v1/completions \
   -H "Content-Type: application/json" \
-  -d '{"model": "Intel/neural-chat-7b-v3-3", "prompt": "What is Deep Learning?", "max_tokens": 32, "temperature": 0}'
+  -d '{"model": "meta-llama/Meta-Llama-3-8B-Instruct", "prompt": "What is Deep Learning?", "max_tokens": 32, "temperature": 0}'
 ```
 
 ## Values
 
-| Key                             | Type   | Default                              | Description                                                                                                                                                                                                            |
-| ------------------------------- | ------ | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| LLM_MODEL_ID                    | string | `"Intel/neural-chat-7b-v3-3"`        | Models id from https://huggingface.co/, or predownloaded model directory                                                                                                                                               |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here` | Hugging Face API token                                                                                                                                                                                                 |
-| global.modelUseHostPath         | string | `""`                                 | Cached models directory, vllm will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
-| image.repository                | string | `"opea/vllm"`                        |                                                                                                                                                                                                                        |
-| image.tag                       | string | `"latest"`                           |                                                                                                                                                                                                                        |
-| autoscaling.enabled             | bool   | `false`                              | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                  |
-| global.monitoring               | bool   | `false`                              | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                            |
+| Key                             | Type   | Default                                 | Description                                                                                                                                                                                                            |
+| ------------------------------- | ------ | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| LLM_MODEL_ID                    | string | `"meta-llama/Meta-Llama-3-8B-Instruct"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                                                                                               |
+| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here`    | Hugging Face API token                                                                                                                                                                                                 |
+| global.modelUseHostPath         | string | `""`                                    | Cached models directory, vllm will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
+| image.repository                | string | `"opea/vllm"`                           |                                                                                                                                                                                                                        |
+| image.tag                       | string | `"latest"`                              |                                                                                                                                                                                                                        |
+| autoscaling.enabled             | bool   | `false`                                 | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                  |
+| global.monitoring               | bool   | `false`                                 | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                            |

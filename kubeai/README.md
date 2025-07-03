@@ -248,7 +248,7 @@ spec:
     preferNewBalloons: true
     hideHyperthreads: true
     matchExpressions:
-    - key: labels/app.kubernetes.io/name
+    - key: pod/labels/app.kubernetes.io/name
       operator: In
       values: ["vllm", "ollama"]
     - key: name

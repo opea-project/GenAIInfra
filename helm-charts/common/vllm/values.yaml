@@ -12,9 +12,13 @@ replicaCount: 1
 # - Requires custom metrics ConfigMap available in the main application chart
 # - https://kubernetes.io/docs/concepts/workloads/autoscaling/
 autoscaling:
+  enabled: false
   minReplicas: 1
   maxReplicas: 4
-  enabled: false
+  # targeted active requests average per engine pod instance
+  activeRequestsTarget:
+    accel: 100
+    cpu: 10
 
 # empty for CPU (longer latencies are tolerated before HPA scaling unaccelerated service)
 accelDevice: ""
@@ -96,7 +100,7 @@ affinity: {}
 
 tdxEnabled: false
 
-LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 
 # Environment variables for vLLM (set in configmap):
 # https://docs.vllm.ai/en/latest/getting_started/gaudi-installation.html#environment-variables

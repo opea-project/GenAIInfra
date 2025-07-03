@@ -1137,7 +1137,7 @@ data:
                 "uid": "${Metrics}"
               },
               "editorMode": "code",
-              "expr": "sum by (service)(rate(tgi_request_mean_time_per_token_duration_count{service=\"$release-tgi\",namespace=\"$namespace\"}[$__rate_interval]))",
+              "expr": "sum by (service)(rate(tgi_request_generated_tokens_sum{service=\"$release-tgi\",namespace=\"$namespace\"}[$__rate_interval]))",
               "hide": false,
               "instant": false,
               "legendFormat": "TGI",
@@ -1690,6 +1690,30 @@ data:
               "legendFormat": "vLLM: used",
               "range": true,
               "refId": "H"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Metrics}"
+              },
+              "editorMode": "code",
+              "expr": "count(up{service=\"$release\",namespace=\"$namespace\"})",
+              "hide": false,
+              "legendFormat": "MegaService: instances",
+              "range": true,
+              "refId": "I"
+            },
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "${Metrics}"
+              },
+              "editorMode": "code",
+              "expr": "count(megaservice_first_token_latency_count{service=\"$release\",namespace=\"$namespace\"})",
+              "hide": false,
+              "legendFormat": "MegaService: used",
+              "range": true,
+              "refId": "J"
             }
           ],
           "title": "Replicas",
