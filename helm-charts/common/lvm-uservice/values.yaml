@@ -95,7 +95,7 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_TOKEN: "insert-your-huggingface-token-here"
   # service account name to be shared with all parent/child charts.
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.

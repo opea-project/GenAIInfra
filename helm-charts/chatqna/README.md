@@ -25,36 +25,36 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="meta-llama/Meta-Llama-3-8B-Instruct"
 # To use CPU with vLLM
-helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME}
+helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device with vLLM
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-values.yaml
 # To use CPU with TGI
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-tgi-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-tgi-values.yaml
 # To use Gaudi device with TGI
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-tgi-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/gaudi-tgi-values.yaml
 # To use Nvidia GPU with TGI
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/nv-values.yaml
 # To include guardrail component in chatqna on Gaudi with TGI
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/guardrails-gaudi-values.yaml
 # To run chatqna with Intel TDX feature
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set vllm.LLM_MODEL_ID=${MODELNAME} --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=4Gi --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=7Gi --set tei.tdxEnabled=true --set tei.resources.limits.memory=4Gi --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=6Gi --set nginx.tdxEnabled=true --set chatqna-ui.tdxEnabled=true --set chatqna-ui.resources.limits.memory=2Gi --set data-prep.tdxEnabled=true --set data-prep.resources.limits.memory=11Gi --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=80Gi
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set vllm.LLM_MODEL_ID=${MODELNAME} --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=4Gi --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=7Gi --set tei.tdxEnabled=true --set tei.resources.limits.memory=4Gi --set teirerank.tdxEnabled=true --set teirerank.resources.limits.memory=6Gi --set nginx.tdxEnabled=true --set chatqna-ui.tdxEnabled=true --set chatqna-ui.resources.limits.memory=2Gi --set data-prep.tdxEnabled=true --set data-prep.resources.limits.memory=11Gi --set vllm.tdxEnabled=true --set vllm.resources.limits.memory=80Gi
 # To use CPU with vLLM with Qdrant DB
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-qdrant-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/cpu-qdrant-values.yaml
 # To use AMD ROCm device with vLLM
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/rocm-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/rocm-values.yaml
 # To use AMD ROCm device with TGI
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/rocm-tgi-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/rocm-tgi-values.yaml
 
 # To use with external OpenAI compatible LLM endpoint
 #helm install chatqna chatqna -f chatqna/external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST_IP="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
 
 # To deploy FaqGen
-#helm install faqgen chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/faqgen-cpu-values.yaml
+#helm install faqgen chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/faqgen-cpu-values.yaml
 
 # To deploy FaqGen based application on AMD ROCm device with vLLM
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/faqgen-rocm-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/faqgen-rocm-values.yaml
 # To deploy FaqGen based application on AMD ROCm device with TGI
-#helm install chatqna chatqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/faqgen-rocm-tgi-values.yaml
+#helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set vllm.LLM_MODEL_ID=${MODELNAME} -f chatqna/faqgen-rocm-tgi-values.yaml
 
 ```
 

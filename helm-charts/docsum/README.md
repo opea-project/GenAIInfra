@@ -16,16 +16,16 @@ scripts/update_dependency.sh
 helm dependency update docsum
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
-export MODELNAME="Intel/neural-chat-7b-v3-3"
+export MODELNAME="meta-llama/Meta-Llama-3-8B-Instruct"
 helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device with vLLM
-# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-values.yaml
+# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/gaudi-values.yaml
 # To use Gaudi device with TGI
-# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/gaudi-tgi-values.yaml
+# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/gaudi-tgi-values.yaml
 # To use AMD ROCm device with vLLM
-# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/rocm-values.yaml
+# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/rocm-values.yaml
 # To use AMD ROCm device with TGI
-# helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values docsum/rocm-tgi-values.yaml
+# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/rocm-tgi-values.yaml
 
 ```
 
@@ -65,10 +65,10 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 
 ## Values
 
-| Key                       | Type   | Default                       | Description                                                                                                         |
-| ------------------------- | ------ | ----------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| image.repository          | string | `"opea/docsum"`               |                                                                                                                     |
-| service.port              | string | `"8888"`                      |                                                                                                                     |
-| llm-uservice.LLM_MODEL_ID | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory, must be consistent with vllm.LLM_MODEL_ID |
-| vllm.LLM_MODEL_ID         | string | `"Intel/neural-chat-7b-v3-3"` | Models id from https://huggingface.co/, or predownloaded model directory                                            |
-| global.monitoring         | bool   | `false`                       | Enable usage metrics for the service components. See ../monitoring.md before enabling!                              |
+| Key                       | Type   | Default                                 | Description                                                                                                         |
+| ------------------------- | ------ | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| image.repository          | string | `"opea/docsum"`                         |                                                                                                                     |
+| service.port              | string | `"8888"`                                |                                                                                                                     |
+| llm-uservice.LLM_MODEL_ID | string | `"meta-llama/Meta-Llama-3-8B-Instruct"` | Models id from https://huggingface.co/, or predownloaded model directory, must be consistent with vllm.LLM_MODEL_ID |
+| vllm.LLM_MODEL_ID         | string | `"meta-llama/Meta-Llama-3-8B-Instruct"` | Models id from https://huggingface.co/, or predownloaded model directory                                            |
+| global.monitoring         | bool   | `false`                                 | Enable usage metrics for the service components. See ../monitoring.md before enabling!                              |

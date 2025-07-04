@@ -76,8 +76,8 @@ data:
   {{- else }}
   {{- cat "Invalid DATAPREP_BACKEND:" .Values.DATAPREP_BACKEND | fail }}
   {{- end }}
-  HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
-  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+  HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote }}
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote }}
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.global.HF_ENDPOINT }}
   HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}

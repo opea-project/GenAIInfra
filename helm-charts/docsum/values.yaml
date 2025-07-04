@@ -63,17 +63,17 @@ llm-uservice:
   DOCSUM_BACKEND: "vLLM"
   MAX_INPUT_TOKENS: "1024"
   MAX_TOTAL_TOKENS: "2048"
-  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 
 # To override values in TGI/vLLM subcharts
 tgi:
   enabled: false
-  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
   MAX_INPUT_LENGTH: "1024"
   MAX_TOTAL_TOKENS: "2048"
 vllm:
   enabled: true
-  LLM_MODEL_ID: Intel/neural-chat-7b-v3-3
+  LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 
 # Use docsum gradio UI
 nginx:
@@ -107,7 +107,7 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_TOKEN: "insert-your-huggingface-token-here"
   # service account name to be shared with all parent/child charts.
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.
