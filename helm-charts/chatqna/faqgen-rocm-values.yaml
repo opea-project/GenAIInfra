@@ -43,17 +43,3 @@ vllm:
     readOnlyRootFilesystem: false
     runAsNonRoot: false
     runAsUser: 0
-
-# Reranking: second largest bottleneck when reranking is in use
-# (i.e. query context docs have been uploaded with data-prep)
-#
-# TODO: could vLLM be used also for reranking / embedding?
-teirerank:
-  accelDevice: "cpu"
-  image:
-    repository: ghcr.io/huggingface/text-embeddings-inference
-    tag: cpu-1.5
-  # securityContext:
-  #   readOnlyRootFilesystem: false
-  readinessProbe:
-    timeoutSeconds: 1
