@@ -300,26 +300,28 @@ on the configuration options.
 
 # Observability
 
-With [Prometheus](../helm-charts/monitoring.md) running, install script can enable monitoring of the vLLM inference engine instances.
+With [kube-prometheus-stack](../helm-charts/monitoring.md) Helm chart already deployed, install script will automatically enable monitoring for the vLLM inference engine pods.
 
-Script requires Prometheus Helm chart release name for that, e.g.
+If script did not detect it, one can specify Prometheus Helm chart release manually:
 
 ```
 release=prometheus-stack
 ./install.sh $release
 ```
 
-Port-forward Grafana.
+If script finds also a (running) Grafana instance, it will install "vLLM scaling" and "vLLM details" dashboards for it.
+
+But they can be installed also manually afterwards:
+
+```
+ns=monitoring # Grafana namespace
+kubectl apply -n $ns -f grafana/vllm-scaling.yaml -f grafana/vllm-details.yaml
+```
+
+Then port-forward Grafana.
 
 ```
 kubectl port-forward -n $ns svc/$release-grafana 3000:80
-```
-
-Install "vLLM scaling" and "vLLM details" dashboards, to the same namespace as Grafana.
-
-```
-ns=monitoring
-kubectl apply -n $ns -f grafana/vllm-scaling.yaml -f grafana/vllm-details.yaml
 ```
 
 Open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login, to view the dashboards.
