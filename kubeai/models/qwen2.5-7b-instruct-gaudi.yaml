@@ -26,5 +26,4 @@ spec:
   maxReplicas: 8
   # same as max-num-seqs (batch size)
   targetRequests: 512
-  # Change the resource profile to match your Gaudi node
-  resourceProfile: gaudi-node-1:1
+  resourceProfile: gaudi-for-text-generation::1

@@ -28,5 +28,5 @@ spec:
   minReplicas: 1
   maxReplicas: 8
   # Equals to max-num-seqs (batch-size) parameter
-    targetRequests: 512
-  resourceProfile: gaudi-node-2:1
+  targetRequests: 512
+  resourceProfile: gaudi-for-text-generation:1

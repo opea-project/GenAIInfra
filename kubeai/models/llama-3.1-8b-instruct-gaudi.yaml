@@ -4,12 +4,11 @@
 apiVersion: kubeai.org/v1
 kind: Model
 metadata:
-  # Change the name to match your --model argument in the benchmark job
   name: llama-3.1-8b-instruct-gaudi
 spec:
   features: [TextGeneration]
   url: hf://meta-llama/Meta-Llama-3.1-8B-Instruct
-  cacheProfile: nfs
+  cacheProfile: default
   engine: VLLM
   args:
     - --tensor-parallel-size=1
@@ -25,5 +24,4 @@ spec:
   maxReplicas: 8
   # same as max-num-seqs (batch size)
   targetRequests: 256
-  # Change the resource profile to match your Gaudi node
-  resourceProfile: gaudi-node-1:1
+  resourceProfile: gaudi-for-text-generation:1

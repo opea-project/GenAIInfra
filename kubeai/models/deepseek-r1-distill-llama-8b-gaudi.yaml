@@ -5,7 +5,6 @@
 apiVersion: kubeai.org/v1
 kind: Model
 metadata:
-  # Change the name to match your --model argument in the benchmark job
   name: deepseek-r1-distill-llama-8b-gaudi
 spec:
   features: [TextGeneration]
@@ -27,5 +26,4 @@ spec:
   maxReplicas: 8
   # same as max-num-seqs (batch size)
   targetRequests: 512
-  # Change the resource profile to match your Gaudi node
-  resourceProfile: gaudi-node-1:1
+  resourceProfile: gaudi-for-text-generation:1

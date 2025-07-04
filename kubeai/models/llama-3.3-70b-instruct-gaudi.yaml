@@ -23,10 +23,9 @@ spec:
   env:
     OMPI_MCA_btl_vader_single_copy_mechanism: none
     PT_HPU_ENABLE_LAZY_COLLECTIVES: "true"
-    # vLLM startup takes too long for autoscaling, especially with Gaudi
     VLLM_SKIP_WARMUP: "true"
   minReplicas: 1
   maxReplicas: 4
-  # vLLM startup takes too long for autoscaling, especially with Gaudi
+  # Equals to max-num-seqs (batch-size)
   targetRequests: 64
-  resourceProfile: gaudi-node-2:2
+  resourceProfile: gaudi-for-text-generation:2
