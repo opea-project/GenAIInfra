@@ -10,7 +10,8 @@ To install the chart, run the following:
 cd ${GenAIInfro_repo}/helm-charts/common
 export MODELDIR=/mnt/opea-models
 export MODELNAME="BAAI/bge-base-en-v1.5"
-helm install tei tei --set global.modelUseHostPath=${MODELDIR} --set EMBEDDING_MODEL_ID=${MODELNAME}
+export HFTOKEN="insert-your-huggingface-token-here"
+helm install tei tei --set global.modelUseHostPath=${MODELDIR} --set EMBEDDING_MODEL_ID=${MODELNAME} --set global.HF_TOKEN=${HFTOKEN}
 ```
 
 By default, the tei service will downloading the "BAAI/bge-base-en-v1.5" which is about 1.1GB.

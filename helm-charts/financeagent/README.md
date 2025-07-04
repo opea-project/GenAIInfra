@@ -59,12 +59,12 @@ Deploy everything on Gaudi enabled Kubernetes cluster:
 If you want to try with latest version, use `helm pull oci://ghcr.io/opea-project/charts/financeagent --version 0-latest --untar`
 
 ```
-export HUGGINGFACEHUB_API_TOKEN="YourOwnToken"
+export HF_TOKEN="YourOwnToken"
 export FINNHUB_API_KEY="YourOwnToken"
 export FINANCIAL_DATASETS_API_KEY="YourOwnToken"
 helm pull oci://ghcr.io/opea-project/charts/financeagent --untar
 helm install financeagent financeagent -f financeagent/gaudi-values.yaml \
---set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN} \
+--set global.HF_TOKEN=${HF_TOKEN} \
 --set research-agent.FINNHUB_API_KEY=${FINNHUB_API_KEY}  \
 --set research-agent.FINANCIAL_DATASETS_API_KEY=${FINANCIAL_DATASETS_API_KEY}
 ```
