@@ -33,12 +33,25 @@ The following features are available at the moment.
 - Integration with OPEA application - missing
 - Observability - tested/working
 
+## Models
+
 The following models are included.
 
-- Text generation model (llama-3.1-8b) for vLLM (CPU and Gaudi)
-- Text generation model (llama-3.3-70b) for vLLM (Gaudi)
-- Text embedding model (BAII/BGE) for vLLM (CPU)
-- Text generation model (qwen-2.5-0.5b) for OLlama (CPU)
+| Model Name                                                                             | Engine | Hardware | Task            |
+| -------------------------------------------------------------------------------------- | ------ | -------- | --------------- |
+| [bge-embed-text-cpu](models/bge-embed-text-cpu.yaml)                                   | vLLM   | 1x CPU   | Text Embeddings |
+| [deepseek-r1-distill-llama-8b-gaudi](models/deepseek-r1-distill-llama-8b-gaudi.yaml)   | vLLM   | 1x Gaudi | Text Generation |
+| [deepseek-r1-distill-llama-70b-gaudi](models/deepseek-r1-distill-llama-70b-gaudi.yaml) | vLLM   | 2x Gaudi | Text Generation |
+| [llama-3.1-8b-instruct-cpu](models/llama-3.1-8b-instruct-cpu.yaml)                     | vLLM   | 6x CPU   | Text Generation |
+| [llama-3.1-8b-instruct-gaudi](models/llama-3.1-8b-instruct-gaudi.yaml)                 | vLLM   | 1x Gaudi | Text Generation |
+| [llama-3.3-70b-instruct-gaudi](models/llama-3.3-70b-instruct-gaudi.yaml)               | vLLM   | 2x Gaudi | Text Generation |
+| [mistral-7b-instruct-v0.3-gaudi](models/mistral-7b-instruct-v0.3-gaudi.yaml)           | vLLM   | 1x Gaudi | Text Generation |
+| [mixtral-8x7b-instruct-v0.1-gaudi](models/mixtral-8x7b-instruct-v0.1-gaudi.yaml)       | vLLM   | 2x Gaudi | Text Generation |
+| [qwen2-500m-cpu](models/qwen2-500m-cpu.yaml)                                           | vLLM   | 1x CPU   | Text Generation |
+| [qwen2.5-7b-instruct-gaudi](models/qwen2.5-7b-instruct-gaudi.yaml)                     | vLLM   | 1x Gaudi | Text Generation |
+| [qwen2.5-72b-instruct-gaudi](models/qwen2.5-72b-instruct-gaudi.yaml)                   | vLLM   | 2x Gaudi | Text Generation |
+
+The number of Gaudi devices or CPUs required to run the model is included in the Hardware column.
 
 # Installation
 
