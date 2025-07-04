@@ -25,3 +25,5 @@ helm install opea-dashboard dashboard/ --set global.prometheusNamespace=PROM_NAM
 | scaling                   | bool   | `false`            | Whether to install scaling dashboard for the application services scaling, use with [HPA](../../HPA.md) |
 | global.promeheusNamespace | string | `monitoring`       | Namespace where Prometheus/Grafana are installed, needed to for Grafana to pick up installed dashboard  |
 | global.promeheusRelease   | string | `prometheus-stack` | Release name for Prometheus/Grafana Helm install, needed to for Grafana to pick up installed dashboard  |
+
+See [updating the dashboards](json/README.md).
