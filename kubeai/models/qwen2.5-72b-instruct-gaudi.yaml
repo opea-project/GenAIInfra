@@ -8,7 +8,7 @@ metadata:
 spec:
   features: [TextGeneration]
   url: hf://Qwen/Qwen2.5-72B-Instruct
-  cacheProfile: default  
+  cacheProfile: default
   engine: VLLM
   args:
     - --tensor-parallel-size=2

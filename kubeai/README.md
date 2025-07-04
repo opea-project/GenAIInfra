@@ -20,7 +20,6 @@ For now, OPEA enables a subset of the KubeAI features. In the future more KubeAI
   - [Configuration of Balloons Policy Plugin](#configuration-of-balloons-policy-plugin)
 - [Observability](#observability)
 
-
 ## Features
 
 The following features are available at the moment.
