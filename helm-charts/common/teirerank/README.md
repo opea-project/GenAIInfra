@@ -10,7 +10,8 @@ To install the chart, run the following:
 cd ${GenAIInfro_repo}/helm-charts/common
 export MODELDIR=/mnt/opea-models
 export MODELNAME="BAAI/bge-reranker-base"
-helm install teirerank teirerank --set global.modelUseHostPath=${MODELDIR} --set RERANK_MODEL_ID=${MODELNAME}
+export HFTOKEN="insert-your-huggingface-token-here"
+helm install teirerank teirerank --set global.modelUseHostPath=${MODELDIR} --set RERANK_MODEL_ID=${MODELNAME} --set global.HF_TOKEN=${HFTOKEN}
 ```
 
 By default, the teirerank service will downloading the "BAAI/bge-reranker-base" which is about 1.1GB.
