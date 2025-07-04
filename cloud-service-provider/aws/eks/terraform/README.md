@@ -49,7 +49,7 @@ Now you should have access to the cluster via the `kubectl` command.
 Deploy ChatQnA Application with Helm
 
 ```bash
-helm install -n chatqna --create-namespace chatqna oci://ghcr.io/opea-project/charts/chatqna --set service.type=LoadBalancer --set global.modelUsePVC=model-volume --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
+helm install -n chatqna --create-namespace chatqna oci://ghcr.io/opea-project/charts/chatqna --set service.type=LoadBalancer --set global.modelUsePVC=model-volume --set global.HF_TOKEN=${HFTOKEN}
 ```
 
 Create the PVC as mentioned [above](#-persistent-volume-claim)
