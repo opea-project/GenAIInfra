@@ -61,7 +61,6 @@ data:
   no_proxy: {{ tpl .Values.global.no_proxy . | quote }}
   {{- end }}
   HF_HOME: "/tmp/.cache/huggingface"
-  HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote }}
   HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote }}
   LOGFLAG: {{ .Values.LOGFLAG | quote }}
   NUMBA_CACHE_DIR: "/tmp/numba/cache"
