@@ -30,7 +30,7 @@ This guide assumes that:
 
 Follow the below steps on the server node with Intel Xeon Processor:
 
-1. [Install Ubuntu 24.04 and enable Intel TDX](https://github.com/canonical/tdx/blob/noble-24.04/README.md#setup-host-os)
+1. [Install Ubuntu 24.04 and enable Intel TDX](https://github.com/canonical/tdx/blob/3.2/README.md#setup-host-os)
 2. Check, if Intel TDX is enabled:
 
    ```bash
@@ -84,7 +84,7 @@ Follow the steps below to deploy ChatQnA:
 
    ```
    helm install $myrelease $chartname \
-      --set global.HUGGINGFACEHUB_API_TOKEN="${HFTOKEN}" --set vllm.LLM_MODEL_ID="${MODELNAME}" \
+      --set global.HF_TOKEN="${HFTOKEN}" --set vllm.LLM_MODEL_ID="${MODELNAME}" \
       --set redis-vector-db.tdxEnabled=true --set redis-vector-db.resources.limits.memory=4Gi \
       --set retriever-usvc.tdxEnabled=true --set retriever-usvc.resources.limits.memory=7Gi \
       --set tei.tdxEnabled=true --set tei.resources.limits.memory=4Gi \

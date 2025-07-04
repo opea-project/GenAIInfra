@@ -17,7 +17,7 @@ helm dependency update docsum
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="meta-llama/Meta-Llama-3-8B-Instruct"
-helm install docsum docsum --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME}
+helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservice.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME}
 # To use Gaudi device with vLLM
 # helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/gaudi-values.yaml
 # To use Gaudi device with TGI

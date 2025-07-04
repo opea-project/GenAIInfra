@@ -10,7 +10,7 @@ To install the chart, run the following:
 cd GenAIInfra/helm-charts/common
 export HFTOKEN="insert-your-huggingface-token-here"
 # To deploy <CHARTNAME> microserice on CPU
-helm install <CHARTNAME> <CHARTNAME> --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
+helm install <CHARTNAME> <CHARTNAME> --set global.HF_TOKEN=${HFTOKEN}
 
 ```
 
@@ -32,6 +32,6 @@ curl http://localhost:8080/v1/<CHARTNAME> \
 
 ## Values
 
-| Key                             | Type   | Default                              | Description           |
-| ------------------------------- | ------ | ------------------------------------ | --------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here` | HuggingFace API token |
+| Key             | Type   | Default                              | Description           |
+| --------------- | ------ | ------------------------------------ | --------------------- |
+| global.HF_TOKEN | string | `insert-your-huggingface-token-here` | HuggingFace API token |
