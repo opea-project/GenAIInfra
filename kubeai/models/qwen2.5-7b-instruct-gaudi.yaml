@@ -4,7 +4,6 @@
 apiVersion: kubeai.org/v1
 kind: Model
 metadata:
-  # Change the name to match your --model argument in the benchmark job
   name: qwen2.5-7b-instruct-gaudi
 spec:
   features: [TextGeneration]
@@ -24,6 +23,6 @@ spec:
     VLLM_SKIP_WARMUP: "true"
   minReplicas: 1
   maxReplicas: 8
-  # same as max-num-seqs (batch size)
+  # Equals to max-num-seqs (batch-size)
   targetRequests: 512
   resourceProfile: gaudi-for-text-generation::1
