@@ -79,7 +79,7 @@ kubectl explain models.kubeai.org
 
 This section describes how to deploy various models. All the examples below use Kubernetes Persistent Volumes and Claims (PV/PVC) to store the models. The Kubernetes Storage Class (SC) is called `standard`. You can tune the storage configuration to match your environment during the installation (see `cacheProfiles` in `opea-values.yaml`).
 
-The models in the examples below are deployed to `$NAMESPACE`. Please set that according to your needs.
+The models in the examples below are deployed to `$NAMESPACE`. Please set that according to your needs. Model README is located here [models](models/README.md)
 
 ```
 export NAMESPACE="kubeai"

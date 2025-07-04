@@ -9,17 +9,24 @@ metadata:
 spec:
   features: [TextGeneration]
   url: hf://deepseek-ai/DeepSeek-R1-Distill-Llama-70B
-  cacheProfile: nfs
+  cacheProfile: default
   engine: VLLM
   args:
-    - --tensor-parallel-size=8
+    - --tensor-parallel-size=2
+    - --max-model-len=2048
+    - --max-seq-len-to-capture=2048
+    - --max-num-batched-token=16000
+    - --max-num-seqs=64
+    - --gpu-memory-utilization=0.9
+    - --enable-auto-tool-choice
+    - --tool-call-parser=llama3_json
+    - --disable-log-requests
   env:
     OMPI_MCA_btl_vader_single_copy_mechanism: none
     PT_HPU_ENABLE_LAZY_COLLECTIVES: "true"
-    # vLLM startup takes too long for autoscaling, especially with Gaudi
     VLLM_SKIP_WARMUP: "true"
-
-  # scale-from-zero avoids idle instance occupying a node, but causes long delay
-  minReplicas: 0
-  maxReplicas: 1
-  resourceProfile: gaudi-for-text-generation:8
+  minReplicas: 1
+  maxReplicas: 4
+  # same as max-num-seqs (batch size)
+  targetRequests: 64
+  resourceProfile: gaudi-for-text-generation:2
