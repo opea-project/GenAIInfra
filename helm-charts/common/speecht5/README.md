@@ -27,17 +27,17 @@ huggingface-cli download --cache-dir "${MODEL_DIR}" microsoft/speecht5_tts
 huggingface-cli download --cache-dir "${MODEL_DIR}" microsoft/speecht5_hifigan
 # On K8s master node, run the following command:
 # Install using Helm with the following additional parameters:
-helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODEL_DIR}
+helm install ... --set global.offline=true,global.modelUseHostPath=${MODEL_DIR}
 ```
 
 Assuming we share the offline data on cluster level using a persistent volume (PV), first we need to create the persistent volume claim (PVC) with name `opea-model-pvc` to store the model data.
 
 ```
 # Download model openai/whisper-small at the root directory of the corresponding PV
-# ... ...
+# ...
 # Install using Helm with the following additional parameters:
 # export MODEL_PVC=opea-model-pvc
-# helm install ... ... --set global.offline=true,global.modelUsePVC=${MODEL_PVC}
+# helm install ... --set global.offline=true,global.modelUsePVC=${MODEL_PVC}
 ```
 
 ## Verify

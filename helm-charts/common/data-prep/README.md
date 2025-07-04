@@ -65,17 +65,17 @@ done
 
 # On K8s master node, run the following command:
 # Install using Helm with the following additional parameters:
-helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODELDIR}
+helm install ... --set global.offline=true,global.modelUseHostPath=${MODELDIR}
 ```
 
 Assuming we share the offline data on cluster level using a persistent volume (PV), first we need to create the persistent volume claim (PVC) with name `opea-model-pvc` to store the model data.
 
 ```
 # Download model data at the root directory of the corresponding PV
-# ... ...
+# ...
 # Install using Helm with the following additional parameters:
 # export MODELPVC=opea-model-pvc
-# helm install ... ... --set global.offline=true,global.modelUsePVC=${MOELPVC}
+# helm install ... --set global.offline=true,global.modelUsePVC=${MOELPVC}
 ```
 
 ## Verify
