@@ -179,6 +179,7 @@ jobs:
               --set research-agent.FINNHUB_API_KEY=${{ env.FINNHUB_API_KEY }} \
               --set research-agent.FINANCIAL_DATASETS_API_KEY=${{ env.FINANCIAL_DATASETS_API_KEY }} \
               --set global.HUGGINGFACEHUB_API_TOKEN=${{ env.HFTOKEN }} \
+              --set global.HF_TOKEN=${{ env.HFTOKEN }} \
               --set global.modelUseHostPath=${CHART_MOUNT} \
               ${external_llm_args} \
               --values ${{ env.CHART_FOLDER }}/${value_file} \
