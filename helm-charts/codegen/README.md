@@ -33,7 +33,7 @@ helm install codegen codegen --set global.HF_TOKEN=${HFTOKEN} --set global.model
 # To use AMD ROCm device with vLLM
 # helm install codegen codegen --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codegen/rocm-values.yaml
 # To use with external OpenAI compatible LLM endpoint
-# helm install codegen codegen -f codegen/external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST_IP="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
+# helm install codegen codegen -f codegen/variant_external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST_IP="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
 ```
 
 ### IMPORTANT NOTE
