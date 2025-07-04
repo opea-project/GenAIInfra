@@ -5,28 +5,27 @@
 apiVersion: kubeai.org/v1
 kind: Model
 metadata:
-  name: llama-3.3-70b-instruct-gaudi
+  name: mixtral-8x7b-instruct-v0.1-gaudi
 spec:
   features: [TextGeneration]
-  url: hf://meta-llama/Llama-3.3-70B-Instruct
+  url: hf://mistralai/Mixtral-8x7B-Instruct-v0.1
   cacheProfile: default
   engine: VLLM
   args:
+    - --model=mistralai/Mixtral-8x7B-Instruct-v0.1
     - --tensor-parallel-size=2
-    - --max-num-seqs=64
-    - --max-seq-len-to-capture=2048
-    - --max-model-len=2048
-    - --max-num-batched-token=16000
-    - --enable-auto-tool-choice
-    - --tool-call-parser=llama3_json
+    - --block-size=128
+    - --max-num-seqs=512
+    - --max-model-len=32000
+    - --max-seq-len-to-capture=32000
+    - --max-num-batched-token=64000
     - --disable-log-request
   env:
     OMPI_MCA_btl_vader_single_copy_mechanism: none
     PT_HPU_ENABLE_LAZY_COLLECTIVES: "true"
-    # vLLM startup takes too long for autoscaling, especially with Gaudi
     VLLM_SKIP_WARMUP: "true"
   minReplicas: 1
   maxReplicas: 4
-  # vLLM startup takes too long for autoscaling, especially with Gaudi
-  targetRequests: 64
+  # same as max-num-seqs (batch size)
+  targetRequests: 512
   resourceProfile: gaudi-node-2:2
