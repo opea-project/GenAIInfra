@@ -12,11 +12,11 @@ export MODELDIR=/mnt/opea-models
 export HFTOKEN="insert-your-huggingface-token-here"
 export LVM_MODEL_ID="llava-hf/llava-1.5-7b-hf"
 # To deploy lvm-llava microserice on CPU
-helm install lvm-serve lvm-serve --set global.modelUseHostPath=${MODELDIR} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LVM_MODEL_ID=${LVM_MODEL_ID}
+helm install lvm-serve lvm-serve --set global.modelUseHostPath=${MODELDIR} --set global.HF_TOKEN=${HFTOKEN} --set LVM_MODEL_ID=${LVM_MODEL_ID}
 # To deploy lvm-llava  microserice on Gaudi
-# helm install lvm-serve lvm-serve --set global.modelUseHostPath=${MODELDIR} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LVM_MODEL_ID=${LVM_MODEL_ID} --values lvm-serve/gaudi-values.yaml
+# helm install lvm-serve lvm-serve --set global.modelUseHostPath=${MODELDIR} --set global.HF_TOKEN=${HFTOKEN} --set LVM_MODEL_ID=${LVM_MODEL_ID} --values lvm-serve/gaudi-values.yaml
 # To deploy lvm-video-llama microserice on CPU
-helm install lvm-serve lvm-serve --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values lvm-serve/variant_video-llama-values.yaml
+helm install lvm-serve lvm-serve --set global.HF_TOKEN=${HFTOKEN} --values lvm-serve/variant_video-llama-values.yaml
 ```
 
 By default, the lvm-serve-llava service will downloading the model "llava-hf/llava-1.5-7b-hf" which is about 14GB.
@@ -51,10 +51,10 @@ curl $url -XPOST -d "$body" -H 'Content-Type: application/json'
 
 ## Values
 
-| Key                             | Type   | Default                              | Description                                                                                                                                                                                                               |
-| ------------------------------- | ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here` | Hugging Face API token                                                                                                                                                                                                    |
-| global.modelUseHostPath         | string | `""`                                 | Cached models directory, service will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
-| LVM_MODEL_ID                    | string | `"llava-hf/llava-1.5-7b-hf"`         |                                                                                                                                                                                                                           |
-| autoscaling.enabled             | bool   | `false`                              | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                     |
-| global.monitoring               | bool   | `false`                              | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                               |
+| Key                     | Type   | Default                              | Description                                                                                                                                                                                                               |
+| ----------------------- | ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| global.HF_TOKEN         | string | `insert-your-huggingface-token-here` | Hugging Face API token                                                                                                                                                                                                    |
+| global.modelUseHostPath | string | `""`                                 | Cached models directory, service will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
+| LVM_MODEL_ID            | string | `"llava-hf/llava-1.5-7b-hf"`         |                                                                                                                                                                                                                           |
+| autoscaling.enabled     | bool   | `false`                              | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                     |
+| global.monitoring       | bool   | `false`                              | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                               |

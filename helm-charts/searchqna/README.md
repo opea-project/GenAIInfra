@@ -29,10 +29,10 @@ export GOOGLE_API_KEY="insert-your-google-api-key-here"
 export GOOGLE_CSE_ID="insert-your-google-search-engine-id-here"
 
 # To run on Xeon
-helm install searchqna searchqna --set global.modelUseHostPath=${MODELDIR} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set web-retriever.GOOGLE_API_KEY=${GOOGLE_API_KEY} --web-retriever.GOOGLE_CSE_ID=${GOOGLE_CSE_ID} --set tgi.LLM_MODEL_ID=${MODEL} --set llm-uservice.LLM_MODEL_ID=${MODEL}
+helm install searchqna searchqna --set global.modelUseHostPath=${MODELDIR} --set global.HF_TOKEN=${HFTOKEN} --set web-retriever.GOOGLE_API_KEY=${GOOGLE_API_KEY} --web-retriever.GOOGLE_CSE_ID=${GOOGLE_CSE_ID} --set tgi.LLM_MODEL_ID=${MODEL} --set llm-uservice.LLM_MODEL_ID=${MODEL}
 
 # To run on Gaudi
-# helm install searchqna searchqna --set global.modelUseHostPath=${MODELDIR} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set web-retriever.GOOGLE_API_KEY=${GOOGLE_API_KEY} --web-retriever.GOOGLE_CSE_ID=${GOOGLE_CSE_ID} --set tgi.LLM_MODEL_ID=${MODEL} --set llm-uservice.LLM_MODEL_ID=${MODEL} -f gaudi-values.yaml
+# helm install searchqna searchqna --set global.modelUseHostPath=${MODELDIR} --set global.HF_TOKEN=${HFTOKEN} --set web-retriever.GOOGLE_API_KEY=${GOOGLE_API_KEY} --web-retriever.GOOGLE_CSE_ID=${GOOGLE_CSE_ID} --set tgi.LLM_MODEL_ID=${MODEL} --set llm-uservice.LLM_MODEL_ID=${MODEL} -f gaudi-values.yaml
 ```
 
 ### IMPORTANT NOTE

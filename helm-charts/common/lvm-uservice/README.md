@@ -27,17 +27,17 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export LLM_MODEL_ID="model-id-used-for-vllm"
 export LVM_BACKEND="vLLM"
 export LVM_ENDPOINT="http://myvllm"
-helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LLM_MODEL_ID=${LLM_MODEL_ID} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
+helm install lvm-uservice . --set global.HF_TOKEN=${HFTOKEN} --set LLM_MODEL_ID=${LLM_MODEL_ID} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
 
 # Use TGI as the backend
 # export LVM_BACKEND="TGI"
 # export LVM_ENDPOINT="http://tgi"
-# helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
+# helm install lvm-uservice . --set global.HF_TOKEN=${HFTOKEN} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
 
 # Use other lvm-serve engine variant as the backend, see file `values.yaml` more details
 # export LVM_ENDPOINT="http://lvm-serve"
 # export LVM_BACKEND="LLaVA"
-# helm install lvm-uservice . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
+# helm install lvm-uservice . --set global.HF_TOKEN=${HFTOKEN} --set LVM_BACKEND=${LVM_BACKEND} --set LVM_ENDPOINT=${LVM_ENDPOINT} --wait
 ```
 
 ## Verify
@@ -57,9 +57,9 @@ curl http://localhost:9000/v1/lvm \
 
 ## Values
 
-| Key                             | Type   | Default  | Description                                                                                               |
-| ------------------------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`     | Your own Hugging Face API token                                                                           |
-| LVM_BACKEND                     | string | `"vLLM"` | lvm backend engine, possible value "vLLM", "TGI", "LLaVA", "VideoLlama", "LlamaVision", "PredictionGuard" |
-| LVM_ENDPOINT                    | string | `""`     | LVM endpoint                                                                                              |
-| global.monitoring               | bool   | `false`  | Service usage metrics                                                                                     |
+| Key               | Type   | Default  | Description                                                                                               |
+| ----------------- | ------ | -------- | --------------------------------------------------------------------------------------------------------- |
+| global.HF_TOKEN   | string | `""`     | Your own Hugging Face API token                                                                           |
+| LVM_BACKEND       | string | `"vLLM"` | lvm backend engine, possible value "vLLM", "TGI", "LLaVA", "VideoLlama", "LlamaVision", "PredictionGuard" |
+| LVM_ENDPOINT      | string | `""`     | LVM endpoint                                                                                              |
+| global.monitoring | bool   | `false`  | Service usage metrics                                                                                     |
