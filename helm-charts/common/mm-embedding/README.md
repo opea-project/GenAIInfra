@@ -11,11 +11,11 @@ cd GenAIInfra/helm-charts/common
 export MODELDIR=/mnt/opea-models
 export HFTOKEN="insert-your-huggingface-token-here"
 # To deploy embedding-multimodal-bridgetower microserice on CPU
-helm install mm-embedding mm-embedding --set global.modelUseHostPath=${MODELDIR} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
+helm install mm-embedding mm-embedding --set global.modelUseHostPath=${MODELDIR} --set global.HF_TOKEN=${HFTOKEN}
 # To deploy embedding-multimodal-bridgetower microserice on Gaudi
-# helm install mm-embedding mm-embedding --set global.modelUseHostPath=${MODELDIR} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values mm-embedding/gaudi-values.yaml
+# helm install mm-embedding mm-embedding --set global.modelUseHostPath=${MODELDIR} --set global.HF_TOKEN=${HFTOKEN} --values mm-embedding/gaudi-values.yaml
 # To deploy embedding-multimodal-clip microserice on CPU
-# helm install mm-embedding mm-embedding --set global.modelUseHostPath=${MODELDIR} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values mm-embedding/variant_clip-values.yaml
+# helm install mm-embedding mm-embedding --set global.modelUseHostPath=${MODELDIR} --set global.HF_TOKEN=${HFTOKEN} --values mm-embedding/variant_clip-values.yaml
 ```
 
 By default, the embedding-multimodal-bridgetower service will download the "BridgeTower/bridgetower-large-itm-mlm-itc" model which is about 3.5GB, and the embedding-multimodal-clip service will download the "openai/clip-vit-base-patch32" model which is about 1.7GB.
@@ -50,9 +50,9 @@ curl http://localhost:6990/v1/embeddings \
 
 ## Values
 
-| Key                             | Type   | Default                              | Description                                                                                                                                                                                                               |
-| ------------------------------- | ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here` | Hugging Face API token                                                                                                                                                                                                    |
-| global.modelUseHostPath         | string | `""`                                 | Cached models directory, service will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
-| autoscaling.enabled             | bool   | `false`                              | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                     |
-| global.monitoring               | bool   | `false`                              | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                               |
+| Key                     | Type   | Default                              | Description                                                                                                                                                                                                               |
+| ----------------------- | ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| global.HF_TOKEN         | string | `insert-your-huggingface-token-here` | Hugging Face API token                                                                                                                                                                                                    |
+| global.modelUseHostPath | string | `""`                                 | Cached models directory, service will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
+| autoscaling.enabled     | bool   | `false`                              | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                     |
+| global.monitoring       | bool   | `false`                              | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                               |

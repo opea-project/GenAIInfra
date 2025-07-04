@@ -32,4 +32,4 @@ data:
   {{- if .Values.MAX_WARMUP_SEQUENCE_LENGTH }}
   MAX_WARMUP_SEQUENCE_LENGTH: {{ .Values.MAX_WARMUP_SEQUENCE_LENGTH | quote }}
   {{- end }}
-  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote}}

@@ -23,7 +23,7 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export SAFETY_GUARD_ENDPOINT="http://tgi"
 export SAFETY_GUARD_MODEL_ID="meta-llama/Meta-Llama-Guard-2-8B"
 export GUARDRAILS_BACKEND="LLAMA"
-helm install guardrails-usvc . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set SAFETY_GUARD_ENDPOINT=${SAFETY_GUARD_ENDPOINT} --set SAFETY_GUARD_MODEL_ID=${SAFETY_GUARD_MODEL_ID} --set GUARDRAILS_BACKEND=${GUARDRAILS_BACKEND} --wait
+helm install guardrails-usvc . --set global.HF_TOKEN=${HFTOKEN} --set SAFETY_GUARD_ENDPOINT=${SAFETY_GUARD_ENDPOINT} --set SAFETY_GUARD_MODEL_ID=${SAFETY_GUARD_MODEL_ID} --set GUARDRAILS_BACKEND=${GUARDRAILS_BACKEND} --wait
 ```
 
 ### Use Allen Institute AI's WildGuard models:
@@ -41,7 +41,7 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export SAFETY_GUARD_ENDPOINT="http://tgi"
 export SAFETY_GUARD_MODEL_ID="allenai/wildguard"
 export GUARDRAILS_BACKEND="WILD"
-helm install guardrails-usvc . --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set SAFETY_GUARD_ENDPOINT=${SAFETY_GUARD_ENDPOINT} --set SAFETY_GUARD_MODEL_ID=${SAFETY_GUARD_MODEL_ID} --set GUARDRAILS_BACKEND=${GUARDRAILS_BACKEND} --wait
+helm install guardrails-usvc . --set global.HF_TOKEN=${HFTOKEN} --set SAFETY_GUARD_ENDPOINT=${SAFETY_GUARD_ENDPOINT} --set SAFETY_GUARD_MODEL_ID=${SAFETY_GUARD_MODEL_ID} --set GUARDRAILS_BACKEND=${GUARDRAILS_BACKEND} --wait
 ```
 
 ## Verify
@@ -61,11 +61,11 @@ curl http://localhost:9090/v1/guardrails \
 
 ## Values
 
-| Key                             | Type   | Default                              | Description                                                     |
-| ------------------------------- | ------ | ------------------------------------ | --------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`                                 | Your own Hugging Face API token                                 |
-| image.repository                | string | `"opea/guardrails-usvc"`             |                                                                 |
-| service.port                    | string | `"9090"`                             |                                                                 |
-| SAFETY_GUARD_ENDPOINT           | string | `""`                                 | LLM endpoint                                                    |
-| SAFETY_GUARD_MODEL_ID           | string | `"meta-llama/Meta-Llama-Guard-2-8B"` | Model ID for the underlying LLM service is using                |
-| GUARDRAIL_BACKEND               | string | `"LLAMA"`                            | different gaurdrail model family to use, one of `LLAMA`, `WILD` |
+| Key                   | Type   | Default                                | Description                                                     |
+| --------------------- | ------ | -------------------------------------- | --------------------------------------------------------------- |
+| global.HF_TOKEN       | string | `"insert-your-huggingface-token-here"` | Your own Hugging Face API token                                 |
+| image.repository      | string | `"opea/guardrails-usvc"`               |                                                                 |
+| service.port          | string | `"9090"`                               |                                                                 |
+| SAFETY_GUARD_ENDPOINT | string | `""`                                   | LLM endpoint                                                    |
+| SAFETY_GUARD_MODEL_ID | string | `"meta-llama/Meta-Llama-Guard-2-8B"`   | Model ID for the underlying LLM service is using                |
+| GUARDRAIL_BACKEND     | string | `"LLAMA"`                              | different gaurdrail model family to use, one of `LLAMA`, `WILD` |
