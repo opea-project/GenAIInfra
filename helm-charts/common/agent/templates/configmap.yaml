@@ -103,7 +103,6 @@ data:
   {{- if .Values.FINANCIAL_DATASETS_API_KEY }}
   FINANCIAL_DATASETS_API_KEY: {{ .Values.FINANCIAL_DATASETS_API_KEY | quote }}
   {{- end }}
-  HUGGINGFACEHUB_API_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote }}
   HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote }}
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if .Values.global.HF_ENDPOINT }}
