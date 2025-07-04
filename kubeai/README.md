@@ -339,7 +339,7 @@ kubectl port-forward -n $ns svc/$release-grafana 3000:80
 
 Open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login, to view the dashboards.
 
-Both dashboards filter the viewed vLLM instances by the selected namespace (e.g. `kubeai`) and the model they use.
+Both [dashboards](grafana/README.md) filter the viewed vLLM instances by the selected namespace (e.g. `kubeai`) and the model they use.
 
 The scaling dashboard shows trends both for sum of metrics across all these instances, as well as the best and worst per-instance metric values at a given moment.
 ![Scaling dashboard](grafana/vllm-scaling.png)

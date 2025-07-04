@@ -27,6 +27,7 @@ configMaps, they persist even if Grafana gets re-installed, and one
 can save their updates as JSON files.
 
 Update process for the dashboards is following:
+
 - Apply configMap to K8s so it's visible in Grafana dashboards list
 - Update dashboard in Grafana
 - Save it as JSON
