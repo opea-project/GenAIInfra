@@ -66,24 +66,35 @@ vllm:
   LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
 llm-uservice:
+  enabled: true
   TEXTGEN_BACKEND: vLLM
   LLM_MODEL_ID: Qwen/Qwen2.5-Coder-7B-Instruct
 
+tei:
+  enabled: true
+
+redis-vector-db:
+  enabled: true
+
 data-prep:
+  enabled: true
   # the following are for redis-vector-db
   DATAPREP_BACKEND: "REDIS"
   INDEX_NAME: "CodeGen"
 retriever-usvc:
+  enabled: true
   # the following are for redis-vector-db
   RETRIEVER_BACKEND: "REDIS"
   INDEX_NAME: "CodeGen"
 embedding-usvc:
+  enabled: true
   EMBEDDING_BACKEND: "TEI"
 
 # Use codegen gradio UI
 nginx:
   enabled: false
 codegen-ui:
+  enabled: true
   image:
     repository: opea/codegen-gradio-ui
     tag: "latest"
@@ -104,6 +115,13 @@ codegen-ui:
 #   containerPort: 5173
 #   service:
 #     type: ClusterIP
+
+# External LLM configuration
+externalLLM:
+  enabled: false
+  LLM_SERVICE_HOST_IP: "http://your-llm-server"
+  LLM_MODEL_ID: "your-model"
+  OPENAI_API_KEY: "your-api-key"
 
 global:
   http_proxy: ""

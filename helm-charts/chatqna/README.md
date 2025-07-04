@@ -45,6 +45,9 @@ helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.model
 # To use AMD ROCm device with TGI
 #helm install chatqna chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set tgi.LLM_MODEL_ID=${MODELNAME} -f chatqna/rocm-tgi-values.yaml
 
+# To use with external OpenAI compatible LLM endpoint
+#helm install chatqna chatqna -f chatqna/external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST_IP="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
+
 # To deploy FaqGen
 #helm install faqgen chatqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f chatqna/faqgen-cpu-values.yaml
 

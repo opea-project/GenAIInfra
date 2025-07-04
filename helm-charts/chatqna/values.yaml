@@ -75,6 +75,7 @@ vllm:
   shmSize: 128Gi
   VLLM_TORCH_PROFILER_DIR: "/tmp/vllm_profile"
 data-prep:
+  enabled: true
   # the following are for redis-vector-db
   DATAPREP_BACKEND: "REDIS"
   INDEX_NAME: "rag-redis"
@@ -84,6 +85,7 @@ data-prep:
   # the following are for milvus db
   MILVUS_PORT: 19530
 retriever-usvc:
+  enabled: true
   # the following are for redis-vector-db
   RETRIEVER_BACKEND: "REDIS"
   INDEX_NAME: "rag-redis"
@@ -103,6 +105,10 @@ vllm-guardrails:
 
 # reranking
 teirerank:
+  enabled: true
+
+# Text embedding inference service
+tei:
   enabled: true
 
 # vector db choice
@@ -150,11 +156,13 @@ reranking-usvc:
   RERANK_BACKEND: "TEI"
 
 nginx:
+  enabled: true
   service:
     type: NodePort
 
-# Uncomment the following lines
+# UI configuration
 chatqna-ui:
+  enabled: true
   image:
     repository: opea/chatqna-ui
     tag: "latest"
@@ -162,6 +170,13 @@ chatqna-ui:
 
 dashboard:
   prefix: "OPEA ChatQnA"
+
+# External LLM configuration
+externalLLM:
+  enabled: false
+  LLM_SERVICE_HOST_IP: "http://your-llm-server"
+  LLM_MODEL: "your-model"
+  OPENAI_API_KEY: "your-api-key"
 
 global:
   http_proxy: ""
