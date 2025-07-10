@@ -8,7 +8,7 @@ metadata:
   labels:
     {{- include "vllm.labels" . | nindent 4 }}
 data:
-  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | quote}}
+  HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote}}
   {{- if .Values.global.HF_ENDPOINT }}
   HF_ENDPOINT: {{ .Values.global.HF_ENDPOINT | quote}}
   {{- end }}

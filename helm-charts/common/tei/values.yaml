@@ -30,7 +30,7 @@ image:
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "cpu-1.5"
+  tag: "cpu-1.7"
 
 # empty for CPU
 accelDevice: ""
@@ -111,7 +111,7 @@ global:
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_TOKEN: "insert-your-huggingface-token-here"
   # service account name to be shared with all parent/child charts.
   # If set, it will overwrite serviceAccount.name.
   # If set, and serviceAccount.create is false, it will assume this service account is already created by others.

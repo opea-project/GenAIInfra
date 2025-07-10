@@ -16,9 +16,9 @@ helm dependency update visualqna
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 # To use CPU with vLLM
-helm install visualqna visualqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR}
+helm install visualqna visualqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR}
 # To use Gaudi with vLLM
-# helm install visualqna visualqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f visualqna/gaudi-values.yaml
+# helm install visualqna visualqna --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f visualqna/gaudi-values.yaml
 
 ```
 

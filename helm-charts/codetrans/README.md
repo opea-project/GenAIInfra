@@ -16,17 +16,17 @@ export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 export MODELNAME="mistralai/Mistral-7B-Instruct-v0.3"
 # To use CPU with vLLM
-helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codetrans/cpu-values.yaml
+helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codetrans/cpu-values.yaml
 # To use CPU with TGI
-# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codetrans/cpu-tgi-values.yaml
+# helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codetrans/cpu-tgi-values.yaml
 # To use Gaudi device with vLLM
-# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codetrans/gaudi-values.yaml
+# helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codetrans/gaudi-values.yaml
 # To use Gaudi device with TGI
-# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codetrans/gaudi-tgi-values.yaml
+# helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codetrans/gaudi-tgi-values.yaml
 # To use AMD ROCm device with vLLM
-# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codetrans/rocm-values.yaml
+# helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codetrans/rocm-values.yaml
 # To use AMD ROCm device with TGI
-# helm install codetrans codetrans --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codetrans/rocm-tgi-values.yaml
+# helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codetrans/rocm-tgi-values.yaml
 ```
 
 ### IMPORTANT NOTE

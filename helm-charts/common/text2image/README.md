@@ -11,9 +11,9 @@ cd GenAIInfra/helm-charts/common
 export MODELDIR=/mnt/opea-models
 export MODELNAME=stable-diffusion-v1-5/stable-diffusion-v1-5
 export HFTOKEN="insert-your-huggingface-token-here"
-helm install text2image text2image --set global.modelUseHostPath=${MODELDIR} --set MODEL=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN}
+helm install text2image text2image --set global.modelUseHostPath=${MODELDIR} --set MODEL=${MODELNAME} --set global.HF_TOKEN=${HFTOKEN}
 # To deploy on Gaudi enabled kubernetes cluster
-# helm install text2image text2image --set global.modelUseHostPath=${MODELDIR} --set MODEL=${MODELNAME} --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --values gaudi-values.yaml
+# helm install text2image text2image --set global.modelUseHostPath=${MODELDIR} --set MODEL=${MODELNAME} --set global.HF_TOKEN=${HFTOKEN} --values gaudi-values.yaml
 ```
 
 By default, the text2image service will downloading the "stable-diffusion-v1-5/stable-diffusion-v1-5" which is about 45GB.
@@ -41,10 +41,10 @@ curl http://localhost:9379/v1/text2image \
 
 ## Values
 
-| Key                             | Type   | Default                                         | Description                                                                                                                                                                                                                  |
-| ------------------------------- | ------ | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| MODEL                           | string | `"stable-diffusion-v1-5/stable-diffusion-v1-5"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                                                                                                     |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here`            | Hugging Face API token                                                                                                                                                                                                       |
-| global.modelUseHostPath         | string | `""`                                            | Cached models directory, text2image will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
-| autoscaling.enabled             | bool   | `false`                                         | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                        |
-| global.monitoring               | bool   | `false`                                         | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                                  |
+| Key                     | Type   | Default                                         | Description                                                                                                                                                                                                                  |
+| ----------------------- | ------ | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| MODEL                   | string | `"stable-diffusion-v1-5/stable-diffusion-v1-5"` | Models id from https://huggingface.co/, or predownloaded model directory                                                                                                                                                     |
+| global.HF_TOKEN         | string | `insert-your-huggingface-token-here`            | Hugging Face API token                                                                                                                                                                                                       |
+| global.modelUseHostPath | string | `""`                                            | Cached models directory, text2image will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to container as /data directory. Set this to null/empty will force it to download model. |
+| autoscaling.enabled     | bool   | `false`                                         | Enable HPA autoscaling for the service deployment based on metrics it provides. See [HPA instructions](../../HPA.md) before enabling!                                                                                        |
+| global.monitoring       | bool   | `false`                                         | Enable usage metrics for the service. Required for HPA. See [monitoring instructions](../../monitoring.md) before enabling!                                                                                                  |

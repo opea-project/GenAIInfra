@@ -98,4 +98,4 @@ global:
   modelUseHostPath: ""
   modelUsePVC: ""
 
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_TOKEN: "insert-your-huggingface-token-here"

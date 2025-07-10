@@ -21,15 +21,15 @@ scripts/update_dependency.sh
 helm dependency update audioqna
 export HFTOKEN="insert-your-huggingface-token-here"
 # To use CPU with vLLM
-helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/cpu-values.yaml
+helm install audioqna audioqna --set global.HF_TOKEN=${HFTOKEN} -f audioqna/cpu-values.yaml
 # To use CPU with TGI
-# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/cpu-tgi-values.yaml
+# helm install audioqna audioqna --set global.HF_TOKEN=${HFTOKEN} -f audioqna/cpu-tgi-values.yaml
 # To use CPU with vLLM with multilang tts
-# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f cpu-multilang-values.yaml
+# helm install audioqna audioqna --set global.HF_TOKEN=${HFTOKEN} -f cpu-multilang-values.yaml
 # To use Gaudi device with vLLM
-# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/gaudi-values.yaml
+# helm install audioqna audioqna --set global.HF_TOKEN=${HFTOKEN} -f audioqna/gaudi-values.yaml
 # To use Gaudi device with TGI
-# helm install audioqna audioqna --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} -f audioqna/gaudi-tgi-values.yaml
+# helm install audioqna audioqna --set global.HF_TOKEN=${HFTOKEN} -f audioqna/gaudi-tgi-values.yaml
 ```
 
 ### IMPORTANT NOTE

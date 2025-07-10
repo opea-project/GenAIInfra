@@ -9,7 +9,7 @@ metadata:
 spec:
   features: [TextGeneration]
   url: hf://meta-llama/Meta-Llama-3.1-8B-Instruct
-  cacheProfile: standard
+  cacheProfile: default
   engine: VLLM
   args:
     - --max-model-len=32768

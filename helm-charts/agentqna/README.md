@@ -51,9 +51,9 @@ Deploy everything on Gaudi enabled Kubernetes cluster:
 If you want to try with latest version, use `helm pull oci://ghcr.io/opea-project/charts/agentqna --version 0-latest --untar`
 
 ```
-export HUGGINGFACEHUB_API_TOKEN="YourOwnToken"
+export HF_TOKEN="YourOwnToken"
 helm pull oci://ghcr.io/opea-project/charts/agentqna --untar
-helm install agentqna agentqna -f agentqna/gaudi-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+helm install agentqna agentqna -f agentqna/gaudi-values.yaml --set global.HF_TOKEN=${HF_TOKEN}
 
 # To use AMD ROCm device
 cd GenAIInfra/helm-charts/
@@ -62,10 +62,10 @@ helm dependency update agentqna
 export HFTOKEN="your_huggingface_token"
 export MODELDIR="/mnt/opea-models"
 # with vLLM
-helm upgrade --install agentqna agentqna -f agentqna/rocm-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+helm upgrade --install agentqna agentqna -f agentqna/rocm-values.yaml --set global.HF_TOKEN=${HF_TOKEN}
 
 # with TGI
-helm upgrade --install agentqna agentqna -f agentqna/rocm-tgi-values.yaml --set global.HUGGINGFACEHUB_API_TOKEN=${HUGGINGFACEHUB_API_TOKEN}
+helm upgrade --install agentqna agentqna -f agentqna/rocm-tgi-values.yaml --set global.HF_TOKEN=${HF_TOKEN}
 ```
 
 ## Verify

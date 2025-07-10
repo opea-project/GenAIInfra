@@ -29,17 +29,17 @@ export TEI_EMBEDDING_ENDPOINT="http://tei"
 # Install retriever-usvc with Redis DB backend
 export RETRIEVER_BACKEND="REDIS"
 export DB_HOST="redis-vector-db"
-helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set REDIS_HOST=${DB_HOST}
+helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HF_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set REDIS_HOST=${DB_HOST}
 
 # Install retriever-usvc with Milvus DB backend
 # export RETRIEVER_BACKEND="MILVUS"
 # export DB_HOST="milvus"
-# helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set MILVUS_HOST=${DB_HOST}
+# helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HF_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set MILVUS_HOST=${DB_HOST}
 
 # Install retriever-usvc with Qdrant DB backend
 # export RETRIEVER_BACKEND="QDRANT"
 # export DB_HOST="qdrant"
-# helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HUGGINGFACEHUB_API_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set QDRANT_HOST=${DB_HOST}
+# helm install retriever-usvc . --set TEI_EMBEDDING_ENDPOINT=${TEI_EMBEDDING_ENDPOINT} --set global.HF_TOKEN=${HF_TOKEN} --set RETRIEVER_BACKEND=${RETRIEVER_BACKEND} --set QDRANT_HOST=${DB_HOST}
 ```
 
 ## Verify
@@ -60,16 +60,16 @@ curl http://localhost:7000/v1/retrieval  \
 
 ## Values
 
-| Key                             | Type   | Default   | Description                                                                                             |
-| ------------------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`      | Your own Hugging Face API token                                                                         |
-| service.port                    | string | `"7000"`  |                                                                                                         |
-| RETRIEVER_BACKEND               | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT"                                            |
-| REDIS_HOST                      | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration    |
-| MILVUS_HOST                     | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration |
-| QDRANT_HOST                     | string | `""`      | Qdrant service URL host, only valid for Qdrant, please see `values.yaml` for other Qdrant configuration |
-| TEI_EMBEDDING_ENDPOINT          | string | `""`      |                                                                                                         |
-| global.monitoring               | bool   | `false`   |                                                                                                         |
+| Key                    | Type   | Default   | Description                                                                                             |
+| ---------------------- | ------ | --------- | ------------------------------------------------------------------------------------------------------- |
+| global.HF_TOKEN        | string | `""`      | Your own Hugging Face API token                                                                         |
+| service.port           | string | `"7000"`  |                                                                                                         |
+| RETRIEVER_BACKEND      | string | `"REDIS"` | vector DB backend to use, one of "REDIS", "MILVUS", "QDRANT"                                            |
+| REDIS_HOST             | string | `""`      | Redis service URL host, only valid for Redis, please see `values.yaml` for other Redis configuration    |
+| MILVUS_HOST            | string | `""`      | Milvus service URL host, only valid for Milvus, please see `values.yaml` for other Milvus configuration |
+| QDRANT_HOST            | string | `""`      | Qdrant service URL host, only valid for Qdrant, please see `values.yaml` for other Qdrant configuration |
+| TEI_EMBEDDING_ENDPOINT | string | `""`      |                                                                                                         |
+| global.monitoring      | bool   | `false`   |                                                                                                         |
 
 ## Milvus support
 

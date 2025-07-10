@@ -37,12 +37,12 @@ curl http://localhost:9090/v1/chat/completions \
 
 For global options, see Global Options.
 
-| Key                             | Type   | Default        | Description                                                                             |
-| ------------------------------- | ------ | -------------- | --------------------------------------------------------------------------------------- |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `""`           | Your own Hugging Face API token                                                         |
-| image.repository                | string | `"opea/agent"` |                                                                                         |
-| service.port                    | string | `"9090"`       |                                                                                         |
-| llm_endpoint_url                | string | `""`           | LLM endpoint                                                                            |
-| toolHostPath                    | string | `""`           | hostPath to be mounted to agent's /home/user/tools, used for passing files for tools    |
-| toolPVC                         | string | `""`           | Same as toolHostPath, but use PVC. You can only specify one of toolHostPath and toolPVC |
-| global.monitoring               | bop;   | false          | Service usage metrics                                                                   |
+| Key               | Type   | Default        | Description                                                                             |
+| ----------------- | ------ | -------------- | --------------------------------------------------------------------------------------- |
+| global.HF_TOKEN   | string | `""`           | Your own Hugging Face API token                                                         |
+| image.repository  | string | `"opea/agent"` |                                                                                         |
+| service.port      | string | `"9090"`       |                                                                                         |
+| llm_endpoint_url  | string | `""`           | LLM endpoint                                                                            |
+| toolHostPath      | string | `""`           | hostPath to be mounted to agent's /home/user/tools, used for passing files for tools    |
+| toolPVC           | string | `""`           | Same as toolHostPath, but use PVC. You can only specify one of toolHostPath and toolPVC |
+| global.monitoring | bop;   | false          | Service usage metrics                                                                   |

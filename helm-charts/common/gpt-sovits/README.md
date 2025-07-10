@@ -27,17 +27,17 @@ export MODEL_DIR=/mnt/opea-models
 huggingface-cli download --local-dir-use-symlinks False --local-dir "${MODEL_DIR}/lj1995/GPT-SoVITS" lj1995/GPT-SoVITS
 # On K8s master node, run the following command:
 # Install using Helm with the following additional parameters:
-helm install ... ... --set global.offline=true,global.modelUseHostPath=${MODEL_DIR}
+helm install ... --set global.offline=true,global.modelUseHostPath=${MODEL_DIR}
 ```
 
 Assuming we share the offline data on cluster level using a persistent volume (PV), first we need to create the persistent volume claim (PVC) with name `opea-model-pvc` to store the model data.
 
 ```
 # Download model openai/whisper-small at the root directory of the corresponding PV
-# ... ...
+# ...
 # Install using Helm with the following additional parameters:
 # export MODEL_PVC=opea-model-pvc
-# helm install ... ... --set global.offline=true,global.modelUsePVC=${MODEL_PVC}
+# helm install ... --set global.offline=true,global.modelUsePVC=${MODEL_PVC}
 ```
 
 ## Verify
@@ -68,11 +68,11 @@ curl localhost:9880/ -XPOST -d '{
 
 ## Values
 
-| Key                             | Type   | Default                              | Description                                                                                                                                                                                                                                                                                                                                 |
-| ------------------------------- | ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| image.repository                | string | `"opea/gpt-sovits"`                  |                                                                                                                                                                                                                                                                                                                                             |
-| service.port                    | string | `"9880"`                             |                                                                                                                                                                                                                                                                                                                                             |
-| global.HUGGINGFACEHUB_API_TOKEN | string | `insert-your-huggingface-token-here` | Hugging Face API token                                                                                                                                                                                                                                                                                                                      |
-| global.offline                  | bool   | `false`                              | Whether to run the microservice in air gapped environment                                                                                                                                                                                                                                                                                   |
-| global.modelUseHostPath         | string | `""`                                 | Cached models directory on Kubernetes node, service will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to the container as /data directory. Setting this to null/empty will force the pod to download the model every time during startup. May not be set if `global.modelUsePVC` is also set. |
-| global.modelUsePVC              | string | `""`                                 | Name of Persistent Volume Claim to use for model cache. The Persistent Volume will be mounted to the container as /data directory. Setting this to null/empty will force the pod to download the model every time during startup. May not be set if `global.modelUseHostPath` is also set.                                                  |
+| Key                     | Type   | Default                              | Description                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------- | ------ | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| image.repository        | string | `"opea/gpt-sovits"`                  |                                                                                                                                                                                                                                                                                                                                             |
+| service.port            | string | `"9880"`                             |                                                                                                                                                                                                                                                                                                                                             |
+| global.HF_TOKEN         | string | `insert-your-huggingface-token-here` | Hugging Face API token                                                                                                                                                                                                                                                                                                                      |
+| global.offline          | bool   | `false`                              | Whether to run the microservice in air gapped environment                                                                                                                                                                                                                                                                                   |
+| global.modelUseHostPath | string | `""`                                 | Cached models directory on Kubernetes node, service will not download if the model is cached here. The host path "modelUseHostPath" will be mounted to the container as /data directory. Setting this to null/empty will force the pod to download the model every time during startup. May not be set if `global.modelUsePVC` is also set. |
+| global.modelUsePVC      | string | `""`                                 | Name of Persistent Volume Claim to use for model cache. The Persistent Volume will be mounted to the container as /data directory. Setting this to null/empty will force the pod to download the model every time during startup. May not be set if `global.modelUseHostPath` is also set.                                                  |

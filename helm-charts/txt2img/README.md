@@ -13,9 +13,9 @@ helm dependency update txt2img
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
 # To run on Xeon
-helm install txt2img txt2img --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR}
+helm install txt2img txt2img --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR}
 # To run on Gaudi
-#helm install txt2img txt2img --set global.HUGGINGFACEHUB_API_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f txt2img/gaudi-values.yaml
+#helm install txt2img txt2img --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} -f txt2img/gaudi-values.yaml
 ```
 
 ### IMPORTANT NOTE

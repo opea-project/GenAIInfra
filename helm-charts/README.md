@@ -45,14 +45,14 @@ Refer to [GenAIComps](https://github.com/opea-project/GenAIComps) for details of
 ### From Source Code
 
 These Helm charts are designed to be easy to start, which means you can deploy a workload easily without further options.
-However, `HUGGINGFACEHUB_API_TOKEN` should be set in most cases for a workload to start up correctly.
+However, `HF_TOKEN` should be set in most cases for a workload to start up correctly.
 Examples of deploy a workload:
 
 ```
 export myrelease=mytgi
 export chartname=common/tgi
 helm dependency update $chartname
-helm install $myrelease $chartname --set global.HUGGINGFACEHUB_API_TOKEN="insert-your-huggingface-token-here"
+helm install $myrelease $chartname --set global.HF_TOKEN="insert-your-huggingface-token-here"
 ```
 
 Depending on your environment, you may want to customize some of the options, see [Helm Charts Options](#helm-charts-options) for further information.
@@ -76,7 +76,7 @@ There are global options (which should be shared across all components of a work
 
 | Helm chart | Options                         | Description                                                                                                                                                                                                                                                                    |
 | ---------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| global     | HUGGINGFACEHUB_API_TOKEN        | Your own HuggingFace token, there is no default value. If not set, you might fail to start the component.                                                                                                                                                                      |
+| global     | HF_TOKEN                        | Your own HuggingFace token, there is no default value. If not set, you might fail to start the component.                                                                                                                                                                      |
 | global     | http_proxy https_proxy no_proxy | Proxy settings. If you are running the workloads behind the proxy, you'll have to add your proxy settings here.                                                                                                                                                                |
 | global     | modelUsePVC                     | The PersistentVolumeClaim you want to use as HuggingFace hub cache. Default "" means not using PVC. Only one of modelUsePVC/modelUseHostPath can be set.                                                                                                                       |
 | global     | modelUseHostPath                | If you don't have Persistent Volume in your k8s cluster and want to use local directory as HuggingFace hub cache, set modelUseHostPath to your local directory name. Note that this can't share across nodes. Default "". Only one of modelUsePVC/modelUseHostPath can be set. |

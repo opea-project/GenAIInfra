@@ -33,12 +33,25 @@ The following features are available at the moment.
 - Integration with OPEA application - missing
 - Observability - tested/working
 
+## Models
+
 The following models are included.
 
-- Text generation model (llama-3.1-8b) for vLLM (CPU and Gaudi)
-- Text generation model (llama-3.3-70b) for vLLM (Gaudi)
-- Text embedding model (BAII/BGE) for vLLM (CPU)
-- Text generation model (qwen-2.5-0.5b) for OLlama (CPU)
+| Model Name                                                                             | Engine | Hardware | Task            |
+| -------------------------------------------------------------------------------------- | ------ | -------- | --------------- |
+| [bge-embed-text-cpu](models/bge-embed-text-cpu.yaml)                                   | vLLM   | 1x CPU   | Text Embeddings |
+| [deepseek-r1-distill-llama-8b-gaudi](models/deepseek-r1-distill-llama-8b-gaudi.yaml)   | vLLM   | 1x Gaudi | Text Generation |
+| [deepseek-r1-distill-llama-70b-gaudi](models/deepseek-r1-distill-llama-70b-gaudi.yaml) | vLLM   | 2x Gaudi | Text Generation |
+| [llama-3.1-8b-instruct-cpu](models/llama-3.1-8b-instruct-cpu.yaml)                     | vLLM   | 6x CPU   | Text Generation |
+| [llama-3.1-8b-instruct-gaudi](models/llama-3.1-8b-instruct-gaudi.yaml)                 | vLLM   | 1x Gaudi | Text Generation |
+| [llama-3.3-70b-instruct-gaudi](models/llama-3.3-70b-instruct-gaudi.yaml)               | vLLM   | 2x Gaudi | Text Generation |
+| [mistral-7b-instruct-v0.3-gaudi](models/mistral-7b-instruct-v0.3-gaudi.yaml)           | vLLM   | 1x Gaudi | Text Generation |
+| [mixtral-8x7b-instruct-v0.1-gaudi](models/mixtral-8x7b-instruct-v0.1-gaudi.yaml)       | vLLM   | 2x Gaudi | Text Generation |
+| [qwen2-500m-cpu](models/qwen2-500m-cpu.yaml)                                           | vLLM   | 1x CPU   | Text Generation |
+| [qwen2.5-7b-instruct-gaudi](models/qwen2.5-7b-instruct-gaudi.yaml)                     | vLLM   | 1x Gaudi | Text Generation |
+| [qwen2.5-72b-instruct-gaudi](models/qwen2.5-72b-instruct-gaudi.yaml)                   | vLLM   | 2x Gaudi | Text Generation |
+
+The number of Gaudi devices or CPUs required to run the model is included in the Hardware column.
 
 # Installation
 
@@ -79,7 +92,7 @@ kubectl explain models.kubeai.org
 
 This section describes how to deploy various models. All the examples below use Kubernetes Persistent Volumes and Claims (PV/PVC) to store the models. The Kubernetes Storage Class (SC) is called `standard`. You can tune the storage configuration to match your environment during the installation (see `cacheProfiles` in `opea-values.yaml`).
 
-The models in the examples below are deployed to `$NAMESPACE`. Please set that according to your needs.
+The models in the examples below are deployed to `$NAMESPACE`. Please set that according to your needs. Model README is located here [models](models/README.md)
 
 ```
 export NAMESPACE="kubeai"
@@ -190,9 +203,9 @@ Enjoy the answer!
 ## Overview
 
 [NRI plugins][nri-plugins] provide a way to
-optimize the resource placement of applications in a Kubernetes cluster. They
-connect to the container runtime and are able, for example, to adjust the CPU
-and memory pinning of containers.
+optimize the node-level resource assignment of applications in a Kubernetes
+cluster. They connect to the container runtime and are able, for example, to
+adjust the CPU and memory pinning of containers.
 
 This section provides a guide on how to use the
 [Balloons Policy][balloons-policy] plugin from the [NRI Plugins][nri-plugins]
@@ -200,9 +213,9 @@ project to optimize the performance of CPU-backed KubeAI profiles.
 
 ## Installation of Balloons Policy Plugin
 
-> **NOTE:** To avoid disturbing already running workloads it is recommended to
-> install the NRI plugin to an empty node (do it right after node bootstrap, or
-> drain the node before installation).
+> **NOTE:** To avoid disturbing already running workloads, it is recommended to
+> install the NRI plugin on an empty node, that is, before deploying workloads
+> (do it right after node bootstrap, or drain the node before installation).
 
 Install the balloons policy plugin with Helm:
 
@@ -212,11 +225,11 @@ helm repo update nri-plugins
 helm install -n kube-system balloons nri-plugins/nri-resource-policy-balloons
 ```
 
-> **NOTE**: With containerd version earlier than v2.0 you need to enable
-> the NRI support in the containerd configuration file. Instead of manual
-> configuration you can provide `--set nri.runtime.patchConfig=true` to the Helm
-> command above, which will automatically patch the containerd configuration
-> file on each node.
+> **NOTE**: With containerd version prior to v2.0, first enable
+> NRI support in the containerd configuration file. Instead of manually
+> editing the configuration file, you can pass in `--set
+nri.runtime.patchConfig=true` to the Helm command above, which will
+> automatically patch the containerd configuration file on each node.
 
 Verify that the balloons policy plugin is running on every node:
 
@@ -228,8 +241,8 @@ nri-resource-policy-balloons   2         2         2       2            2       
 
 ## Configuration of Balloons Policy Plugin
 
-The aim of the balloons policy configuration is to isolate the model (inference
-engine) containers to minimize the impact of containers on each other.
+The aim of the balloons policy configuration is to isolate the model inference
+engine containers, to minimize noisy neighbor effects between containers.
 
 An example configuration for the current CPU-backed model profiles:
 
@@ -280,7 +293,7 @@ spec:
 EOF
 ```
 
-The configuration above allocates full CPU cores to inference engine
+The configuration above allocates full CPU cores to the inference engine
 containers by hiding hyperthreads from them. For example, if a pod requests 6
 CPUs, the balloon will reserve 6 full physical CPU cores (i.e., 12 logical
 CPUs), but configure the cpuset so that the inference instance can only use 6
@@ -300,26 +313,28 @@ on the configuration options.
 
 # Observability
 
-With [Prometheus](../helm-charts/monitoring.md) running, install script can enable monitoring of the vLLM inference engine instances.
+With [kube-prometheus-stack](../helm-charts/monitoring.md) Helm chart already deployed, install script will automatically enable monitoring for the vLLM inference engine pods.
 
-Script requires Prometheus Helm chart release name for that, e.g.
+If script did not detect it, one can specify Prometheus Helm chart release manually:
 
 ```
 release=prometheus-stack
 ./install.sh $release
 ```
 
-Port-forward Grafana.
+If script finds also a (running) Grafana instance, it will install "vLLM scaling" and "vLLM details" dashboards for it.
+
+But they can be installed also manually afterwards:
+
+```
+ns=monitoring # Grafana namespace
+kubectl apply -n $ns -f grafana/vllm-scaling.yaml -f grafana/vllm-details.yaml
+```
+
+Then port-forward Grafana.
 
 ```
 kubectl port-forward -n $ns svc/$release-grafana 3000:80
-```
-
-Install "vLLM scaling" and "vLLM details" dashboards, to the same namespace as Grafana.
-
-```
-ns=monitoring
-kubectl apply -n $ns -f grafana/vllm-scaling.yaml -f grafana/vllm-details.yaml
 ```
 
 Open web-browser to `http://localhost:3000` with `admin` / `prom-operator` given as the username / password for login, to view the dashboards.
