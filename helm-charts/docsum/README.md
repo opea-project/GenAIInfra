@@ -27,7 +27,7 @@ helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --set global.modelUs
 # To use AMD ROCm device with TGI
 # helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/rocm-tgi-values.yaml
 # To use with OPEA KubeAI models installed to same cluster
-# helm install docsum docsum -f docsum/variant_external-llm-values.yaml --set externalLLM.LLM_MODEL="some-KubeAI-model" externalLLM.LLM_SERVICE_HOST_IP="http://kubeai.kubeai/openai" --set externalLLM.LLM_SERVICE_PORT="" --set externalLLM.OPENAI_API_KEY=""
+# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/variant_external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST="http://kubeai.kubeai/openai" --set externalLLM.LLM_SERVER_PORT="" --set externalLLM.LLM_MODEL="some-KubeAI-model" --set externalLLM.OPENAI_API_KEY=""
 # To use with other external OpenAI compatible LLM endpoints
 # helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/variant_external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
 ```
