@@ -36,13 +36,13 @@ spec:
           env:
             - name: LLM_SERVICE_HOST_IP
               {{- if .Values.externalLLM.enabled }}
-              value: {{ .Values.externalLLM.LLM_SERVICE_HOST_IP }}
+              value: {{ .Values.externalLLM.LLM_SERVER_HOST }}
               {{- else }}
               value: {{ include "llm-uservice.fullname" (index .Subcharts "llm-uservice") | quote }}
               {{- end }}
             - name: LLM_SERVICE_PORT
               {{- if .Values.externalLLM.enabled }}
-              value: {{ .Values.externalLLM.LLM_SERVICE_PORT | default "80" | quote }}
+              value: {{ .Values.externalLLM.LLM_SERVER_PORT | default "80" | quote }}
               {{- else }}
               value: {{ index .Values "llm-uservice" "service" "port" | quote }}
               {{- end }}

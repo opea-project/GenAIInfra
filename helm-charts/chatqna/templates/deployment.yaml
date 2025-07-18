@@ -45,7 +45,7 @@ spec:
               {{- else if .Values.tgi.enabled }}
               value: {{ .Release.Name }}-tgi
               {{- else if .Values.externalLLM.enabled }}
-              value: {{ .Values.externalLLM.LLM_SERVER_HOST_IP }}
+              value: {{ .Values.externalLLM.LLM_SERVER_HOST }}
               {{- else }}
               {{- fail "ChatQnA needs a LLM inference backend!" }}
               {{- end }}

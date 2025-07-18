@@ -75,6 +75,7 @@ vllm:
   shmSize: 128Gi
   VLLM_TORCH_PROFILER_DIR: "/tmp/vllm_profile"
 data-prep:
+  # if set to false, need to set also nginx.enabled=false
   enabled: true
   # the following are for redis-vector-db
   DATAPREP_BACKEND: "REDIS"
@@ -162,6 +163,7 @@ nginx:
 
 # UI configuration
 chatqna-ui:
+  # if set to false, need to set also nginx.enabled=false
   enabled: true
   image:
     repository: opea/chatqna-ui
@@ -174,7 +176,8 @@ dashboard:
 # External LLM configuration
 externalLLM:
   enabled: false
-  LLM_SERVICE_HOST_IP: "http://your-llm-server"
+  LLM_SERVER_HOST: "http://your-llm-server"
+  LLM_SERVER_PORT: "80"
   LLM_MODEL: "your-model"
   OPENAI_API_KEY: "your-api-key"
 
