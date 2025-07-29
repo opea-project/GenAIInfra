@@ -32,8 +32,11 @@ helm install codegen codegen --set global.HF_TOKEN=${HFTOKEN} --set global.model
 # helm install codegen codegen --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set tgi.LLM_MODEL_ID=${MODELNAME} -f codegen/gaudi-tgi-values.yaml
 # To use AMD ROCm device with vLLM
 # helm install codegen codegen --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codegen/rocm-values.yaml
-# To use with external OpenAI compatible LLM endpoint
-# helm install codegen codegen -f codegen/variant_external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST_IP="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
+
+# To use with OPEA KubeAI LLM models installed to same cluster
+# helm install codegen codegen -f codegen/variant_external-llm-values.yaml --set global.HF_TOKEN=${HFTOKEN} --set externalLLM.LLM_MODEL="your-kubeai-model" --set externalLLM.LLM_SERVER_HOST="http://kubeai.kubeai/openai"  --set externalLLM.LLM_SERVER_PORT="" --set externalLLM.OPENAI_API_KEY=""
+# To use with other external OpenAI compatible LLM endpoints
+# helm install codegen codegen -f codegen/variant_external-llm-values.yaml --set global.HF_TOKEN=${HFTOKEN} --set externalLLM.LLM_MODEL="your-model" --set externalLLM.LLM_SERVER_HOST="http://your-llm-server"  --set externalLLM.LLM_SERVER_PORT="80" --set externalLLM.OPENAI_API_KEY="your-api-key"
 ```
 
 ### IMPORTANT NOTE
