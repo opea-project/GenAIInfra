@@ -1,0 +1,86 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+image:
+  repository: "insert-your-image-here"  # image-registry.openshift-image-registry.svc:5000/<namespace>/llm-tgi
+  tag: "latest"
+  pullPolicy: IfNotPresent
+
+source:
+  gitRef: main
+  gitUri: https://github.com/opea-project/GenAIComps.git
+  type: Git
+
+strategy:
+  type: Docker
+  dockerfilePath: comps/llms/text-generation/tgi/Dockerfile
+
+replicaCount: 1
+
+PYTHONPATH: /home/user/.local/lib/python3.11/site-packages:/home/user  # don't edit unless you have a good reason
+HOME: /tmp/home
+
+service:
+  type: ClusterIP
+  port: 9000
+
+servingRuntime:
+  name: "insert-name-of-deployed-model-here"
+  namespace: "insert-project-name-where-model-is-deployed"
+
+global:
+  clusterDomain: "insert-your-cluster-domain-here"
+
+job:
+  image: image-registry.openshift-image-registry.svc:5000/openshift/cli:latest
+
+serviceAccountName: codegen-sa
+
+rbac:
+  roles:
+    - name: codegen-rhoai-role
+      createRole: true
+      apiGroups:
+        - '""'
+        - '"apps"'
+        - '"batch"'
+        - '"machineconfiguration.openshift.io"'
+        - '"rbac.authorization.k8s.io"'
+        - '"security.openshift.io"'
+        - '"datasciencecluster.opendatahub.io"'
+        - '"operator.knative.dev"'
+        - '"build.openshift.io"'
+      scope:
+        cluster: true
+      resources:
+        - namespaces
+        - secrets
+        - datascienceclusters
+        - clusterrolebindings
+        - knativeservings
+        - jobs
+        - buildconfigs
+        - builds
+        - buildconfigs/instantiate
+      verbs:
+        - "create"
+        - "get"
+        - "list"
+        - "patch"
+        - "update"
+        - "use"
+        - "watch"
+  roleBindings:
+    - name: codegen-rhoai-rolebind
+      createBinding: true
+      scope:
+        cluster: true
+        namespace: ""
+      subjects:
+        kind: ServiceAccount
+        name: codegen-sa
+        namespace: insert-your-namespace-here
+        apiGroup: ""
+      roleRef:
+        kind: ClusterRole
+        name: codegen-rhoai-role
