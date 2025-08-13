@@ -25,4 +25,4 @@ spec:
   maxReplicas: 8
   # Equals to max-num-seqs (batch-size)
   targetRequests: 512
-  resourceProfile: gaudi-for-text-generation::1
+  resourceProfile: gaudi-for-text-generation:1
