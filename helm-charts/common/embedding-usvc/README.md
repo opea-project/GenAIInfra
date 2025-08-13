@@ -10,7 +10,7 @@ The OPEA embedding microservice depends on one of the following backend services
 
 - multimodal embedding BridgeTower: please refer to [mm-embedding](../mm-embedding) chart for more information.
 
-- prediction guard: please refert to external [Prediction Guard](https://predictionguard.com) for more information.
+- prediction guard: please refer to external [Prediction Guard](https://predictionguard.com) for more information.
 
 First, you need to get the dependent service deployed, i.e. deploy the `tei` helm chart, `mm-embedding` helm chart, or contact prediction guard to get access info.
 
