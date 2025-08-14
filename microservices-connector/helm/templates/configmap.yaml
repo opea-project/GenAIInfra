@@ -1,5 +1,6 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
+# TODO: these makefiles should became templates
 
 apiVersion: v1
 kind: ConfigMap
@@ -8,6 +9,48 @@ metadata:
   labels:
     {{- include "gmc.labels" . | nindent 4 }}
 data:
-{{ (.Files.Glob "manifests_common/*.yaml").AsConfig | indent 2 }}
+  {{- range $path, $_ := .Files.Glob "manifests_common/*.yaml" }}
+  {{ $filename := index (splitList "." ($path | base)) 0 }}
+  {{ $imageKey := index $.Values.images $filename }}
+  {{ $hugToken := required "The hugToken value is required and must be set in values.yaml" $.Values.tokens.hugToken }}
+  {{ $path | base }}: |
+    {{- $content := $.Files.Get $path }}
+    {{- if and $imageKey.repository $imageKey.image $imageKey.tag }}
+      {{- $content = regexReplaceAll "(?s)(containers:.*?image:\\s*).*?(\n)" $content (printf "${1}%s/%s:%s${2}" $imageKey.repository $imageKey.image $imageKey.tag) }}
+    {{- end }}
+    {{- if $imageKey.envs }}
+      {{- range $key, $value := $imageKey.envs }}
+        {{- $key := $key }}
+        {{- $value := $value | quote }}
+        {{- $envVar := printf "%s: %s" $key $value | nindent 2 }}
+        {{- $content = regexReplaceAll "(\\s+data:.*)" $content (printf "${1}%s" $envVar) }}
+      {{- end }}
+    {{- end }}
+    {{- if $imageKey.envfile }}
+      {{- $envContent := $.Files.Get (printf "envs/%s" $imageKey.envfile) }}
+      {{- $envContent = regexReplaceAll "#.*" $envContent "" | trim }}
+      {{- $envContent = regexReplaceAll "(?m)\\s+$" $envContent "" }}
+      {{- $envContent = $envContent | replace "=" ": " }}
+      {{- $envContent = regexReplaceAll "(?m)^([^:]+):\\s*[\"']?(.*?)[\"']?$" $envContent "$1: \"$2\"" }}
+      {{- $envContent = $envContent | nindent 2 }}
+      {{- $content = regexReplaceAll "(\\s+data:.*)" $content (printf "${1}%s" $envContent) }}
+    {{- end }}
+    {{- $content = regexReplaceAll "(.*http_proxy:\\s*).*" $content (printf "$1\"%s\"" $.Values.proxy.httpProxy) }}
+    {{- $content = regexReplaceAll "(.*https_proxy:\\s*).*" $content (printf "$1\"%s\"" $.Values.proxy.httpsProxy) }}
+    {{- $content = regexReplaceAll "(.*no_proxy:\\s*).*" $content (printf "$1\"%s\"" $.Values.proxy.noProxy) }}
+    {{- $content = regexReplaceAll "(.*(HF_TOKEN|HUGGINGFACEHUB_API_TOKEN):\\s*.*\\n?)" $content "" }}
+    {{- if $.Values.imagePullSecrets }}
+      {{- $imagePullSecrets := toYaml $.Values.imagePullSecrets | nindent 10 }}
+      {{- $content = regexReplaceAllLiteral "containers:" $content (printf "imagePullSecrets:%s\n      containers:" $imagePullSecrets) }}
+    {{- end }}
+    {{- $content | nindent 4 }}
+  {{- end }}
+  # router cannot be an actual template as some parameters are being set by gmc
   gmc-router.yaml: |
-    {{- .Files.Get "gmc-router.yaml" | nindent 4 }}
+    {{- $routerContent := .Files.Get "gmc-router.yaml" }}
+    {{- $routerContent = regexReplaceAll "(image:\\s*).*" $routerContent (printf "${1}%s/%s:%s" .Values.images.gmcRouter.repository .Values.images.gmcRouter.image .Values.images.gmcRouter.tag) }}
+    {{- if .Values.imagePullSecrets }}
+      {{- $imagePullSecrets := toYaml .Values.imagePullSecrets | nindent 10 }}
+      {{- $routerContent = regexReplaceAllLiteral "containers:" $routerContent (printf "imagePullSecrets:%s\n      containers:" $imagePullSecrets) }}
+    {{- end }}
+    {{- $routerContent | nindent 4 }}

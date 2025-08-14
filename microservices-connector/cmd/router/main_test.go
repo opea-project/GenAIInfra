@@ -112,7 +112,8 @@ func TestSimpleModelChainer(t *testing.T) {
 		"Authorization": {"Bearer Token"},
 	}
 
-	res, _, err := routeStep("root", gmcGraph, jsonBytes, jsonBytes, headers)
+	ctx := context.Background()
+	res, _, err := routeStep(ctx, "root", gmcGraph, jsonBytes, jsonBytes, headers)
 	if err != nil {
 		return
 	}
@@ -218,7 +219,8 @@ func TestSimpleServiceEnsemble(t *testing.T) {
 	headers := http.Header{
 		"Authorization": {"Bearer Token"},
 	}
-	res, _, err := routeStep("root", gmcGraph, jsonBytes, jsonBytes, headers)
+	ctx := context.Background()
+	res, _, err := routeStep(ctx, "root", gmcGraph, jsonBytes, jsonBytes, headers)
 	if err != nil {
 		return
 	}
@@ -458,7 +460,8 @@ func TestMCWithCondition(t *testing.T) {
 	headers := http.Header{
 		"Authorization": {"Bearer Token"},
 	}
-	res, _, err := routeStep("root", gmcGraph, jsonBytes, jsonBytes, headers)
+	ctx := context.Background()
+	res, _, err := routeStep(ctx, "root", gmcGraph, jsonBytes, jsonBytes, headers)
 	if err != nil {
 		return
 	}
@@ -547,7 +550,8 @@ func TestCallServiceWhenNoneHeadersToPropagateIsEmpty(t *testing.T) {
 		Condition: "instances.#(modelId==\"1\")",
 	}
 
-	res, _, err := callService(step, service1Url.String(), jsonBytes, headers)
+	ctx := context.Background()
+	res, _, err := callService(ctx, step, service1Url.String(), jsonBytes, headers)
 	if err != nil {
 		return
 	}
@@ -581,7 +585,9 @@ func TestMalformedURL(t *testing.T) {
 		},
 		Condition: "instances.#(modelId==\"1\")",
 	}
-	_, response, err := callService(step, malformedURL, []byte{}, http.Header{})
+
+	ctx := context.Background()
+	_, response, err := callService(ctx, step, malformedURL, []byte{}, http.Header{})
 	if err != nil {
 		assert.Equal(t, 500, response)
 	}

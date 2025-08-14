@@ -46,7 +46,18 @@ var (
 		"Whisper",
 		"WhisperGaudi",
 		"DataPrep",
-		"UI",
+
+		// EntRag specific
+		// please keep that in sync with internal/controller/gmconnector_controller.go:41 const section
+		"Ingestion",
+		"TorchserveEmbedding",
+		"TorchserveEmbeddingGaudi",
+		"LLMGuardInput",
+		"LLMGuardOutput",
+		"VLLMGaudi",
+		"VLLM",
+		"VLLMOpenVino",
+		"LanguageDetection",
 	}
 )
 

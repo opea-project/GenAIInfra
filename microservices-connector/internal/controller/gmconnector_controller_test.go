@@ -311,7 +311,7 @@ var _ = Describe("GMConnector Controller", func() {
 			}, &appsv1.Deployment{})).To(Succeed())
 
 			Expect(k8sClient.Get(ctx, types.NamespacedName{
-				Name:      "llm-uservice-config",
+				Name:      "llm-usvc-config",
 				Namespace: "default",
 			}, &corev1.ConfigMap{})).To(Succeed())
 
