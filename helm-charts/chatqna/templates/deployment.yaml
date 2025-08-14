@@ -65,26 +65,47 @@ spec:
               {{- else if .Values.externalLLM.enabled }}
               value: {{ .Values.externalLLM.LLM_MODEL }}
               {{- end }}
-            {{- if .Values.externalLLM.enabled }}
+            {{- if .Values.externalAuthorization.needed }}
             - name: OPENAI_API_KEY
-              value: {{ .Values.externalLLM.OPENAI_API_KEY }}
+              value: {{ .Values.externalAuthorization.OPENAI_API_KEY }}
             {{- end }}
+            {{- if .Values.externalRerank.enabled }}
+            - name: RERANK_SERVER_HOST_IP
+              value: {{ .Values.externalRerank.RERANK_SERVER_HOST }}
+            - name: RERANK_SERVER_PORT
+              value: {{ .Values.externalRerank.RERANK_SERVER_PORT | default "80" | quote }}
+            {{- else }}
             - name: RERANK_SERVER_HOST_IP
               value: {{ .Release.Name }}-teirerank
             - name: RERANK_SERVER_PORT
               value: "80"
+            {{- end }}
             - name: RETRIEVER_SERVICE_HOST_IP
               value: {{ .Release.Name }}-retriever-usvc
             - name: RETRIEVER_SERVICE_PORT
               value: "7000"
+            {{- if .Values.externalEmbed.enabled }}
+            - name: EMBEDDING_SERVER_HOST_IP
+              value: {{ .Values.externalEmbed.EMBEDDING_SERVER_HOST }}
+            - name: EMBEDDING_SERVER_PORT
+              value: {{ .Values.externalEmbed.EMBEDDING_SERVER_PORT | default "80" | quote }}
+            {{- else }}
             - name: EMBEDDING_SERVER_HOST_IP
               value: {{ .Release.Name }}-tei
             - name: EMBEDDING_SERVER_PORT
               value: "80"
+            {{- end }}
+            {{- if .Values.externalGuardrails.enabled }}
+            - name: GUARDRAIL_SERVICE_HOST_IP
+              value: {{ .Values.externalGuardrails.GUARDRAILS_SERVER_HOST }}
+            - name: GUARDRAIL_SERVICE_PORT
+              value: {{ .Values.externalGuardrails.GUARDRAILS_SERVER_PORT | default "80" | quote }}
+            {{- else }}
             - name: GUARDRAIL_SERVICE_HOST_IP
               value: {{ .Release.Name }}-guardrails-usvc
             - name: GUARDRAIL_SERVICE_PORT
               value: "9090"
+            {{- end }}
             - name: LLM_SERVICE_HOST_IP
               value: {{ .Release.Name }}-llm-uservice
             - name: LLM_SERVICE_PORT
