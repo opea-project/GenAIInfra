@@ -1,17 +1,18 @@
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 
-# External LLM configuration override
-externalLLM:
-  enabled: true  # Enable external LLM service
-  LLM_SERVER_HOST: "http://your-llm-server"  # External LLM service host
-  LLM_SERVER_PORT: "80"  # Port for the external LLM service
-  LLM_MODEL: "your-model"  # LLM model to use
-  OPENAI_API_KEY: "your-api-key"  # OpenAI API key for authentication
-
-# Disable internal LLM service when using external LLM
+# External LLM configuration - configures llm-uservice to use external LLM providers
+# This keeps the llm-uservice wrapper (required for /v1/docsum endpoint) but connects it to external LLMs
 llm-uservice:
-  enabled: false
+  enabled: true  # Keep the wrapper service for DocSum compatibility
+  env:
+    # Configure llm-uservice to use external OpenAI-compatible endpoints
+    LLM_ENDPOINT: "https://api.openai.com/v1"  # External LLM API endpoint (OpenAI, vLLM, TGI, etc.)
+    OPENAI_API_KEY: "${OPENAI_API_KEY}"        # API key for authentication
+    LLM_MODEL_ID: "gpt-4-turbo"               # Model to use
+    TEXTGEN_BACKEND: "openai"                  # Backend type for OpenAI-compatible endpoints
+
+# Disable local inference services since we're using external LLMs
 vllm:
   enabled: false
 tgi:

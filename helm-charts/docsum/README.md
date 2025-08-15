@@ -26,10 +26,11 @@ helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --set global.modelUs
 # helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/rocm-values.yaml
 # To use AMD ROCm device with TGI
 # helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/rocm-tgi-values.yaml
-# To use with OPEA KubeAI models installed to same cluster
-# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/variant_external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST="http://kubeai.kubeai/openai" --set externalLLM.LLM_SERVER_PORT="" --set externalLLM.LLM_MODEL="some-KubeAI-model" --set externalLLM.OPENAI_API_KEY=""
-# To use with other external OpenAI compatible LLM endpoints
-# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/variant_external-llm-values.yaml --set externalLLM.LLM_SERVER_HOST="http://your-llm-server" --set externalLLM.LLM_MODEL="your-model" --set externalLLM.OPENAI_API_KEY="your-api-key"
+# To use with external OpenAI-compatible LLM endpoints (OpenAI, vLLM, TGI, etc.)
+# This configures the llm-uservice to connect to external LLM providers while maintaining DocSum compatibility
+# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/variant_external-llm-values.yaml --set llm-uservice.env.OPENAI_API_KEY="your-api-key" --set llm-uservice.env.LLM_MODEL_ID="gpt-4-turbo"
+# For vLLM/TGI endpoints:
+# helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/variant_external-llm-values.yaml --set llm-uservice.env.LLM_ENDPOINT="http://your-vllm-server/v1" --set llm-uservice.env.LLM_MODEL_ID="your-model"
 ```
 
 ## Verify
