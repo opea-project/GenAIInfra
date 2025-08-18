@@ -107,6 +107,7 @@ LLM_MODEL_ID: meta-llama/Meta-Llama-3-8B-Instruct
 OMPI_MCA_btl_vader_single_copy_mechanism: ""
 PT_HPU_ENABLE_LAZY_COLLECTIVES: ""
 VLLM_CPU_KVCACHE_SPACE: ""
+VLLM_CPU_OMP_THREADS_BIND: ""
 
 global:
   http_proxy: ""

@@ -27,6 +27,9 @@ data:
   {{- if .Values.VLLM_CPU_KVCACHE_SPACE }}
   VLLM_CPU_KVCACHE_SPACE: {{ .Values.VLLM_CPU_KVCACHE_SPACE | quote}}
   {{- end }}
+  {{- if .Values.VLLM_CPU_OMP_THREADS_BIND }}
+  VLLM_CPU_OMP_THREADS_BIND: {{ .Values.VLLM_CPU_OMP_THREADS_BIND | quote}}
+  {{- end }}
   {{- if .Values.VLLM_SKIP_WARMUP }}
   VLLM_SKIP_WARMUP: {{ .Values.VLLM_SKIP_WARMUP | quote }}
   {{- end }}
