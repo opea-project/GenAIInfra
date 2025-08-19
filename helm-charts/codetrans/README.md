@@ -14,7 +14,7 @@ scripts/update_dependency.sh
 helm dependency update codetrans
 export HFTOKEN="insert-your-huggingface-token-here"
 export MODELDIR="/mnt/opea-models"
-export MODELNAME="mistralai/Mistral-7B-Instruct-v0.3"
+export MODELNAME="Qwen/Qwen2.5-Coder-7B-Instruct"
 # To use CPU with vLLM
 helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.modelUseHostPath=${MODELDIR} --set llm-uservcie.LLM_MODEL_ID=${MODELNAME} --set vllm.LLM_MODEL_ID=${MODELNAME} -f codetrans/cpu-values.yaml
 # To use CPU with TGI
@@ -31,7 +31,7 @@ helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.m
 
 ### IMPORTANT NOTE
 
-1. To use model `mistralai/Mistral-7B-Instruct-v0.3`, you should first goto the [huggingface model card](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) to apply for the model access first. You need to make sure your huggingface token has at least read access to that model.
+1. To use model `Qwen/Qwen2.5-Coder-7B-Instruct`, you should first goto the [huggingface model card](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) to apply for the model access first. You need to make sure your huggingface token has at least read access to that model.
 
 2. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
 
@@ -70,5 +70,5 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 | ----------------- | ------ | -------------------------------------- | -------------------------------------------------------------------------------------- |
 | image.repository  | string | `"opea/codetrans"`                     |                                                                                        |
 | service.port      | string | `"7777"`                               |                                                                                        |
-| tgi.LLM_MODEL_ID  | string | `"mistralai/Mistral-7B-Instruct-v0.3"` | Models id from https://huggingface.co/, or predownloaded model directory               |
+| tgi.LLM_MODEL_ID  | string | `"Qwen/Qwen2.5-Coder-7B-Instruct"` | Models id from https://huggingface.co/, or predownloaded model directory               |
 | global.monitoring | bool   | `false`                                | Enable usage metrics for the service components. See ../monitoring.md before enabling! |
