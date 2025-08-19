@@ -55,7 +55,7 @@ podSecurityContext: {}
 # Workaround for https://github.com/opea-project/GenAIComps/issues/1549
 # Need to run as root until upstream fixed and released.
 securityContext:
-  readOnlyRootFilesystem: true
+  readOnlyRootFilesystem: false
   allowPrivilegeEscalation: false
   runAsNonRoot: false
   runAsUser: 0
