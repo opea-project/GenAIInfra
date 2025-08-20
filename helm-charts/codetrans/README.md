@@ -31,9 +31,7 @@ helm install codetrans codetrans --set global.HF_TOKEN=${HFTOKEN} --set global.m
 
 ### IMPORTANT NOTE
 
-1. To use model `Qwen/Qwen2.5-Coder-7B-Instruct`, you should first goto the [huggingface model card](https://huggingface.co/mistralai/Mistral-7B-Instruct-v0.3) to apply for the model access first. You need to make sure your huggingface token has at least read access to that model.
-
-2. Make sure your `MODELDIR` exists on the node where your workload is schedueled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
+Make sure your `MODELDIR` exists on the node where your workload is scheduled so you can cache the downloaded model for next time use. Otherwise, set `global.modelUseHostPath` to 'null' if you don't want to cache the model.
 
 ## Verify
 
