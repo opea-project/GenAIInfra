@@ -5,12 +5,10 @@
 # This keeps the llm-uservice wrapper (required for /v1/docsum endpoint) but connects it to external LLMs
 llm-uservice:
   enabled: true  # Keep the wrapper service for DocSum compatibility
-  env:
-    # Configure llm-uservice to use external OpenAI-compatible endpoints
-    LLM_ENDPOINT: "https://api.openai.com/v1"  # External LLM API endpoint (OpenAI, vLLM, TGI, etc.)
-    OPENAI_API_KEY: "${OPENAI_API_KEY}"        # API key for authentication
-    LLM_MODEL_ID: "gpt-4-turbo"               # Model to use
-    TEXTGEN_BACKEND: "openai"                  # Backend type for OpenAI-compatible endpoints
+  DOCSUM_BACKEND: "vLLM"                      # Use vLLM backend for OpenAI-compatible APIs
+  LLM_ENDPOINT: "https://api.openai.com"      # External LLM API endpoint (omit /v1 suffix)
+  OPENAI_API_KEY: "${OPENAI_API_KEY}"         # API key for authentication
+  LLM_MODEL_ID: "gpt-4-turbo"                 # Model to use
 
 # Disable local inference services since we're using external LLMs
 vllm:
