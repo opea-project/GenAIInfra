@@ -66,9 +66,9 @@ Open a browser to access `http://<k8s-node-ip-address>:${port}` to play with the
 
 ## Values
 
-| Key               | Type   | Default                                | Description                                                                            |
-| ----------------- | ------ | -------------------------------------- | -------------------------------------------------------------------------------------- |
-| image.repository  | string | `"opea/codetrans"`                     |                                                                                        |
-| service.port      | string | `"7777"`                               |                                                                                        |
+| Key               | Type   | Default                            | Description                                                                            |
+| ----------------- | ------ | ---------------------------------- | -------------------------------------------------------------------------------------- |
+| image.repository  | string | `"opea/codetrans"`                 |                                                                                        |
+| service.port      | string | `"7777"`                           |                                                                                        |
 | tgi.LLM_MODEL_ID  | string | `"Qwen/Qwen2.5-Coder-7B-Instruct"` | Models id from https://huggingface.co/, or predownloaded model directory               |
-| global.monitoring | bool   | `false`                                | Enable usage metrics for the service components. See ../monitoring.md before enabling! |
+| global.monitoring | bool   | `false`                            | Enable usage metrics for the service components. See ../monitoring.md before enabling! |
