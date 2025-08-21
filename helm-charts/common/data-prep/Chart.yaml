@@ -22,7 +22,7 @@ dependencies:
     repository: https://zilliztech.github.io/milvus-helm/
     condition: milvus.enabled
   - name: qdrant
-    version: 1.13.1
+    version: 1.15.3
     repository: https://qdrant.github.io/qdrant-helm
     condition: qdrant.enabled
   - name: commonlib
