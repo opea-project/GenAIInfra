@@ -37,7 +37,7 @@ jobs:
             local chart="$1"
             helm dependency update ${chart}
             helm package $chart
-            helm push ${chart}-0-latest.tgz oci://ghcr.io/opea-project/chart
+            helm push ${chart}-0-latest.tgz oci://ghcr.io/opea-project/charts
           }
           # args: <parent-dir|include-string> <path-cut-depth> <exclude-pattern>
           update_charts () {
