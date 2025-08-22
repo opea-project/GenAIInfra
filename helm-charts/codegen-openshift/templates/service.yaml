@@ -1,0 +1,19 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "codegen.fullname" . }}
+  labels:
+    {{- include "codegen.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - port: {{ .Values.service.port }}
+      targetPort: {{ .Values.port }}
+      protocol: TCP
+      name: codegen
+  selector:
+    {{- include "codegen.selectorLabels" . | nindent 4 }}
+    app: {{ include "codegen.fullname" . }}

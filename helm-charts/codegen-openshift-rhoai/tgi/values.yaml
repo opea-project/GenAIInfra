@@ -1,0 +1,35 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+global:
+  huggingfacehubApiToken: "insert-your-huggingface-token-here"
+
+image:
+  repository: ghcr.io/huggingface/text-generation-inference
+  tag: 2.1.0
+
+servingRuntimeName: tgi-magicoder-s-ds-6.7b-cpu
+servingRuntimeDisplayName: Text Generation Inference Magicoder-S-DS-6.7B on CPU
+
+args:
+  - --model-id
+  - /mnt/models/--ise-uiuc--Magicoder-S-DS-6.7B/snapshots/b3ed7cb1578a3643ceaf2ebf996a3d8e85f75d8f
+  - --port=8080
+  - --json-output
+  - --max-input-length
+  - "1024"
+  - --max-batch-prefill-tokens
+  - "32256"
+
+accelerators: {}
+
+resources: {}
+
+volumes:
+  - emptyDir:
+      sizeLimit: 300Gi
+    name: model-volume
+
+volumeMounts:
+  - mountPath: /data
+    name: model-volume

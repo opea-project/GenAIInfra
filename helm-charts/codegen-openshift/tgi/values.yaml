@@ -1,0 +1,30 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+model:
+  id: ise-uiuc/Magicoder-S-DS-6.7B
+
+replicaCount: 1
+
+port: 8080
+
+image:
+  repository: ghcr.io/huggingface/text-generation-inference
+  tag: 2.1.0
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+
+resources: {}
+
+args: []
+
+volumeMounts:
+  - mountPath: /data
+    name: model-volume
+
+volumes:
+  - emptyDir:
+      sizeLimit: 50Gi
+    name: model-volume

@@ -1,0 +1,30 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+kind: BuildConfig
+apiVersion: build.openshift.io/v1
+metadata:
+  name: {{ include "llm-uservice.fullname" . }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  output:
+    to:
+      kind: "ImageStreamTag"
+      name: "llm-tgi:latest"
+  failedBuildsHistoryLimit: 5
+  successfulBuildsHistoryLimit: 5
+  nodeSelector: null
+  postCommit: {}
+  resources: {}
+  runPolicy: SerialLatestOnly
+  source:
+    git:
+      ref: {{ .Values.source.gitRef }}
+      uri: {{ .Values.source.gitUri }}
+    type: {{ .Values.source.type }}
+  strategy:
+    type: {{ .Values.strategy.type }}
+    dockerStrategy:
+      dockerfilePath: {{ .Values.strategy.dockerfilePath }}
+  triggers:
+  - type: ConfigChange

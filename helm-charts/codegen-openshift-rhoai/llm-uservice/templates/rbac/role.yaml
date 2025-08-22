@@ -1,0 +1,31 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+{{- range $key, $value := .Values.rbac.roles }}
+{{- if $value.createRole }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+{{- if $value.scope.cluster }}
+kind: ClusterRole
+metadata:
+  name: {{ .name }}
+{{- else }}
+kind: Role
+metadata:
+  name: {{ $value.name }}
+{{- end }}
+rules:
+  - apiGroups:
+{{- range $value.apiGroups }}
+      - {{ . }}
+{{- end }}
+    resources:
+{{- range $value.resources }}
+      - {{ . }}
+{{- end }}
+    verbs:
+{{- range $value.verbs }}
+      - {{ . }}
+{{- end }}
+{{- end }}
+{{- end }}

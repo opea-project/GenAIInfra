@@ -1,0 +1,21 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  labels:
+    {{- include "codegen.labels" . | nindent 4 }}
+  name: {{ .Release.Name }}-tls
+spec:
+  host: codegen-react-ui-{{ .Release.Namespace }}.apps.{{ .Values.global.clusterDomain }}
+  path: /v1/codegen
+  port:
+    targetPort: codegen
+  tls:
+    termination: edge
+  to:
+    kind: Service
+    name: codegen
+    weight: 100
+  wildcardPolicy: None

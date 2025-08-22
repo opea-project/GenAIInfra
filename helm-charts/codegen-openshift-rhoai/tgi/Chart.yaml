@@ -1,0 +1,8 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v2
+name: tgi
+description: A Helm chart for deploying servingruntime for ise-uiuc/Magicoder-S-DS-6.7B model on Red Hat OpenShift with Red Hat OpenShift AI
+type: application
+version: 1.0.0

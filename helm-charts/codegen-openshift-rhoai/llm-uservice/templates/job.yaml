@@ -1,0 +1,34 @@
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-rhoai-istio-rootca-cert-secret
+spec:
+  template:
+    spec:
+      containers:
+      - image: {{ .Values.job.image }}
+        command:
+        - /bin/bash
+        - -c
+        - |
+          oc wait --for=condition=ReconcileComplete=True dsc/rhods-datasciencecluster --timeout=-1s
+          oc wait --for condition=Ready=True knativeserving -n knative-serving knative-serving --timeout=-1s
+          '/tmp/create-rhoai-istio-rootca-cert-secret.sh'
+        name: create-rhoai-istio-rootca-cert-secret
+        volumeMounts:
+          - mountPath: /tmp/create-rhoai-istio-rootca-cert-secret.sh
+            name: create-rhoai-istio-rootca-cert-secret
+            subPath: create-rhoai-istio-rootca-cert-secret.sh
+      volumes:
+        - name: create-rhoai-istio-rootca-cert-secret
+          configMap:
+            name: create-rhoai-istio-rootca-cert-secret
+            defaultMode: 0755
+      dnsPolicy: ClusterFirst
+      restartPolicy: Never
+      serviceAccount: {{ .Values.serviceAccountName }}
+      serviceAccountName: {{ .Values.serviceAccountName }}
+      terminationGracePeriodSeconds: 400
