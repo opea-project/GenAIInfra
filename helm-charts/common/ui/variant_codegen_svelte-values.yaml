@@ -3,7 +3,7 @@
 
 image:
   repository: opea/codegen-ui
-  tag: "latest"
+  tag: "1.4"
 
 containerPort: 5173
 

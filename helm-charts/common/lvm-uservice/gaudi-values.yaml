@@ -10,7 +10,7 @@ vllm:
   accelDevice: "gaudi"
   image:
     repository: opea/vllm-gaudi
-    tag: "latest"
+    tag: "1.4"
   OMPI_MCA_btl_vader_single_copy_mechanism: none
   PT_HPUGRAPH_DISABLE_TENSOR_CACHE: "false"
   VLLM_SKIP_WARMUP: true

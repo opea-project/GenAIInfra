@@ -1,0 +1,360 @@
+---
+# Source: embedding-usvc/charts/mm-embedding/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: embedding-usvc-mm-embedding-config
+  labels:
+    helm.sh/chart: mm-embedding-1.4.0
+    app.kubernetes.io/name: mm-embedding
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  PORT: "6990"
+  HF_TOKEN: "insert-your-huggingface-token-here"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+  HF_HOME: "/tmp/.cache/huggingface"
+  HF_HUB_CACHE: "/data"
+---
+# Source: embedding-usvc/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: embedding-usvc-config
+  labels:
+    helm.sh/chart: embedding-usvc-1.4.0
+    app.kubernetes.io/name: embedding-usvc
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  MULTIMODAL_EMBEDDING: "true"
+  EMBEDDING_COMPONENT_NAME: "OPEA_MULTIMODAL_EMBEDDING_BRIDGETOWER"
+  MMEI_EMBEDDING_ENDPOINT: "http://embedding-usvc-mm-embedding"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+---
+# Source: embedding-usvc/charts/mm-embedding/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: embedding-usvc-mm-embedding
+  labels:
+    helm.sh/chart: mm-embedding-1.4.0
+    app.kubernetes.io/name: mm-embedding
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: mm-embedding
+      protocol: TCP
+      name: mm-embedding
+  selector:
+    app.kubernetes.io/name: mm-embedding
+    app.kubernetes.io/instance: embedding-usvc
+---
+# Source: embedding-usvc/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: embedding-usvc
+  labels:
+    helm.sh/chart: embedding-usvc-1.4.0
+    app.kubernetes.io/name: embedding-usvc
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6000
+      targetPort: 6000
+      protocol: TCP
+      name: embedding-usvc
+  selector:
+    app.kubernetes.io/name: embedding-usvc
+    app.kubernetes.io/instance: embedding-usvc
+---
+# Source: embedding-usvc/charts/mm-embedding/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedding-usvc-mm-embedding
+  labels:
+    helm.sh/chart: mm-embedding-1.4.0
+    app.kubernetes.io/name: mm-embedding
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mm-embedding
+      app.kubernetes.io/instance: embedding-usvc
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: mm-embedding-1.4.0
+        app.kubernetes.io/name: mm-embedding
+        app.kubernetes.io/instance: embedding-usvc
+        app.kubernetes.io/version: "1.1"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: embedding-usvc-mm-embedding-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model BridgeTower/bridgetower-large-itm-mlm-itc ... ";
+              huggingface-cli download --cache-dir /data "BridgeTower/bridgetower-large-itm-mlm-itc";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--BridgeTower--bridgetower-large-itm-mlm-itc
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      containers:
+        - name: mm-embedding
+          envFrom:
+            - configMapRef:
+                name: embedding-usvc-mm-embedding-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: false
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/embedding-multimodal-bridgetower:1.4"
+          args:
+            - "--model_name_or_path"
+            - "BridgeTower/bridgetower-large-itm-mlm-itc"
+          ports:
+            - name: mm-embedding
+              containerPort: 6990
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: mm-embedding
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: mm-embedding
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: tmp
+          emptyDir: {}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
+      terminationGracePeriodSeconds: 120
+---
+# Source: embedding-usvc/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: embedding-usvc
+  labels:
+    helm.sh/chart: embedding-usvc-1.4.0
+    app.kubernetes.io/name: embedding-usvc
+    app.kubernetes.io/instance: embedding-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: embedding-usvc
+      app.kubernetes.io/instance: embedding-usvc
+  template:
+    metadata:
+      
+      labels:
+        app.kubernetes.io/name: embedding-usvc
+        app.kubernetes.io/instance: embedding-usvc
+    spec:      
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: wait-for-embedding
+          envFrom:
+            - configMapRef:
+                name: embedding-usvc-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              endpoint=${MMEI_EMBEDDING_ENDPOINT};
+              proto=$(echo $endpoint | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\1/p');
+              host=$(echo $endpoint | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\2/p');
+              port=$(echo $endpoint | sed -n 's/.*\(http[s]\?\):\/\/\([^ :]\+\):\?\([0-9]*\).*/\3/p');
+              if [ -z "$port" ]; then
+                  port=80;
+                  [[ "$proto" = "https" ]] && port=443;
+              fi;
+              wait_timeout=1;
+              total_timeout=60;
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${host} ${port}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${host}:${port} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
+              done;
+              echo "${host}:${port} is reachable within $j seconds.";
+      containers:
+        - name: embedding-usvc
+          envFrom:
+            - configMapRef:
+                name: embedding-usvc-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/embedding:1.4"
+          ports:
+            - name: embedding-usvc
+              containerPort: 6000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: embedding-usvc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: embedding-usvc
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Source: embedding-usvc/charts/mm-embedding/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: embedding-usvc/charts/mm-embedding/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: embedding-usvc/charts/mm-embedding/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+---
+# Source: embedding-usvc/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: embedding-usvc/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

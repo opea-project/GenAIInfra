@@ -1,0 +1,183 @@
+---
+# Source: text2image/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: text2image-config
+  labels:
+    helm.sh/chart: text2image-1.4.0
+    app.kubernetes.io/name: text2image
+    app.kubernetes.io/instance: text2image
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+data:
+  MODEL: "stable-diffusion-v1-5/stable-diffusion-v1-5"
+  HF_TOKEN: "insert-your-huggingface-token-here"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+  HF_HOME: "/tmp/.cache/huggingface"
+  HF_HUB_CACHE: "/data"
+---
+# Source: text2image/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: text2image
+  labels:
+    helm.sh/chart: text2image-1.4.0
+    app.kubernetes.io/name: text2image
+    app.kubernetes.io/instance: text2image
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 9379
+      targetPort: text2image
+      protocol: TCP
+      name: text2image
+  selector:
+    app.kubernetes.io/name: text2image
+    app.kubernetes.io/instance: text2image
+---
+# Source: text2image/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: text2image
+  labels:
+    helm.sh/chart: text2image-1.4.0
+    app.kubernetes.io/name: text2image
+    app.kubernetes.io/instance: text2image
+    app.kubernetes.io/version: "1.1"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: text2image
+      app.kubernetes.io/instance: text2image
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: text2image-1.4.0
+        app.kubernetes.io/name: text2image
+        app.kubernetes.io/instance: text2image
+        app.kubernetes.io/version: "1.1"
+        app.kubernetes.io/managed-by: Helm
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: text2image-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model stable-diffusion-v1-5/stable-diffusion-v1-5 ... ";
+              huggingface-cli download --cache-dir /data "stable-diffusion-v1-5/stable-diffusion-v1-5";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--stable-diffusion-v1-5--stable-diffusion-v1-5
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      containers:
+        - name: text2image
+          envFrom:
+            - configMapRef:
+                name: text2image-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/text2image:1.4"
+          ports:
+            - name: text2image
+              containerPort: 9379
+              protocol: TCP
+          readinessProbe:
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: text2image
+          startupProbe:
+            failureThreshold: 120
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: text2image
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: tmp
+          emptyDir: {}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
+      terminationGracePeriodSeconds: 120
+---
+# Source: text2image/templates/horizontal-pod-autoscaler.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: text2image/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: text2image/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#

@@ -3,7 +3,7 @@
 
 image:
   repository: opea/faqgen-ui
-  tag: "latest"
+  tag: "1.4"
 
 containerPort: 5173
 

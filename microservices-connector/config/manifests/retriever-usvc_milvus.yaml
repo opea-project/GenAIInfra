@@ -241,10 +241,10 @@ kind: ConfigMap
 metadata:
   name: retriever-usvc-tei-config
   labels:
-    helm.sh/chart: tei-0-latest
+    helm.sh/chart: tei-1.4.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/version: "cpu-1.6"
     app.kubernetes.io/managed-by: Helm
 data:
   MODEL_ID: "BAAI/bge-base-en-v1.5"
@@ -258,6 +258,7 @@ data:
   HF_HUB_DISABLE_PROGRESS_BARS: "1"
   HF_HUB_ENABLE_HF_TRANSFER: "0"
   # More options for HPU
+  HF_TOKEN: "insert-your-huggingface-token-here"
 ---
 # Source: retriever-usvc/templates/configmap.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -268,66 +269,28 @@ kind: ConfigMap
 metadata:
   name: retriever-usvc-config
   labels:
-    helm.sh/chart: retriever-usvc-0-latest
+    helm.sh/chart: retriever-usvc-1.4.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
   TEI_EMBEDDING_ENDPOINT: "http://retriever-usvc-tei"
-  REDIS_URL: "redis://retriever-usvc-redis-vector-db:6379"
-  INDEX_NAME: "rag-redis"
+  RETRIEVER_COMPONENT_NAME: "OPEA_RETRIEVER_MILVUS"
   MILVUS_HOST: "retriever-usvc-milvus"
-  MILVUS: ""
   MILVUS_PORT: "19530"
   COLLECTION_NAME: "rag_milvus"
+  LOCAL_EMBEDDING_MODEL: ""
   EASYOCR_MODULE_PATH: "/tmp/.EasyOCR"
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
   HF_HOME: "/tmp/.cache/huggingface"
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_TOKEN: "insert-your-huggingface-token-here"
   LOGFLAG: ""
----
-# Source: retriever-usvc/charts/milvus/charts/minio/templates/pvc.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: retriever-usvc-minio
-  annotations:
-    helm.sh/resource-policy: keep
-  labels:
-    app: minio
-    chart: minio-8.0.17
-    release: retriever-usvc
-    heritage: Helm
-spec:
-  accessModes:
-    - "ReadWriteOnce"
-  resources:
-    requests:
-      storage: "500Gi"
----
-# Source: retriever-usvc/charts/milvus/templates/pvc.yaml
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: retriever-usvc-milvus
-  namespace: default
-  annotations:
-    helm.sh/resource-policy: keep
-  labels:
-    helm.sh/chart: milvus-4.2.12
-    app.kubernetes.io/name: milvus
-    app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "2.4.12"
-    app.kubernetes.io/managed-by: Helm
-spec:
-  accessModes:
-  - "ReadWriteOnce"
-  resources:
-    requests:
-      storage: 50Gi
+  NUMBA_CACHE_DIR: "/tmp/numba/cache"
+  MPLCONFIGDIR: "/tmp/matplotlib"
+  HAYSTACK_TELEMETRY_ENABLED: "False"
 ---
 # Source: retriever-usvc/charts/milvus/charts/etcd/templates/svc-headless.yaml
 apiVersion: v1
@@ -443,10 +406,10 @@ kind: Service
 metadata:
   name: retriever-usvc-tei
   labels:
-    helm.sh/chart: tei-0-latest
+    helm.sh/chart: tei-1.4.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/version: "cpu-1.6"
     app.kubernetes.io/managed-by: Helm
 spec:
   type: ClusterIP
@@ -468,7 +431,7 @@ kind: Service
 metadata:
   name: retriever-usvc
   labels:
-    helm.sh/chart: retriever-usvc-0-latest
+    helm.sh/chart: retriever-usvc-1.4.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
@@ -515,10 +478,6 @@ spec:
         checksum/config: 00fcd70c298e23f1a7eb32e4d92853e108b72b0b0be203369d5446a4363a2d91
     spec:
       serviceAccountName: "retriever-usvc-minio"
-      securityContext:
-        runAsUser: 1000
-        runAsGroup: 1000
-        fsGroup: 1000
       containers:
         - name: minio
           image: "minio/minio:RELEASE.2023-03-20T20-16-18Z"
@@ -527,9 +486,7 @@ spec:
             - "/bin/sh"
             - "-ce"
             - "/usr/bin/docker-entrypoint.sh minio -S /etc/minio/certs/ server /export"
-          volumeMounts:
-            - name: export
-              mountPath: /export            
+          volumeMounts:            
           ports:
             - name: http
               containerPort: 9000
@@ -575,8 +532,7 @@ spec:
               memory: 2Gi      
       volumes:
         - name: export
-          persistentVolumeClaim:
-            claimName: retriever-usvc-minio
+          emptyDir: {}
         - name: minio-user
           secret:
             secretName: retriever-usvc-minio
@@ -677,8 +633,7 @@ spec:
         configMap:
           name: retriever-usvc-milvus
       - name: milvus-data-disk
-        persistentVolumeClaim:
-          claimName: retriever-usvc-milvus
+        emptyDir: {}
       - name: disk
         emptyDir: {}
 ---
@@ -691,10 +646,10 @@ kind: Deployment
 metadata:
   name: retriever-usvc-tei
   labels:
-    helm.sh/chart: tei-0-latest
+    helm.sh/chart: tei-1.4.0
     app.kubernetes.io/name: tei
     app.kubernetes.io/instance: retriever-usvc
-    app.kubernetes.io/version: "cpu-1.5"
+    app.kubernetes.io/version: "cpu-1.6"
     app.kubernetes.io/managed-by: Helm
 spec:
   selector:
@@ -703,12 +658,50 @@ spec:
       app.kubernetes.io/instance: retriever-usvc
   template:
     metadata:
+      
       labels:
         app.kubernetes.io/name: tei
         app.kubernetes.io/instance: retriever-usvc
-    spec:
+    spec:      
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: retriever-usvc-tei-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model BAAI/bge-base-en-v1.5 ... ";
+              huggingface-cli download --cache-dir /data "BAAI/bge-base-en-v1.5";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--BAAI--bge-base-en-v1.5;
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
         - name: tei
           envFrom:
@@ -718,8 +711,17 @@ spec:
                 name: extra-env-config
                 optional: true
           securityContext:
-            {}
-          image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.5"
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.7"
           args:
             - "--auto-truncate"
           volumeMounts:
@@ -733,14 +735,6 @@ spec:
             - name: http
               containerPort: 2081
               protocol: TCP
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
-            timeoutSeconds: 2
           readinessProbe:
             httpGet:
               path: /health
@@ -756,7 +750,9 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: model-volume
           hostPath:
@@ -780,7 +776,7 @@ kind: Deployment
 metadata:
   name: retriever-usvc
   labels:
-    helm.sh/chart: retriever-usvc-0-latest
+    helm.sh/chart: retriever-usvc-1.4.0
     app.kubernetes.io/name: retriever-usvc
     app.kubernetes.io/instance: retriever-usvc
     app.kubernetes.io/version: "v1.0"
@@ -793,12 +789,37 @@ spec:
       app.kubernetes.io/instance: retriever-usvc
   template:
     metadata:
+      
       labels:
         app.kubernetes.io/name: retriever-usvc
         app.kubernetes.io/instance: retriever-usvc
-    spec:
+    spec:      
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: wait-for-db
+          envFrom:
+            - configMapRef:
+                name: retriever-usvc-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              TESTHOST=$(MILVUS_HOST);
+              TESTPORT=$(MILVUS_PORT);
+              wait_timeout=1;
+              total_timeout=60;
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${TESTHOST} ${TESTPORT}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${TESTHOST}:${TESTPORT} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
+              done;
+              echo "${TESTHOST}:${TESTPORT} is reachable within $j seconds.";
       containers:
         - name: retriever-usvc
           envFrom:
@@ -817,7 +838,7 @@ spec:
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/retriever-milvus:latest"
+          image: "opea/retriever:1.4"
           ports:
             - name: retriever-usvc
               containerPort: 7000
@@ -825,13 +846,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: v1/health_check
-              port: retriever-usvc
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: v1/health_check
@@ -846,7 +860,9 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: tmp
           emptyDir: {}
@@ -986,21 +1002,18 @@ spec:
             - name: data
               mountPath: /bitnami/etcd
       volumes:
-  volumeClaimTemplates:
-    - metadata:
-        name: data
-      spec:
-        accessModes:
-          - "ReadWriteOnce"
-        resources:
-          requests:
-            storage: "10Gi"
+        - name: data
+          emptyDir: {}
 ---
-# Source: retriever-usvc/charts/tei/templates/horizontal-pod-autoscaler.yaml
+# Source: retriever-usvc/charts/tei/templates/serviceaccount.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---
 # Source: retriever-usvc/charts/tei/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: retriever-usvc/templates/serviceaccount.yaml
 # Copyright (C) 2024 Intel Corporation
 # SPDX-License-Identifier: Apache-2.0
 ---

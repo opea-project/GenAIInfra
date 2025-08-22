@@ -7,8 +7,8 @@ description: The Helm chart for vLLM Inference Server
 type: application
 dependencies:
   - name: commonlib
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../commonlib"
-version: 0-latest
+version: 1.4.0
 # The vLLM version
 appVersion: "0.5"

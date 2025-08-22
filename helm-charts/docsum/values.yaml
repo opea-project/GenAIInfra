@@ -12,7 +12,7 @@ image:
   # Uncomment the following line to set desired image pull policy if needed, as one of Always, IfNotPresent, Never.
   # pullPolicy: ""
   # Overrides the image tag whose default is the chart appVersion.
-  tag: "latest"
+  tag: "1.4"
 
 imagePullSecrets: []
 nameOverride: ""
@@ -90,7 +90,7 @@ docsum-ui:
   enabled: true
   image:
     repository: opea/docsum-gradio-ui
-    tag: "latest"
+    tag: "1.4"
   containerPort: 5173
   service:
     type: NodePort
@@ -103,7 +103,7 @@ docsum-ui:
 # docsum-ui:
 #   image:
 #     repository: opea/docsum-ui
-#     tag: "latest"
+#     tag: "1.4"
 #   BACKEND_SERVICE_ENDPOINT: "/v1/docsum"
 #   containerPort: 5173
 #   service:

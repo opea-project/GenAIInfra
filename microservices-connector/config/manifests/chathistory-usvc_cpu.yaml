@@ -1,0 +1,232 @@
+---
+# Source: chathistory-usvc/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: chathistory-usvc-config
+  labels:
+    helm.sh/chart: chathistory-usvc-1.4.0
+    app.kubernetes.io/name: chathistory-usvc
+    app.kubernetes.io/instance: chathistory-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  MONGO_HOST: "chathistory-usvc-mongodb"
+  MONGO_PORT: "27017"
+  DB_NAME: "OPEA"
+  COLLECTION_NAME: "ChatHistory"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+---
+# Source: chathistory-usvc/charts/mongodb/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: chathistory-usvc-mongodb
+  labels:
+    helm.sh/chart: mongodb-1.4.0
+    app.kubernetes.io/name: mongodb
+    app.kubernetes.io/instance: chathistory-usvc
+    app.kubernetes.io/version: "7.0.11"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 27017
+      targetPort: 27017
+      protocol: TCP
+      name: mongodb
+  selector:
+    app.kubernetes.io/name: mongodb
+    app.kubernetes.io/instance: chathistory-usvc
+---
+# Source: chathistory-usvc/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: chathistory-usvc
+  labels:
+    helm.sh/chart: chathistory-usvc-1.4.0
+    app.kubernetes.io/name: chathistory-usvc
+    app.kubernetes.io/instance: chathistory-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6012
+      targetPort: 6012
+      protocol: TCP
+      name: port
+  selector:
+    app.kubernetes.io/name: chathistory-usvc
+    app.kubernetes.io/instance: chathistory-usvc
+---
+# Source: chathistory-usvc/charts/mongodb/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chathistory-usvc-mongodb
+  labels:
+    helm.sh/chart: mongodb-1.4.0
+    app.kubernetes.io/name: mongodb
+    app.kubernetes.io/instance: chathistory-usvc
+    app.kubernetes.io/version: "7.0.11"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: mongodb
+      app.kubernetes.io/instance: chathistory-usvc
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: mongodb
+        app.kubernetes.io/instance: chathistory-usvc
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: mongodb
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: false
+            runAsUser: 999
+            seccompProfile:
+              type: RuntimeDefault
+          image: "mongo:7.0.11"
+          volumeMounts:
+            - mountPath: /data
+              name: data-volume
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: port
+              containerPort: 27017
+              protocol: TCP
+          startupProbe:
+            failureThreshold: 120
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            tcpSocket:
+              port: port
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: data-volume
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+# Source: chathistory-usvc/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chathistory-usvc
+  labels:
+    helm.sh/chart: chathistory-usvc-1.4.0
+    app.kubernetes.io/name: chathistory-usvc
+    app.kubernetes.io/instance: chathistory-usvc
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: chathistory-usvc
+      app.kubernetes.io/instance: chathistory-usvc
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: chathistory-usvc
+        app.kubernetes.io/instance: chathistory-usvc
+    spec:
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: chathistory-usvc
+          envFrom:
+            - configMapRef:
+                name: chathistory-usvc-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/chathistory-mongo:1.4"
+          ports:
+            - name: port
+              containerPort: 6012
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: v1/health_check
+              port: port
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: port
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: port
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Source: chathistory-usvc/charts/mongodb/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: chathistory-usvc/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

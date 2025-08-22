@@ -1,0 +1,144 @@
+---
+# Source: ui/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: productivity-suite-ui-config
+  labels:
+    helm.sh/chart: ui-1.4.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: productivity-suite-ui
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  APP_BACKEND_SERVICE_ENDPOINT_CHATQNA: "/v1/chatqna"
+  APP_DATAPREP_DELETE_FILE_ENDPOINT: "/v1/dataprep/delete"
+  APP_BACKEND_SERVICE_ENDPOINT_CODEGEN: "/v1/codegen"
+  APP_BACKEND_SERVICE_ENDPOINT_DOCSUM: "/v1/docsum"
+  APP_DATAPREP_SERVICE_ENDPOINT: "/v1/dataprep/ingest"
+  APP_DATAPREP_GET_FILE_ENDPOINT: "/v1/dataprep/get"
+  APP_CHAT_HISTORY_CREATE_ENDPOINT: "/v1/chathistory/create"
+  APP_CHAT_HISTORY_DELETE_ENDPOINT: "/v1/chathistory/delete"
+  APP_CHAT_HISTORY_GET_ENDPOINT: "/v1/chathistory/get"
+  APP_PROMPT_SERVICE_GET_ENDPOINT: "/v1/prompt/get"
+  APP_PROMPT_SERVICE_CREATE_ENDPOINT: "/v1/prompt/create"
+  APP_PROMPT_SERVICE_DELETE_ENDPOINT: "/v1/prompt/delete"
+  APP_KEYCLOAK_SERVICE_ENDPOINT: "/auth"
+---
+# Source: ui/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: productivity-suite-ui
+  labels:
+    helm.sh/chart: ui-1.4.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: productivity-suite-ui
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5174
+      targetPort: ui
+      protocol: TCP
+      name: ui
+  selector:
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: productivity-suite-ui
+---
+# Source: ui/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: productivity-suite-ui
+  labels:
+    helm.sh/chart: ui-1.4.0
+    app.kubernetes.io/name: ui
+    app.kubernetes.io/instance: productivity-suite-ui
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ui
+      app.kubernetes.io/instance: productivity-suite-ui
+  template:
+    metadata:
+      
+      labels:
+        helm.sh/chart: ui-1.4.0
+        app.kubernetes.io/name: ui
+        app.kubernetes.io/instance: productivity-suite-ui
+        app.kubernetes.io/version: "v1.0"
+        app.kubernetes.io/managed-by: Helm
+    spec:      
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: ui
+          envFrom:
+            - configMapRef:
+                name: productivity-suite-ui-config
+            - configMapRef:
+                name: productivity-suite-ui-opea-ui-config
+                optional: true
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            {}
+          image: "opea/productivity-suite-react-ui-server:1.4"
+          ports:
+            - name: ui
+              containerPort: 5173
+              protocol: TCP
+          livenessProbe:
+            failureThreshold: 24
+            httpGet:
+              path: /
+              port: ui
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: ui
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: /
+              port: ui
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
+---
+# Source: ui/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: ui/templates/tests/test-pod.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

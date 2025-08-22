@@ -8,29 +8,41 @@ kind: ConfigMap
 metadata:
   name: agent-config
   labels:
-    helm.sh/chart: agent-0-latest
+    helm.sh/chart: agent-1.4.0
     app.kubernetes.io/name: agent
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "v1.0"
     app.kubernetes.io/managed-by: Helm
 data:
-  llm_endpoint_url: "http://agent-tgi"
+  tools: "/home/user/comps/agent/src/tools/custom_tools.yaml"
+  llm_endpoint_url: "http://agent-vllm"
+  REDIS_URL_VECTOR: "redis://agent-redis-vector-db:6379"
+  REDIS_URL_KV: "redis://agent-redis-kv-store:6379"
+  TEI_EMBEDDING_ENDPOINT: "http://agent-tei"
   #
-  model: "meta-llama/Meta-Llama-3.1-70B-Instruct"
+  model: "meta-llama/Llama-3.3-70B-Instruct"
+  stream: "false"
+  temperature: "0.01"
   RETRIEVAL_TOOL_URL: "http://agent-docretriever:8889/v1/retrievaltool"
   CRAG_SERVER: "http://agent-crag:8080"
-  WORKER_AGENT_URL: "http://agent-worker:9095/v1/chat/completions"
+  WORKER_AGENT_URL: "http://agent-ragagent:9095/v1/chat/completions"
+  SQL_AGENT_URL: "http://agent-sqlagent:9096/v1/chat/completions"
+  WORKER_FINQA_AGENT_URL: "http://agent-finqa-agent:9095/v1/chat/completions"
+  WORKER_RESEARCH_AGENT_URL: "http://agent-research-agent:9096/v1/chat/completions"
+  DOCSUM_ENDPOINT: "http://agent-docsum:9000/v1/docsum"
   require_human_feedback: "false"
-  recursion_limit: "15"
-  llm_engine: "tgi"
-  strategy: "react_langchain"
+  recursion_limit: "10"
+  llm_engine: "vllm"
+  strategy: "react_llama"
+  with_memory: "true"
+  use_hints: 
   max_new_tokens: "4096"
-  HUGGINGFACEHUB_API_TOKEN: "insert-your-huggingface-token-here"
+  HF_TOKEN: "insert-your-huggingface-token-here"
   HF_HOME: "/tmp/.cache/huggingface"
   http_proxy: ""
   https_proxy: ""
   no_proxy: ""
-  LOGFLAG: "True"
+  LOGFLAG: ""
 ---
 # Source: agent/templates/service.yaml
 # Copyright (C) 2024 Intel Corporation
@@ -41,7 +53,7 @@ kind: Service
 metadata:
   name: agent
   labels:
-    helm.sh/chart: agent-0-latest
+    helm.sh/chart: agent-1.4.0
     app.kubernetes.io/name: agent
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "v1.0"
@@ -66,7 +78,7 @@ kind: Deployment
 metadata:
   name: agent
   labels:
-    helm.sh/chart: agent-0-latest
+    helm.sh/chart: agent-1.4.0
     app.kubernetes.io/name: agent
     app.kubernetes.io/instance: agent
     app.kubernetes.io/version: "v1.0"
@@ -83,6 +95,7 @@ spec:
         app.kubernetes.io/name: agent
         app.kubernetes.io/instance: agent
     spec:
+      serviceAccountName: default
       securityContext:
         {}
       containers:
@@ -98,12 +111,12 @@ spec:
             capabilities:
               drop:
               - ALL
-            readOnlyRootFilesystem: false
+            readOnlyRootFilesystem: true
             runAsNonRoot: true
             runAsUser: 1000
             seccompProfile:
               type: RuntimeDefault
-          image: "opea/agent-langchain:latest"
+          image: "opea/agent:1.4"
           ports:
             - name: agent
               containerPort: 9090
@@ -111,13 +124,6 @@ spec:
           volumeMounts:
             - mountPath: /tmp
               name: tmp
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: v1/health_check
-              port: agent
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: v1/health_check
@@ -132,10 +138,16 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: agent/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
 ---
 # Source: agent/templates/servicemonitor.yaml
 # Copyright (C) 2024 Intel Corporation

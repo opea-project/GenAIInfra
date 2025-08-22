@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: codegen-svelte-ui-config
   labels:
-    helm.sh/chart: ui-0-latest
+    helm.sh/chart: ui-1.4.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: codegen-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -25,7 +25,7 @@ kind: Service
 metadata:
   name: codegen-svelte-ui
   labels:
-    helm.sh/chart: ui-0-latest
+    helm.sh/chart: ui-1.4.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: codegen-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -50,7 +50,7 @@ kind: Deployment
 metadata:
   name: codegen-svelte-ui
   labels:
-    helm.sh/chart: ui-0-latest
+    helm.sh/chart: ui-1.4.0
     app.kubernetes.io/name: ui
     app.kubernetes.io/instance: codegen-svelte-ui
     app.kubernetes.io/version: "v1.0"
@@ -63,13 +63,15 @@ spec:
       app.kubernetes.io/instance: codegen-svelte-ui
   template:
     metadata:
+      
       labels:
-        helm.sh/chart: ui-0-latest
+        helm.sh/chart: ui-1.4.0
         app.kubernetes.io/name: ui
         app.kubernetes.io/instance: codegen-svelte-ui
         app.kubernetes.io/version: "v1.0"
         app.kubernetes.io/managed-by: Helm
-    spec:
+    spec:      
+      serviceAccountName: default
       securityContext:
         {}
       containers:
@@ -78,11 +80,14 @@ spec:
             - configMapRef:
                 name: codegen-svelte-ui-config
             - configMapRef:
+                name: codegen-svelte-ui-opea-ui-config
+                optional: true
+            - configMapRef:
                 name: extra-env-config
                 optional: true
           securityContext:
             {}
-          image: "opea/codegen-ui:latest"
+          image: "opea/codegen-ui:1.4"
           ports:
             - name: ui
               containerPort: 5173
@@ -108,10 +113,20 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           resources:
-            {}
+            requests:
+              cpu: 100m
+              memory: 128Mi
           volumeMounts:
             - mountPath: /tmp
               name: tmp
       volumes:
         - name: tmp
           emptyDir: {}
+---
+# Source: ui/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: ui/templates/tests/test-pod.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0

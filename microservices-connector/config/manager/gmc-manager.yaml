@@ -27,7 +27,7 @@ spec:
       containers:
       - command:
         - /manager
-        image: opea/gmcmanager:latest
+        image: opea/gmcmanager:1.4
         imagePullPolicy: IfNotPresent
         name: manager
         env:

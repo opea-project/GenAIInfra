@@ -7,40 +7,40 @@ description: The Helm chart to deploy FinanceAgent
 type: application
 dependencies:
   - name: agent
-    version: 0-latest
+    version: 1.4.0
     alias: finqa-agent
     repository: "file://../common/agent"
   - name: agent
-    version: 0-latest
+    version: 1.4.0
     alias: research-agent
     repository: "file://../common/agent"
   - name: agent
-    version: 0-latest
+    version: 1.4.0
     alias: supervisor
     repository: "file://../common/agent"
   - name: llm-uservice
-    version: 0-latest
+    version: 1.4.0
     alias: docsum
     repository: "file://../common/llm-uservice"
   - name: ui
     alias: agent-ui
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../common/ui"
   - name: vllm
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../common/vllm"
   - name: tei
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../common/tei"
   - name: redis-vector-db
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../common/redis-vector-db"
   - name: redis-vector-db
-    version: 0-latest
+    version: 1.4.0
     alias: redis-kv-store
     repository: "file://../common/redis-vector-db"
   - name: data-prep
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../common/data-prep"
-version: 0-latest
+version: 1.4.0
 appVersion: "v1.0"

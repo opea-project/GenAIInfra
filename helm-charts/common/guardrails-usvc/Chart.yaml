@@ -5,14 +5,14 @@ apiVersion: v2
 name: guardrails-usvc
 description: The Helm chart for deploying guardrails-usvc as microservice
 type: application
-version: 0-latest
+version: 1.4.0
 appVersion: "v1.0"
 dependencies:
   - name: tgi
-    version: 0-latest
+    version: 1.4.0
     alias: tgi-guardrails
     repository: file://../tgi
     condition: tgi-guardrails.enabled
   - name: commonlib
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../commonlib"

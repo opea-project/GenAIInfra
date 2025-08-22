@@ -5,14 +5,14 @@ apiVersion: v2
 name: reranking-usvc
 description: The Helm chart for deploying reranking as microservice
 type: application
-version: 0-latest
+version: 1.4.0
 # The reranking microservice server version
 appVersion: "v1.0"
 dependencies:
   - name: teirerank
-    version: 0-latest
+    version: 1.4.0
     repository: file://../teirerank
     condition: teirerank.enabled
   - name: commonlib
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../commonlib"

@@ -8,7 +8,7 @@ kind: ConfigMap
 metadata:
   name: vllm-config
   labels:
-    helm.sh/chart: vllm-0-latest
+    helm.sh/chart: vllm-1.4.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
@@ -21,6 +21,8 @@ data:
   HABANA_LOGS: "/tmp/habana_logs"
   NUMBA_CACHE_DIR: "/tmp"
   HF_HOME: "/tmp/.cache/huggingface"
+  XDG_CONFIG_HOME: "/tmp"
+  TORCHINDUCTOR_CACHE_DIR: "/tmp/pytorchinductor_cache"
   # https://github.com/outlines-dev/outlines/blob/main/outlines/caching.py#L14-L29
   OUTLINES_CACHE_DIR: "/tmp/.cache/outlines"
   OMPI_MCA_btl_vader_single_copy_mechanism: "none"
@@ -34,7 +36,7 @@ kind: Service
 metadata:
   name: vllm
   labels:
-    helm.sh/chart: vllm-0-latest
+    helm.sh/chart: vllm-1.4.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
@@ -59,25 +61,64 @@ kind: Deployment
 metadata:
   name: vllm
   labels:
-    helm.sh/chart: vllm-0-latest
+    helm.sh/chart: vllm-1.4.0
     app.kubernetes.io/name: vllm
     app.kubernetes.io/instance: vllm
     app.kubernetes.io/version: "0.5"
     app.kubernetes.io/managed-by: Helm
 spec:
-  replicas: 1
   selector:
     matchLabels:
       app.kubernetes.io/name: vllm
       app.kubernetes.io/instance: vllm
   template:
     metadata:
+      
       labels:
         app.kubernetes.io/name: vllm
         app.kubernetes.io/instance: vllm
-    spec:
+    spec:      
+      serviceAccountName: default
       securityContext:
         {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: vllm-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model meta-llama/Meta-Llama-3-8B-Instruct ... ";
+              huggingface-cli download --cache-dir /data "meta-llama/Meta-Llama-3-8B-Instruct";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--meta-llama--Meta-Llama-3-8B-Instruct;
+              # Some models(e.g. mistralai/Mistral-7B-Instruct-v0.3, etc) need to write additional files to /data root directory
+              chmod -R g+w /data;
+              chmod -R g+w $(HF_HOME);
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
       containers:
         - name: vllm
           envFrom:
@@ -87,20 +128,27 @@ spec:
                 name: extra-env-config
                 optional: true
           securityContext:
-            {}
-          image: "opea/vllm-gaudi:latest"
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: false
+            runAsUser: 0
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/vllm-gaudi:1.4"
           args:
-            - "--enforce-eager"
             - "--tensor-parallel-size"
             - "1"
             - "--block-size"
             - "128"
             - "--max-num-seqs"
             - "256"
-            - "--max-seq_len-to-capture"
+            - "--max-seq-len-to-capture"
             - "2048"
             - "--model"
-            - "Intel/neural-chat-7b-v3-3"
+            - "meta-llama/Meta-Llama-3-8B-Instruct"
             - "--host"
             - "0.0.0.0"
             - "--port"
@@ -118,13 +166,6 @@ spec:
             - name: http
               containerPort: 2080
               protocol: TCP
-          livenessProbe:
-            failureThreshold: 24
-            httpGet:
-              path: /health
-              port: http
-            initialDelaySeconds: 5
-            periodSeconds: 5
           readinessProbe:
             httpGet:
               path: /health
@@ -132,7 +173,7 @@ spec:
             initialDelaySeconds: 5
             periodSeconds: 5
           startupProbe:
-            failureThreshold: 120
+            failureThreshold: 360
             httpGet:
               path: /health
               port: http
@@ -141,6 +182,9 @@ spec:
           resources:
             limits:
               habana.ai/gaudi: 1
+            requests:
+              cpu: 100m
+              memory: 128Mi
       volumes:
         - name: model-volume
           hostPath:
@@ -152,3 +196,16 @@ spec:
             sizeLimit: 1Gi
         - name: tmp
           emptyDir: {}
+---
+# Source: vllm/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: vllm/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+#
+# Dashboard for the exposed vLLM metrics:
+# - https://github.com/vllm-project/vllm/tree/main/examples/production_monitoring/
+# Metric descriptions:
+# - https://docs.vllm.ai/en/stable/serving/metrics.html

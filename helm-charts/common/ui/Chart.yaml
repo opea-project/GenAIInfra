@@ -7,7 +7,7 @@ description: Common Helm chart for the UI for various opea workload
 type: application
 dependencies:
   - name: commonlib
-    version: 0-latest
+    version: 1.4.0
     repository: "file://../commonlib"
-version: 0-latest
+version: 1.4.0
 appVersion: "v1.0"

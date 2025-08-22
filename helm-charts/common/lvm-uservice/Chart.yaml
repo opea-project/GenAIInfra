@@ -5,19 +5,19 @@ apiVersion: v2
 name: lvm-uservice
 description: The Helm chart for deploying lvm as microservice
 type: application
-version: 0-latest
+version: 1.4.0
 # The lvm microservice server version
 appVersion: "v1.0"
 dependencies:
   - name: tgi
-    version: 0-latest
+    version: 1.4.0
     repository: file://../tgi
     condition: tgi.enabled
   - name: vllm
-    version: 0-latest
+    version: 1.4.0
     repository: file://../vllm
     condition: vllm.enabled
   - name: lvm-serve
-    version: 0-latest
+    version: 1.4.0
     repository: file://../lvm-serve
     condition: lvm-serve.enabled

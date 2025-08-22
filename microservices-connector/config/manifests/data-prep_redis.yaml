@@ -1,0 +1,480 @@
+---
+# Source: data-prep/charts/tei/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: data-prep-tei-config
+  labels:
+    helm.sh/chart: tei-1.4.0
+    app.kubernetes.io/name: tei
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "cpu-1.6"
+    app.kubernetes.io/managed-by: Helm
+data:
+  MODEL_ID: "BAAI/bge-base-en-v1.5"
+  PORT: "2081"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  NUMBA_CACHE_DIR: "/tmp"
+  TRANSFORMERS_CACHE: "/tmp/transformers_cache"
+  HF_HOME: "/tmp/.cache/huggingface"
+  HF_HUB_DISABLE_PROGRESS_BARS: "1"
+  HF_HUB_ENABLE_HF_TRANSFER: "0"
+  # More options for HPU
+  HF_TOKEN: "insert-your-huggingface-token-here"
+---
+# Source: data-prep/templates/configmap.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: data-prep-config
+  labels:
+    helm.sh/chart: data-prep-1.4.0
+    app.kubernetes.io/name: data-prep
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+data:
+  TEI_EMBEDDING_ENDPOINT: "http://data-prep-tei"
+  DATAPREP_COMPONENT_NAME: "OPEA_DATAPREP_REDIS"
+  REDIS_HOST: "data-prep-redis-vector-db"
+  REDIS_PORT: "6379"
+  REDIS_SSL: "false"
+  REDIS_PASSWORD: ""
+  REDIS_USERNAME: ""
+  INDEX_NAME: "rag_redis"
+  KEY_INDEX_NAME: "file-keys"
+  SEARCH_BATCH_SIZE: "10"
+  EMBED_MODEL: ""
+  HF_TOKEN: "insert-your-huggingface-token-here"
+  HF_HOME: "/tmp/.cache/huggingface"
+  http_proxy: ""
+  https_proxy: ""
+  no_proxy: ""
+  LOGFLAG: ""
+  NUMBA_CACHE_DIR: "/tmp/numba/cache"
+  XDG_CACHE_HOME: "/tmp/fontconfig/cache"
+  MPLCONFIGDIR: "/tmp/matplotlib"
+---
+# Source: data-prep/charts/redis-vector-db/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-prep-redis-vector-db
+  labels:
+    helm.sh/chart: redis-vector-db-1.4.0
+    app.kubernetes.io/name: redis-vector-db
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "7.2.0-v9"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+      - port: 6379
+        targetPort: 6379
+        protocol: TCP
+        name: redis-service
+      - port: 8001
+        targetPort: 8001
+        protocol: TCP
+        name: redis-insight
+  selector:
+    app.kubernetes.io/name: redis-vector-db
+    app.kubernetes.io/instance: data-prep
+---
+# Source: data-prep/charts/tei/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-prep-tei
+  labels:
+    helm.sh/chart: tei-1.4.0
+    app.kubernetes.io/name: tei
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "cpu-1.6"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 80
+      targetPort: 2081
+      protocol: TCP
+      name: tei
+  selector:
+    app.kubernetes.io/name: tei
+    app.kubernetes.io/instance: data-prep
+---
+# Source: data-prep/templates/service.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: data-prep
+  labels:
+    helm.sh/chart: data-prep-1.4.0
+    app.kubernetes.io/name: data-prep
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: ClusterIP
+  ports:
+    - port: 6007
+      targetPort: 5000
+      protocol: TCP
+      name: data-prep
+  selector:
+    app.kubernetes.io/name: data-prep
+    app.kubernetes.io/instance: data-prep
+---
+# Source: data-prep/charts/redis-vector-db/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-prep-redis-vector-db
+  labels:
+    helm.sh/chart: redis-vector-db-1.4.0
+    app.kubernetes.io/name: redis-vector-db
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "7.2.0-v9"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: redis-vector-db
+      app.kubernetes.io/instance: data-prep
+  template:
+    metadata:
+      
+      labels:
+        app.kubernetes.io/name: redis-vector-db
+        app.kubernetes.io/instance: data-prep
+    spec:      
+      serviceAccountName: default
+      securityContext:
+        {}
+      containers:
+        - name: redis-vector-db
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "redis/redis-stack:7.2.0-v9"
+          volumeMounts:
+            - mountPath: /data
+              name: data-volume
+            - mountPath: /redisinsight
+              name: redisinsight-volume
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: redis-service
+              containerPort: 6379
+              protocol: TCP
+            - name: redis-insight
+              containerPort: 8001
+              protocol: TCP
+          startupProbe:
+            tcpSocket:
+              port: 6379 # Probe the Redis port
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            failureThreshold: 120
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: data-volume
+          emptyDir: {}
+        - name: redisinsight-volume
+          emptyDir: {}
+        - name: tmp
+          emptyDir: {}
+---
+# Source: data-prep/charts/tei/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-prep-tei
+  labels:
+    helm.sh/chart: tei-1.4.0
+    app.kubernetes.io/name: tei
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "cpu-1.6"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: tei
+      app.kubernetes.io/instance: data-prep
+  template:
+    metadata:
+      
+      labels:
+        app.kubernetes.io/name: tei
+        app.kubernetes.io/instance: data-prep
+    spec:      
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: model-downloader
+          envFrom:
+            - configMapRef:
+                name: data-prep-tei-config
+          securityContext:
+            readOnlyRootFilesystem: true
+            allowPrivilegeEscalation: false
+            runAsGroup: 0
+            capabilities:
+              drop:
+              - ALL
+              add:
+              - DAC_OVERRIDE
+              # To be able to make data model directory group writable for
+              # previously downloaded model by old versions of helm chart
+              - FOWNER
+            seccompProfile:
+              type: RuntimeDefault
+          image: huggingface/downloader:0.17.3
+          command: ['sh', '-ec']
+          args:
+            - |
+              echo "Huggingface log in ...";
+              huggingface-cli login --token $(HF_TOKEN);
+              echo "Download model BAAI/bge-base-en-v1.5 ... ";
+              huggingface-cli download --cache-dir /data "BAAI/bge-base-en-v1.5";
+              echo "Change model files mode ...";
+              chmod -R g+w /data/models--BAAI--bge-base-en-v1.5;
+              # NOTE: Buggy logout command;
+              # huggingface-cli logout;
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /tmp
+              name: tmp
+      containers:
+        - name: tei
+          envFrom:
+            - configMapRef:
+                name: data-prep-tei-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsGroup: 0
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "ghcr.io/huggingface/text-embeddings-inference:cpu-1.7"
+          args:
+            - "--auto-truncate"
+          volumeMounts:
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /dev/shm
+              name: shm
+            - mountPath: /tmp
+              name: tmp
+          ports:
+            - name: http
+              containerPort: 2081
+              protocol: TCP
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+            timeoutSeconds: 2
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: model-volume
+          hostPath:
+            path: /mnt/opea-models
+            type: Directory
+        - name: shm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 1Gi
+        - name: tmp
+          emptyDir: {}
+      # extra time to finish processing buffered requests on CPU before pod is forcibly terminated
+      terminationGracePeriodSeconds: 60
+---
+# Source: data-prep/templates/deployment.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-prep
+  labels:
+    helm.sh/chart: data-prep-1.4.0
+    app.kubernetes.io/name: data-prep
+    app.kubernetes.io/instance: data-prep
+    app.kubernetes.io/version: "v1.0"
+    app.kubernetes.io/managed-by: Helm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: data-prep
+      app.kubernetes.io/instance: data-prep
+  template:
+    metadata:
+      
+      labels:
+        app.kubernetes.io/name: data-prep
+        app.kubernetes.io/instance: data-prep
+    spec:      
+      serviceAccountName: default
+      securityContext:
+        {}
+      initContainers:
+        - name: wait-for-db
+          envFrom:
+            - configMapRef:
+                name: data-prep-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          image: busybox:1.36
+          command: ["sh", "-c"]
+          args:
+            - |
+              TESTHOST=$(REDIS_HOST);
+              TESTPORT=$(REDIS_PORT);
+              wait_timeout=1;
+              total_timeout=60;
+              j=0;
+              while ! nc -w ${wait_timeout} -z ${TESTHOST} ${TESTPORT}; do
+                j=$((j+wait_timeout));
+                [[ $j -ge ${total_timeout} ]] && echo "ERROR: ${TESTHOST}:${TESTPORT} is NOT reachable in $j seconds!" && exit 1;
+                j=$((j+2)); sleep 2;
+              done;
+              echo "${TESTHOST}:${TESTPORT} is reachable within $j seconds.";
+      containers:
+        - name: data-prep
+          envFrom:
+            - configMapRef:
+                name: data-prep-config
+            - configMapRef:
+                name: extra-env-config
+                optional: true
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+            runAsUser: 1000
+            seccompProfile:
+              type: RuntimeDefault
+          image: "opea/dataprep:1.4"
+          ports:
+            - name: data-prep
+              containerPort: 5000
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmp
+            - mountPath: /home/user/comps/dataprep/src/uploaded_files
+              name: uploaded-files
+            - mountPath: /data
+              name: model-volume
+            - mountPath: /home/user/.config
+              name: user-config-data
+          readinessProbe:
+            httpGet:
+              path: v1/health_check
+              port: data-prep
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          startupProbe:
+            failureThreshold: 120
+            httpGet:
+              path: v1/health_check
+              port: data-prep
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+      volumes:
+        - name: tmp
+          emptyDir: {}
+        - name: uploaded-files
+          emptyDir: {}
+        - name: user-config-data
+          emptyDir: {}
+        - name: model-volume
+          emptyDir: {}
+---
+# Source: data-prep/charts/redis-vector-db/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: data-prep/charts/tei/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: data-prep/charts/tei/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: data-prep/templates/serviceaccount.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
+---
+# Source: data-prep/templates/servicemonitor.yaml
+# Copyright (C) 2024 Intel Corporation
+# SPDX-License-Identifier: Apache-2.0
