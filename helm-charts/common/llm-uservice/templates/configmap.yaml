@@ -70,6 +70,9 @@ data:
   {{- if .Values.LLM_MODEL_ID }}
   LLM_MODEL_ID: {{ .Values.LLM_MODEL_ID | quote }}
   {{- end }}
+  {{- if .Values.OPENAI_API_KEY }}
+  OPENAI_API_KEY: {{ .Values.OPENAI_API_KEY | quote }}
+  {{- end }}
   HF_HOME: "/tmp/.cache/huggingface"
   {{- if not .Values.global.offline }}
   HF_TOKEN: {{ .Values.global.HUGGINGFACEHUB_API_TOKEN | default .Values.global.HF_TOKEN | quote }}

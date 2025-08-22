@@ -57,7 +57,14 @@ tolerations: []
 affinity: {}
 
 # To override values in subchart llm-uservice
+# For external LLM configuration, you can override these values here or use variant_external-llm-values.yaml
+# Example for external OpenAI-compatible endpoints:
+#   DOCSUM_BACKEND: "vLLM"  # Use vLLM backend for OpenAI-compatible APIs
+#   LLM_ENDPOINT: "https://api.openai.com"  # External endpoint (omit /v1 suffix)
+#   LLM_MODEL_ID: "gpt-4-turbo"  # Model to use
+#   OPENAI_API_KEY: "your-api-key"  # API key for authentication
 llm-uservice:
+  enabled: true
   image:
     repository: opea/llm-docsum
   DOCSUM_BACKEND: "vLLM"
@@ -79,6 +86,8 @@ vllm:
 nginx:
   enabled: false
 docsum-ui:
+  # if false, set also nginx.enabled=false
+  enabled: true
   image:
     repository: opea/docsum-gradio-ui
     tag: "latest"
@@ -101,7 +110,11 @@ docsum-ui:
 #     type: ClusterIP
 
 dashboard:
+  enabled: true
   prefix: "OPEA DocSum"
+
+whisper:
+  enabled: true
 
 global:
   http_proxy: ""

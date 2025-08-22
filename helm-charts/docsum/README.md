@@ -26,7 +26,12 @@ helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --set global.modelUs
 # helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/rocm-values.yaml
 # To use AMD ROCm device with TGI
 # helm install docsum docsum --set global.HF_TOKEN=${HFTOKEN} --values docsum/rocm-tgi-values.yaml
-
+# To use with external OpenAI-compatible LLM endpoints (OpenAI, vLLM, TGI, etc.)
+# This configures the llm-uservice to connect to external LLM providers while maintaining DocSum compatibility
+# For OpenAI:
+# helm install docsum docsum --values docsum/variant_external-llm-values.yaml --set llm-uservice.OPENAI_API_KEY="your-api-key" --set llm-uservice.LLM_ENDPOINT="https://api.openai.com" --set llm-uservice.LLM_MODEL_ID="gpt-4-turbo"
+# For vLLM/TGI or other OpenAI-compatible endpoints:
+# helm install docsum docsum --values docsum/variant_external-llm-values.yaml --set llm-uservice.LLM_ENDPOINT="http://your-server-url" --set llm-uservice.LLM_MODEL_ID="your-model"
 ```
 
 ## Verify
