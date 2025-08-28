@@ -69,6 +69,18 @@ const (
 	Tgi StepNameType = "Tgi"
 	// Llm
 	Llm StepNameType = "Llm"
+	// LLMGuardInput
+	LLMGuardInput StepNameType = "LLMGuardInput"
+	// LLMGuardOutput
+	LLMGuardOutput StepNameType = "LLMGuardOutput"
+	// VLLMGaudi
+	VLLMGaudi StepNameType = "VLLMGaudi"
+	// VLLM
+	VLLM StepNameType = "VLLM"
+	// VLLMOpenVino
+	VLLMOpenVino StepNameType = "VLLMOpenVino"
+	// Language-Detection
+	LanguageDetection StepNameType = "LanguageDetection"
 )
 
 type Executor struct {
