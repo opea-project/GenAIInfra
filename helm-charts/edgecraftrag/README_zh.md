@@ -15,6 +15,7 @@
 ### 关键配置
 
 1. **镜像**：设置 `ecrag` 和 `vllm` 的镜像仓库和标签。
+
    ```yaml
    image:
      ecrag:
@@ -26,6 +27,7 @@
    ```
 
 2. **环境变量**：配置代理和主机IP。
+
    ```yaml
    env:
      http_proxy: "http://proxy:port"
@@ -34,6 +36,7 @@
    ```
 
 3. **LLM设置**：调整LLM模型路径和参数。
+
    ```yaml
    llm:
      LLM_MODEL: "/path/to/model/inside/container" # 确保此路径映射到 paths.model
@@ -72,8 +75,9 @@ helm install edgecraftrag ./ --kubeconfig /home/user/.kube/nas.yaml
 
 2.  **确认IP**：
     使用部署所运行的Kubernetes节点的IP地址。
-    *   如果在本地机器运行（如MicroK8s），使用 `localhost` 或您机器的局域网IP。
-    *   如果在远程集群运行，使用该节点的IP。
+
+    - 如果在本地机器运行（如MicroK8s），使用 `localhost` 或您机器的局域网IP。
+    - 如果在远程集群运行，使用该节点的IP。
 
 3.  **在浏览器中打开**：
     访问 `http://<NodeIP>:<NodePort>`

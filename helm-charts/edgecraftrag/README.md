@@ -15,6 +15,7 @@ Before installing, you should configure the `edgecraftrag/values.yaml` file acco
 ### Key Configurations
 
 1. **Images**: Set the registry and tag for `ecrag` and `vllm`.
+
    ```yaml
    image:
      ecrag:
@@ -26,6 +27,7 @@ Before installing, you should configure the `edgecraftrag/values.yaml` file acco
    ```
 
 2. **Environment Variables**: Configure proxies and host IP.
+
    ```yaml
    env:
      http_proxy: "http://proxy:port"
@@ -34,6 +36,7 @@ Before installing, you should configure the `edgecraftrag/values.yaml` file acco
    ```
 
 3. **LLM Settings**: Adjust LLM model paths and parameters.
+
    ```yaml
    llm:
      LLM_MODEL: "/path/to/model/inside/container" # Ensure this maps to paths.model
@@ -72,8 +75,9 @@ Once the service is running, you can access the UI via your browser.
 
 2.  **Identify the IP**:
     Use the IP address of the Kubernetes node where the deployment is running.
-    *   If running on your local machine (e.g., MicroK8s), use `localhost` or your machine's LAN IP.
-    *   If running on a remote cluster, use that node's IP.
+
+    - If running on your local machine (e.g., MicroK8s), use `localhost` or your machine's LAN IP.
+    - If running on a remote cluster, use that node's IP.
 
 3.  **Open in Browser**:
     Navigate to `http://<NodeIP>:<NodePort>`
