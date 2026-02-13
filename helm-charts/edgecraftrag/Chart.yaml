@@ -5,5 +5,5 @@ apiVersion: v2
 name: edgecraftrag
 description: Helm chart for EdgeCraftRAG stack
 type: application
-version: 0.1.0
+version: version 0-latest
 appVersion: "25.11"
