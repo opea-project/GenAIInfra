@@ -43,6 +43,7 @@
    ```
 
 4. **持久化路径**：确保主机挂载路径存在。
+
    ```yaml
    paths:
      model: /home/user/models
@@ -50,19 +51,19 @@
    ```
 
 5. **Redis 存储**：Redis 默认启用，用于在服务重启间快速持久化配置参数。如需禁用或使用外部 Redis，请配置：
+
    ```yaml
    redis:
-     enabled: false   # 设为 false 以禁用内置 Redis 部署
+     enabled: false # 设为 false 以禁用内置 Redis 部署
      port: 6379
      persistence:
-       enabled: true           # 使用 PersistentVolumeClaim 持久化 Redis 数据（推荐）
+       enabled: true # 使用 PersistentVolumeClaim 持久化 Redis 数据（推荐）
        size: 1Gi
-       storageClass: ""        # 留空则使用集群默认 StorageClass
+       storageClass: "" # 留空则使用集群默认 StorageClass
 
    env:
-     REDIS_URL: "redis://my-external-redis:6379"  # redis.enabled 为 false 时使用
+     REDIS_URL: "redis://my-external-redis:6379" # redis.enabled 为 false 时使用
    ```
-
 
 ## 安装
 
