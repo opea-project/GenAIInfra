@@ -1,6 +1,3 @@
-# Copyright (C) 2026 Intel Corporation
-# SPDX-License-Identifier: Apache-2.0
-
 image:
   ecrag:
     registry: opea
@@ -17,10 +14,22 @@ env:
   no_proxy: ""
   http_proxy: ""
   https_proxy: ""
+  CLUSTER_ENABLED: true
   HOST_IP: ""
   ENABLE_BENCHMARK: false
   CHAT_HISTORY_ROUND: 0
   METADATA_DATABASE_URL: ""
+
+redis:
+  enabled: true
+  image:
+    registry: valkey
+    name: valkey
+    tag: "8"
+  password: ""
+  port: 6379
+  host: ""
+  maxmemory: "128mb"
 
 llm:
   LLM_MODEL: ""
@@ -43,7 +52,7 @@ llm:
 ports:
   pipeline: 16010
   mega: 16011
-  ui:
+  ui: 
     port: 8082
     nodePort: 30082
   vllm: 8086

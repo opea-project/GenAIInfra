@@ -49,6 +49,21 @@ Before installing, you should configure the `edgecraftrag/values.yaml` file acco
      docs: /home/user/docs
    ```
 
+5. **Redis Storage**: Redis is enabled by default for fast config persistence across restarts. To disable it or use an external Redis instance:
+   ```yaml
+   redis:
+     enabled: false   # set to false to disable the built-in Redis deployment
+     port: 6379
+     persistence:
+       enabled: true           # use a PersistentVolumeClaim for Redis data (recommended)
+       size: 1Gi
+       storageClass: ""        # leave empty to use the cluster default StorageClass
+
+   env:
+     REDIS_URL: "redis://my-external-redis:6379"  # used when redis.enabled is false
+   ```
+
+
 ## Installation
 
 To install the chart, please use below command (`edgecraftrag` as an example)

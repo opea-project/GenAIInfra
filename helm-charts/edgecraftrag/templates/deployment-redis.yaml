@@ -1,0 +1,54 @@
+{{- if .Values.redis.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: redis
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: redis
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+        - name: redis
+          image: "{{ .Values.redis.image.registry }}/{{ .Values.redis.image.name }}:{{ .Values.redis.image.tag }}"
+          imagePullPolicy: IfNotPresent
+          env:
+            - name: REDIS_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: edgecraftrag-env
+                  key: REDIS_PASSWORD
+          command:
+            - sh
+            - -c
+            - >-
+              redis-server
+              --maxmemory {{ .Values.redis.maxmemory }}
+              --maxmemory-policy allkeys-lru
+              {{- if .Values.redis.password }}
+              --requirepass "$REDIS_PASSWORD"
+              {{- end }}
+          ports:
+            - containerPort: {{ .Values.redis.port }}
+          livenessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli {{- if .Values.redis.password }} -a "$REDIS_PASSWORD"{{- end }} ping
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          readinessProbe:
+            exec:
+              command:
+                - sh
+                - -c
+                - redis-cli {{- if .Values.redis.password }} -a "$REDIS_PASSWORD"{{- end }} ping
+            initialDelaySeconds: 5
+            periodSeconds: 5
+{{- end }}
