@@ -13,7 +13,7 @@ apiVersion: cert-manager.io/v1
 kind: Certificate
 metadata:
   name: istio-gateway
-  namespace: istio-ingress # ceritificate must be in the same namespace as istio ingress gw
+  namespace: istio-ingress # certificate must be in the same namespace as istio ingress gw
 spec:
   commonName: "Istio ingress for OPEA services"
   dnsNames:
